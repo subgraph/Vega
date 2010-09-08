@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="com.subgraph.vega.application.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="RCP Perspective"
+            class="com.subgraph.vega.application.Perspective"
+            id="com.subgraph.vega.application.perspective">
+      </perspective>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="com.subgraph.vega.application.application"
+            name="Subgraph Vega">
+         <property
+               name="windowImages"
+               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+         </property>
+         <property
+               name="appName"
+               value="Subgraph Vega">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.subgraph.vega.commands.category.workspaces"
+            name="Workspaces">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.category.workspaces"
+            id="com.subgraph.vega.commands.newWorkspace"
+            name="New Workspace">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.category.workspaces"
+            id="com.subgraph.vega.commands.switchWorkspace"
+            name="Switch Workspace">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.subgraph.vega.toolbar.workspaces">
+            <command
+                  commandId="com.subgraph.vega.commands.newWorkspace"
+                  icon="icons/new_workspace.png"
+                  label="New Workspace"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.subgraph.vega.commands.switchWorkspace"
+                  icon="icons/switch_workspace.png"
+                  label="Switch Workspace"
+                  style="push">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.subgraph.vega.application.workspaces.NewWorkspaceHandler"
+            commandId="com.subgraph.vega.commands.newWorkspace">
+      </handler>
+      <handler
+            class="com.subgraph.vega.application.workspaces.SwitchWorkspaceHandler"
+            commandId="com.subgraph.vega.commands.switchWorkspace">
+      </handler>
+   </extension>
+
+</plugin>

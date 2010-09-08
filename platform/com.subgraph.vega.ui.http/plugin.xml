@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="com.subgraph.vega.ui.http.requestviewer.HttpRequestView"
+            icon="icons/requestview.png"
+            id="com.subgraph.vega.views.http"
+            name="HTTP Requests"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.subgraph.vega.ui.http.commands.StartProxyHandler"
+            commandId="com.subgraph.vega.commands.startProxy">
+         <enabledWhen>
+            <with
+                  variable="vega.proxyState">
+               <equals
+                     value="stopped">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.StopProxyHandler"
+            commandId="com.subgraph.vega.commands.stopProxy">
+         <enabledWhen>
+            <with
+                  variable="vega.proxyState">
+               <equals
+                     value="started">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            description="Commands for controlling the HTTP proxy"
+            id="com.subgraph.vega.commands.proxyCategory"
+            name="Proxy Commands">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            description="Start the HTTP Proxy"
+            id="com.subgraph.vega.commands.startProxy"
+            name="Start HTTP Proxy">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            description="Stop the HTTP Proxy"
+            id="com.subgraph.vega.commands.stopProxy"
+            name="Stop HTTP Proxy">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="com.subgraph.vega.toolbars.main">
+            <command
+                  commandId="com.subgraph.vega.commands.startProxy"
+                  icon="icons/start_proxy.png"
+                  style="push"
+                  tooltip="Start HTTP Proxy">
+            </command>
+            <command
+                  commandId="com.subgraph.vega.commands.stopProxy"
+                  icon="icons/stop_proxy.png"
+                  style="push"
+                  tooltip="Stop HTTP Proxy">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="com.subgraph.vega.ui.http.commands.ProxyStateSourceProvider">
+         <variable
+               name="vega.proxyState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
+   </extension>
+
+</plugin>

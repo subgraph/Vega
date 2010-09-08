@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Api
+Bundle-SymbolicName: com.subgraph.vega.api
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SUBGRAPH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.apache.http;version="4.0.0"
+Export-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.model,
+ com.subgraph.vega.api.model.web,
+ com.subgraph.vega.api.requestlog

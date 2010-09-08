@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Application
+Bundle-SymbolicName: com.subgraph.vega.application; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.subgraph.vega.application.Activator
+Bundle-Vendor: SUBGRAPH
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: com.subgraph.vega.api.model

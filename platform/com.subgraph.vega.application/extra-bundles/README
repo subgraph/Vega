@@ -1,0 +1,4 @@
+Google Guava OSGi
+https://code.google.com/a/eclipselabs.org/p/guava-bundle/
+
+commons-lang is needed by jsoup

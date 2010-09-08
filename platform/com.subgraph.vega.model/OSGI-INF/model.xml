@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="vega.model">
+   <implementation class="com.subgraph.vega.internal.model.Model"/>
+   <service>
+      <provide interface="com.subgraph.vega.api.model.IModel"/>
+   </service>
+   <reference bind="setWebModel" cardinality="1..1" interface="com.subgraph.vega.api.model.web.IWebModel" name="IWebModel" policy="static" unbind="unsetWebModel"/>
+   <reference bind="setRequestLog" cardinality="1..1" interface="com.subgraph.vega.api.requestlog.IRequestLog" name="IRequestLog" policy="static" unbind="unsetRequestLog"/>
+</scr:component>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="com.subgraph.vega.ui.web.views.WebsiteView"
+            icon="icons/websites.png"
+            id="com.subgraph.vega.views.website"
+            name="Website View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="com.subgraph.vega.ui.command.crawl"
+            name="Crawl">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.WebSiteView">
+         <command
+               commandId="com.subgraph.vega.ui.command.crawl"
+               icon="icons/start_crawling.png"
+               label="Start Crawling"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="oneElementSelected">
+         <with
+               variable="selection">
+            <count
+                  value="1">
+            </count>
+         </with>
+      </definition>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.subgraph.vega.ui.web.commands.StartCrawlHandler"
+            commandId="com.subgraph.vega.ui.command.crawl">
+         <activeWhen>
+            <reference
+                  definitionId="oneElementSelected">
+            </reference>
+         </activeWhen>
+      </handler>
+   </extension>
+
+</plugin>

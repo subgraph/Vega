@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Model
+Bundle-SymbolicName: com.subgraph.vega.model
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SUBGRAPH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.base;version="1.6.0",
+ com.google.common.collect;version="1.6.0",
+ com.subgraph.vega.api.model,
+ com.subgraph.vega.api.model.web,
+ com.subgraph.vega.api.requestlog,
+ org.apache.http;version="4.0.0",
+ org.apache.http.client.utils,
+ org.apache.http.message;version="4.0.0"
+Service-Component: OSGI-INF/model.xml
