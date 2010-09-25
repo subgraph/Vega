@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Http Requests
+Bundle-SymbolicName: com.subgraph.vega.http.requests
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SUBGRAPH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.subgraph.vega.api.http.requests,
+ org.apache.http;version="4.0.0",
+ org.apache.http.client,
+ org.apache.http.client.methods,
+ org.apache.http.client.params,
+ org.apache.http.client.protocol,
+ org.apache.http.conn,
+ org.apache.http.conn.params,
+ org.apache.http.conn.scheme,
+ org.apache.http.entity;version="4.0.0",
+ org.apache.http.impl.client,
+ org.apache.http.impl.conn.tsccm,
+ org.apache.http.params;version="4.0.0",
+ org.apache.http.protocol;version="4.0.0",
+ org.apache.http.util;version="4.0.0"
+Service-Component: OSGI-INF/request-engine.xml
