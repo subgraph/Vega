@@ -22,7 +22,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:com.subgraph.vega.views.WebSiteView">
+            locationURI="toolbar:com.subgraph.vega.views.website">
          <command
                commandId="com.subgraph.vega.ui.command.crawl"
                icon="icons/start_crawling.png"
