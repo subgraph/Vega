@@ -3,15 +3,17 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Proxy
 Bundle-SymbolicName: com.subgraph.vega.http.proxy
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.subgraph.vega.http.proxy.Activator
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.io;version="1.6.0",
+ com.subgraph.vega.api.http.proxy,
+ com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.model,
  com.subgraph.vega.api.model.web,
  com.subgraph.vega.api.requestlog,
  com.subgraph.vega.urls,
  org.apache.http;version="4.0.0",
+ org.apache.http.client.methods,
  org.apache.http.entity;version="4.0.0",
  org.apache.http.impl;version="4.0.0",
  org.apache.http.impl.nio;version="4.0.0",
@@ -23,6 +25,4 @@ Import-Package: com.google.common.io;version="1.6.0",
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0",
  org.osgi.framework;version="1.3.0"
-Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/proxy-service.xml
-Export-Package: com.subgraph.vega.http.proxy
