@@ -2,7 +2,7 @@ package com.subgraph.vega.ui.http.commands;
 
 import java.util.logging.Logger;
 
-import com.subgraph.vega.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 
 public class StartProxyHandler extends AbstractProxyCommandHandler {
 

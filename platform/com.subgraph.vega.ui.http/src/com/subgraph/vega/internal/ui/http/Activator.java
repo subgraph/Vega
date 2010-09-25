@@ -5,7 +5,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.subgraph.vega.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.model.IModel;
 
 public class Activator extends AbstractUIPlugin {

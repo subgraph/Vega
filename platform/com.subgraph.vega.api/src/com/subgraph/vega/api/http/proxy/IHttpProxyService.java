@@ -1,4 +1,4 @@
-package com.subgraph.vega.http.proxy;
+package com.subgraph.vega.api.http.proxy;
 
 public interface IHttpProxyService {
 	void start();

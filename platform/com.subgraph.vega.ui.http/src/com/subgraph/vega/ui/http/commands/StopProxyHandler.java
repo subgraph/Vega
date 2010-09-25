@@ -1,6 +1,6 @@
 package com.subgraph.vega.ui.http.commands;
 
-import com.subgraph.vega.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 
 public class StopProxyHandler extends AbstractProxyCommandHandler {
 	@Override
