@@ -55,5 +55,4 @@ public class CrawlerTask {
 			return (outstandingTasks == 0);
 		}
 	}
-
 }

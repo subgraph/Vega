@@ -5,19 +5,16 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 public class RequestConsumer implements Runnable {
-	private final HttpContext context;
-	private final HttpClient httpClient;
+	private final IHttpRequestEngine requestEngine;
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	
-	RequestConsumer(HttpClient httpClient, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue) {
-		this.context = new BasicHttpContext();
-		this.httpClient = httpClient;
+	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue) {
+		this.requestEngine = requestEngine;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 	}
@@ -42,7 +39,7 @@ public class RequestConsumer implements Runnable {
 				return;
 			}
 			try {
-				HttpResponse response = httpClient.execute(task.getRequest(), context);
+				HttpResponse response = requestEngine.sendRequest(task.getRequest());
 				task.setResponse(response);
 				crawlerResponseQueue.put(task);
 			} catch(ClientProtocolException e) {
