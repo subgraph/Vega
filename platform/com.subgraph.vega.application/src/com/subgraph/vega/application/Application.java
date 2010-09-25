@@ -1,6 +1,5 @@
 package com.subgraph.vega.application;
 
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,10 +34,10 @@ public class Application implements IApplication {
 	}
 
 	private void setupLogging() {
-		Handler handler = new ConsoleHandler();
-		handler.setLevel(Level.FINEST);
 		Logger rootLogger = Logger.getLogger("");
-		rootLogger.addHandler(handler);
+		for(Handler h: rootLogger.getHandlers()) {
+			h.setLevel(Level.FINEST);
+		}
 		rootLogger.setLevel(Level.INFO);
 	}
 	
