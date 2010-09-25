@@ -3,14 +3,10 @@ package com.subgraph.vega.internal.model.web;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -21,7 +17,6 @@ public class WebHost extends AbstractWebEntity implements IWebHost {
 	
 	private final String hostname;
 	private final URI uri;
-	private Set<InetAddress> addresses = new LinkedHashSet<InetAddress>();
 	private final int port;
 	private final WebPath rootPath;
 	
@@ -66,34 +61,12 @@ public class WebHost extends AbstractWebEntity implements IWebHost {
 			return new URI("https", null, hostname, port, null, null,null);
 	}
 	
-	public WebHost(WebModel model, String hostname, InetAddress address, int port, boolean ssl) {
-		this(model, hostname, port, ssl);
-		setAddress(address, false);
-	}
-	
 	@Override public String getHostname() { return hostname; }
 	@Override public int getPort() { return port; }
 	@Override public IWebEntity getParent() { return null; }
 	@Override public URI toURI() { return uri; }
 	@Override public IWebHost getHostEntity() { return this; }
 	@Override public IWebPath getRootPath() { return rootPath; }
-
-	@Override public Iterable<InetAddress> getAddresses() { 
-		synchronized (addresses) {
-			return Iterables.unmodifiableIterable(addresses);	
-		}
-	}
-	
-	@Override
-	public void setAddress(InetAddress address, boolean notify) {
-		synchronized (addresses) {	
-			if(addresses.contains(address))
-				return;
-			addresses.add(address);
-		}
-		if(notify)
-			model.notifyEntityChanged(this);
-	}
 
 	@Override
 	public IWebPath addPath(String path) {

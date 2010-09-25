@@ -2,7 +2,6 @@ package com.subgraph.vega.internal.model.web;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,16 +47,13 @@ public class WebModel implements IWebModel {
 	}
 
 	@Override
-	public IWebHost addWebHost(String name, InetAddress address, int port,
-			boolean isSSL) {
+	public IWebHost addWebHost(String name, int port, boolean isSSL) {
 		
 		final IWebHost host = getWebHostByNameAndPort(name, port);
-		if(host != null) {
-			host.setAddress(address, true);
+		if(host != null) 
 			return host;
-		} else {
-			return createWebHost(name, address, port, true, isSSL);
-		}
+		else 
+			return createWebHost(name, port, true, isSSL);
 	}
 
 	@Override
@@ -71,12 +67,12 @@ public class WebModel implements IWebModel {
 			}
 		}
 		boolean isSSL = uri.getScheme().equals("https");
-		IWebHost hostEntity = createWebHost(uri.getHost(), null, uri.getPort(), false, isSSL);
+		IWebHost hostEntity = createWebHost(uri.getHost(), uri.getPort(), false, isSSL);
 		return hostEntity.addPath(uri.getPath());
 	}
 	
-	private IWebHost createWebHost(String name, InetAddress address, int port, boolean isVisited, boolean isSSL) {
-		IWebHost wh = new WebHost(this, name, address, port, isSSL);
+	private IWebHost createWebHost(String name, int port, boolean isVisited, boolean isSSL) {
+		IWebHost wh = new WebHost(this, name, port, isSSL);
 		synchronized (webhostsByKey) {
 			webhostsByKey.put(new HostKey(name, port), wh);
 			webhosts.add(wh);

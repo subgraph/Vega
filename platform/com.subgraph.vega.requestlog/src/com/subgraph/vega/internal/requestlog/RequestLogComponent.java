@@ -1,7 +1,5 @@
 package com.subgraph.vega.internal.requestlog;
 
-import java.net.InetAddress;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -20,19 +18,19 @@ public class RequestLogComponent implements IRequestLog {
 	}
 
 	@Override
-	public long addRequest(HttpRequest request, HttpHost host, InetAddress address) {
-		return log.addRequest(request, host, address);
+	public long addRequest(HttpRequest request, HttpHost host) {
+		return log.addRequest(request, host);
 	}
 
 	@Override
-	public void addRequest(long requestId, HttpRequest request, HttpHost host, InetAddress address) {
-		log.addRequest(requestId, request, host, address);		
+	public void addRequest(long requestId, HttpRequest request, HttpHost host) {
+		log.addRequest(requestId, request, host);		
 	}
 	
 	@Override
 	public long addRequestResponse(HttpRequest request, HttpResponse response,
-			HttpHost host, InetAddress address) {
-		return log.addRequestResponse(request, response, host, address);
+			HttpHost host) {
+		return log.addRequestResponse(request, response, host);
 	}
 	
 	@Override

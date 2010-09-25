@@ -1,6 +1,5 @@
 package com.subgraph.vega.internal.requestlog;
 
-import java.net.InetAddress;
 import java.util.Collection;
 
 import org.apache.http.HttpHost;
@@ -33,23 +32,23 @@ public class RequestLog implements IRequestLog {
 		requestLogId = initializeRequestLogId(store);
 	}
 	
-	public long addRequest(HttpRequest request, HttpHost host, InetAddress address) {
+	public long addRequest(HttpRequest request, HttpHost host) {
 		final long id = allocateRequestId();
-		addRequest(id, request, host, address);
+		addRequest(id, request, host);
 		return id;
 	}
 	
-	public void addRequest(long requestId, HttpRequest request, HttpHost host, InetAddress address) {
-		final RequestLogRecord record = new RequestLogRecord(requestId, request, host, address);
+	public void addRequest(long requestId, HttpRequest request, HttpHost host) {
+		final RequestLogRecord record = new RequestLogRecord(requestId, request, host);
 		store.store(record);
 		eventManager.fireEvent(new AddRecordEvent(record));
 	}
 	
 	@Override
 	public long addRequestResponse(HttpRequest request, HttpResponse response,
-			HttpHost host, InetAddress address) {
+			HttpHost host) {
 		final long id = allocateRequestId();
-		final RequestLogRecord record = new RequestLogRecord(id, request, response, host, address);
+		final RequestLogRecord record = new RequestLogRecord(id, request, response, host);
 		store.store(record);
 		eventManager.fireEvent(new AddRecordEvent(record));
 		return id;
