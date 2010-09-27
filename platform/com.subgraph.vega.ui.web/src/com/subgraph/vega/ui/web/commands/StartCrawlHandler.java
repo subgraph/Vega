@@ -9,8 +9,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.subgraph.vega.crawler.IWebCrawler;
-import com.subgraph.vega.crawler.IWebCrawlerFactory;
+import com.subgraph.vega.api.crawler.IWebCrawler;
+import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.ui.web.Activator;
 

@@ -1,4 +1,4 @@
-package com.subgraph.vega.crawler;
+package com.subgraph.vega.api.crawler;
 
 public interface IWebCrawler {
 	void start();

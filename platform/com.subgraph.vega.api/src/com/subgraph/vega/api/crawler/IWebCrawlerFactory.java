@@ -1,4 +1,4 @@
-package com.subgraph.vega.crawler;
+package com.subgraph.vega.api.crawler;
 
 import java.net.URI;
 

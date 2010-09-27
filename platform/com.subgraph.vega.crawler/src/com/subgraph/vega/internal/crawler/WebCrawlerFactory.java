@@ -2,11 +2,11 @@ package com.subgraph.vega.internal.crawler;
 
 import java.net.URI;
 
+import com.subgraph.vega.api.crawler.IWebCrawler;
+import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.crawler.IWebCrawler;
-import com.subgraph.vega.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.urls.IUrlExtractor;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {

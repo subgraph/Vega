@@ -6,7 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.subgraph.vega.crawler.IWebCrawler;
+import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
