@@ -3,6 +3,7 @@ package com.subgraph.vega.ui.http.commands;
 import java.util.logging.Logger;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.internal.ui.http.Activator;
 
 public class StartProxyHandler extends AbstractProxyCommandHandler {
 
@@ -11,7 +12,9 @@ public class StartProxyHandler extends AbstractProxyCommandHandler {
 			ProxyStateSourceProvider proxyState) {
 		Logger logger = Logger.getLogger(getClass().getName());
 		logger.info("Start proxy");
-		proxyService.start();
+		int proxyPort = Activator.getDefault().getPreferenceStore()
+		.getInt("ProxyPort");
+		proxyService.start(proxyPort);
 		proxyState.setProxyStarted();		
 	}
 }

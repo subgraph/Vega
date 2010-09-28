@@ -89,5 +89,19 @@
          </variable>
       </sourceProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.subgraph.vega.ui.http.preferencepage.HttpPreferencePage"
+            id="com.subgraph.vega.ui.http.preferencepage"
+            name="HTTP Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.subgraph.vega.ui.http.preferencepage.HTTPPreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>
