@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="scanMenu"
+               label="Scan">
+            <command
+                  commandId="com.subgraph.vega.ui.scanner.startnewscan"
+                  label="Start New Scan"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
+            id="com.subgraph.vega.ui.scanner.startnewscan"
+            name="Start New Scan">
+      </command>
+   </extension>
+
+</plugin>

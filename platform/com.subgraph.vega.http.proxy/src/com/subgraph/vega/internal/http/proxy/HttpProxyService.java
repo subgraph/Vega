@@ -40,10 +40,11 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	@Override
-	public void start() {
+	public void start(int proxyPort) {
 		webModel = model.getCurrentWorkspace().getWebModel();
 		requestLog = model.getCurrentWorkspace().getRequestLog();
-		proxy = new HttpProxy(8888, requestEngine);
+	
+		proxy = new HttpProxy(proxyPort, requestEngine);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
 	}

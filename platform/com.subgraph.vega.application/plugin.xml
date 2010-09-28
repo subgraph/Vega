@@ -27,7 +27,7 @@
             name="Subgraph Vega">
          <property
                name="windowImages"
-               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+               value="icons/alt_window_16.gif,icons/vega-icon-100x100.png">
          </property>
          <property
                name="appName"
