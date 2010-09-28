@@ -3,6 +3,7 @@
 
 <product name="Subgraph Vega" id="com.subgraph.vega.application.product" application="com.subgraph.vega.application.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
+
    <configIni use="default">
    </configIni>
 
@@ -10,7 +11,8 @@
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="icons/alt_window_16.gif" i32="icons/alt_window_32.gif"/>
+   <windowImages i16="icons/alt_window_16.gif" i32="/com.subgraph.vega.application/icons/vega-icon-100x100.png"/>
+
 
    <launcher>
       <solaris/>
@@ -18,6 +20,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
