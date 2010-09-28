@@ -9,9 +9,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.model.web.IWebEntity;
+import com.subgraph.vega.api.model.web.IWebHost;
+import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.ui.web.Activator;
 
 public class StartCrawlHandler extends AbstractHandler {
@@ -27,11 +31,22 @@ public class StartCrawlHandler extends AbstractHandler {
 		return null;
 	}
 	
-	
 	private void crawlFrom(IWebEntity item) {
 		final IWebCrawlerFactory factory = Activator.getDefault().getWebCrawlerFactory();
 		final URI uri = item.toURI();
-		final IWebCrawler crawler = factory.create(uri);
+		final ICrawlerConfig crawlerConfig = factory.createBasicConfig(uri);
+		configureCrawler(crawlerConfig);
+		final IWebCrawler crawler = factory.create(crawlerConfig);
 		crawler.start();
+	}
+	
+	private void configureCrawler(ICrawlerConfig config) {
+		final URI base = config.getBaseURI();
+		final IWebModel model = Activator.getDefault().getModel();
+		boolean secure = ("https".equalsIgnoreCase(base.getScheme()));
+		final IWebHost host = model.addWebHost(base.getHost(), base.getPort(), secure);
+		final IWebPath path = host.addPath(base.getPath());
+		for(IWebPath wp: path.getUnvisitedPaths()) 
+			config.addInitialURI(wp.toURI());	
 	}
 }
