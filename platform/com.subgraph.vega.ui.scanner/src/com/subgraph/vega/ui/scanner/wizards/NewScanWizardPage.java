@@ -22,7 +22,6 @@ public class NewScanWizardPage extends WizardPage {
 	}
 	@Override
 	public void createControl(Composite parent) {
-		// TODO Auto-generated method stub
 		container = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
