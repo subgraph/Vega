@@ -64,6 +64,8 @@
       <plugin id="com.subgraph.vega.model" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.model.web" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.requestlog" autoStart="true" startLevel="0" />
+      <plugin id="com.subgraph.vega.scanner" autoStart="true" startLevel="0" />
+      <plugin id="com.subgraph.vega.scanner.modules" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.urls" autoStart="true" startLevel="0" />
    </configurations>
 

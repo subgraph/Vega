@@ -4,7 +4,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.subgraph.vega.crawler.IWebCrawlerFactory;
+import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.model.web.IWebModel;
 
 /**

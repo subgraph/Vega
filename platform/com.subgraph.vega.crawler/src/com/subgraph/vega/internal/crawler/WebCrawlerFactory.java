@@ -2,11 +2,12 @@ package com.subgraph.vega.internal.crawler;
 
 import java.net.URI;
 
+import com.subgraph.vega.api.crawler.ICrawlerConfig;
+import com.subgraph.vega.api.crawler.IWebCrawler;
+import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.crawler.IWebCrawler;
-import com.subgraph.vega.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.urls.IUrlExtractor;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {
@@ -16,9 +17,13 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 	private IHttpRequestEngine requestEngine;
 	
 	@Override
-	public IWebCrawler create(URI baseURI) {
+	public IWebCrawler create(ICrawlerConfig config) {
 		final IWebModel webModel = model.getCurrentWorkspace().getWebModel();
-		return new WebCrawler(webModel, urlExtractor, requestEngine, baseURI);
+		return new WebCrawler(webModel, urlExtractor, requestEngine, config);
+	}
+	
+	public ICrawlerConfig createBasicConfig(URI baseURI) {
+		return new BasicCrawlerConfig(baseURI);
 	}
 	
 	protected void setModel(IModel model) {

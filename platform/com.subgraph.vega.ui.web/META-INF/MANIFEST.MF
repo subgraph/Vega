@@ -11,7 +11,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.common.base;version="1.6.0",
  com.google.common.collect;version="1.6.0",
+ com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.model.web,
- com.subgraph.vega.crawler,
  org.eclipse.core.expressions

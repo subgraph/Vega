@@ -2,7 +2,7 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="vega.crawler-factory">
    <implementation class="com.subgraph.vega.internal.crawler.WebCrawlerFactory"/>
    <service>
-      <provide interface="com.subgraph.vega.crawler.IWebCrawlerFactory"/>
+      <provide interface="com.subgraph.vega.api.crawler.IWebCrawlerFactory"/>
    </service>
    <reference bind="setModel" cardinality="1..1" interface="com.subgraph.vega.api.model.IModel" name="IModel" policy="static" unbind="unsetModel"/>
    <reference bind="setUrlExtractor" cardinality="1..1" interface="com.subgraph.vega.urls.IUrlExtractor" name="IUrlExtractor" policy="static" unbind="unsetUrlExtractor"/>

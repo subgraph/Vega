@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Scanner
+Bundle-SymbolicName: com.subgraph.vega.scanner
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SUBGRAPH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.base;version="1.6.0",
+ com.subgraph.vega.api.crawler,
+ com.subgraph.vega.api.http.requests,
+ com.subgraph.vega.api.scanner,
+ com.subgraph.vega.api.scanner.model,
+ com.subgraph.vega.api.scanner.modules
+Service-Component: OSGI-INF/scanner-factory.xml
