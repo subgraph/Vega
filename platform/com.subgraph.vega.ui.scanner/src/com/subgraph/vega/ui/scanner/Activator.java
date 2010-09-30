@@ -2,6 +2,9 @@ package com.subgraph.vega.ui.scanner;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
+import com.subgraph.vega.api.scanner.IScannerFactory;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -13,6 +16,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+	
+	private ServiceTracker scannerFactoryTracker;
 	
 	/**
 	 * The constructor
@@ -27,6 +32,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		scannerFactoryTracker = new ServiceTracker(context, IScannerFactory.class.getName(), null);
+		scannerFactoryTracker.open();
 	}
 
 	/*
@@ -45,6 +53,10 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
+	}
+	
+	public IScannerFactory getScannerFactory() {
+		return (IScannerFactory) scannerFactoryTracker.getService();
 	}
 
 }
