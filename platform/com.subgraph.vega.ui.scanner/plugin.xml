@@ -25,5 +25,36 @@
             name="Start New Scan">
       </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="com.subgraph.vega.views.category.scanner"
+            class="com.subgraph.vega.ui.scanner.info.ScanInfoView"
+            icon="icons/info_view.png"
+            id="com.subgraph.vega.views.scaninfo"
+            name="Scan Info"
+            restorable="true">
+      </view>
+      <view
+            category="com.subgraph.vega.views.category.scanner"
+            class="com.subgraph.vega.ui.scanner.alerts.ScanAlertView"
+            icon="icons/alert_view.gif"
+            id="com.subgraph.vega.views.alert"
+            name="Scan Alerts"
+            restorable="true">
+      </view>
+      <category
+            id="com.subgraph.vega.views.category.scanner"
+            name="Scanner">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.subgraph.vega.ui.scanner.ScannerPerspectiveFactory"
+            id="com.subgraph.vega.perspectives.scanner"
+            name="Scanner">
+      </perspective>
+   </extension>
 
 </plugin>

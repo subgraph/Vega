@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Test vulnerability</title>
+	
+	<class>Example</class>
+	<severity>High</severity>		
+	
+	<impact> Could be used to demonstrate partially completed functionality of web application scanner.</impact>
+	<impact> May cause boredom.</impact>
+	
+	<remediation>
+	  There is currently no solution for this vulnerability.  Contact your vendor.  
+	</remediation>
+		
+	<discussion>
+		Discuss it here.
+	</discussion>
+	
+	<external>
+		<url address="http://subgraph.com">Subgraph security.</url>
+	</external>
+	
+	<references>
+		<url address="http://minecraft.net">Minecraft is a good game.</url>
+		<url address="http://en.wikipedia.com">Learn stuff here</url>
+	</references>
+	
+</alert>
