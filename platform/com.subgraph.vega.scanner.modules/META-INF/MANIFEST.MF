@@ -8,5 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
- com.subgraph.vega.api.scanner.modules
-Service-Component: OSGI-INF/scanner-module-registry.xml
+ com.subgraph.vega.api.scanner.modules,
+ org.osgi.framework;version="1.5.0"
+Service-Component: OSGI-INF/scanner-module-registry.xml, OSGI-INF/scan-alert-repo.xml

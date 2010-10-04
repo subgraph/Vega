@@ -9,4 +9,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.subgraph.vega.api.scanner
+Import-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.scanner,
+ com.subgraph.vega.api.scanner.model,
+ com.subgraph.vega.ui.util
+Bundle-ClassPath: .,
+ lib/freemarker.jar

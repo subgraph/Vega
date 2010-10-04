@@ -17,10 +17,10 @@ public class Scanner implements IScanner {
 	private ScannerTask scannerTask;
 	private Thread scannerThread;
 	
-	Scanner(IScannerConfig config, IWebCrawlerFactory crawlerFactory, IHttpRequestEngine requestEngine, IScannerModuleRegistry moduleRegistry) {
+	Scanner(IScannerConfig config, ScanModel scanModel, IWebCrawlerFactory crawlerFactory, IHttpRequestEngine requestEngine, IScannerModuleRegistry moduleRegistry) {
 		this.config = config;
 		this.crawlerFactory = crawlerFactory;
-		this.scanModel = new ScanModel(config);
+		this.scanModel = scanModel;
 		this.requestEngine = requestEngine;
 		this.moduleRegistry = moduleRegistry;
 	}
