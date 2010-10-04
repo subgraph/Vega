@@ -11,6 +11,7 @@ import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.ui.tree.web.WebModelAdapter;
+import com.subgraph.vega.ui.util.ImageCache;
 import com.subgraph.vega.ui.web.Activator;
 
 public class WebsiteLabelProvider extends LabelProvider implements IColorProvider {

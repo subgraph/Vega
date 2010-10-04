@@ -10,3 +10,4 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.subgraph.vega.api.model
+Export-Package: com.subgraph.vega.ui.util

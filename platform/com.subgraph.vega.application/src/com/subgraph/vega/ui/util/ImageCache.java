@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.web.views;
+package com.subgraph.vega.ui.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +17,11 @@ public class ImageCache {
 		this.pluginId = pluginId;
 	}
 	
-	Image get(String key) {
+	public Image get(String key) {
 		return get(getDescriptor(key));
 	}
 	
-	Image getDisabled(String key) {
+	public Image getDisabled(String key) {
 		synchronized (disabledMap) {
 			final Image image = disabledMap.get(key);
 			if(image == null)
@@ -40,7 +40,7 @@ public class ImageCache {
 		return newImage;
 	}
 	
-	Image get(ImageDescriptor descriptor) {
+	public Image get(ImageDescriptor descriptor) {
 		if(descriptor == null)
 			return null;
 		synchronized (imageMap) {
@@ -60,7 +60,7 @@ public class ImageCache {
 		return image;
 	}
 	
-	void dispose() {
+	public void dispose() {
 		synchronized (imageMap) {
 			for(Image image: imageMap.values())
 				image.dispose();

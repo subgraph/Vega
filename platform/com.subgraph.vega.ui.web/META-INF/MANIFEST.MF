@@ -14,4 +14,5 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.model.web,
+ com.subgraph.vega.ui.util,
  org.eclipse.core.expressions
