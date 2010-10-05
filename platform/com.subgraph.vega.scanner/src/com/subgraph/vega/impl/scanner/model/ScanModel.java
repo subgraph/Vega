@@ -3,8 +3,10 @@ package com.subgraph.vega.impl.scanner.model;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -24,6 +26,7 @@ public class ScanModel implements IScanModel {
 	private final Set<IScanHost> scanHosts = new LinkedHashSet<IScanHost>();
 	private final Set<IScanDirectory> scanDirectories = new LinkedHashSet<IScanDirectory>();
 	private final List<IScanAlert> scanAlerts = new ArrayList<IScanAlert>();
+	private final Map<String, Object> properties = new HashMap<String, Object>();
 	
 	public ScanModel(IScanAlertRepository alertRepository) {
 		this.alertRepository = alertRepository;
@@ -103,6 +106,50 @@ public class ScanModel implements IScanModel {
 	@Override
 	public IScanAlert createAlert(String type) {
 		return alertRepository.createAlert(type);
+	}
+
+	@Override
+	public void setProperty(String key, Object value) {
+		synchronized(properties) {
+			properties.put(key, value);
+		}		
+	}
+
+	@Override
+	public void setStringProperty(String key, String value) {
+		setProperty(key, value);		
+	}
+
+	@Override
+	public void setIntegerProperty(String key, int value) {
+		setProperty(key, value);		
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		synchronized(properties) {
+			return properties.get(key);
+		}
+	}
+	
+	@Override
+	public String getStringProperty(String key) {
+		final Object value = getProperty(key);
+		if(value == null)
+			return null;
+		if(value instanceof String)
+			return (String) value;
+		throw new IllegalArgumentException("Property '"+ key +"' exists but it is not a String");
+	}
+
+	@Override
+	public Integer getIntegerProperty(String key) {
+		final Object value = getProperty(key);
+		if(value == null)
+			return null;
+		if(value instanceof Integer)
+			return (Integer) value;
+		throw new IllegalArgumentException("Property '"+ key +"' exists but it is not an Integer");
 	}
 
 }
