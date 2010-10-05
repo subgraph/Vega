@@ -11,6 +11,7 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
@@ -26,7 +27,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IModel model;
 	private IWebModel webModel;
 	private IRequestLog requestLog;
-	private IHttpRequestEngine requestEngine;
+	private IHttpRequestEngineFactory requestEngineFactory;
 	private IUrlExtractor urlExtractor;
 	private HttpProxy proxy;
 
@@ -43,7 +44,7 @@ public class HttpProxyService implements IHttpProxyService {
 	public void start(int proxyPort) {
 		webModel = model.getCurrentWorkspace().getWebModel();
 		requestLog = model.getCurrentWorkspace().getRequestLog();
-	
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, requestEngine);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
@@ -119,11 +120,11 @@ public class HttpProxyService implements IHttpProxyService {
 		this.urlExtractor = null;
 	}
 
-	protected void setRequestEngine(IHttpRequestEngine engine) {
-		this.requestEngine = engine;
+	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = factory;
 	}
 
-	protected void unsetRequestEngine(IHttpRequestEngine engine) {
-		this.requestEngine = null;
+	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = null;
 	}
 }

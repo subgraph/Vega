@@ -2,6 +2,7 @@ package com.subgraph.vega.impl.scanner;
 
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.IScannerFactory;
@@ -15,7 +16,7 @@ public class ScannerFactory implements IScannerFactory {
 	private ScanModel scanModel;
 	
 	private IWebCrawlerFactory crawlerFactory;
-	private IHttpRequestEngine requestEngine;
+	private IHttpRequestEngineFactory requestEngineFactory;
 	private IScannerModuleRegistry moduleRegistry;
 	private IScanAlertRepository scanAlertRepository;
 	
@@ -38,6 +39,7 @@ public class ScannerFactory implements IScannerFactory {
 
 	@Override
 	public IScanner createScanner(IScannerConfig config) {
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		return new Scanner(config, scanModel, crawlerFactory, requestEngine, moduleRegistry);
 	}
 
@@ -49,12 +51,12 @@ public class ScannerFactory implements IScannerFactory {
 		this.crawlerFactory = null;
 	}
 	
-	protected void setRequestEngine(IHttpRequestEngine requestEngine) {
-		this.requestEngine = requestEngine;
+	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = factory;
 	}
 	
-	protected void unsetRequestEngine(IHttpRequestEngine requestEngine) {
-		this.requestEngine = null;
+	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = null;
 	}
 	
 	protected void setModuleRegistry(IScannerModuleRegistry registry) {

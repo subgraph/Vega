@@ -15,14 +15,17 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
+
 class RequestTask implements Callable<HttpResponse> {
 
 	private final HttpClient client;
 	private final HttpUriRequest request;
 	private final HttpContext context;
-	private final HttpRequestEngineConfig config;
+	private final IHttpRequestEngineConfig config;
 
-	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, HttpRequestEngineConfig config) {
+	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config) {
 		this.client = client;
 		this.request = request;
 		this.context = context;
@@ -31,20 +34,21 @@ class RequestTask implements Callable<HttpResponse> {
 
 	@Override
 	public HttpResponse call() throws Exception {
-		if(config.forceIdentityEncoding())
+		if(config.getForceIdentityEncoding())
 			request.setHeader(HTTP.CONTENT_ENCODING, HTTP.IDENTITY_CODING);
 
 		final HttpResponse response = client.execute(request, context);
 
 		final HttpEntity entity = response.getEntity();
 
-		if(entity == null)
-			return response;
-
 		if(entity != null) {
 			final HttpEntity newEntity = processEntity(response, entity);
 			response.setEntity(newEntity);
 		}
+		
+		for(IHttpResponseProcessor p: config.getResponseProcessors())
+			p.processResponse(request, response, context);
+		
 		return response;
 	}
 
@@ -52,7 +56,7 @@ class RequestTask implements Callable<HttpResponse> {
 		if(entity == null)
 			return null;
 
-		if(isGzipEncoded(entity) && config.decompressGzipEncoding())
+		if(isGzipEncoded(entity) && config.getDecompressGzipEncoding())
 			return processGzipEncodedEntity(response, entity);
 
 		final InputStream input = entity.getContent();
