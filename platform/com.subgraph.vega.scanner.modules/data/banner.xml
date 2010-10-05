@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP Server Banner</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	<discussion>
+		The HTTP Server banner was retrieved from web server.
+	</discussion>
+	
+	
+</alert>
+
