@@ -2,7 +2,7 @@
 <#escape x as x?html>
 
 <#function defined x>
-  <#return !(x?is_boolean)>
+  <#return (x?is_string && x?length != 0) || (x?is_sequence && x?size != 0) >
 </#function>
 
 <#macro topsection title image>
@@ -90,6 +90,19 @@ ${text}
 	<td><div class="tablefield">Attack string</div></td><td><span class="attackstring">${attackstring}</span></td>
 </tr>
 </#if>
+</table>
+</div>
+</#if>
+</#macro>
+
+<#macro outputsection text>
+<#if defined(text)>
+<h2>Resource Content</h2>
+<div class="section" id="resourcecontentsection">
+<table>
+<tr>
+	<td><span class="resourcecontent">${text}</span></td>	
+</tr>
 </table>
 </div>
 </#if>

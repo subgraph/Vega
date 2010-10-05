@@ -57,6 +57,10 @@ span.attackstring {
 	font-family: monospace;
 }
 
+span.resourcecontent {
+	font-family: monospace;
+}
+
 span.parameter {
 	font-style: italic;
 }
