@@ -35,11 +35,15 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 
 	@Override
 	public void registerResponseProcessor(IHttpResponseProcessor processor) {
-		responseProcessors.add(processor);		
+		synchronized(responseProcessors) {
+			responseProcessors.add(processor);
+		}
 	}
 
 	@Override
 	public List<IHttpResponseProcessor> getResponseProcessors() {
-		return Collections.unmodifiableList(responseProcessors);
+		synchronized(responseProcessors) {
+			return Collections.unmodifiableList(responseProcessors);
+		}
 	}
 }

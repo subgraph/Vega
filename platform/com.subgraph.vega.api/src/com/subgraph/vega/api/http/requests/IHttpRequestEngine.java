@@ -10,4 +10,5 @@ import org.apache.http.protocol.HttpContext;
 public interface IHttpRequestEngine {
 	HttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException, ClientProtocolException;
 	HttpResponse sendRequest(HttpUriRequest request) throws IOException, ClientProtocolException;
+	void registerResponseProcessor(IHttpResponseProcessor processor);
 }

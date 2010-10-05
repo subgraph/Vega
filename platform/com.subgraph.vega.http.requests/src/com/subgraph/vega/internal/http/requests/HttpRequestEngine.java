@@ -16,6 +16,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -49,5 +50,10 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	public HttpResponse sendRequest(HttpUriRequest request)
 			throws IOException, ClientProtocolException {
 		return sendRequest(request, null);
+	}
+
+	@Override
+	public void registerResponseProcessor(IHttpResponseProcessor processor) {
+		config.registerResponseProcessor(processor);		
 	}
 }
