@@ -11,5 +11,7 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
- com.subgraph.vega.api.scanner.modules
+ com.subgraph.vega.api.scanner.modules,
+ org.apache.http;version="4.0.0",
+ org.apache.http.protocol;version="4.0.0"
 Service-Component: OSGI-INF/scanner-factory.xml
