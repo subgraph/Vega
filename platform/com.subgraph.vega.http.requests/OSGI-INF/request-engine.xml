@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="vega.request-engine">
-   <implementation class="com.subgraph.vega.internal.http.requests.HttpRequestEngine"/>
-   <service>
-      <provide interface="com.subgraph.vega.api.http.requests.IHttpRequestEngine"/>
-   </service>
-</scr:component>

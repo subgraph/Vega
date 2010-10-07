@@ -3,7 +3,6 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,14 +15,21 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	private final Logger logger = Logger.getLogger("request-engine");
-	private final static int NTHREADS = 12;
-	ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
-	HttpClient client = HttpClientFactory.createHttpClient();
-	HttpRequestEngineConfig config = new HttpRequestEngineConfig();
+	private final ExecutorService executor;
+	private final HttpClient client;
+	private final IHttpRequestEngineConfig config;
 
+	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config) {
+		this.executor = executor;
+		this.client = client;
+		this.config = config;
+	}
+	
 	@Override
 	public HttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
@@ -44,5 +50,10 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	public HttpResponse sendRequest(HttpUriRequest request)
 			throws IOException, ClientProtocolException {
 		return sendRequest(request, null);
+	}
+
+	@Override
+	public void registerResponseProcessor(IHttpResponseProcessor processor) {
+		config.registerResponseProcessor(processor);		
 	}
 }

@@ -6,6 +6,7 @@ import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.urls.IUrlExtractor;
@@ -14,13 +15,20 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 
 	private IModel model;
 	private IUrlExtractor urlExtractor;
-	private IHttpRequestEngine requestEngine;
+	private IHttpRequestEngineFactory requestEngineFactory;
 	
 	@Override
 	public IWebCrawler create(ICrawlerConfig config) {
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+		return create(config, requestEngine);
+	}
+	
+	@Override
+	public IWebCrawler create(ICrawlerConfig config, IHttpRequestEngine requestEngine) {
 		final IWebModel webModel = model.getCurrentWorkspace().getWebModel();
 		return new WebCrawler(webModel, urlExtractor, requestEngine, config);
 	}
+
 	
 	public ICrawlerConfig createBasicConfig(URI baseURI) {
 		return new BasicCrawlerConfig(baseURI);
@@ -42,12 +50,11 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 		this.urlExtractor = null;
 	}
 	
-	protected void setRequestEngine(IHttpRequestEngine requestEngine) {
-		this.requestEngine = requestEngine;
+	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = factory;
 	}
 	
-	protected void unsetRequestEngine(IHttpRequestEngine requestEngine) {
-		this.requestEngine = null;
+	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
+		this.requestEngineFactory = null;
 	}
-
 }

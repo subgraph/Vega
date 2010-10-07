@@ -112,7 +112,11 @@ public class WebGetTarget extends AbstractWebEntity implements IWebGetTarget {
 		if(params == null || params.isEmpty())
 			return ImmutableList.of();
 		final List<NameValuePair> parameterList = new ArrayList<NameValuePair>();
-		URLEncodedUtils.parse(parameterList, new Scanner(params), "UTF-8");
+		try {
+			URLEncodedUtils.parse(parameterList, new Scanner(params), "UTF-8");
+		} catch (RuntimeException e) {
+			System.err.println("Failed to parse URI parameters for WebGetTarget: "+ params);
+		}
 		return ImmutableList.copyOf(parameterList);
 	}
 }

@@ -32,7 +32,7 @@ public class HttpClientFactory {
 	private static HttpParams createHttpParams() {
 		final HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		ConnManagerParams.setMaxTotalConnections(params, 100);
+		ConnManagerParams.setMaxTotalConnections(params, 10);
 		return params;
 	}
 

@@ -8,6 +8,7 @@ import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.model.IScanDirectory;
 import com.subgraph.vega.api.scanner.model.IScanHost;
@@ -24,6 +25,7 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	private final IWebCrawlerFactory crawlerFactory;
 	private final IHttpRequestEngine requestEngine;
 	private final IScannerModuleRegistry moduleRegistry;
+	private final IHttpResponseProcessor responseProcessor;
 	
 	ScannerTask(IScannerConfig config, ScanModel scanModel, IWebCrawlerFactory crawlerFactory, IHttpRequestEngine requestEngine, IScannerModuleRegistry moduleRegistry) {
 		this.scannerConfig = config;
@@ -31,6 +33,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		this.crawlerFactory = crawlerFactory;
 		this.requestEngine = requestEngine;
 		this.moduleRegistry = moduleRegistry;
+		responseProcessor = new ScannerResponseProcessor(moduleRegistry.getResponseProcessingModules(), scanModel);
+		this.requestEngine.registerResponseProcessor(responseProcessor);
 	}
 	
 	@Override
@@ -45,7 +49,7 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		logger.info("Starting crawling phase");
 		ICrawlerConfig config = crawlerFactory.createBasicConfig(scannerConfig.getBaseURI());
 		config.addEventHandler(this);
-		IWebCrawler crawler = crawlerFactory.create(config);
+		IWebCrawler crawler = crawlerFactory.create(config, requestEngine);
 		crawler.start();
 		try {
 			crawler.waitFinished();
@@ -64,7 +68,6 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	private void runPerHostModulePhase() {
 		logger.info("Starting per host module phase");
 		for(IScanHost host: scanModel.getUnscannedHosts()) {
-			logger.info("Scanning host "+ host);
 			for(IPerHostScannerModule m: moduleRegistry.getPerHostModules()) {
 				m.runScan(host, requestEngine, scanModel);
 			}
@@ -74,7 +77,6 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	private void runPerDirectoryModulePhase() {
 		logger.info("Starting per directory module phase");
 		for(IScanDirectory dir: scanModel.getUnscannedDirectories()) {
-			logger.info("Scanning directory "+ dir);
 			for(IPerDirectoryScannerModule m: moduleRegistry.getPerDirectoryModules()) {
 				m.runScan(dir, requestEngine, scanModel);
 			}

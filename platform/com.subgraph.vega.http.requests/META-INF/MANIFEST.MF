@@ -20,4 +20,4 @@ Import-Package: com.subgraph.vega.api.http.requests,
  org.apache.http.params;version="4.0.0",
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0"
-Service-Component: OSGI-INF/request-engine.xml
+Service-Component: OSGI-INF/request-engine-factory.xml

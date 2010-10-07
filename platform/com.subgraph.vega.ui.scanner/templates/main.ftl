@@ -3,35 +3,40 @@
 
 <@topsection 
   doc.alert.title ! "No title set." 
-  vars.imageURL ! false
+  vars.imageURL ! ""
 />
 
 <hr>
 
 <@infobox 
   doc.alert.class ! "No class set." 
-  vars.resource ! false
-  vars.severity ! false
-  vars.severityCSS ! false
+  vars.resource ! ""
+  vars.severity ! ""
+  vars.severityCSS ! ""
 />
 
 <@impactsection 
-  doc.alert.impact ! false 
+  doc.alert.impact
 />
 
 <@remediation
-  doc.alert.remediation ! false
+  doc.alert.remediation
 />
 
 <@detailsection
-  vars.resource ! false
-  vars.methods ! false
-  vars.parameter ! false
-  vars.attackstring ! false
+  vars.resource ! ""
+  vars.methods ! ""
+  vars.parameter ! ""
+  vars.attackstring ! ""
+/>
+
+
+<@outputsection
+  vars.output ! ""
 />
 
 <@discussion
-  doc.alert.discussion ! false
+  doc.alert.discussion
 />
 
 
