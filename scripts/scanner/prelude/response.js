@@ -1,4 +1,4 @@
-importPackage(org.apache.http.util)
+importPackage(org.apache.http.util);
 
 var httpResponse = null;
 var wrappedResponse = null;
@@ -17,12 +17,12 @@ function Response(httpResponse) {
 Response.prototype.header = function(name) {
   var hdr = this.httpResponse.getFirstHeader(name);
   return (hdr && hdr.value);
-}
+};
 
 Response.prototype.consumeContent = function() {
   if(this.httpResponse.entity)
     this.httpResponse.entity.consumeContent();
-}
+};
 
 Response.prototype.__defineGetter__("bodyAsString", function() {
     var e = this.httpResponse.entity;

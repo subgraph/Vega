@@ -13,11 +13,11 @@ function Model(scanModel) {
 
 Model.prototype.get = function(name) {
   return this.scanModel.getProperty(name);
-}
+};
 
 Model.prototype.set = function(name, value) {
   this.scanModel.setProperty(name, value);
-}
+};
 
 Model.prototype.alert = function(type, vars) {
   var alert = this.scanModel.createAlert(type);
@@ -29,5 +29,5 @@ Model.prototype.alert = function(type, vars) {
       alert.setProperty(name, value);
   }
   this.scanModel.addAlert(alert);
-}
+};
 

@@ -1,7 +1,7 @@
 var module = {
   name : "HTTP Banner Module",
-  type: "response-processor",
-}
+  type: "response-processor"
+};
 
 function run() {
   var banner = response.header("Server");
