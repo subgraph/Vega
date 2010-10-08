@@ -30,6 +30,7 @@ public class Scanner implements IScanner {
 	}
 	
 	public void start() {
+		moduleRegistry.refreshModuleScripts();
 		scannerTask = new ScannerTask(config, scanModel, crawlerFactory, requestEngine, moduleRegistry);
 		scannerThread = new Thread(scannerTask);
 		scannerThread.start();
