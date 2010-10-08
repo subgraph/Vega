@@ -24,7 +24,7 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 	private long length;
 
 	private HttpEntity bufferEntity;
-	private InputStream input;
+	private volatile InputStream input;
 
 	RepeatableStreamingEntity(InputStream input, long length, boolean isChunked, String contentType, String contentEncoding) {
 		setChunked(isChunked);
@@ -65,6 +65,7 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 		isStreaming = false;
 		length = content.length;
 		bufferEntity = entity;
+		input = null;
 	}
 
 	@Override

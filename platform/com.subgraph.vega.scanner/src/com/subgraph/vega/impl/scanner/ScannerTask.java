@@ -39,6 +39,7 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	
 	@Override
 	public void run() {
+		scanModel.addDiscoveredURI(scannerConfig.getBaseURI());
 		runCrawlerPhase();
 		runPerHostModulePhase();
 		runPerDirectoryModulePhase();

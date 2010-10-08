@@ -9,5 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.subgraph.vega.api.model
+Import-Package: com.subgraph.vega.api.model,
+ com.subgraph.vega.api.paths
 Export-Package: com.subgraph.vega.ui.util
+Service-Component: OSGI-INF/path-finder.xml

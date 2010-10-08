@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="scanner/modules/directory"/>
+	<classpathentry kind="src" path="scanner/modules/response"/>
+	<classpathentry kind="src" path="scanner/modules/server"/>
+	<classpathentry kind="src" path="scanner/prelude"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
