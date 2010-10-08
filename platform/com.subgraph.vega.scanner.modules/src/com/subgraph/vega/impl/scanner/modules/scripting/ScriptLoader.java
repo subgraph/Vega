@@ -105,7 +105,7 @@ public class ScriptLoader {
 			logger.warning("Failed to validate module script "+ scriptFile.getAbsolutePath() +" :"+ e.getMessage());
 			return null;
 		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter(e).toString());
+			logger.warning(new RhinoExceptionFormatter("Failed to compile module script.", e).toString());
 			return null;
 			
 		}

@@ -3,14 +3,16 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 import org.mozilla.javascript.RhinoException;
 
 public class RhinoExceptionFormatter {
+	private final String message;
 	private final RhinoException e;
-	public RhinoExceptionFormatter(RhinoException e) {
+	public RhinoExceptionFormatter(String message, RhinoException e) {
+		this.message = message;
 		this.e = e;
 	}
 	
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("Failed to compile script "+ e.sourceName() + " at line "+ e.lineNumber() +" and column "+ e.columnNumber() + "\n");
+		sb.append(message +"\nSource file: "+ e.sourceName() + " at line "+ e.lineNumber() +" and column "+ e.columnNumber() + "\n");
 		if(e.details() != null)
 			sb.append(e.details() + "\n");
 		if(e.lineSource() != null) {

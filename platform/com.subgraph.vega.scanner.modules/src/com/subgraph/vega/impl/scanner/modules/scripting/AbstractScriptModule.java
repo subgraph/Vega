@@ -34,7 +34,7 @@ public abstract class AbstractScriptModule {
 			processExports(instance);
 			module.runModule(cx, instance);
 		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter(e).toString());
+			logger.warning(new RhinoExceptionFormatter("Exception running module script.", e).toString());
 		} finally {
 			Context.exit();
 		}
