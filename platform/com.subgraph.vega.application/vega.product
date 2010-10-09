@@ -51,7 +51,7 @@
 
    <features>
       <feature id="com.subgraph.vega.feature" version="1.0.0.qualifier"/>
-      <feature id="org.eclipse.rcp" /> 
+      <feature id="org.eclipse.rcp"/>
    </features>
 
    <configurations>
@@ -65,6 +65,7 @@
       <plugin id="com.subgraph.vega.scanner.modules" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.urls" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="0" />
    </configurations>
 
 </product>
