@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="vega.build" default="main">
+<project name="vega.build" default="all">
 
 	<property name="buildpack.version" value="10082010" />
 
@@ -8,7 +8,7 @@
 	<import file="build/ant/pde-build-targets.xml" />
 	<import file="build/ant/unpack-targets.xml" />
 
-	<target name="main">
+	<target name="one">
     <property name="build.one" value="true" />
     <antcall target="dobuild" />
 	</target>
