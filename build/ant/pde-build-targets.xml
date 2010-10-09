@@ -45,6 +45,19 @@
 		</java>
 	</target>
 
+	<target name="pde-build-nofork" if="build.nofork">
+		<echo>basedir: ${basedir}</echo>
+    <echo>nofork launch </echo>
+		<java jar="${launcher}" fork="false" failonerror="true">
+			<arg line="-application org.eclipse.ant.core.antRunner" />
+			<arg line="-buildfile ${buildfile}" />
+			<arg line="-Dbasedir=${basedir}" />
+			<arg line="-Dbuilder=${builder}" />
+			<arg line="-Dbuildpack=${buildpack}" />
+			<arg line="-Dtimestamp=${DSTAMP}${TSTAMP}" />
+			<jvmarg value="-XX:MaxPermSize=648m" />
+			<jvmarg value="-Xmx1024m" />
+		</java>
 	<!-- Set an appropriate build config to only build vega for the current platform -->
 
 	<target name="pde-set-config" unless="build.all">

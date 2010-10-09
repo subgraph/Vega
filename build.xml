@@ -20,4 +20,8 @@
 		<antcall target="main" />
 	</target>
 
+  <target name="nofork">
+    <property name="build.nofork" value="true" />
+    <antcall target="main" />
+  </target>
 </project>
