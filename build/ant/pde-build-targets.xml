@@ -58,6 +58,7 @@
 			<jvmarg value="-XX:MaxPermSize=648m" />
 			<jvmarg value="-Xmx1024m" />
 		</java>
+  </target>
 	<!-- Set an appropriate build config to only build vega for the current platform -->
 
 	<target name="pde-set-config" unless="build.all">
