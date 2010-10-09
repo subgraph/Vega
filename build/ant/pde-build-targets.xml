@@ -9,7 +9,7 @@
 	<property name="buildpack" location="build/buildpack" />
 	<tstamp />
 
-	<target name="pde-build" depends="pde-build-all,pde-build-one"/>
+	<target name="pde-build" depends="pde-build-all,pde-build-one,pde-build-nofork"/>
 	
 	<!-- Build vega for all platforms specified in build.properties -->
 
@@ -30,7 +30,7 @@
 
 	<!-- Build vega only for the current platform -->
 
-	<target name="pde-build-one" depends="pde-set-config" unless="build.all">
+  <target name="pde-build-one" depends="pde-set-config" if="build.one" >
 		<echo>basedir: ${basedir}</echo>
 		<java jar="${launcher}" fork="true" failonerror="true">
 			<arg line="-application org.eclipse.ant.core.antRunner" />

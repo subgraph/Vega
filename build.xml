@@ -9,19 +9,25 @@
 	<import file="build/ant/unpack-targets.xml" />
 
 	<target name="main">
+    <property name="build.one" value="true" />
+    <antcall target="dobuild" />
+	</target>
+
+  <target name="dobuild">
 		<antcall target="buildpack-setup" />
 		<antcall target="setup" />
 		<antcall target="pde-build" />
 		<antcall target="unpack-archive" />
-	</target>
+  </target>
 
 	<target name="all">
 		<property name="build.all" value="true" />
-		<antcall target="main" />
+		<antcall target="dobuild" />
 	</target>
 
   <target name="nofork">
+    <echo> nofork </echo>
     <property name="build.nofork" value="true" />
-    <antcall target="main" />
+    <antcall target="dobuild" />
   </target>
 </project>
