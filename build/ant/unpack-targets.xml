@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<project name="vega.unpack">
+
+	<property name="build.output" location="build/stage/I.VegaBuild" />
+	<property name="unpack.dir" location="build/unpack-tmp" />
+	<!-- If running in default 'single build' mode, unpack the final archive so it is ready to run -->
+
+	<target name="unpack-archive" depends="choose-archive,unpack-setup,unpack-and-move" unless="build.all" />
+
+	<target name="unpack-and-move" depends="unpack-osx,unpack-linux,unpack-win32" unless="build.all">
+		<move file="${unpack.dir}/vega" tofile="vega-build" />
+		<delete dir="${unpack.dir}" />
+	</target>
+
+	<!-- Delete a previously unpacked vega package if it exists -->
+
+	<target name="unpack-setup">
+		<delete dir="vega-build" />
+		<delete dir="${unpack.dir}" />
+		<mkdir dir="${unpack.dir}" />
+	</target>
+
+	<!-- One target for each operating system -->
+
+	<target name="unpack-osx" if="unpack.osx">
+		<unzip src="${build.output}/VegaBuild-macosx.cocoa.x86.zip" dest="${unpack.dir}" />
+		<chmod file="${unpack.dir}/vega/Vega.app/Contents/MacOS/Vega" perm="755" />
+	</target>
+
+	<target name="unpack-linux" if="unpack.linux">
+		<unzip src="${build.output}/VegaBuild-linux.gtk.x86.zip" dest="${unpack.dir}" />
+		<chmod file="${unpack.dir}/vega/vega" perm="755" />
+		<chmod file="${unpack.dir}/vega/jre/bin/java" perm="755" />
+	</target>
+
+	<target name="unpack-win32" if="unpack.win32">
+		<unzip src="${build.output}/VegaBuild-win32.win32.x86.zip" dest="${unpack.dir}" />
+	</target>
+
+	<!-- Set a property depending on which OS the build is being run on -->
+
+	<target name="choose-archive" unless="build.all">
+		<condition property="unpack.linux">
+			<os name="Linux" />
+		</condition>
+
+		<condition property="unpack.osx">
+			<os name="Mac OS X" />
+		</condition>
+
+		<condition property="unpack.win32">
+			<os family="windows" />
+		</condition>
+	</target>
+</project>

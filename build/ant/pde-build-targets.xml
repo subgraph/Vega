@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<project name="vega.pde-build">
+
+	<property name="basebuilderdir" value="${basedir}/build/buildpack/org.eclipse.releng.basebuilder" />
+	<property name="pde.build" value="org.eclipse.pde.build_3.6.0.v20100603" />
+	<property name="buildfile" value="${basebuilderdir}/plugins/${pde.build}/scripts/productBuild/productBuild.xml" />
+	<property name="launcher" value="${basebuilderdir}/plugins/org.eclipse.equinox.launcher.jar" />
+	<property name="builder" location="build/config" />
+	<property name="buildpack" location="build/buildpack" />
+	<tstamp />
+
+	<target name="pde-build" depends="pde-build-all,pde-build-one"/>
+	
+	<!-- Build vega for all platforms specified in build.properties -->
+
+	<target name="pde-build-all" if="build.all">
+		<echo>basedir: ${basedir}</echo>
+		<java jar="${launcher}" fork="true" failonerror="true">
+			<arg line="-application org.eclipse.ant.core.antRunner" />
+			<arg line="-buildfile ${buildfile}" />
+			<arg line="-Dbasedir=${basedir}" />
+			<arg line="-Dbuilder=${builder}" />
+			<arg line="-Dbuildpack=${buildpack}" />
+			<arg line="-Dtimestamp=${DSTAMP}${TSTAMP}" />
+			<jvmarg value="-XX:MaxPermSize=648m" />
+			<jvmarg value="-Xmx1024m" />
+		</java>
+	</target>
+
+
+	<!-- Build vega only for the current platform -->
+
+	<target name="pde-build-one" depends="pde-set-config" unless="build.all">
+		<echo>basedir: ${basedir}</echo>
+		<java jar="${launcher}" fork="true" failonerror="true">
+			<arg line="-application org.eclipse.ant.core.antRunner" />
+			<arg line="-buildfile ${buildfile}" />
+			<arg line="-Dbasedir=${basedir}" />
+			<arg line="-Dbuilder=${builder}" />
+			<arg line="-Dbuildpack=${buildpack}" />
+			<arg line="-Dtimestamp=${DSTAMP}${TSTAMP}" />
+			<arg line="-Dconfigs=${build.config}" />
+			<jvmarg value="-XX:MaxPermSize=648m" />
+			<jvmarg value="-Xmx1024m" />
+		</java>
+	</target>
+
+	<!-- Set an appropriate build config to only build vega for the current platform -->
+
+	<target name="pde-set-config" unless="build.all">
+		<condition property="build.config" value="linux,gtk,x86">
+			<os name="Linux"/>
+		</condition>
+
+		<condition property="build.config" value="macosx,cocoa,x86">
+			<os name="Mac OS X"/>
+		</condition>
+
+		<condition property="build.config" value="win32,win32,x86">
+			<os family="windows"/>
+		</condition>
+	</target>
+    
+</project>

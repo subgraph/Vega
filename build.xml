@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<project name="vega.build" default="main">
+
+	<property name="buildpack.version" value="10082010" />
+
+	<import file="build/ant/setup-targets.xml" />
+	<import file="build/ant/buildpack-targets.xml" />
+	<import file="build/ant/pde-build-targets.xml" />
+	<import file="build/ant/unpack-targets.xml" />
+
+	<target name="main">
+		<antcall target="buildpack-setup" />
+		<antcall target="setup" />
+		<antcall target="pde-build" />
+		<antcall target="unpack-archive" />
+	</target>
+
+	<target name="all">
+		<property name="build.all" value="true" />
+		<antcall target="main" />
+	</target>
+
+</project>

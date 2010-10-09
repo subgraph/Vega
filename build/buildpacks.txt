@@ -1,0 +1,59 @@
+Vega Build Packs
+====================
+
+Contents
+--------
+
+A build pack contains several third-party dependencies that are needed to 
+build Vega.
+
+Currently the following items are included:
+
+  buildpack/target
+
+	The Eclipse RCP SDK and RCP delta pack.
+
+  buildpack/org.eclipse.releng.basebuilder
+
+	The Eclipse build system.
+
+Each build pack is versioned with the date that it was published using the
+date format MMDDYYYY in the filname of the archive.  Inside the unpacked
+archive an empty file exists at buildpack/version/MMDDYYYY which identifies
+the buildpack version which is currently unpacked to the build system.
+
+
+Creating a new Build Pack
+-------------------------
+
+A new build pack can be created with the master build script by specifying the
+ant target 'buildpack-create'
+
+  $ ant buildpack-create
+
+This will create a new buildpack archive from the current contents of the
+build/buildpack directory.  
+
+  1) The empty version file (build/buildpack/version/MMDDYYYY) will 
+     automatically be created.
+
+  2) The contents of build/buildpack will be placed in a compressed 
+     tarball in the build/archives directory as buildpack-MMDDYYYY.tar.bz2
+
+  3) The sha-1 hash value of the new buildpack tarball will be calculated 
+     and stored in buildpack-MMDDYYYY.tar.bz2.SHA
+
+The sha-1 file must be committed into the git repository and the new buildpack
+archive should be uploaded to the subgraph webserver so that it is available
+to be downloaded by the build system when needed.
+
+To use the new buildpack in a build a property must be changed near the top of
+the master build file.  This property is called buildpack.version and should be
+changed to the MMDDYYYY version value of the newly created buildpack.
+
+Once the buildpack is available in the buildpack directory on the subgraph
+webserver, the build script will automatically fetch the file, verify the checksum,
+and unpack it into the build/buildpack directory when performing a build which
+requires the new version.
+
+

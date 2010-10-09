@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<project name="vega.buildpack">
+
+	<!-- The version file is used to identify which version of the buildpack is unpacked in build/buildpack -->
+	<property name="buildpack.path.version" location="build/buildpack/version" />
+
+	<!-- Downloaded buildpacks are stored here -->
+	<property name="buildpack.path.archives" location="build/archives" />
+
+	<!-- Name of the buildpack file for the required version -->
+	<property name="buildpack.filename" value="buildpack-${buildpack.version}.tar.bz2" />
+
+	<!-- Buildpack archive name for the buildpack.version property defined in master build.xml -->
+	<property name="buildpack.archive" location="${buildpack.path.archives}/${buildpack.filename}" />
+
+	<!-- If the version file is found, then the correct buildpack is installed -->
+	<available file="${buildpack.path.version}/${buildpack.version}" property="buildpack.installed" />
+
+	<!-- Is the buildpack version we are looking for downloaded already? -->
+	<available file="${buildpack.archive}" property="buildpack.available" />
+
+	<target name="buildpack-setup" depends="buildpack-unpack" />
+
+	<!-- If the correct buildpack is not installed, delete the old contents of build/buildpack and unpack the right buildpack -->
+
+	<target name="buildpack-unpack" depends="buildpack-download,buildpack-verify" unless="buildpack.installed">
+		<delete dir="build/buildpack" />
+		<untar src="${buildpack.archive}" dest="${basedir}" compression="bzip2" />
+	</target>
+
+	<!-- Download the buildpack archive if it is not found in the build/archives directory -->
+
+	<target name="buildpack-download" unless="buildpack.available">
+		<property name="buildpack.source" value="http://mitnick.subgraph.com/buildpacks" />
+		<property name="buildpack.url" value="${buildpack.source}/${buildpack.filename}" />
+		<echo>
+			The build system will now download a buildpack from ${buildpack.url}
+			
+			Depending on the speed of your connection this may take a few minutes.
+		</echo>
+		<get src="${buildpack.url}" dest="${buildpack.archive}.tmp" />
+		<move file="${buildpack.archive}.tmp" tofile="${buildpack.archive}" />
+	</target>
+	
+	<!-- Calculate the checksum for the buildpack archive and call target to abort if it is invalid -->
+
+	<target name="buildpack-verify" unless="buildpack.installed">
+		<echo message="Verifying checksum on ${buildpack.archive}"/>
+		<condition property="buildpack.checksum.failed" >
+			<not>
+				<and>
+					<available file="${buildpack.archive}" />
+					<checksum file="${buildpack.archive}" algorithm="SHA" />
+				</and>
+			</not>
+		</condition>
+		<antcall target="buildpack-abort-if-checksum-failed" />
+		<echo message="Checksum valid." />
+	</target>
+
+	<!-- Display a message and fail if the buildpack.checksum.failed propety is set -->
+
+	<target name="buildpack-abort-if-checksum-failed" if="buildpack.checksum.failed">
+		<echo>
+			Checksum verification failed.  Buildpack has an invalid SHA-1 hash.
+		</echo>
+		<fail message="Aborted."/>
+	</target>
+
+	<!--
+		Create a new build pack from the contents of the build/buildpack directory.
+		See build/buildpacks.txt for more details.
+	-->
+	<target name="buildpack-create">
+
+		<!-- Create buildpack version from today's date -->
+		<tstamp>
+			<format property="buildpack.tstamp" pattern="MMddyyyy" />
+		</tstamp>
+
+		<property name="buildpack.file" value="buildpack-${buildpack.tstamp}.tar.bz2" />
+		<delete dir="build/buildpack/version" />
+		<!-- Write the buildpack version file -->
+		<touch file="build/buildpack/version/${buildpack.tstamp}" mkdirs="yes" />
+		<tar destfile="build/archives/${buildpack.file}" 
+			basedir="${basedir}" 
+			includes="build/buildpack/**" 
+			longfile="gnu" 
+			compression="bzip2" 
+		/>
+		<!-- Write sha-1 hash of tarball to a checksum file -->
+		<checksum file="build/archives/${buildpack.file}" algorithm="SHA" />
+		<echo message="Buildpack created at ${buildpack.file}" />
+	</target>
+
+</project>
