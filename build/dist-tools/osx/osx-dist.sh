@@ -23,12 +23,13 @@ make_dist() {
 	mv $TARGET/vega/plugins $RESOURCES
 	mv $TARGET/vega/features $RESOURCES
 	mv $TARGET/vega/configuration $RESOURCES
+	mv $TARGET/vega/scripts $RESOURCES
 	mv $TARGET/Vega.ini $TARGET/vega/Vega.app/Contents/MacOS/Vega.ini
 }
 
 make_dmg() {
 	echo "enter make_dmg()"
-	dd if=/dev/zero of=$TARGET/vega.dmg bs=1M count=30
+	dd if=/dev/zero of=$TARGET/vega.dmg bs=1M count=40
 	mkfs.hfsplus -v Vega $TARGET/vega.dmg
 	/usr/local/bin/mount-dmg $TARGET/vega.dmg
 	mv $TARGET/vega/Vega.app /mnt/dmg

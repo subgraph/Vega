@@ -26,12 +26,8 @@
 	</target>
 
   <target name="dist">
-    <echo> dist </echo>
+	<property name="build.all" value="true" />
+	<antcall target="dobuild" />
     <exec executable="build/dist-tools/osx/osx-dist.sh"></exec>
-  </target>
-  <target name="nofork">
-    <echo> nofork </echo>
-    <property name="build.nofork" value="true" />
-    <antcall target="dobuild" />
   </target>
 </project>
