@@ -10,7 +10,7 @@ __defineGetter__("response", function() {
 });
 
 function Response(httpResponse) {
-  this.httpResponse = httpResponse;
+  this.httpResponse = httpResponse.rawResponse;
   this.entityString = null;
 }
 
