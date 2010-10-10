@@ -6,10 +6,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class RequestConsumer implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
@@ -50,7 +50,7 @@ public class RequestConsumer implements Runnable {
 			}
 			try {
 				logger.info("Retrieving: " + task.getRequest().getURI());
-				HttpResponse response = requestEngine.sendRequest(task.getRequest());
+				IHttpResponse response = requestEngine.sendRequest(task.getRequest());
 				task.setResponse(response);
 				crawlerResponseQueue.put(task);
 				

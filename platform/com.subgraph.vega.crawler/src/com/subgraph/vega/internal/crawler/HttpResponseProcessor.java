@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -73,8 +73,8 @@ public class HttpResponseProcessor implements Runnable {
 		}
 	}
 	
-	private void processResponse(HttpResponse response, URI page) throws IOException {
-		HttpEntity entity = response.getEntity();
+	private void processResponse(IHttpResponse response, URI page) throws IOException {
+		HttpEntity entity = response.getRawResponse().getEntity();
 		if(entity == null)
 			return;
 		processEntity(entity, page);

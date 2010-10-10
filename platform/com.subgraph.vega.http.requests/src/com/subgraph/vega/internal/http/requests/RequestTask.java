@@ -16,9 +16,10 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
-class RequestTask implements Callable<HttpResponse> {
+class RequestTask implements Callable<IHttpResponse> {
 
 	private final HttpClient client;
 	private final HttpUriRequest request;
@@ -33,19 +34,20 @@ class RequestTask implements Callable<HttpResponse> {
 	}
 
 	@Override
-	public HttpResponse call() throws Exception {
+	public IHttpResponse call() throws Exception {
 		if(config.getForceIdentityEncoding())
 			request.setHeader(HTTP.CONTENT_ENCODING, HTTP.IDENTITY_CODING);
 
-		final HttpResponse response = client.execute(request, context);
+		final HttpResponse httpResponse = client.execute(request, context);
 
-		final HttpEntity entity = response.getEntity();
+		final HttpEntity entity = httpResponse.getEntity();
 
 		if(entity != null) {
-			final HttpEntity newEntity = processEntity(response, entity);
-			response.setEntity(newEntity);
+			final HttpEntity newEntity = processEntity(httpResponse, entity);
+			httpResponse.setEntity(newEntity);
 		}
 		
+		final IHttpResponse response = new EngineHttpResponse(httpResponse);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		
