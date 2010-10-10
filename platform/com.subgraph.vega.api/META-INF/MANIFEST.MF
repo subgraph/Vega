@@ -8,7 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.http;version="4.0.0",
  org.apache.http.client,
  org.apache.http.client.methods,
- org.apache.http.protocol;version="4.0.0"
+ org.apache.http.protocol;version="4.0.0",
+ org.jsoup.nodes
 Export-Package: com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.http.proxy,

@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -15,11 +16,26 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.subgraph.vega.api.http.requests.IHttpResponse;
+
 public class HtmlUrlExtractor {
+	
+	List<URI> findHtmlUrls(IHttpResponse response) {
+		final Document document = response.getHtml();
+		if(document != null) {
+			return extractUrlsFromDocument(document);
+		} else {
+			return Collections.emptyList();
+		}
+	}
 	
 	List<URI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
+		return extractUrlsFromDocument(document);
+	}
+	
+	private List<URI> extractUrlsFromDocument(Document document) {
 		final ArrayList<URI> uris = new ArrayList<URI>();
 		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "[src]", "abs:src"));

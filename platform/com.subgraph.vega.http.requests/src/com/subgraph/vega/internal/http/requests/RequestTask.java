@@ -47,7 +47,7 @@ class RequestTask implements Callable<IHttpResponse> {
 			httpResponse.setEntity(newEntity);
 		}
 		
-		final IHttpResponse response = new EngineHttpResponse(httpResponse);
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), request, httpResponse);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		

@@ -77,18 +77,18 @@ public class HttpResponseProcessor implements Runnable {
 		HttpEntity entity = response.getRawResponse().getEntity();
 		if(entity == null)
 			return;
-		processEntity(entity, page);
+		processEntity(response, entity, page);
 		entity.consumeContent();
 	}
 	
-	private void processEntity(HttpEntity entity, URI page) {
+	private void processEntity(IHttpResponse response, HttpEntity entity, URI page) {
 		Header contentType = entity.getContentType();
 		String mimeType = (contentType == null) ? (null) : (contentType.getValue());
 		IWebPath path = model.addURI(page);
 		IWebGetTarget getTarget = path.addGetTarget(page.getQuery(), mimeType);
 		getTarget.setVisited(true);
-		if(mimeType != null && mimeType.startsWith("text/html")) {
-			List<URI> uris = extractor.findUrls(entity, page);
+		if(mimeType != null && mimeType.contains("html")) {
+			List<URI> uris = extractor.findUrls(response);
 			filterAndQueueURIs(uris);
 		}
 	}

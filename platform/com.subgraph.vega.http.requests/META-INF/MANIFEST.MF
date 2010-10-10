@@ -19,5 +19,7 @@ Import-Package: com.subgraph.vega.api.http.requests,
  org.apache.http.impl.conn.tsccm,
  org.apache.http.params;version="4.0.0",
  org.apache.http.protocol;version="4.0.0",
- org.apache.http.util;version="4.0.0"
+ org.apache.http.util;version="4.0.0",
+ org.jsoup,
+ org.jsoup.nodes
 Service-Component: OSGI-INF/request-engine-factory.xml

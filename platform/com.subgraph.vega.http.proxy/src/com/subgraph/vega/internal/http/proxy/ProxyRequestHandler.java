@@ -54,12 +54,12 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 		BasicHttpContext ctx = new BasicHttpContext();
 		IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
-		HttpResponse httpResponse = r.getRawResponse();
-		context.setAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE, copyResponse(httpResponse));
+		if(r == null)
+			return;
+		context.setAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE, r); 
 		context.setAttribute(HttpProxy.PROXY_HTTP_HOST, ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
 
-		if(httpResponse == null)
-			return;
+		HttpResponse httpResponse = copyResponse(r.getRawResponse());
 
 		removeHopByHopHeaders(httpResponse);
 
