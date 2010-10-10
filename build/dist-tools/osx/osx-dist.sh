@@ -35,6 +35,7 @@ make_dmg() {
 	mv $TARGET/vega/Vega.app /mnt/dmg
 	/usr/local/bin/mount-dmg -u
 }
+mkdir build/dist
 make_dist x86
 make_dmg
 mv $TARGET/vega.dmg build/dist/Vega.dmg
