@@ -35,6 +35,7 @@ public class ScriptLoader {
 	};
 	
 	public ScriptLoader(File moduleRoot) {
+		logger.info("Loading scripts from "+ moduleRoot.getAbsolutePath());
 		this.moduleRoot = moduleRoot;
 		enableDynamicScope();
 		globalScope = createGlobalScope();

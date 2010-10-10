@@ -1,8 +1,12 @@
 package com.subgraph.vega.impl.scanner.modules;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
@@ -22,10 +26,34 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	
 	
 	void activate() {
-		final String sep = File.separator;
-		final File root = new File(pathFinder.getDataDirectory(), "scripts" + sep + "scanner");
-		scriptLoader = new ScriptLoader(root);
+		scriptLoader = new ScriptLoader(getScriptDirectory());
 		scriptLoader.load();
+	}
+	
+	private File getScriptDirectory() {
+		final File configScriptPath = getScriptDirectoryFromConfig(pathFinder.getConfigFilePath()); 
+		if(configScriptPath != null && configScriptPath.exists() && configScriptPath.isDirectory()) 
+			return configScriptPath;
+		
+		return new File(pathFinder.getDataDirectory(), "scripts" + File.separator + "scanner");		
+	}
+	
+	private File getScriptDirectoryFromConfig(File configFile) {
+		try {
+			if(!(configFile.exists() && configFile.canRead()))
+				return null;
+			Reader configReader = new FileReader(configFile);
+			Properties configProperties = new Properties();
+			configProperties.load(configReader);
+			String pathProp = configProperties.getProperty("vega.scanner.datapath");
+			
+			if(pathProp != null) 
+				return new File(pathProp, "scripts" + File.separator + "scanner");
+			
+		} catch (IOException e) {
+			return null;
+		}
+		return null;
 	}
 	
 	@Override

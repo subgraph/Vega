@@ -7,6 +7,12 @@ import com.subgraph.vega.api.paths.IPathFinder;
 public class PathFinder implements IPathFinder {
 
 	
+	public File getConfigFilePath() {
+		final File homeDirectory = new File(System.getProperty("user.home"));
+		final File vegaDirectory = new File(homeDirectory, ".vega");
+		return new File(vegaDirectory, "config");
+	}
+	
 	@Override
 	public File getDataDirectory() {
 		if(isRunningInEclipse())
