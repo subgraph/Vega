@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>RFC 1918 Addresses Found</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>
+	<discussion>
+    Found addresses meant for use in internal networks (non-routable on the Internet).
+	</discussion>
+	
+	
+</alert>
+

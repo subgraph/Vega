@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Possible source code disclosure</title>
+	
+	<class>Information</class>
+
+	<severity>Medium</severity>
+
+  <impact> Could result in disclosure of sensitive information to attackers.</impact>
+  <impact> This includes passwords, etc.</impact>
+
+  <remediation>
+    There is currently no solution for this vulnerability.  Contact your vendor.
+  </remediation>
+
+
+	<discussion>
+    Possible source code disclosure.
+	</discussion>
+
+  <external>
+    <url address="http://subgraph.com">Subgraph security.</url>
+  </external>
+           
+  <references>
+    <url address="http://minecraft.net">Minecraft is a good game.</url>
+    <url address="http://en.wikipedia.com">Learn stuff here</url>
+  </references>
+
+	
+	
+</alert>
+
