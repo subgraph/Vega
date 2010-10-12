@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<project name="vega.build" default="all">
+
+	<property name="buildpack.version" value="10082010" />
+
+	<import file="build/ant/setup-targets.xml" />
+	<import file="build/ant/buildpack-targets.xml" />
+	<import file="build/ant/pde-build-targets.xml" />
+	<import file="build/ant/unpack-targets.xml" />
+
+	<target name="one">
+    <property name="build.one" value="true" />
+    <antcall target="dobuild" />
+	</target>
+
+  <target name="dobuild">
+		<antcall target="buildpack-setup" />
+		<antcall target="setup" />
+		<antcall target="pde-build" />
+		<antcall target="unpack-archive" />
+  </target>
+
+	<target name="all">
+		<property name="build.all" value="true" />
+		<antcall target="dobuild" />
+	</target>
+
+  <target name="dist">
+	<property name="build.all" value="true" />
+	<antcall target="dobuild" />
+    <exec executable="build/dist-tools/osx/osx-dist.sh"></exec>
+  </target>
+</project>

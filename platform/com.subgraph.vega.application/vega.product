@@ -3,7 +3,6 @@
 
 <product name="Subgraph Vega" id="com.subgraph.vega.application.product" application="com.subgraph.vega.application.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
-
    <configIni use="default">
    </configIni>
 
@@ -13,14 +12,13 @@
 
    <windowImages i16="icons/alt_window_16.gif" i32="/com.subgraph.vega.application/icons/vega-icon-100x100.png"/>
 
-
-   <launcher>
+   <launcher name="Vega">
+      <macosx icon="/com.subgraph.vega.application/icons/VegaIcons-OSX.icns"/>
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
@@ -54,7 +52,7 @@
 
    <features>
       <feature id="com.subgraph.vega.feature" version="1.0.0.qualifier"/>
-      <feature id="org.eclipse.rcp" version="3.6.0.v20100519-9OArFKvFtsd7WLUKh-DcYTS"/>
+      <feature id="org.eclipse.rcp"/>
    </features>
 
    <configurations>
@@ -67,6 +65,8 @@
       <plugin id="com.subgraph.vega.scanner" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.scanner.modules" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.urls" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="0" />
    </configurations>
 
 </product>

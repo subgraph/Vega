@@ -7,12 +7,13 @@ import java.util.List;
 
 import org.apache.http.HttpEntity;
 
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.urls.IUrlExtractor;
 
 public class UrlExtractor implements IUrlExtractor {
 	private final HtmlUrlExtractor htmlExtractor = new HtmlUrlExtractor();
 
-	@Override
+	//@Override
 	public List<URI> findUrls(HttpEntity entity, URI basePath) {
 		if(entity.getContentType() != null && entity.getContentType().getValue().contains("html"))
 			try {
@@ -23,5 +24,10 @@ public class UrlExtractor implements IUrlExtractor {
 				return Collections.emptyList();
 			}
 		return Collections.emptyList();
+	}
+
+	@Override
+	public List<URI> findUrls(IHttpResponse response) {
+		return htmlExtractor.findHtmlUrls(response);
 	}
 }

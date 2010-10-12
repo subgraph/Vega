@@ -7,12 +7,18 @@ import com.subgraph.vega.api.paths.IPathFinder;
 public class PathFinder implements IPathFinder {
 
 	
+	public File getConfigFilePath() {
+		final File homeDirectory = new File(System.getProperty("user.home"));
+		final File vegaDirectory = new File(homeDirectory, ".vega");
+		return new File(vegaDirectory, "config");
+	}
+	
 	@Override
 	public File getDataDirectory() {
-		if(!isRunningInEclipse())
-			throw new UnsupportedOperationException("Path finder not implemented for launching Vega outside of Eclipse.");
-		
-		return getDataDirectoryForEclipseLaunch();
+		if(isRunningInEclipse())
+			return getDataDirectoryForEclipseLaunch();
+		else
+			return getInstallDataDirectory();
 	}
 	
 	private boolean isRunningInEclipse() {
@@ -21,9 +27,16 @@ public class PathFinder implements IPathFinder {
 	
 	private File getDataDirectoryForEclipseLaunch() {
 		final String uglyHack = System.getProperty("osgi.splashPath");
-		final String splashPath = (uglyHack.startsWith("file:")) ? (uglyHack.substring(5)) : (uglyHack);
-		final File splashPathFile = new File(splashPath);
+		final File splashPathFile = new File(fileURLTrim(uglyHack));
 		return splashPathFile.getParentFile().getParentFile();		
 	}
 
+	private File getInstallDataDirectory() {
+		final String install = System.getProperty("osgi.install.area");
+		return new File(fileURLTrim(install));
+	}
+	
+	private String fileURLTrim(String fileURL) {
+		return (fileURL.startsWith("file:")) ? (fileURL.substring(5)) : fileURL;
+	}
 }

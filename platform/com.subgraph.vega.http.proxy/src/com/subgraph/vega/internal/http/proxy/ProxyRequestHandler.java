@@ -25,6 +25,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
@@ -52,12 +53,13 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			return;
 
 		BasicHttpContext ctx = new BasicHttpContext();
-		HttpResponse httpResponse = requestEngine.sendRequest(uriRequest, ctx);
-		context.setAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE, copyResponse(httpResponse));
+		IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
+		if(r == null)
+			return;
+		context.setAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE, r); 
 		context.setAttribute(HttpProxy.PROXY_HTTP_HOST, ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
 
-		if(httpResponse == null)
-			return;
+		HttpResponse httpResponse = copyResponse(r.getRawResponse());
 
 		removeHopByHopHeaders(httpResponse);
 

@@ -8,6 +8,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
@@ -22,11 +23,12 @@ public class ScannerResponseProcessor implements IHttpResponseProcessor {
 	}
 	
 	@Override
-	public void processResponse(HttpRequest request, HttpResponse response, HttpContext context) {
+	public void processResponse(HttpRequest request, IHttpResponse response, HttpContext context) {
 		if(responseProcessingModules.isEmpty())
 			return;
-		final int statusCode = response.getStatusLine().getStatusCode();
-		final String mimeType = responseToMimeType(response);
+		final HttpResponse httpResponse = response.getRawResponse();
+		final int statusCode = httpResponse.getStatusLine().getStatusCode();
+		final String mimeType = responseToMimeType(httpResponse);
 		
 		for(IResponseProcessingModule m: responseProcessingModules) {
 			if(m.responseCodeFilter(statusCode) && m.mimeTypeFilter(mimeType)) 

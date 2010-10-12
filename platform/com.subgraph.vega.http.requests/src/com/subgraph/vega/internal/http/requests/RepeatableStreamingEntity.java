@@ -117,8 +117,10 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 				remaining -= l;
 			}
 		}
-		input.close();
-		input = null;
+		if(input != null) {
+			input.close();
+			input = null;
+		}
 	}
 
 	@Override

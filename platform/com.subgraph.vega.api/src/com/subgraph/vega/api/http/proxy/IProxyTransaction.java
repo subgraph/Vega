@@ -2,10 +2,11 @@ package com.subgraph.vega.api.http.proxy;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
+
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public interface IProxyTransaction {
 	HttpHost getHttpHost();
 	HttpRequest getRequest();
-	HttpResponse getResponse();
+	IHttpResponse getResponse();
 }

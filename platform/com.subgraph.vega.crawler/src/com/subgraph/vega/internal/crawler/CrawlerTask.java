@@ -2,9 +2,10 @@ package com.subgraph.vega.internal.crawler;
 
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class CrawlerTask {
 	
@@ -23,7 +24,7 @@ public class CrawlerTask {
 	}
 	
 	private HttpUriRequest request;
-	private HttpResponse response;
+	private IHttpResponse response;
 	private final boolean isExitTask;
 	
 	
@@ -41,11 +42,11 @@ public class CrawlerTask {
 		return request;
 	}
 	
-	HttpResponse getResponse() {
+	IHttpResponse getResponse() {
 		return response;
 	}
 	
-	void setResponse(HttpResponse response) {
+	void setResponse(IHttpResponse response) {
 		this.response = response;
 	}
 	

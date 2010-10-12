@@ -1,1 +1,5 @@
+build/stage
+build/buildpack
+build/archives/*.bz2
+vega-build/
 platform/*/bin

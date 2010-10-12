@@ -4,14 +4,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
@@ -52,9 +55,9 @@ public class HttpProxyService implements IHttpProxyService {
 
 	private void processTransaction(IProxyTransaction transaction) {
 
-		requestLog.addRequestResponse(transaction.getRequest(), transaction.getResponse(), transaction.getHttpHost());
+		requestLog.addRequestResponse(transaction.getRequest(), transaction.getResponse().getRawResponse(), transaction.getHttpHost());
 
-		HttpEntity responseEntity = transaction.getResponse().getEntity();
+		HttpEntity responseEntity = transaction.getResponse().getRawResponse().getEntity();
 		if(responseEntity == null)
 			return;
 
@@ -64,14 +67,16 @@ public class HttpProxyService implements IHttpProxyService {
 			return;
 
 		addGetTargetToModel(transaction.getHttpHost(), uri, mimeType);
-		addDiscoveredLinks(transaction.getHttpHost(), uri, responseEntity);
+		addDiscoveredLinks(transaction.getResponse());
 	}
 
 	private String transactionToMimeType(IProxyTransaction transaction) {
-		if(transaction.getResponse().getFirstHeader("Content-Type") == null)
+		HttpResponse response = transaction.getResponse().getRawResponse();
+		Header hdr = response.getFirstHeader("Content-Type");
+		if(hdr == null || hdr.getValue() == null)
 			return "unknown/unknown";
 		else
-			return transaction.getResponse().getFirstHeader("Content-Type").getValue();
+			return hdr.getValue();
 	}
 
 	private URI transactionToURI(IProxyTransaction transaction) {
@@ -91,10 +96,8 @@ public class HttpProxyService implements IHttpProxyService {
 		getTarget.setVisited(true);
 	}
 	
-	private void addDiscoveredLinks(HttpHost httpHost, URI uri, HttpEntity entity) {
-		final URI hostURI = URI.create(httpHost.toURI());
-		final URI base = hostURI.resolve(uri);
-		for(URI u: urlExtractor.findUrls(entity, base))
+	private void addDiscoveredLinks(IHttpResponse response) {
+		for(URI u: urlExtractor.findUrls(response))
 			webModel.addURI(u);
 	}
 

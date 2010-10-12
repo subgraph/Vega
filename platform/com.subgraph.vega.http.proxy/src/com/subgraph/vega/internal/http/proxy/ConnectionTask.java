@@ -8,11 +8,12 @@ import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.impl.SocketHttpServerConnection;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpService;
+
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ConnectionTask implements Runnable {
 	private final Logger logger = Logger.getLogger("proxy");
@@ -56,7 +57,7 @@ public class ConnectionTask implements Runnable {
 
 	private void processRequestContext(HttpContext context) throws IOException {
 		final HttpRequest request = (HttpRequest) context.getAttribute(HttpProxy.PROXY_CONTEXT_REQUEST);
-		final HttpResponse response = (HttpResponse) context.getAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE);
+		final IHttpResponse response = (IHttpResponse) context.getAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE);
 		final HttpHost host = (HttpHost) context.getAttribute(HttpProxy.PROXY_HTTP_HOST);
 		if(request != null && response != null && host != null)
 			proxy.completeRequest(new ProxyTransaction(request, response, host));

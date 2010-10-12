@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -16,6 +15,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
@@ -31,9 +31,9 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 	
 	@Override
-	public HttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
+	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
-		Future<HttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config));
+		Future<IHttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config));
 		try {
 			return future.get();
 		} catch (InterruptedException e) {
@@ -47,7 +47,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
-	public HttpResponse sendRequest(HttpUriRequest request)
+	public IHttpResponse sendRequest(HttpUriRequest request)
 			throws IOException, ClientProtocolException {
 		return sendRequest(request, null);
 	}
