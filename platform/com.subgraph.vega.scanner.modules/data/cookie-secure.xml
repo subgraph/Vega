@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Cookie not set as http only</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	<discussion>
+		The cookie was not set as secure	
+	</discussion>
+</alert>
+

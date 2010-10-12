@@ -22,7 +22,7 @@ public class NewScanWizard extends Wizard {
 		if(scanHostText.isEmpty())
 			return false;
 		try {
-			new URI("http", scanHostText, null, null);
+			new URI(scanHostText);
 			return true;
 		} catch (URISyntaxException e) {
 			return false;
@@ -32,7 +32,7 @@ public class NewScanWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			scanHostURI = new URI("http", page.getText(), null, null);
+			scanHostURI = new URI(page.getText());
 		} catch (URISyntaxException e) {
 		}
 		return true;
