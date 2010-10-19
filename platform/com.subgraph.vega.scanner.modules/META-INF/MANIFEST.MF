@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.subgraph.vega.scanner.modules
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.subgraph.vega.api.http.requests,
+Import-Package: com.subgraph.vega.api.html,
+ com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.paths,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
@@ -14,7 +15,10 @@ Import-Package: com.subgraph.vega.api.http.requests,
  org.apache.http.client,
  org.apache.http.client.methods,
  org.apache.http.util;version="4.0.0",
- org.osgi.framework;version="1.5.0"
+ org.jsoup.nodes,
+ org.jsoup.select,
+ org.osgi.framework;version="1.5.0",
+ org.w3c.dom.html2
 Service-Component: OSGI-INF/scanner-module-registry.xml, OSGI-INF/scan-alert-repo.xml
 Bundle-ClassPath: .,
  lib/js.jar

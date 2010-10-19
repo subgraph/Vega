@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.scanner.model.IScanAlert;
 import com.subgraph.vega.api.scanner.model.IScanAlertRepository;
 import com.subgraph.vega.api.scanner.model.IScanDirectory;
@@ -22,14 +23,16 @@ public class ScanModel implements IScanModel {
 	private final Logger logger = Logger.getLogger("scanner");
 	
 	private final IScanAlertRepository alertRepository;
+	private final IHTMLParser htmlParser;
 	private final EventListenerManager eventManager = new EventListenerManager();
 	private final Set<IScanHost> scanHosts = new LinkedHashSet<IScanHost>();
 	private final Set<IScanDirectory> scanDirectories = new LinkedHashSet<IScanDirectory>();
 	private final List<IScanAlert> scanAlerts = new ArrayList<IScanAlert>();
 	private final Map<String, Object> properties = new HashMap<String, Object>();
 	
-	public ScanModel(IScanAlertRepository alertRepository) {
+	public ScanModel(IScanAlertRepository alertRepository, IHTMLParser htmlParser) {
 		this.alertRepository = alertRepository;
+		this.htmlParser = htmlParser;
 	}
 	
 	@Override
@@ -150,6 +153,11 @@ public class ScanModel implements IScanModel {
 		if(value instanceof Integer)
 			return (Integer) value;
 		throw new IllegalArgumentException("Property '"+ key +"' exists but it is not an Integer");
+	}
+
+	@Override
+	public IHTMLParser getHTMLParser() {
+		return htmlParser;
 	}
 
 }

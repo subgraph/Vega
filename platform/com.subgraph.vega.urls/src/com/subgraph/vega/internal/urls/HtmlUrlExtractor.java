@@ -16,14 +16,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class HtmlUrlExtractor {
 	
 	List<URI> findHtmlUrls(IHttpResponse response) {
-		final Document document = response.getHtml();
-		if(document != null) {
-			return extractUrlsFromDocument(document);
+		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
+		
+		if(htmlParseResult != null) {
+			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument());
 		} else {
 			return Collections.emptyList();
 		}

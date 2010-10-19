@@ -2,12 +2,14 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.WrappedException;
 
 public abstract class AbstractScriptModule {
 	private static final Logger logger = Logger.getLogger("script-module");
@@ -33,6 +35,9 @@ public abstract class AbstractScriptModule {
 			Scriptable instance = module.createInstanceScope(cx);
 			processExports(instance);
 			module.runModule(cx, instance);
+		} catch (WrappedException e) {
+			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
+			e.printStackTrace();
 		} catch (RhinoException e) {
 			logger.warning(new RhinoExceptionFormatter("Exception running module script.", e).toString());
 		} finally {
@@ -40,16 +45,21 @@ public abstract class AbstractScriptModule {
 		}
 	}
 	
+	
 	protected void export(String name, Object object) {
-		currentExports.add(new ExportedObject(name, object));
+		synchronized(currentExports) {
+			currentExports.add(new ExportedObject(name, object));
+		}
 	}
 	
 	private void processExports(Scriptable instance) {
-		for(ExportedObject exp: currentExports) {
-			Object wrappedObject = Context.javaToJS(exp.object, instance);
-			ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
+		synchronized(currentExports) {
+			for(ExportedObject exp: currentExports) {
+				Object wrappedObject = Context.javaToJS(exp.object, instance);
+				ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
+			}
+			currentExports.clear();
 		}
-		currentExports.clear();
 	}
 
 }

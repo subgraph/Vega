@@ -22,6 +22,11 @@ public class StartNewScanHandler extends AbstractHandler {
 		NewScanWizard wizard = new NewScanWizard();
 		WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
+			if(wizard.isDomTest()) {
+				runDomTest();
+				return null;
+			}
+				
 			URI uri = wizard.getScanHostURI();
 			if(uri != null) 
 				launchScanner(uri);
@@ -36,6 +41,13 @@ public class StartNewScanHandler extends AbstractHandler {
 			scannerConfig.setBaseURI(uri);
 			IScanner scanner = scannerFactory.createScanner(scannerConfig);
 			scanner.start();
+		}
+	}
+	
+	private void runDomTest() {
+		IScannerFactory scannerFactory = Activator.getDefault().getScannerFactory();
+		if(scannerFactory != null) {
+			scannerFactory.runDomTests();
 		}
 	}
 }

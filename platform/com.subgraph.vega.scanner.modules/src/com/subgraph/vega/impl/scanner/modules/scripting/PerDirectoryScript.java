@@ -16,8 +16,7 @@ public class PerDirectoryScript extends AbstractScriptModule implements IPerDire
 		export("directory", directory);
 		export("requestEngine", requestEngine);
 		export("scanModel", scanModel);
-		runScript();
-				
+		runScript();		
 	}
 
 }

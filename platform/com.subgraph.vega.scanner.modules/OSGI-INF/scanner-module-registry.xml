@@ -5,4 +5,5 @@
       <provide interface="com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry"/>
    </service>
    <reference bind="setPathFinder" cardinality="1..1" interface="com.subgraph.vega.api.paths.IPathFinder" name="IPathFinder" policy="static" unbind="unsetPathFinder"/>
+   <reference bind="setHTMLParser" cardinality="1..1" interface="com.subgraph.vega.api.html.IHTMLParser" name="IHTMLParser" policy="static" unbind="unsetHTMLParser"/>
 </scr:component>

@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
@@ -19,13 +23,18 @@ import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ResponseProcessorScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptLoader;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
+import com.subgraph.vega.impl.scanner.modules.scripting.tests.DomTestModule;
+import com.subgraph.vega.impl.scanner.modules.scripting.tests.TestScriptLoader;
 
 public class ScannerModuleRepository implements IScannerModuleRegistry {
 	private IPathFinder pathFinder;
+	private IHTMLParser htmlParser;
 	private ScriptLoader scriptLoader;
+	private TestScriptLoader testScriptLoader;
+	private Bundle bundle;
 	
-	
-	void activate() {
+	void activate(BundleContext context) {
+		this.bundle = context.getBundle();
 		scriptLoader = new ScriptLoader(getScriptDirectory());
 		scriptLoader.load();
 	}
@@ -98,5 +107,46 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	
 	protected void unsetPathFinder(IPathFinder pathFinder) {
 		this.pathFinder = null;
+	}
+	
+	protected void setHTMLParser(IHTMLParser htmlParser) {
+		this.htmlParser = htmlParser;
+	}
+	
+	protected void unsetHTMLParser(IHTMLParser htmlParser) {
+		this.htmlParser = null;
+	}
+
+	@Override
+	public void runDomTests() {
+		if(testScriptLoader == null) {
+			testScriptLoader = new TestScriptLoader(scriptLoader.getPreludeScope(),bundle);
+			testScriptLoader.load();
+		}
+		
+		Thread testThread = new Thread(createDomTestRunnable());
+		testThread.start();
+	}
+	
+	private Runnable createDomTestRunnable() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				for(ScriptedModule m: testScriptLoader.getAllModules()) {
+					runDomTestModule(m);
+				}
+			}
+		};
+	}
+	
+	private void runDomTestModule(ScriptedModule module) {
+		if(module.getModuleType() != ModuleScriptType.DOM_TEST)
+			return;
+		final DomTestModule test = new DomTestModule(module, bundle, htmlParser);
+		try {
+			test.run();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

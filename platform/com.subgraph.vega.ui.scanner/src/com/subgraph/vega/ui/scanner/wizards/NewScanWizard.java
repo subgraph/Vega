@@ -9,6 +9,7 @@ public class NewScanWizard extends Wizard {
 
 	private NewScanWizardPage page;
 	private URI scanHostURI;
+	private boolean isDomTest;
 	
 	@Override
 	public void addPages() {
@@ -31,9 +32,16 @@ public class NewScanWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
+		String target = page.getText();
+		if(target.equals("domtest")) {
+			isDomTest = true;
+			return true;
+		}
+		
 		try {
 			scanHostURI = new URI(page.getText());
 		} catch (URISyntaxException e) {
+			return false;
 		}
 		return true;
 		
@@ -41,6 +49,11 @@ public class NewScanWizard extends Wizard {
 	
 	public URI getScanHostURI() {
 		return scanHostURI;
+	}
+	
+	public boolean isDomTest() {
+		return isDomTest;
+		
 	}
 
 }

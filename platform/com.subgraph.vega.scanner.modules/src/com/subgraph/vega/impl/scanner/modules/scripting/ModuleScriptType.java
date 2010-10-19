@@ -1,9 +1,11 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
 public enum ModuleScriptType {
+	DISABLED("disabled"),
 	PER_SERVER("per-server"),
 	PER_DIRECTORY("per-directory"),
-	RESPONSE_PROCESSOR("response-processor");
+	RESPONSE_PROCESSOR("response-processor"),
+	DOM_TEST("dom-test");
 
 	private final String name;
 	private ModuleScriptType(String name) {
@@ -17,5 +19,4 @@ public enum ModuleScriptType {
 		}
 		return null;
 	}
-	
 }

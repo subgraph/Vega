@@ -1,15 +1,22 @@
-package com.subgraph.vega.impl.scanner.modules.scripting;
+package com.subgraph.vega.impl.scanner.modules.scripting.tests;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.osgi.framework.Bundle;
 
+import com.subgraph.vega.impl.scanner.modules.scripting.RhinoExceptionFormatter;
+import com.subgraph.vega.impl.scanner.modules.scripting.ScriptCompiler;
 import com.subgraph.vega.impl.scanner.modules.scripting.dom.AnchorJS;
 import com.subgraph.vega.impl.scanner.modules.scripting.dom.AttrJS;
 import com.subgraph.vega.impl.scanner.modules.scripting.dom.CharacterDataJS;
@@ -27,32 +34,24 @@ import com.subgraph.vega.impl.scanner.modules.scripting.dom.OptionJS;
 import com.subgraph.vega.impl.scanner.modules.scripting.dom.SelectJS;
 import com.subgraph.vega.impl.scanner.modules.scripting.dom.TextJS;
 
-public class PreludeLoader {
-	private final Logger logger = Logger.getLogger("prelude-loader");
-	private final File preludeDirectory;
-	private final ScriptCompiler preludeCompiler;
-
-	private final FileFilter scriptFilter = new FileFilter() {
-		public boolean accept(File pathname) {
-			return pathname.isFile() && pathname.getName().endsWith(".js");
-		}
-	};
+public class QunitLoader {
+	private final static String QUNIT_PATH = "/tests/qunit/qunit.js";
+	private final Logger logger = Logger.getLogger("qunit-loader");
+	private final ScriptCompiler qunitCompiler;
+ 	private final Bundle bundle;
 	
-	private Scriptable preludeScope;
+	private Scriptable qunitScope;
 	
-	PreludeLoader(File directory, Scriptable scope) {
-		this.preludeDirectory = directory;
-		this.preludeCompiler = new ScriptCompiler(scope);
+	QunitLoader(Scriptable globalScope, Bundle bundle) {
+		this.qunitCompiler = new ScriptCompiler(globalScope);
+		this.bundle = bundle;
 	}
 	
 	void load() {
 		try {
 			Context cx = Context.enter();
-			Scriptable scope = preludeCompiler.newScope(cx);
-			for(File ps: preludeDirectory.listFiles(scriptFilter)) {
-				preludeCompiler.compileFile(ps, cx, scope);
-			}
-				
+			Scriptable scope = qunitCompiler.newScope(cx);
+			qunitCompiler.compileReader(openQunit(QUNIT_PATH), QUNIT_PATH, cx, scope);
 			ScriptableObject.defineClass(scope, NodeJS.class, true, true);
 			ScriptableObject.defineClass(scope, DocumentJS.class, true, true);
 			ScriptableObject.defineClass(scope, ElementJS.class, true, true);
@@ -69,10 +68,12 @@ public class PreludeLoader {
 			ScriptableObject.defineClass(scope, OptionJS.class, true, true);
 			ScriptableObject.defineClass(scope, SelectJS.class, true, true);
 			ScriptableObject.defineClass(scope, NodeListJS.class, true, true);
-			preludeScope = scope;
-			
-		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Failed to load Prelude and DOM wrapper classes", e).toString());
+			qunitScope = scope;			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(RhinoException e) {
+			logger.warning(new RhinoExceptionFormatter("Failed to compile module prelude script.", e).toString());
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -85,9 +86,18 @@ public class PreludeLoader {
 		} finally {
 			Context.exit();
 		}
+		
+	}
+
+	private Reader openQunit(String path) throws IOException {
+		final URL url = bundle.getEntry(path);
+		if(url == null)
+			throw new FileNotFoundException("Could not locate qunit library at "+ path);
+		final InputStream input = url.openStream();
+		return new InputStreamReader(input);
 	}
 	
-	Scriptable getPreludeScope() {
-		return preludeScope;
+	Scriptable getScope() {
+		return qunitScope;
 	}
 }

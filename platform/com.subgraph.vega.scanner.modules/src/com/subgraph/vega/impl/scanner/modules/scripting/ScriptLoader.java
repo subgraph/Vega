@@ -80,6 +80,9 @@ public class ScriptLoader {
 			return Collections.unmodifiableList(allModules);
 		}
 	}
+	public Scriptable getPreludeScope() {
+		return preludeLoader.getPreludeScope();
+	}
 	
 	public void refreshModules() {
 		synchronized (allModules) {

@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
+ com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,

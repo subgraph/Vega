@@ -18,5 +18,4 @@ public class PerHostScript extends AbstractScriptModule implements IPerHostScann
 		export("scanModel", scanModel);
 		runScript();
 	}
-	
 }

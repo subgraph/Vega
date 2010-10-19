@@ -1,6 +1,7 @@
 package com.subgraph.vega.impl.scanner;
 
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.scanner.IScanner;
@@ -19,9 +20,10 @@ public class ScannerFactory implements IScannerFactory {
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IScannerModuleRegistry moduleRegistry;
 	private IScanAlertRepository scanAlertRepository;
+	private IHTMLParser htmlParser;
 	
 	protected void activate() {
-		scanModel = new ScanModel(scanAlertRepository);
+		scanModel = new ScanModel(scanAlertRepository, htmlParser);
 	}
 	
 	protected void deactivate() {
@@ -41,6 +43,10 @@ public class ScannerFactory implements IScannerFactory {
 	public IScanner createScanner(IScannerConfig config) {
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		return new Scanner(config, scanModel, crawlerFactory, requestEngine, moduleRegistry);
+	}
+	
+	public void runDomTests() {
+		moduleRegistry.runDomTests();
 	}
 
 	protected void setCrawlerFactory(IWebCrawlerFactory crawlerFactory) {
@@ -74,5 +80,13 @@ public class ScannerFactory implements IScannerFactory {
 	
 	protected void unsetScanAlertRepository(IScanAlertRepository repo) {
 		this.scanAlertRepository = null;
+	}
+	
+	protected void setHTMLParser(IHTMLParser htmlParser) {
+		this.htmlParser = htmlParser;
+	}
+	
+	protected void unsetHTMLParser(IHTMLParser htmlParser) {
+		this.htmlParser = null;
 	}
 }

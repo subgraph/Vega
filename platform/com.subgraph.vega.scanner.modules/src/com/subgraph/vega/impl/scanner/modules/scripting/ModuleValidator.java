@@ -12,7 +12,7 @@ public class ModuleValidator {
 	private Function runFunction;
 	private boolean isValidated;
 	
-	ModuleValidator(Scriptable moduleScope) {
+	public ModuleValidator(Scriptable moduleScope) {
 		this.moduleScope = moduleScope;
 	}
 	
@@ -50,8 +50,6 @@ public class ModuleValidator {
 			throw new IllegalStateException("Cannot get run function because module is not validated");
 		return runFunction;
 	}
-	
-	
 	
 	private Scriptable getModule() throws ModuleValidationException {
 		final Object ob = moduleScope.get("module", moduleScope);
