@@ -9,9 +9,9 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
+import com.subgraph.vega.api.html.IHTMLParseResult;
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class EngineHttpResponse implements IHttpResponse {
@@ -19,15 +19,18 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final URI requestUri;
 	private final HttpRequest originalRequest;
 	private final HttpResponse rawResponse;
+	private final IHTMLParser htmlParser;
+	
 	private String cachedString;
 	private boolean stringExtractFailed;
-	private Document cachedDocument;
-	private boolean htmlExtractFailed;
+	private boolean htmlParseFailed;
+	private IHTMLParseResult htmlParseResult;
 	
-	EngineHttpResponse(URI uri, HttpRequest originalRequest, HttpResponse rawResponse) {
+	EngineHttpResponse(URI uri, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.originalRequest = originalRequest;
 		this.rawResponse = rawResponse;
+		this.htmlParser = htmlParser;
 	}
 
 	@Override
@@ -64,27 +67,21 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
-	public Document getHtml() {
+	public IHTMLParseResult getParsedHTML() {
 		synchronized(rawResponse) {
-			if(htmlExtractFailed)
+			if(htmlParseFailed)
 				return null;
-		
-			if(cachedDocument != null)
-				return cachedDocument;
-		
+			if(htmlParseResult != null)
+				return htmlParseResult;
 			final String body = getBodyAsString();
 			if(body == null) {
-				htmlExtractFailed = true;
+				htmlParseFailed = true;
 				return null;
 			}
-		
-			cachedDocument = Jsoup.parse(body, requestUri.toString());
-			if(cachedDocument == null) {
-				htmlExtractFailed = true;
-				return null;
-			}
-			return cachedDocument;
+			htmlParseResult = htmlParser.parseString(body, requestUri);
+			if(htmlParseResult == null) 
+				htmlParseFailed = true;
+			return htmlParseResult;
 		}
 	}
-
 }

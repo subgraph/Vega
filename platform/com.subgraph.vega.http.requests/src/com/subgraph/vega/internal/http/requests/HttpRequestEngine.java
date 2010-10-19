@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -23,17 +24,19 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final ExecutorService executor;
 	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
+	private final IHTMLParser htmlParser;
 
-	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config) {
+	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.executor = executor;
 		this.client = client;
 		this.config = config;
+		this.htmlParser = htmlParser;
 	}
 	
 	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
-		Future<IHttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config));
+		Future<IHttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config, htmlParser));
 		try {
 			return future.get();
 		} catch (InterruptedException e) {

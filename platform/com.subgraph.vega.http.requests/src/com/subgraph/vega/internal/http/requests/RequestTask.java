@@ -15,6 +15,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
@@ -25,12 +26,14 @@ class RequestTask implements Callable<IHttpResponse> {
 	private final HttpUriRequest request;
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
+	private final IHTMLParser htmlParser;
 
-	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config) {
+	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.client = client;
 		this.request = request;
 		this.context = context;
 		this.config = config;
+		this.htmlParser = htmlParser;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ class RequestTask implements Callable<IHttpResponse> {
 			httpResponse.setEntity(newEntity);
 		}
 		
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), request, httpResponse);
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), request, httpResponse, htmlParser);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		

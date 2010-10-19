@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.html.IHTMLParser;
 
 public interface IScanModel {
 	void setProperty(String key, Object value);
@@ -18,5 +19,5 @@ public interface IScanModel {
 	List<IScanAlert> getAlerts();
 	void addAlertListenerAndPopulate(IEventHandler listener);
 	void removeAlertListener(IEventHandler listener);
-
+	IHTMLParser getHTMLParser();
 }

@@ -57,6 +57,7 @@
 
    <configurations>
       <plugin id="com.subgraph.vega.crawler" autoStart="true" startLevel="0" />
+      <plugin id="com.subgraph.vega.html" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.http.proxy" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.http.requests" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.model" autoStart="true" startLevel="0" />

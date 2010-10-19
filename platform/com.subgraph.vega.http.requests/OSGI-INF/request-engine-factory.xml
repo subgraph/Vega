@@ -4,4 +4,5 @@
    <service>
       <provide interface="com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory"/>
    </service>
+   <reference bind="setHTMLParser" cardinality="1..1" interface="com.subgraph.vega.api.html.IHTMLParser" name="IHTMLParser" policy="static" unbind="unsetHTMLParser"/>
 </scr:component>
