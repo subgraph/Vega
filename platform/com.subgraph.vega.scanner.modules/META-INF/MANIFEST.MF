@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.subgraph.vega.scanner.modules
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.subgraph.vega.api.html,
+Import-Package: com.subgraph.vega.api.console,
+ com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.paths,
  com.subgraph.vega.api.scanner,

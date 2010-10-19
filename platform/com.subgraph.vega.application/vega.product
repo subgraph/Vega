@@ -65,6 +65,7 @@
       <plugin id="com.subgraph.vega.requestlog" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.scanner" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.scanner.modules" autoStart="true" startLevel="0" />
+      <plugin id="com.subgraph.vega.ui.console" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.urls" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="0" />

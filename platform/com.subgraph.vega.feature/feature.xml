@@ -227,4 +227,11 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="com.subgraph.vega.ui.console"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.html.IHTMLParser;
@@ -24,15 +25,17 @@ public class ScanModel implements IScanModel {
 	
 	private final IScanAlertRepository alertRepository;
 	private final IHTMLParser htmlParser;
+	private final IConsole console;
 	private final EventListenerManager eventManager = new EventListenerManager();
 	private final Set<IScanHost> scanHosts = new LinkedHashSet<IScanHost>();
 	private final Set<IScanDirectory> scanDirectories = new LinkedHashSet<IScanDirectory>();
 	private final List<IScanAlert> scanAlerts = new ArrayList<IScanAlert>();
 	private final Map<String, Object> properties = new HashMap<String, Object>();
 	
-	public ScanModel(IScanAlertRepository alertRepository, IHTMLParser htmlParser) {
+	public ScanModel(IScanAlertRepository alertRepository, IHTMLParser htmlParser, IConsole console) {
 		this.alertRepository = alertRepository;
 		this.htmlParser = htmlParser;
+		this.console = console;
 	}
 	
 	@Override
@@ -158,6 +161,16 @@ public class ScanModel implements IScanModel {
 	@Override
 	public IHTMLParser getHTMLParser() {
 		return htmlParser;
+	}
+
+	@Override
+	public void consoleWrite(String output) {
+		console.write(output);		
+	}
+
+	@Override
+	public void consoleError(String output) {
+		console.error(output);		
 	}
 
 }

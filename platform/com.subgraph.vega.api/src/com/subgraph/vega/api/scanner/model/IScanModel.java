@@ -20,4 +20,6 @@ public interface IScanModel {
 	void addAlertListenerAndPopulate(IEventHandler listener);
 	void removeAlertListener(IEventHandler listener);
 	IHTMLParser getHTMLParser();
+	void consoleWrite(String output);
+	void consoleError(String output);
 }

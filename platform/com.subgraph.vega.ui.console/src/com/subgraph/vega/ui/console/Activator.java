@@ -1,12 +1,10 @@
-package com.subgraph.vega.application;
+package com.subgraph.vega.ui.console;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.console.IConsole;
-import com.subgraph.vega.api.model.IModel;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -14,13 +12,12 @@ import com.subgraph.vega.api.model.IModel;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "com.subgraph.vega.application"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.subgraph.vega.ui.console"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker modelTracker;
-	private ServiceTracker consoleTracker;
+	private ServiceTracker consoleServiceTracker;
 	
 	/**
 	 * The constructor
@@ -35,12 +32,8 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
-		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
-		modelTracker.open();
-		
-		consoleTracker = new ServiceTracker(context, IConsole.class.getName(), null);
-		consoleTracker.open();
+		consoleServiceTracker = new ServiceTracker(context, IConsole.class.getName(), null);
+		consoleServiceTracker.open();
 	}
 
 	/*
@@ -60,23 +53,9 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
+	
+	public IConsole getConsoleService() {
+		return (IConsole) consoleServiceTracker.getService();
+	}
 
-	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path
-	 *
-	 * @param path the path
-	 * @return the image descriptor
-	 */
-	public static ImageDescriptor getImageDescriptor(String path) {
-		return imageDescriptorFromPlugin(PLUGIN_ID, path);
-	}
-	
-	public IModel getModel() {
-		return (IModel) modelTracker.getService();
-	}
-	
-	public IConsole getConsole() {
-		return (IConsole) consoleTracker.getService();
-	}
 }

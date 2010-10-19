@@ -10,6 +10,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
+import com.subgraph.vega.api.console.IConsole;
+import com.subgraph.vega.application.logging.LogFormatter;
+import com.subgraph.vega.application.logging.LogHandler;
+
 /**
  * This class controls all aspects of the application's execution
  */
@@ -35,9 +39,17 @@ public class Application implements IApplication {
 
 	private void setupLogging() {
 		Logger rootLogger = Logger.getLogger("");
-		for(Handler h: rootLogger.getHandlers()) {
-			h.setLevel(Level.FINEST);
+
+		IConsole console = Activator.getDefault().getConsole();
+		if(console != null) {
+			Handler handler = new LogHandler(console);
+			handler.setFormatter(new LogFormatter());
+			handler.setLevel(Level.FINEST);
+			for(Handler h: rootLogger.getHandlers())
+				rootLogger.removeHandler(h);
+			rootLogger.addHandler(handler);
 		}
+		
 		rootLogger.setLevel(Level.INFO);
 	}
 	

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="com.subgraph.vega.ui.console.ConsoleView"
+            icon="icons/console.png"
+            id="com.subgraph.vega.views.console"
+            name="Console"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

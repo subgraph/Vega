@@ -1,5 +1,6 @@
 package com.subgraph.vega.impl.scanner;
 
+import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -21,9 +22,11 @@ public class ScannerFactory implements IScannerFactory {
 	private IScannerModuleRegistry moduleRegistry;
 	private IScanAlertRepository scanAlertRepository;
 	private IHTMLParser htmlParser;
+	private IConsole console;
 	
 	protected void activate() {
-		scanModel = new ScanModel(scanAlertRepository, htmlParser);
+		scanModel = new ScanModel(scanAlertRepository, htmlParser, console);
+		moduleRegistry.setScanModel(scanModel);
 	}
 	
 	protected void deactivate() {
@@ -88,5 +91,13 @@ public class ScannerFactory implements IScannerFactory {
 	
 	protected void unsetHTMLParser(IHTMLParser htmlParser) {
 		this.htmlParser = null;
+	}
+	
+	protected void setConsole(IConsole console) {
+		this.console = console;
+	}
+	
+	protected void unsetConsole(IConsole console) {
+		this.console = null;
 	}
 }
