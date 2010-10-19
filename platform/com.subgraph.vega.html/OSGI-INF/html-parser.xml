@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="vega.html-parser">
+   <implementation class="com.subgraph.vega.internal.html.HTMLParser"/>
+   <service>
+      <provide interface="com.subgraph.vega.api.html.IHTMLParser"/>
+   </service>
+</scr:component>
