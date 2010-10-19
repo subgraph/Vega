@@ -10,6 +10,6 @@ function sendRequest(req) {
 }
 
 function sendGet(url) {
-	sendRequest(new HttpGet(url));
+	return sendRequest(new HttpGet(url));
 }
  
