@@ -6,4 +6,5 @@ public interface IScannerFactory {
 	IScanModel getScanModel();
 	IScannerConfig createScannerConfig();
 	IScanner createScanner(IScannerConfig config);
+	void runDomTests();
 }
