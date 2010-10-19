@@ -7,7 +7,7 @@ var module = {
 
 function run() {
   var serverHeaders=new Array();
-  serverHeaders=this.httpResponse.getHeaders("Set-cookie");
+  serverHeaders= response.headers("Set-cookie");
   var uri=new URI(this.httpRequest.getRequestLine().getUri());
   print("Testing cookie security on ressource: " + this.httpRequest.getRequestLine().getUri());
   if(!serverHeaders)
@@ -16,7 +16,7 @@ function run() {
   for(x in serverHeaders){
 	  print(serverHeaders[x].getValue());
 	  var cookie=new Array();
-	  cookie=serverHeaders[x].getValue().split("; ")
+	  cookie=serverHeaders[x].getValue().split("; ");
 	  var httponly=false;
 	  var secure=false;
 	  var cookieproperly=new Array();
@@ -29,10 +29,10 @@ function run() {
 	  for(y in cookie){
 		  print(cookie[y]);
 		  if(cookie[y].match(".*httponly.*")){
-			  httponly=true
+			  httponly=true;
 		  }
 		  if(cookie[y].match(".*secure.*")){
-			  secure=true
+			  secure=true;
 		  }
 	  }
 	  var param_prefix = uri.getScheme() + "." + uri.getHost  + "." +  uri.getPort  + name;
