@@ -24,6 +24,8 @@ make_dist() {
 	mv $TARGET/vega/features $RESOURCES
 	mv $TARGET/vega/configuration $RESOURCES
 	mv $TARGET/vega/scripts $RESOURCES
+	mv $TARGET/vega/xml $RESOURCES
+	mv $TARGET/vega/templates $RESOURCES
 	mv $TARGET/Vega.ini $TARGET/vega/Vega.app/Contents/MacOS/Vega.ini
 }
 
