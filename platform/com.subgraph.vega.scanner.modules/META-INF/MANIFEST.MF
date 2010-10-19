@@ -11,6 +11,7 @@ Import-Package: com.subgraph.vega.api.html,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
  com.subgraph.vega.api.scanner.modules,
+ com.subgraph.vega.api.xml,
  org.apache.http;version="4.0.0",
  org.apache.http.client,
  org.apache.http.client.methods,
@@ -19,6 +20,6 @@ Import-Package: com.subgraph.vega.api.html,
  org.jsoup.select,
  org.osgi.framework;version="1.5.0",
  org.w3c.dom.html2
-Service-Component: OSGI-INF/scanner-module-registry.xml, OSGI-INF/scan-alert-repo.xml
+Service-Component: OSGI-INF/scanner-module-registry.xml, OSGI-INF/scan-alert-repo.xml, OSGI-INF/xml-repository.xml
 Bundle-ClassPath: .,
  lib/js.jar

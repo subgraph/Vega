@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import com.subgraph.vega.api.scanner.model.IScanAlert;
 import com.subgraph.vega.ui.scanner.Activator;
 
+import freemarker.cache.TemplateLoader;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -25,10 +26,11 @@ public class AlertRenderer {
 	
 	private Configuration configuration;
 	private final String imageURL;
-	AlertRenderer() {
+	
+	AlertRenderer(TemplateLoader templateLoader) {
 		imageURL = findImage();
 		configuration = new Configuration();
-		configuration.setTemplateLoader(new TemplateLoader());
+		configuration.setTemplateLoader(templateLoader);
 		configuration.setObjectWrapper(new DefaultObjectWrapper());
 	}
 	

@@ -4,6 +4,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.IScannerFactory;
 
 /**
@@ -18,6 +19,7 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 	
 	private ServiceTracker scannerFactoryTracker;
+	private ServiceTracker pathFinderTracker;
 	
 	/**
 	 * The constructor
@@ -35,6 +37,9 @@ public class Activator extends AbstractUIPlugin {
 		
 		scannerFactoryTracker = new ServiceTracker(context, IScannerFactory.class.getName(), null);
 		scannerFactoryTracker.open();
+		
+		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
+		pathFinderTracker.open();
 	}
 
 	/*
@@ -57,6 +62,10 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IScannerFactory getScannerFactory() {
 		return (IScannerFactory) scannerFactoryTracker.getService();
+	}
+	
+	public IPathFinder getPathFinder() {
+		return (IPathFinder) pathFinderTracker.getService();
 	}
 
 }
