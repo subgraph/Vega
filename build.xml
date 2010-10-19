@@ -15,6 +15,7 @@
 
   <target name="dobuild">
 		<antcall target="buildpack-setup" />
+		<antcall target="clean" />
 		<antcall target="setup" />
 		<antcall target="pde-build" />
 		<antcall target="unpack-archive" />
