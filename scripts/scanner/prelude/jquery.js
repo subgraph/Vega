@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v1.4.4pre
+ * jQuery JavaScript Library v1.4.3
  * http://jquery.com/
  *
  * Copyright 2010, John Resig
@@ -11,20 +11,10 @@
  * Copyright 2010, The Dojo Foundation
  * Released under the MIT, BSD, and GPL Licenses.
  *
- * Date: Sun Oct 17 14:48:24 2010 -0400
+ * Date: Thu Oct 14 23:10:06 2010 -0400
  */
-(function( window ) {
-	function print(str) {
-		  java.lang.System.out.println(str);
-		}
-	function strace() {
-		try {
-			var c = undefined;
-			c.toString();
-		} catch (e) {
-		     print(e.rhinoException.getScriptStackTrace());
-		}
-	}
+(function( window, undefined ) {
+
 // Use the correct document accordingly with window argument (sandbox)
 var document = window.document;
 var jQuery = (function() {
@@ -109,6 +99,7 @@ var jQuery = function( selector, context ) {
 jQuery.fn = jQuery.prototype = {
 	init: function( selector, context ) {
 		var match, elem, ret, doc;
+
 		// Handle $(""), $(null), or $(undefined)
 		if ( !selector ) {
 			return this;
@@ -120,6 +111,7 @@ jQuery.fn = jQuery.prototype = {
 			this.length = 1;
 			return this;
 		}
+		
 		// The body element only exists once, optimize finding it
 		if ( selector === "body" && !context && document.body ) {
 			this.context = document;
@@ -219,7 +211,7 @@ jQuery.fn = jQuery.prototype = {
 	selector: "",
 
 	// The current version of jQuery being used
-	jquery: "1.4.4pre",
+	jquery: "1.4.3",
 
 	// The default length of a jQuery object is 0
 	length: 0,
@@ -339,7 +331,7 @@ jQuery.fn.init.prototype = jQuery.fn;
 
 jQuery.extend = jQuery.fn.extend = function() {
 	// copy reference to target object
-	var target = arguments[0] || {}, i = 1, length = arguments.length, deep = false, options, name, src, copy, copyIsArray, clone;
+	var target = arguments[0] || {}, i = 1, length = arguments.length, deep = false, options, name, src, copy, copyIsArray;
 
 	// Handle a deep copy situation
 	if ( typeof target === "boolean" ) {
