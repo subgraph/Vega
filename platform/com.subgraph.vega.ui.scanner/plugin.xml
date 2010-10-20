@@ -13,6 +13,15 @@
                   commandId="com.subgraph.vega.ui.scanner.startnewscan"
                   label="Start New Scan"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.scanner">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
          </menu>
       </menuContribution>
@@ -35,6 +44,28 @@
                label="Stop Scanner"
                style="push">
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="com.subgraph.vega.toolbars.main">
+            <command
+                  commandId="com.subgraph.vega.ui.scanner.startnewscan"
+                  icon="icons/new_scan.gif"
+                  label="Start New Scan"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.scanner">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension
