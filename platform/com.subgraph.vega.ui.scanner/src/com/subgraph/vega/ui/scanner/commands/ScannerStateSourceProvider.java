@@ -28,7 +28,6 @@ public class ScannerStateSourceProvider extends AbstractSourceProvider implement
 
 	@Override
 	synchronized public Map<?,?> getCurrentState() {
-		System.out.println("Returning current state as "+ getCurrentScannerState());
 		Map<String, String> stateMap = new HashMap<String, String>(1);
 		stateMap.put(SCANNER_STATE, getCurrentScannerState());
 		return stateMap;
@@ -45,7 +44,6 @@ public class ScannerStateSourceProvider extends AbstractSourceProvider implement
 	private void setScannerState(boolean state) {
 		if(state != isRunning) {
 			isRunning = state;
-			System.out.println("firing change to "+ getCurrentScannerState());
 			fireSourceChanged(ISources.WORKBENCH, SCANNER_STATE, getCurrentScannerState());
 		}
 	}
