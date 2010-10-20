@@ -110,6 +110,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.subgraph.vega.ui.scanner.ScannerPerspectiveFactory"
+            icon="icons/scanner.png"
             id="com.subgraph.vega.perspectives.scanner"
             name="Scanner">
       </perspective>
