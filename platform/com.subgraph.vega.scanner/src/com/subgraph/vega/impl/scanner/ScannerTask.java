@@ -25,7 +25,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	private final IHttpRequestEngine requestEngine;
 
 	private final IHttpResponseProcessor responseProcessor;
-
+	private volatile boolean stopRequested;
+	private IWebCrawler currentCrawler;
 	
 	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine) {
 		this.scanner = scanner;
@@ -38,14 +39,27 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		
 	}
 	
+	void stop() {
+		stopRequested = true;
+		if(currentCrawler != null)
+			try {
+				currentCrawler.stop();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+	
 	@Override
 	public void run() {
 		scanner.getScanModel().addDiscoveredURI(scannerConfig.getBaseURI());
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
 		scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
-		runPerHostModulePhase();
-		runPerDirectoryModulePhase();
+		if(!stopRequested)
+			runPerHostModulePhase();
+		if(!stopRequested)
+			runPerDirectoryModulePhase();
 		scanner.setScannerStatus(ScannerStatus.SCAN_COMPLETED);
 		logger.info("Scanner completed");
 	}
@@ -54,14 +68,15 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		logger.info("Starting crawling phase");
 		ICrawlerConfig config = scanner.getCrawlerFactory().createBasicConfig(scannerConfig.getBaseURI());
 		config.addEventHandler(this);
-		IWebCrawler crawler = scanner.getCrawlerFactory().create(config, requestEngine);
-		crawler.start();
+		currentCrawler = scanner.getCrawlerFactory().create(config, requestEngine);
+		currentCrawler.start();
 		try {
-			crawler.waitFinished();
+			currentCrawler.waitFinished();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		currentCrawler = null;
 		logger.info("Crawler finished");
 	}
 	
@@ -74,6 +89,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		logger.info("Starting per host module phase");
 		for(IScanHost host: scanner.getScanModel().getUnscannedHosts()) {
 			for(IPerHostScannerModule m: scanner.getModuleRegistry().getPerHostModules()) {
+				if(stopRequested)
+					return;
 				m.runScan(host, requestEngine, scanner.getScanModel());
 			}
 		}
@@ -83,6 +100,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		logger.info("Starting per directory module phase");
 		for(IScanDirectory dir: scanner.getScanModel().getUnscannedDirectories()) {
 			for(IPerDirectoryScannerModule m: scanner.getModuleRegistry().getPerDirectoryModules()) {
+				if(stopRequested)
+					return;
 				m.runScan(dir, requestEngine, scanner.getScanModel());
 			}
 		}

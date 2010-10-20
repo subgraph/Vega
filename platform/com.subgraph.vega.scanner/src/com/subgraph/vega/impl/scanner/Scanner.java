@@ -68,6 +68,8 @@ public class Scanner implements IScanner {
 	void setScannerStatus(ScannerStatus newStatus) {
 		synchronized(this) {
 			this.scannerStatus = newStatus;
+			if(newStatus == ScannerStatus.SCAN_COMPLETED)
+				scannerTask = null;
 		}
 		scanStatusListeners.fireEvent(new ScannerStatusChangeEvent(newStatus));
 	}
@@ -84,6 +86,12 @@ public class Scanner implements IScanner {
 		setScannerStatus(ScannerStatus.SCAN_STARTING);
 
 		scannerThread.start();
+	}
+	
+	@Override
+	public void stopScanner() {
+		if(scannerTask != null)
+			scannerTask.stop();
 	}
 
 	@Override

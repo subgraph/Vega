@@ -10,6 +10,7 @@ public interface IScanner {
 	ScannerStatus getScannerStatus();
 	IScannerConfig createScannerConfig();
 	void startScanner(IScannerConfig config);
+	void stopScanner();
 	void registerScannerStatusChangeListener(IEventHandler listener);
 	void runDomTests();
 

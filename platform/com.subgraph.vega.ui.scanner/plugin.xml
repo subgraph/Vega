@@ -26,17 +26,30 @@
                style="push">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.scaninfo">
+         <command
+               commandId="com.subgraph.vega.ui.scanner.stopscan"
+               icon="icons/stop_16x16.png"
+               label="Stop Scanner"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             id="com.subgraph.vega.ui.scanner.startnewscan"
             name="Start New Scan">
       </command>
       <command
             id="com.subgraph.vega.ui.scanner.dashboard"
             name="Display Dashboard">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.stopscan"
+            name="Stop Scanner">
       </command>
    </extension>
    <extension
@@ -76,6 +89,40 @@
             class="com.subgraph.vega.ui.scanner.dashboard.ShowDashboardHandler"
             commandId="com.subgraph.vega.ui.scanner.dashboard">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.StopScannerHandler"
+            commandId="com.subgraph.vega.ui.scanner.stopscan">
+         <enabledWhen>
+            <with
+                  variable="vega.scannerState">
+               <equals
+                     value="running">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
+            commandId="com.subgraph.vega.ui.scanner.startnewscan">
+         <enabledWhen>
+            <with
+                  variable="vega.scannerState">
+               <equals
+                     value="idle">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="com.subgraph.vega.ui.scanner.commands.ScannerStateSourceProvider">
+         <variable
+               name="vega.scannerState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
    </extension>
 
 </plugin>
