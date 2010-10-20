@@ -50,7 +50,7 @@ public class Application implements IApplication {
 			rootLogger.addHandler(handler);
 		}
 		
-		rootLogger.setLevel(Level.INFO);
+		rootLogger.setLevel(Level.WARNING);
 	}
 	
 	/* (non-Javadoc)
