@@ -66,7 +66,7 @@
                id="com.subgraph.vega.toolbars.main">
             <command
                   commandId="com.subgraph.vega.commands.startProxy"
-                  icon="icons/start_proxy.png"
+                  icon="icons/start_16x16.png"
                   style="push"
                   tooltip="Start HTTP Proxy">
                <visibleWhen
@@ -74,14 +74,14 @@
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
                      <equals
-                           value="com.subgraph.vega.application.perspective">
+                           value="com.subgraph.vega.perspectives.proxy">
                      </equals>
                   </with>
                </visibleWhen>
             </command>
             <command
                   commandId="com.subgraph.vega.commands.stopProxy"
-                  icon="icons/stop_proxy.png"
+                  icon="icons/stop_16x16.png"
                   style="push"
                   tooltip="Stop HTTP Proxy">
                <visibleWhen
@@ -89,7 +89,7 @@
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
                      <equals
-                           value="com.subgraph.vega.application.perspective">
+                           value="com.subgraph.vega.perspectives.proxy">
                      </equals>
                   </with>
                </visibleWhen>
@@ -120,6 +120,15 @@
       <initializer
             class="com.subgraph.vega.ui.http.preferencepage.HTTPPreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.subgraph.vega.internal.ui.http.ProxyPerspectiveFactory"
+            icon="icons/proxy.png"
+            id="com.subgraph.vega.perspectives.proxy"
+            name="Proxy">
+      </perspective>
    </extension>
 
 </plugin>
