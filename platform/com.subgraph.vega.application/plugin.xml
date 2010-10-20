@@ -59,18 +59,6 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="com.subgraph.vega.toolbar.workspaces">
-            <command
-                  commandId="com.subgraph.vega.commands.newWorkspace"
-                  icon="icons/new_workspace.png"
-                  label="New Workspace"
-                  style="push">
-            </command>
-            <command
-                  commandId="com.subgraph.vega.commands.switchWorkspace"
-                  icon="icons/switch_workspace.png"
-                  label="Switch Workspace"
-                  style="push">
-            </command>
          </toolbar>
       </menuContribution>
    </extension>
