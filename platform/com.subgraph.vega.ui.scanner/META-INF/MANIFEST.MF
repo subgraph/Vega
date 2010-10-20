@@ -13,6 +13,8 @@ Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.api.paths,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
- com.subgraph.vega.ui.util
+ com.subgraph.vega.ui.util,
+ org.eclipse.ui.forms,
+ org.eclipse.ui.forms.widgets
 Bundle-ClassPath: .,
  lib/freemarker.jar

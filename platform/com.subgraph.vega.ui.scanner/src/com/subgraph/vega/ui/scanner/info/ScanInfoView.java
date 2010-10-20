@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -17,6 +18,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.model.IScanAlert;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.dashboard.DashboardPane;
 
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -27,7 +29,10 @@ public class ScanInfoView extends ViewPart {
 	public static String ID = "com.subgraph.vega.views.scaninfo";
 	
 	private Browser browser;
+	private DashboardPane dashboard;
+	private Composite contentPanel;
 	private final AlertRenderer renderer;
+	private StackLayout stackLayout = new StackLayout();
 	
 	public ScanInfoView() {
 		final TemplateLoader loader = createTemplateLoader();
@@ -53,7 +58,10 @@ public class ScanInfoView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		browser = new Browser(parent, SWT.NONE);
+		contentPanel = new Composite(parent, SWT.NONE);
+		contentPanel.setLayout(stackLayout);
+		dashboard = new DashboardPane(contentPanel);
+		browser = new Browser(contentPanel, SWT.NONE);
 		
 		getSite().getPage().addSelectionListener(new ISelectionListener() {
 
@@ -67,12 +75,21 @@ public class ScanInfoView extends ViewPart {
 			}
 			
 		});
+		stackLayout.topControl = dashboard;
+		contentPanel.layout();
 	}
 
 	private void displayAlert(IScanAlert alert) {
 		String html = renderer.render(alert);
 		if(html != null && !browser.isDisposed())
 			browser.setText(html, true);
+		stackLayout.topControl = browser;
+		contentPanel.layout();
+	}
+	
+	public void showDashboard() {
+		stackLayout.topControl = dashboard;
+		contentPanel.layout();
 	}
 	
 	@Override
