@@ -12,14 +12,6 @@
       </application>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            name="RCP Perspective"
-            class="com.subgraph.vega.application.Perspective"
-            id="com.subgraph.vega.application.perspective">
-      </perspective>
-   </extension>
-   <extension
          id="product"
          point="org.eclipse.core.runtime.products">
       <product
@@ -51,16 +43,6 @@
             id="com.subgraph.vega.commands.switchWorkspace"
             name="Switch Workspace">
       </command>
-   </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="com.subgraph.vega.toolbar.workspaces">
-         </toolbar>
-      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
