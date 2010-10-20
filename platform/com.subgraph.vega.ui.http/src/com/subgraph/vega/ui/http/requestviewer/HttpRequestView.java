@@ -62,6 +62,8 @@ public class HttpRequestView extends ViewPart {
 			@Override
 			public void selectionChanged(IWorkbenchPart part,
 					ISelection selection) {
+				if(!(selection instanceof IStructuredSelection))
+					return;
 				Object o = ((IStructuredSelection)selection).getFirstElement();
 				if(o == null) {
 					filter.setFilterEntity(null);

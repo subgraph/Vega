@@ -67,6 +67,8 @@ public class ScanInfoView extends ViewPart {
 
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				if(!(selection instanceof IStructuredSelection))
+					return;
 				Object o = ((IStructuredSelection)selection).getFirstElement();
 				if(o instanceof IScanAlert) {		
 					IScanAlert alert = (IScanAlert) o;
