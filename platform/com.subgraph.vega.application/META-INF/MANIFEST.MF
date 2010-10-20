@@ -11,6 +11,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.subgraph.vega.api.console,
  com.subgraph.vega.api.model,
- com.subgraph.vega.api.paths
+ com.subgraph.vega.api.paths,
+ org.eclipse.ui.console
 Export-Package: com.subgraph.vega.ui.util
-Service-Component: OSGI-INF/path-finder.xml
+Service-Component: OSGI-INF/path-finder.xml, OSGI-INF/console.xml

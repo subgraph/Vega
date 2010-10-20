@@ -228,7 +228,28 @@
          unpack="false"/>
 
    <plugin
-         id="com.subgraph.vega.ui.console"
+         id="org.eclipse.ui.console"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ui.workbench.texteditor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.compare.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.variables"
          download-size="0"
          install-size="0"
          version="0.0.0"

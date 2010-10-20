@@ -11,6 +11,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.api.console.IConsole;
+import com.subgraph.vega.application.console.ConsoleHandler;
 import com.subgraph.vega.application.logging.LogFormatter;
 import com.subgraph.vega.application.logging.LogHandler;
 
@@ -22,9 +23,12 @@ public class Application implements IApplication {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
+	
 	public Object start(IApplicationContext context) throws Exception {
 		Display display = PlatformUI.createDisplay();
 		setupLogging();
+		ConsoleHandler consoleHandler = new ConsoleHandler(display, Activator.getDefault().getConsole());
+		consoleHandler.activate();
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
 			if (returnCode == PlatformUI.RETURN_RESTART)
@@ -52,6 +56,8 @@ public class Application implements IApplication {
 		
 		rootLogger.setLevel(Level.WARNING);
 	}
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()

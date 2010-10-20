@@ -55,5 +55,17 @@
             commandId="com.subgraph.vega.commands.switchWorkspace">
       </handler>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <view
+               id="org.eclipse.ui.console.ConsoleView"
+               minimized="false"
+               ratio="0.5"
+               relationship="fast">
+         </view>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>
