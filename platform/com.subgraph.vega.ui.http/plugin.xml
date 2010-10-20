@@ -69,12 +69,30 @@
                   icon="icons/start_proxy.png"
                   style="push"
                   tooltip="Start HTTP Proxy">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.application.perspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
             <command
                   commandId="com.subgraph.vega.commands.stopProxy"
                   icon="icons/stop_proxy.png"
                   style="push"
                   tooltip="Stop HTTP Proxy">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.application.perspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
          </toolbar>
       </menuContribution>
