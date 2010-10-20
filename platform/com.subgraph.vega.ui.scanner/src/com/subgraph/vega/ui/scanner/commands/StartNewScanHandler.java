@@ -11,7 +11,6 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.IScannerFactory;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
 
@@ -35,19 +34,18 @@ public class StartNewScanHandler extends AbstractHandler {
 	}
 
 	private void launchScanner(URI uri) {
-		IScannerFactory scannerFactory = Activator.getDefault().getScannerFactory();
-		if(scannerFactory != null) {
-			IScannerConfig scannerConfig = scannerFactory.createScannerConfig();
+		IScanner scanner = Activator.getDefault().getScanner();
+		if(scanner != null) {
+			IScannerConfig scannerConfig = scanner.createScannerConfig();
 			scannerConfig.setBaseURI(uri);
-			IScanner scanner = scannerFactory.createScanner(scannerConfig);
-			scanner.start();
+			scanner.startScanner(scannerConfig);
 		}
 	}
 	
 	private void runDomTest() {
-		IScannerFactory scannerFactory = Activator.getDefault().getScannerFactory();
-		if(scannerFactory != null) {
-			scannerFactory.runDomTests();
+		IScanner scanner = Activator.getDefault().getScanner();
+		if(scanner != null) {
+			scanner.runDomTests();
 		}
 	}
 }

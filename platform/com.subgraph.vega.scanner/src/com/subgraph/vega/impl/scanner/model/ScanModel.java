@@ -39,9 +39,7 @@ public class ScanModel implements IScanModel {
 	}
 	
 	@Override
-	public void addDiscoveredURI(URI uri) {
-		System.out.println("Adding to model: "+ uri);
-		
+	public void addDiscoveredURI(URI uri) {		
 		final URI hostURI = createHostURI(uri);
 		if(hostURI == null)
 			return;

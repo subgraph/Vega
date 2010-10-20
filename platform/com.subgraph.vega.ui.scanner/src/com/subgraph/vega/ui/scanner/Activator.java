@@ -5,8 +5,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.api.scanner.IScannerFactory;
-
+import com.subgraph.vega.api.scanner.IScanner;
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -18,7 +17,7 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker scannerFactoryTracker;
+	private ServiceTracker scannerTracker;
 	private ServiceTracker pathFinderTracker;
 	
 	/**
@@ -35,8 +34,8 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		scannerFactoryTracker = new ServiceTracker(context, IScannerFactory.class.getName(), null);
-		scannerFactoryTracker.open();
+		scannerTracker = new ServiceTracker(context, IScanner.class.getName(), null);
+		scannerTracker.open();
 		
 		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
@@ -60,8 +59,8 @@ public class Activator extends AbstractUIPlugin {
 		return plugin;
 	}
 	
-	public IScannerFactory getScannerFactory() {
-		return (IScannerFactory) scannerFactoryTracker.getService();
+	public IScanner getScanner() {
+		return (IScanner) scannerTracker.getService();
 	}
 	
 	public IPathFinder getPathFinder() {

@@ -6,51 +6,55 @@ import java.util.logging.Logger;
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
 import com.subgraph.vega.api.crawler.IWebCrawler;
-import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
+import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.model.IScanDirectory;
 import com.subgraph.vega.api.scanner.model.IScanHost;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
-import com.subgraph.vega.impl.scanner.model.ScanModel;
 
 public class ScannerTask implements Runnable, ICrawlerEventHandler {
 
 	private final Logger logger = Logger.getLogger("scanner");
+	private final Scanner scanner;
 	private final IScannerConfig scannerConfig;
-	private final ScanModel scanModel;
-	private final IWebCrawlerFactory crawlerFactory;
+
+
 	private final IHttpRequestEngine requestEngine;
-	private final IScannerModuleRegistry moduleRegistry;
+
 	private final IHttpResponseProcessor responseProcessor;
+
 	
-	ScannerTask(IScannerConfig config, ScanModel scanModel, IWebCrawlerFactory crawlerFactory, IHttpRequestEngine requestEngine, IScannerModuleRegistry moduleRegistry) {
+	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine) {
+		this.scanner = scanner;
 		this.scannerConfig = config;
-		this.scanModel = scanModel;
-		this.crawlerFactory = crawlerFactory;
+
 		this.requestEngine = requestEngine;
-		this.moduleRegistry = moduleRegistry;
-		responseProcessor = new ScannerResponseProcessor(moduleRegistry.getResponseProcessingModules(), scanModel);
+
+		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(), scanner.getScanModel());
 		this.requestEngine.registerResponseProcessor(responseProcessor);
+		
 	}
 	
 	@Override
 	public void run() {
-		scanModel.addDiscoveredURI(scannerConfig.getBaseURI());
+		scanner.getScanModel().addDiscoveredURI(scannerConfig.getBaseURI());
+		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
+		scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
 		runPerHostModulePhase();
 		runPerDirectoryModulePhase();
+		scanner.setScannerStatus(ScannerStatus.SCAN_COMPLETED);
 		logger.info("Scanner completed");
 	}
 	
 	private void runCrawlerPhase() {
 		logger.info("Starting crawling phase");
-		ICrawlerConfig config = crawlerFactory.createBasicConfig(scannerConfig.getBaseURI());
+		ICrawlerConfig config = scanner.getCrawlerFactory().createBasicConfig(scannerConfig.getBaseURI());
 		config.addEventHandler(this);
-		IWebCrawler crawler = crawlerFactory.create(config, requestEngine);
+		IWebCrawler crawler = scanner.getCrawlerFactory().create(config, requestEngine);
 		crawler.start();
 		try {
 			crawler.waitFinished();
@@ -63,23 +67,23 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	
 	@Override
 	public void linkDiscovered(URI link) {
-		scanModel.addDiscoveredURI(link);		
+		scanner.getScanModel().addDiscoveredURI(link);		
 	}
 
 	private void runPerHostModulePhase() {
 		logger.info("Starting per host module phase");
-		for(IScanHost host: scanModel.getUnscannedHosts()) {
-			for(IPerHostScannerModule m: moduleRegistry.getPerHostModules()) {
-				m.runScan(host, requestEngine, scanModel);
+		for(IScanHost host: scanner.getScanModel().getUnscannedHosts()) {
+			for(IPerHostScannerModule m: scanner.getModuleRegistry().getPerHostModules()) {
+				m.runScan(host, requestEngine, scanner.getScanModel());
 			}
 		}
 	}
 	
 	private void runPerDirectoryModulePhase() {
 		logger.info("Starting per directory module phase");
-		for(IScanDirectory dir: scanModel.getUnscannedDirectories()) {
-			for(IPerDirectoryScannerModule m: moduleRegistry.getPerDirectoryModules()) {
-				m.runScan(dir, requestEngine, scanModel);
+		for(IScanDirectory dir: scanner.getScanModel().getUnscannedDirectories()) {
+			for(IPerDirectoryScannerModule m: scanner.getModuleRegistry().getPerDirectoryModules()) {
+				m.runScan(dir, requestEngine, scanner.getScanModel());
 			}
 		}
 	}

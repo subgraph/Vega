@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.subgraph.vega.scanner">
-   <implementation class="com.subgraph.vega.impl.scanner.ScannerFactory"/>
+   <implementation class="com.subgraph.vega.impl.scanner.Scanner"/>
    <service>
-      <provide interface="com.subgraph.vega.api.scanner.IScannerFactory"/>
+      <provide interface="com.subgraph.vega.api.scanner.IScanner"/>
    </service>
    <reference bind="setCrawlerFactory" cardinality="1..1" interface="com.subgraph.vega.api.crawler.IWebCrawlerFactory" name="IWebCrawlerFactory" policy="static" unbind="unsetCrawlerFactory"/>
    <reference bind="setRequestEngineFactory" cardinality="1..1" interface="com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory" name="IHttpRequestEngineFactory" policy="static" unbind="unsetRequestEngineFactory"/>

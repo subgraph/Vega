@@ -6,7 +6,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.scanner.IScannerFactory;
+import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.ui.scanner.Activator;
 
 public class ScanAlertView extends ViewPart {
@@ -20,7 +20,7 @@ public class ScanAlertView extends ViewPart {
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new ScanAlertContentProvider());
 		viewer.setLabelProvider(new ScanAlertLabelProvider());
-		final IScannerFactory scannerFactory = Activator.getDefault().getScannerFactory();
+		final IScanner scannerFactory = Activator.getDefault().getScanner();
 		if(scannerFactory == null) {
 			logger.warning("Failed to obtain reference to Scanner Factory");
 			return;
