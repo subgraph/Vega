@@ -74,6 +74,8 @@ public class HttpResponseProcessor implements Runnable {
 	}
 	
 	private void processResponse(IHttpResponse response, URI page) throws IOException {
+		if(response == null)
+			return;
 		HttpEntity entity = response.getRawResponse().getEntity();
 		if(entity == null)
 			return;
