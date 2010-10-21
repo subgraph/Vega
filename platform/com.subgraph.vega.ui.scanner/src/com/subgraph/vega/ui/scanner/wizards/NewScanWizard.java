@@ -22,12 +22,9 @@ public class NewScanWizard extends Wizard {
 		final String scanHostText = page.getText();
 		if(scanHostText.isEmpty())
 			return false;
-		try {
-			new URI(scanHostText);
-			return true;
-		} catch (URISyntaxException e) {
-			return false;
-		}
+		
+		return (createTargetURI(scanHostText) != null);
+
 	}
 	
 	@Override
@@ -37,14 +34,8 @@ public class NewScanWizard extends Wizard {
 			isDomTest = true;
 			return true;
 		}
-		
-		try {
-			scanHostURI = new URI(page.getText());
-		} catch (URISyntaxException e) {
-			return false;
-		}
-		return true;
-		
+		scanHostURI = createTargetURI(page.getText());
+		return (scanHostURI != null);		
 	}
 	
 	public URI getScanHostURI() {
@@ -52,8 +43,18 @@ public class NewScanWizard extends Wizard {
 	}
 	
 	public boolean isDomTest() {
-		return isDomTest;
-		
+		return isDomTest;	
+	}
+	
+	URI createTargetURI(String value) {
+		if(!(value.startsWith("http://") || value.startsWith("https://"))) {
+			value = "http://"+ value;
+		}
+		try {
+			return new URI(value);
+		} catch (URISyntaxException e) {
+			return null;
+		}
 	}
 
 }
