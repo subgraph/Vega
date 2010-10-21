@@ -1,5 +1,8 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.http.HttpRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -15,10 +18,11 @@ public class ResponseProcessorScript extends AbstractScriptModule implements IRe
 	@Override
 	public void processResponse(HttpRequest request, IHttpResponse response,
 			IScanModel scanModel) {
-		export("httpRequest", request);
-		export("httpResponse", response);
-		export("scanModel", scanModel);
-		runScript();
+		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
+		export(exports, "httpRequest", request);
+		export(exports, "httpResponse", response);
+		export(exports, "scanModel", scanModel);
+		runScript(exports);
 	}
 
 	@Override

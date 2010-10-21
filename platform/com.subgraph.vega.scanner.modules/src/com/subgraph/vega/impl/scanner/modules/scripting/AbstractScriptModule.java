@@ -1,6 +1,5 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,7 +12,7 @@ import org.mozilla.javascript.WrappedException;
 
 public abstract class AbstractScriptModule {
 	private static final Logger logger = Logger.getLogger("script-module");
-	private static class ExportedObject {
+	protected static class ExportedObject {
 		private final String identifier;
 		private final Object object;
 		ExportedObject(String identifier, Object object) {
@@ -23,17 +22,16 @@ public abstract class AbstractScriptModule {
 	}
 	
 	private final ScriptedModule module;
-	private final List<ExportedObject> currentExports = new ArrayList<ExportedObject>();
 	
 	protected AbstractScriptModule(ScriptedModule module) {
 		this.module = module;
 	}
 	
-	protected void runScript() {
+	protected void runScript(List<ExportedObject> exports) {
 		try {
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
-			processExports(instance);
+			processExports(exports, instance);
 			module.runModule(cx, instance);
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
@@ -46,19 +44,14 @@ public abstract class AbstractScriptModule {
 	}
 	
 	
-	protected void export(String name, Object object) {
-		synchronized(currentExports) {
-			currentExports.add(new ExportedObject(name, object));
-		}
+	protected void export(List<ExportedObject> exports, String name, Object object) {
+			exports.add(new ExportedObject(name, object));
 	}
 	
-	private void processExports(Scriptable instance) {
-		synchronized(currentExports) {
-			for(ExportedObject exp: currentExports) {
-				Object wrappedObject = Context.javaToJS(exp.object, instance);
-				ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
-			}
-			currentExports.clear();
+	private void processExports(List<ExportedObject> exports, Scriptable instance) {
+		for(ExportedObject exp: exports) {
+			Object wrappedObject = Context.javaToJS(exp.object, instance);
+			ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
 		}
 	}
 

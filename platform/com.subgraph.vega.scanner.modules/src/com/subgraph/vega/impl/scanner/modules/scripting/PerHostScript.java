@@ -1,5 +1,8 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.scanner.model.IScanHost;
 import com.subgraph.vega.api.scanner.model.IScanModel;
@@ -13,9 +16,10 @@ public class PerHostScript extends AbstractScriptModule implements IPerHostScann
 	
 	@Override
 	public void runScan(IScanHost host, IHttpRequestEngine requestEngine, IScanModel scanModel) {
-		export("host", host);
-		export("requestEngine", requestEngine);
-		export("scanModel", scanModel);
-		runScript();
+		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
+		export(exports, "host", host);
+		export(exports, "requestEngine", requestEngine);
+		export(exports, "scanModel", scanModel);
+		runScript(exports);
 	}
 }

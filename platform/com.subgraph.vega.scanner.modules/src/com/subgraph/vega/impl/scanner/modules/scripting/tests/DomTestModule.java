@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -34,9 +36,10 @@ public class DomTestModule extends AbstractScriptModule {
 	public void run(IScanModel model) throws IOException {
 		String html = lookupModuleString("html");
 		IHTMLParseResult parseResult = loadHTML(html);
-		export("testDom", parseResult.getDOMDocument());
-		export("scanModel", model);
-		runScript();
+		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
+		export(exports, "testDom", parseResult.getDOMDocument());
+		export(exports, "scanModel", model);
+		runScript(exports);
 		
 	}
 

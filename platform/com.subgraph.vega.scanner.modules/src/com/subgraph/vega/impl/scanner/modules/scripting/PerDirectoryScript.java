@@ -1,5 +1,8 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.scanner.model.IScanDirectory;
 import com.subgraph.vega.api.scanner.model.IScanModel;
@@ -13,10 +16,11 @@ public class PerDirectoryScript extends AbstractScriptModule implements IPerDire
 	@Override
 	public void runScan(IScanDirectory directory,
 			IHttpRequestEngine requestEngine, IScanModel scanModel) {
-		export("directory", directory);
-		export("requestEngine", requestEngine);
-		export("scanModel", scanModel);
-		runScript();		
+		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
+		export(exports, "directory", directory);
+		export(exports, "requestEngine", requestEngine);
+		export(exports, "scanModel", scanModel);
+		runScript(exports);		
 	}
 
 }
