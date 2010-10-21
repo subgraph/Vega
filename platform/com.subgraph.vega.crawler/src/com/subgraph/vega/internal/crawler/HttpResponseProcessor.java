@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
@@ -29,6 +30,7 @@ public class HttpResponseProcessor implements Runnable {
 	private final CountDownLatch latch;
 	private final TaskCounter counter;
 	private volatile boolean stop;
+	private volatile HttpUriRequest currentRequest;
 	
 	HttpResponseProcessor(BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, IWebModel model, IUrlExtractor extractor, ICrawlerConfig config, CountDownLatch latch, TaskCounter counter) {
 		this.crawlerRequestQueue = requestQueue;
@@ -53,6 +55,10 @@ public class HttpResponseProcessor implements Runnable {
 	
 	void stop() {
 		stop = true;
+		crawlerResponseQueue.offer(CrawlerTask.createExitTask());
+		HttpUriRequest r = currentRequest;
+		if(r != null)
+			r.abort();
 	}
 
 	private void runLoop() throws InterruptedException {
@@ -64,10 +70,14 @@ public class HttpResponseProcessor implements Runnable {
 			}
 			
 			try {
+				currentRequest = task.getRequest();
 				processResponse(task.getResponse(), task.getRequest().getURI());
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error processing response from request: "+ task.getRequest().getURI(), e);
+			} finally {
+				currentRequest = null;
 			}
+			
 			synchronized(counter) {
 				counter.addCompletedTask();
 				for(ICrawlerEventHandler handler: config.getEventHandlers()) {
