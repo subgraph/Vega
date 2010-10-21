@@ -59,12 +59,6 @@ public class RequestConsumer implements Runnable {
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error processing request "+ task.getRequest().getURI(), e);
 			}
-			/*
-			if(task.finishTask()) {
-				CrawlerTask exitTask = CrawlerTask.createExitTask();
-				crawlerResponseQueue.add(exitTask);
-			}
-			*/
 		}
 	}
 
