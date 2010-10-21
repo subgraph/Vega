@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.subgraph.vega.api.annotations.GuardedBy;
+import com.subgraph.vega.api.annotations.ThreadSafe;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
@@ -20,6 +22,7 @@ import com.subgraph.vega.api.scanner.model.IScanDirectory;
 import com.subgraph.vega.api.scanner.model.IScanHost;
 import com.subgraph.vega.api.scanner.model.IScanModel;
 
+@ThreadSafe
 public class ScanModel implements IScanModel {
 	private final Logger logger = Logger.getLogger("scanner");
 	
@@ -27,9 +30,15 @@ public class ScanModel implements IScanModel {
 	private final IHTMLParser htmlParser;
 	private final IConsole console;
 	private final EventListenerManager eventManager = new EventListenerManager();
+	@GuardedBy("scanHosts")
 	private final Set<IScanHost> scanHosts = new LinkedHashSet<IScanHost>();
+	@GuardedBy("scanHosts")
 	private final Set<IScanDirectory> scanDirectories = new LinkedHashSet<IScanDirectory>();
+	@GuardedBy("scanAlerts")
 	private final List<IScanAlert> scanAlerts = new ArrayList<IScanAlert>();
+	@GuardedBy("scanAlerts")
+	private final Map<String, List<IScanAlert>> scanAlertsByResource = new HashMap<String, List<IScanAlert>>();
+	@GuardedBy("properties")
 	private final Map<String, Object> properties = new HashMap<String, Object>();
 	
 	public ScanModel(IScanAlertRepository alertRepository, IHTMLParser htmlParser, IConsole console) {
@@ -44,8 +53,10 @@ public class ScanModel implements IScanModel {
 		if(hostURI == null)
 			return;
 		final IScanHost host = new ScanHost(hostURI);
-		scanHosts.add(host);
-		addDirectories(host, uri);
+		synchronized(scanHosts) {
+			scanHosts.add(host);
+			addDirectories(host, uri);
+		}
 	}
 	
 	@Override
@@ -56,20 +67,52 @@ public class ScanModel implements IScanModel {
 	}
 	
 	@Override
-	public void addAlert(IScanAlert alert) {
-		logger.info("Adding alert: "+ alert.getTitle());
+	public void addAlert(IScanAlert alert) {		
 		synchronized(scanAlerts) {
+			if(rejectDuplicateAlert(alert))
+				return;
+			logger.info("Adding alert: "+ alert.getTitle());
+
+			addScanAlertByResource(alert);
 			scanAlerts.add(alert);
 		}
-		eventManager.fireEvent(new NewScanAlertEvent(alert));
-		
+		eventManager.fireEvent(new NewScanAlertEvent(alert));	
+	}
+	
+	private boolean rejectDuplicateAlert(IScanAlert alert) {
+		final String resource = alert.getStringProperty("resource");
+		if(resource == null)
+			return false;
+		final List<IScanAlert> alertList = scanAlertsByResource.get(resource);
+		if(alertList == null)
+			return false;
+		for(IScanAlert a: alertList) {
+			if(a.equals(alert))
+				return true;
+		}
+		return false;
+	}
+	
+	private void addScanAlertByResource(IScanAlert alert) {
+		final String resource = alert.getStringProperty("resource");
+		if(resource == null)
+			return;
+		getAlertListForResource(resource).add(alert);
+	}
+	
+	private List<IScanAlert> getAlertListForResource(String resource) {
+		if(!scanAlertsByResource.containsKey(resource)) {
+			scanAlertsByResource.put(resource, new ArrayList<IScanAlert>());
+		}
+		return scanAlertsByResource.get(resource);
 	}
 	
 	public void addAlertListenerAndPopulate(IEventHandler listener) {
-		List<IScanAlert> alerts = getAlerts();
-		for(IScanAlert a: alerts)
-			listener.handleEvent(new NewScanAlertEvent(a));
-		eventManager.addListener(listener);
+		synchronized(scanAlerts) {
+			for(IScanAlert a: getAlerts())
+				listener.handleEvent(new NewScanAlertEvent(a));
+			eventManager.addListener(listener);
+		}
 	}
 	
 	public void removeAlertListener(IEventHandler listener) {
@@ -113,11 +156,15 @@ public class ScanModel implements IScanModel {
 	}
 	
 	public List<IScanHost> getUnscannedHosts() {
-		return new ArrayList<IScanHost>(scanHosts);
+		synchronized(scanHosts) {
+			return new ArrayList<IScanHost>(scanHosts);
+		}
 	}
 	
 	public List<IScanDirectory> getUnscannedDirectories() {
-		return new ArrayList<IScanDirectory>(scanDirectories);
+		synchronized(scanHosts) {
+			return new ArrayList<IScanDirectory>(scanDirectories);
+		}
 	}
 
 	@Override
