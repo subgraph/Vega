@@ -12,6 +12,7 @@ import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.model.IScanAlertRepository;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.impl.scanner.events.CrawlerProgressEvent;
 import com.subgraph.vega.impl.scanner.events.ScannerStatusChangeEvent;
 import com.subgraph.vega.impl.scanner.model.ScanModel;
 
@@ -72,6 +73,10 @@ public class Scanner implements IScanner {
 				scannerTask = null;
 		}
 		scanStatusListeners.fireEvent(new ScannerStatusChangeEvent(newStatus));
+	}
+	
+	void updateCrawlerProgress(int completed, int total) {
+		scanStatusListeners.fireEvent(new CrawlerProgressEvent(completed, total));
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
+import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebModel;
@@ -31,6 +32,8 @@ public class WebCrawler implements IWebCrawler {
 	
 	volatile private boolean crawlerRunning;
 	
+	private TaskCounter counter = new TaskCounter();
+	
 	WebCrawler(IWebModel model, IUrlExtractor urlExtractor, IHttpRequestEngine requestEngine, ICrawlerConfig config) {
 		this.model = model;
 		this.urlExtractor = urlExtractor;
@@ -46,10 +49,19 @@ public class WebCrawler implements IWebCrawler {
 		latch = new CountDownLatch(CRAWLER_THREAD_COUNT + 1);
 		
 		for(URI uri: config.getInitialURIs())
-			if(config.getURIFilter().filter(uri))
+			if(config.getURIFilter().filter(uri)) {
+				synchronized(counter) {
+					counter.addNewTask();
+				}
 				requestQueue.add(CrawlerTask.createGetTask(uri));
-			
-		responseProcessor = new HttpResponseProcessor(requestQueue, responseQueue, model, urlExtractor, config, latch);
+			}
+		
+		synchronized(counter) {
+			for(ICrawlerEventHandler handler: config.getEventHandlers()) {
+				handler.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
+			}
+		}
+		responseProcessor = new HttpResponseProcessor(requestQueue, responseQueue, model, urlExtractor, config, latch, counter);
 		
 		executor.execute( responseProcessor );
 		

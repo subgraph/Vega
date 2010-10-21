@@ -19,11 +19,11 @@ import com.subgraph.vega.ui.scanner.Activator;
 
 public class DashboardPane extends Composite {
 	private static final RGB GREY_TEXT_COLOR = new RGB(200, 200, 200);
-	private static final int MINIMUM_UPDATE_INTERVAL = 200;
+	private static final int MINIMUM_UPDATE_INTERVAL = 300;
 	private final Display display;
 	private IScanner.ScannerStatus currentStatus = IScanner.ScannerStatus.SCAN_IDLE;
-	private int crawlerTotal;
-	private int crawlerCompleted;
+	private volatile int crawlerTotal;
+	private volatile int crawlerCompleted;
 	private volatile boolean renderNeeded;
 	private volatile boolean stopRenderLoop;
 	private volatile boolean renderLoopRunning;
@@ -117,16 +117,23 @@ public class DashboardPane extends Composite {
 		addVSpaces(sb, 2);
 		addDefault(sb, "Crawling Stage");
 		if(crawlerTotal != 0) {
-			addDefault(sb, crawlerCompleted+ " out of "+ crawlerTotal +" crawled");
+			addDetail(sb, crawlerCompleted+ " out of "+ crawlerTotal +" crawled ("+ crawlerPercent() + ")");
 		}
 		addVSpaces(sb, 2);
 		addGrey(sb, "Auditing Stage");
 		
 	}
 	
+	private String crawlerPercent() {
+		return String.format("%.1f%%", ((double)crawlerCompleted) / ((double)crawlerTotal) * 100.0);
+	}
+	
 	private void renderAuditing(StringBuilder sb) {
 		addVSpaces(sb, 2);
 		addDefault(sb, "Crawling Stage");
+		if(crawlerTotal != 0)
+			addDetail(sb, crawlerCompleted+ " out of "+ crawlerTotal +" crawled ("+ crawlerPercent() + ")");
+
 		addVSpaces(sb, 2);
 		addDefault(sb, "Auditing Stage");
 	}
@@ -134,6 +141,8 @@ public class DashboardPane extends Composite {
 	private void renderFinished(StringBuilder sb) {
 		addVSpaces(sb, 2);
 		addDefault(sb, "Crawling Stage");
+		if(crawlerTotal != 0)
+			addDetail(sb, crawlerCompleted+ " out of "+ crawlerTotal +" crawled ("+ crawlerPercent() + ")");
 		addVSpaces(sb, 2);
 		addDefault(sb, "Auditing Stage");
 		addVSpaces(sb, 2);
@@ -151,6 +160,13 @@ public class DashboardPane extends Composite {
 		sb.append("<li bindent='20'><span font='big' color='grey'>");
 		sb.append(value);
 		sb.append("</span></li>");
+	}
+	
+	private void addDetail(StringBuilder sb, String value) {
+		addVSpaces(sb, 1);
+		sb.append("<p>            <span font='big'>");
+		sb.append(value);
+		sb.append("</span></p>");
 	}
 	
 	private void addVSpaces(StringBuilder sb, int count) {

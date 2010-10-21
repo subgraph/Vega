@@ -27,15 +27,17 @@ public class HttpResponseProcessor implements Runnable {
 	private final IUrlExtractor extractor;
 	private final ICrawlerConfig config;
 	private final CountDownLatch latch;
+	private final TaskCounter counter;
 	private volatile boolean stop;
 	
-	HttpResponseProcessor(BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, IWebModel model, IUrlExtractor extractor, ICrawlerConfig config, CountDownLatch latch) {
+	HttpResponseProcessor(BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, IWebModel model, IUrlExtractor extractor, ICrawlerConfig config, CountDownLatch latch, TaskCounter counter) {
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.model = model;
 		this.extractor = extractor;
 		this.config = config;
 		this.latch = latch;
+		this.counter = counter;
 	}
 
 	@Override
@@ -65,6 +67,12 @@ public class HttpResponseProcessor implements Runnable {
 				processResponse(task.getResponse(), task.getRequest().getURI());
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error processing response from request: "+ task.getRequest().getURI(), e);
+			}
+			synchronized(counter) {
+				counter.addCompletedTask();
+				for(ICrawlerEventHandler handler: config.getEventHandlers()) {
+					handler.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
+				}
 			}
 			if(task.finishTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
@@ -104,8 +112,14 @@ public class HttpResponseProcessor implements Runnable {
 	}
 	
 	private void queueURI(URI uri) {
-		for(ICrawlerEventHandler handler: config.getEventHandlers())
-			handler.linkDiscovered(uri);
+		synchronized(counter) {
+			counter.addNewTask();
+		
+			for(ICrawlerEventHandler handler: config.getEventHandlers()) {
+				handler.linkDiscovered(uri);
+				handler.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
+			}
+		}
 		crawlerRequestQueue.add(CrawlerTask.createGetTask(uri));
 	}
 }

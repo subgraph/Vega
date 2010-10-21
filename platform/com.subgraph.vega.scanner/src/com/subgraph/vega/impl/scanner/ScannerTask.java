@@ -106,4 +106,9 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 			}
 		}
 	}
+
+	@Override
+	public void progressUpdate(int completed, int total) {
+		scanner.updateCrawlerProgress(completed, total);		
+	}
 }
