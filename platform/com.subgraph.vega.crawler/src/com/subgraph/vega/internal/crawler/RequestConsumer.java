@@ -51,6 +51,9 @@ public class RequestConsumer implements Runnable {
 			try {
 				logger.info("Retrieving: " + task.getRequest().getURI());
 				IHttpResponse response = requestEngine.sendRequest(task.getRequest());
+				if(response == null) {
+					logger.log(Level.WARNING, "No response was received for request to "+ task.getRequest().getURI());
+				}
 				task.setResponse(response);
 				crawlerResponseQueue.put(task);
 				
