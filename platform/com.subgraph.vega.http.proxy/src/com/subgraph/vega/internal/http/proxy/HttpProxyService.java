@@ -2,6 +2,7 @@ package com.subgraph.vega.internal.http.proxy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.http.Header;
@@ -21,6 +22,9 @@ import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.requestlog.IRequestLog;
+import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.urls.IUrlExtractor;
 
 public class HttpProxyService implements IHttpProxyService {
@@ -29,9 +33,12 @@ public class HttpProxyService implements IHttpProxyService {
 	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
 	private IWebModel webModel;
+	private IScanModel scanModel;
 	private IRequestLog requestLog;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IUrlExtractor urlExtractor;
+	private IScannerModuleRegistry moduleRepository;
+	private List<IResponseProcessingModule> responseProcessingModules;
 	private HttpProxy proxy;
 
 	public HttpProxyService() {
@@ -45,8 +52,10 @@ public class HttpProxyService implements IHttpProxyService {
 
 	@Override
 	public void start(int proxyPort) {
+		responseProcessingModules = moduleRepository.getResponseProcessingModules();
 		webModel = model.getCurrentWorkspace().getWebModel();
 		requestLog = model.getCurrentWorkspace().getRequestLog();
+		scanModel = model.getCurrentWorkspace().getScanModel();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, requestEngine);
 		proxy.registerEventHandler(eventHandler);
@@ -68,8 +77,15 @@ public class HttpProxyService implements IHttpProxyService {
 
 		addGetTargetToModel(transaction.getHttpHost(), uri, mimeType);
 		addDiscoveredLinks(transaction.getResponse());
+		runResponseProcessingModules(transaction, mimeType);
 	}
 
+	private void runResponseProcessingModules(IProxyTransaction transaction, String mimeType) {
+		for(IResponseProcessingModule module: responseProcessingModules) {
+			if(module.mimeTypeFilter(mimeType) && module.responseCodeFilter(transaction.getResponse().getRawResponse().getStatusLine().getStatusCode()))
+					module.processResponse(transaction.getRequest(), transaction.getResponse(), scanModel);
+		}
+	}
 	private String transactionToMimeType(IProxyTransaction transaction) {
 		HttpResponse response = transaction.getResponse().getRawResponse();
 		Header hdr = response.getFirstHeader("Content-Type");
@@ -129,5 +145,13 @@ public class HttpProxyService implements IHttpProxyService {
 
 	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
 		this.requestEngineFactory = null;
+	}
+	
+	protected void setModuleRepository(IScannerModuleRegistry moduleRepository) {
+		this.moduleRepository = moduleRepository;
+	}
+	
+	protected void unsetModuleRepository(IScannerModuleRegistry moduleRepository) {
+		this.moduleRepository = null;
 	}
 }

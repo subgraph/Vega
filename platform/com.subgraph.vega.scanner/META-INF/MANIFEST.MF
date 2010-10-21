@@ -6,11 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base;version="1.6.0",
- com.subgraph.vega.api.console,
  com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
- com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
+ com.subgraph.vega.api.model,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.model,
  com.subgraph.vega.api.scanner.modules,

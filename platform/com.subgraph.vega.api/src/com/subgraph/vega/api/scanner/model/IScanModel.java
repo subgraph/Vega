@@ -13,6 +13,8 @@ public interface IScanModel {
 	Object getProperty(String key);
 	String getStringProperty(String key);
 	Integer getIntegerProperty(String key);
+	List<IScanHost> getUnscannedHosts();
+	List<IScanDirectory> getUnscannedDirectories();
 	void addDiscoveredURI(URI uri);
 	void addAlert(IScanAlert alert);
 	IScanAlert createAlert(String type);

@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.model;
+package com.subgraph.vega.internal.model.scan;
 
 import com.subgraph.vega.api.scanner.model.INewScanAlertEvent;
 import com.subgraph.vega.api.scanner.model.IScanAlert;

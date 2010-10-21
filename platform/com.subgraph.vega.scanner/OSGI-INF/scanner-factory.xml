@@ -7,7 +7,5 @@
    <reference bind="setCrawlerFactory" cardinality="1..1" interface="com.subgraph.vega.api.crawler.IWebCrawlerFactory" name="IWebCrawlerFactory" policy="static" unbind="unsetCrawlerFactory"/>
    <reference bind="setRequestEngineFactory" cardinality="1..1" interface="com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory" name="IHttpRequestEngineFactory" policy="static" unbind="unsetRequestEngineFactory"/>
    <reference bind="setModuleRegistry" cardinality="1..1" interface="com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry" name="IScannerModuleRegistry" policy="static" unbind="unsetModuleRegistry"/>
-   <reference bind="setScanAlertRepository" cardinality="1..1" interface="com.subgraph.vega.api.scanner.model.IScanAlertRepository" name="IScanAlertRepository" policy="static" unbind="unsetScanAlertRepository"/>
-   <reference bind="setHTMLParser" cardinality="1..1" interface="com.subgraph.vega.api.html.IHTMLParser" name="IHTMLParser" policy="static" unbind="unsetHTMLParser"/>
-   <reference bind="setConsole" cardinality="1..1" interface="com.subgraph.vega.api.console.IConsole" name="IConsole" policy="static" unbind="unsetConsole"/>
+   <reference bind="setModel" cardinality="1..1" interface="com.subgraph.vega.api.model.IModel" name="IModel" policy="static" unbind="unsetModel"/>
 </scr:component>

@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.model;
+package com.subgraph.vega.internal.model.scan;
 
 import java.net.URI;
 

@@ -6,4 +6,5 @@
    </service>
    <reference bind="setPathFinder" cardinality="1..1" interface="com.subgraph.vega.api.paths.IPathFinder" name="IPathFinder" policy="static" unbind="unsetPathFinder"/>
    <reference bind="setHTMLParser" cardinality="1..1" interface="com.subgraph.vega.api.html.IHTMLParser" name="IHTMLParser" policy="static" unbind="unsetHTMLParser"/>
+   <reference bind="setModel" cardinality="1..1" interface="com.subgraph.vega.api.model.IModel" name="IModel" policy="static" unbind="unsetModel"/>
 </scr:component>

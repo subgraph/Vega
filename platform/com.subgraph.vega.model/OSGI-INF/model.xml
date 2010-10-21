@@ -6,4 +6,7 @@
    </service>
    <reference bind="setWebModel" cardinality="1..1" interface="com.subgraph.vega.api.model.web.IWebModel" name="IWebModel" policy="static" unbind="unsetWebModel"/>
    <reference bind="setRequestLog" cardinality="1..1" interface="com.subgraph.vega.api.requestlog.IRequestLog" name="IRequestLog" policy="static" unbind="unsetRequestLog"/>
+   <reference bind="setConsole" cardinality="1..1" interface="com.subgraph.vega.api.console.IConsole" name="IConsole" policy="static" unbind="unsetConsole"/>
+   <reference bind="setHTMLParser" cardinality="1..1" interface="com.subgraph.vega.api.html.IHTMLParser" name="IHTMLParser" policy="static" unbind="unsetHTMLParser"/>
+   <reference bind="setAlertRepository" cardinality="1..1" interface="com.subgraph.vega.api.scanner.model.IScanAlertRepository" name="IScanAlertRepository" policy="static" unbind="unsetAlertRepository"/>
 </scr:component>

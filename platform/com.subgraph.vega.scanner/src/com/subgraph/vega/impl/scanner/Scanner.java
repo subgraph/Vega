@@ -1,24 +1,22 @@
 package com.subgraph.vega.impl.scanner;
 
-import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.model.IScanAlertRepository;
+import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.events.CrawlerProgressEvent;
 import com.subgraph.vega.impl.scanner.events.ScannerStatusChangeEvent;
-import com.subgraph.vega.impl.scanner.model.ScanModel;
 
 public class Scanner implements IScanner {
 
-	private ScanModel scanModel;
+	private IModel model;
 	private ScannerStatus scannerStatus = ScannerStatus.SCAN_IDLE;
 	private final EventListenerManager scanStatusListeners = new EventListenerManager();
 	
@@ -27,21 +25,13 @@ public class Scanner implements IScanner {
 	private IScannerModuleRegistry moduleRegistry;
 	private ScannerTask scannerTask;
 	private Thread scannerThread;
-	private IScanAlertRepository scanAlertRepository;
-	private IHTMLParser htmlParser;
-	private IConsole console;
-	
-	protected void activate() {
-		scanModel = new ScanModel(scanAlertRepository, htmlParser, console);
-		moduleRegistry.setScanModel(scanModel);
-	}
 	
 	protected void deactivate() {
 		
 	}
 	@Override
-	public ScanModel getScanModel() {
-		return scanModel;
+	public IScanModel getScanModel() {
+		return model.getCurrentWorkspace().getScanModel();
 	}
 
 	IWebCrawlerFactory getCrawlerFactory() {
@@ -136,27 +126,11 @@ public class Scanner implements IScanner {
 		this.moduleRegistry = null;
 	}
 	
-	protected void setScanAlertRepository(IScanAlertRepository repo) {
-		this.scanAlertRepository = repo;	
+	protected void setModel(IModel model) {
+		this.model = model;
 	}
 	
-	protected void unsetScanAlertRepository(IScanAlertRepository repo) {
-		this.scanAlertRepository = null;
-	}
-	
-	protected void setHTMLParser(IHTMLParser htmlParser) {
-		this.htmlParser = htmlParser;
-	}
-	
-	protected void unsetHTMLParser(IHTMLParser htmlParser) {
-		this.htmlParser = null;
-	}
-	
-	protected void setConsole(IConsole console) {
-		this.console = console;
-	}
-	
-	protected void unsetConsole(IConsole console) {
-		this.console = null;
+	protected void unsetModel(IModel model) {
+		this.model = null;
 	}
 }

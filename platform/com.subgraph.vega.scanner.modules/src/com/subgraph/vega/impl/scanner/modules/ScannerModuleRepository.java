@@ -12,8 +12,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
@@ -30,7 +30,7 @@ import com.subgraph.vega.impl.scanner.modules.scripting.tests.TestScriptLoader;
 public class ScannerModuleRepository implements IScannerModuleRegistry {
 	private IPathFinder pathFinder;
 	private IHTMLParser htmlParser;
-	private IScanModel scanModel;
+	private IModel model;
 	private ScriptLoader scriptLoader;
 	private TestScriptLoader testScriptLoader;
 	private Bundle bundle;
@@ -119,6 +119,14 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		this.htmlParser = null;
 	}
 	
+	protected void setModel(IModel model) {
+		this.model = model;
+	}
+	
+	protected void unsetModel(IModel model) {
+		this.model = null;
+	}
+	
 	@Override
 	public void runDomTests() {
 		if(testScriptLoader == null) {
@@ -146,14 +154,9 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			return;
 		final DomTestModule test = new DomTestModule(module, bundle, htmlParser);
 		try {
-			test.run(scanModel);
+			test.run(model.getCurrentWorkspace().getScanModel());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void setScanModel(IScanModel scanModel) {
-		this.scanModel = scanModel;		
 	}
 }
