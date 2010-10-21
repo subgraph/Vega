@@ -89,13 +89,26 @@ public class ScanModel implements IScanModel {
 		final URI hostURI = host.getURI();
 		final StringBuilder sb = new StringBuilder();
 		sb.append("/");
-		scanDirectories.add(new ScanDirectory(host, hostURI.resolve(sb.toString())));
+		URI pathURI = createPathURI(sb.toString());
+		if(pathURI != null)
+			scanDirectories.add(new ScanDirectory(host, hostURI.resolve(pathURI)));
 		for(String pathPart : uri.getPath().split("/")) {
 			if(!pathPart.isEmpty()) {
 				sb.append(pathPart);
 				sb.append("/");
-				scanDirectories.add(new ScanDirectory(host, hostURI.resolve(sb.toString())));
+				pathURI = createPathURI(sb.toString());
+				if(pathURI != null)
+					scanDirectories.add(new ScanDirectory(host, hostURI.resolve(pathURI)));
 			}
+		}
+	}
+	
+	private URI createPathURI(String path) {
+		try {
+			return new URI(path);
+		} catch (URISyntaxException e) {
+			logger.warning("Failed to create path URI from path: "+ path);
+			return null;
 		}
 	}
 	
