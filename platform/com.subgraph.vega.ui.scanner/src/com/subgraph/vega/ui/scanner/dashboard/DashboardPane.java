@@ -5,6 +5,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -19,6 +20,7 @@ import com.subgraph.vega.ui.scanner.Activator;
 public class DashboardPane extends Composite {
 	private static final RGB GREY_TEXT_COLOR = new RGB(200, 200, 200);
 	private static final int MINIMUM_UPDATE_INTERVAL = 200;
+	private final Display display;
 	private IScanner.ScannerStatus currentStatus = IScanner.ScannerStatus.SCAN_IDLE;
 	private int crawlerTotal;
 	private int crawlerCompleted;
@@ -31,11 +33,12 @@ public class DashboardPane extends Composite {
 	
 	public DashboardPane(Composite parent) {
 		super(parent, SWT.NONE);
+		this.display = parent.getDisplay();
 		Activator.getDefault().getScanner().registerScannerStatusChangeListener(createEventHandler());
 		
 		setLayout(new FillLayout());
 		
-		toolkit = new FormToolkit(parent.getDisplay());
+		toolkit = new FormToolkit(display);
 		toolkit.getColors().createColor("grey", GREY_TEXT_COLOR);
 		scrolledForm = createForm(this, toolkit);
 		formText = createFormText(scrolledForm.getBody(), toolkit);
@@ -90,14 +93,15 @@ public class DashboardPane extends Composite {
 		}
 		buffer.append("</form>");
 		
-		this.getDisplay().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if(!formText.isDisposed())
-					formText.setText(buffer.toString(), true, false);
-			}
-		});
-	}
+		if(!display.isDisposed())
+			display.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					if(!formText.isDisposed())
+						formText.setText(buffer.toString(), true, false);
+				}
+			});
+		}
 	
 	private void renderIdle(StringBuilder sb) {
 		addVSpaces(sb, 2);
