@@ -79,6 +79,9 @@ public class Scanner implements IScanner {
 		if(scannerStatus != ScannerStatus.SCAN_IDLE && scannerStatus != ScannerStatus.SCAN_COMPLETED) 
 			throw new IllegalStateException("Scanner is already running.  Verify scanner is not running with getScannerStatus() before trying to start.");
 		
+		if(config.getBaseURI() == null)
+			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
+		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		moduleRegistry.refreshModuleScripts();
 		scannerTask = new ScannerTask(this, config, requestEngine);
