@@ -51,12 +51,15 @@ Response.prototype.headers = function(name) {
 };
 
 Response.prototype.__defineGetter__("document", function()  {
-	if(!this.httpResponse.getDocumentDOM()) {		
+	if(this.cachedDocument)
+		return this.cachedDocument;
+	
+	var html = this.httpResponse.getParsedHTML();
+	if(!html || !html.getDOMDocument())
 		return null;
-	}
-	if(!this.cachedDocument)
-		this.cachedDocument = new Document(this.httpResponse.getDocumentDOM());
-	return this.cachedDocument;
+	
+	return (this.cachedDocument = new Document(html.getDOMDocument()));
+	
 });
 
 Response.prototype.__defineGetter__("code", function() {
