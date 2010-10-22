@@ -1,5 +1,8 @@
 package com.subgraph.vega.ui.scanner.dashboard;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
@@ -19,14 +22,14 @@ import com.subgraph.vega.ui.scanner.Activator;
 
 public class DashboardPane extends Composite {
 	private static final RGB GREY_TEXT_COLOR = new RGB(200, 200, 200);
-	private static final int MINIMUM_UPDATE_INTERVAL = 300;
+	private static final int UPDATE_INTERVAL = 300;
 	private final Display display;
+	private final Timer renderTimer = new Timer();
+	private TimerTask renderTask;
 	private IScanner.ScannerStatus currentStatus = IScanner.ScannerStatus.SCAN_IDLE;
 	private volatile int crawlerTotal;
 	private volatile int crawlerCompleted;
 	private volatile boolean renderNeeded;
-	private volatile boolean stopRenderLoop;
-	private volatile boolean renderLoopRunning;
 	private FormToolkit toolkit;
 	private ScrolledForm scrolledForm;
 	private FormText formText;
@@ -198,14 +201,15 @@ public class DashboardPane extends Composite {
 		case SCAN_IDLE:
 			return;
 		case SCAN_STARTING:
-			startRenderLoop();
+			renderTask = createTimerTask();
+			renderTimer.scheduleAtFixedRate(renderTask, 0, UPDATE_INTERVAL);
 			break;
 		case SCAN_CRAWLING:			
 		case SCAN_AUDITING:
 			renderNeeded = true;
 			break;
 		case SCAN_COMPLETED:
-			stopRenderLoop();
+			renderTask.cancel();
 			renderOutput();
 		}
 	}
@@ -216,40 +220,13 @@ public class DashboardPane extends Composite {
 		renderNeeded = true;
 	}
 	
-	
-	private synchronized void startRenderLoop() {
-		if(renderLoopRunning && !stopRenderLoop)
-			return;
-		
-		stopRenderLoop = false;
-		renderLoopRunning = true;
-		final Thread renderLoopThread = new Thread(new Runnable() {
+	private TimerTask createTimerTask() {
+		return new TimerTask() {
 			@Override
 			public void run() {
-				try {
-					renderLoop();
-				} finally {
-					renderLoopRunning = false;
-				}
-			}
-		});
-		renderLoopThread.start();
-	}
-	
-	private void renderLoop() {
-		while(!stopRenderLoop) {
-			if(renderNeeded)
-				renderOutput();
-			try {
-				Thread.sleep(MINIMUM_UPDATE_INTERVAL);
-			} catch (InterruptedException e) {
-				stopRenderLoop = true;
-				Thread.currentThread().interrupt();
-				return;
-			}
-		}
-	}
-	private void stopRenderLoop() {
-		stopRenderLoop = true;
+				if(renderNeeded)
+					renderOutput();
+			}			
+		};
 	}
 }
