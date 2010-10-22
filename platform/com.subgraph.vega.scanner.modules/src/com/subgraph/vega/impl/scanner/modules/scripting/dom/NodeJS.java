@@ -213,4 +213,11 @@ public class NodeJS extends ScriptableObject {
 		ctor.defineProperty("DOCUMENT_FRAGMENT_NODE", Node.DOCUMENT_FRAGMENT_NODE, READONLY);
 	}
 	
+	public int jsFunction_compareDocumentPosition(Scriptable other) {
+		if(!(other instanceof NodeJS)) {
+			throw Context.reportRuntimeError("compareDocumentPosition must be called with a Node argument");
+		}
+		final Node otherNode = ((NodeJS)other).node;
+		return node.compareDocumentPosition(otherNode);
+	}
 }

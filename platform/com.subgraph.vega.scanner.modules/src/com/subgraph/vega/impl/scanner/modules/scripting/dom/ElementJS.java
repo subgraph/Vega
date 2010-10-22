@@ -113,6 +113,4 @@ public class ElementJS extends NodeJS {
 	public void jsFunction_setAttributeNS(String namespaceURI, String qualifiedName, String value) throws DOMException {
 		element.setAttributeNS(namespaceURI, qualifiedName, value);
 	}
-	
-	
 }

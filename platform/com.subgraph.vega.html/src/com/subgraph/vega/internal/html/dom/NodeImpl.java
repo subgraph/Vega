@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.html.dom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jsoup.nodes.DataNode;
@@ -46,11 +47,22 @@ public class NodeImpl implements Node {
 
 	private final org.jsoup.nodes.Node jsoupNode; // Will be null for Attr nodes
 	private Document ownerDocument;
+	private List<Integer> treePosition = new ArrayList<Integer>();
 		
 	
 	NodeImpl(org.jsoup.nodes.Node jsoupNode, Document ownerDocument) {
 		this.jsoupNode = jsoupNode;
 		this.ownerDocument = ownerDocument;
+		calculateTreePosition();
+	}
+	
+	void calculateTreePosition() {
+		org.jsoup.nodes.Node n = jsoupNode;
+		while(n != null) {
+			treePosition.add(n.siblingIndex());
+			n = n.parent();
+		}
+		Collections.reverse(treePosition);
 	}
 	
 	void setOwnerDocument(Document ownerDocument) {
@@ -213,9 +225,44 @@ public class NodeImpl implements Node {
 		throw createNoLevel3SupportException();
 	}
 
+	List<Integer> getTreePosition() {
+		return treePosition;
+	}
+	
 	@Override
 	public short compareDocumentPosition(Node other) throws DOMException {
-		throw createNoLevel3SupportException();
+		if(!(other instanceof NodeImpl))
+			return Node.DOCUMENT_POSITION_DISCONNECTED;
+		
+		List<Integer> thatTree = ((NodeImpl) other).getTreePosition();
+		if(thatTree.isEmpty() || getTreePosition().isEmpty())
+			return Node.DOCUMENT_POSITION_DISCONNECTED;
+		
+		int i = 0;
+		while(true) {
+			if(i == thatTree.size() && i == treePosition.size())
+				return 0; // They are the same 
+			if(i == thatTree.size())
+				return Node.DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING;
+			if(i == treePosition.size())
+				return Node.DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING;
+			if(thatTree.get(i) < treePosition.get(i))
+				return Node.DOCUMENT_POSITION_PRECEDING;
+			if(thatTree.get(i) > treePosition.get(i)) 
+				return Node.DOCUMENT_POSITION_FOLLOWING;
+			i++;
+		}
+	}
+	
+	void printTree() {
+		System.out.print(getNodeName() + ": [");
+		for(int i = 0; i < treePosition.size(); i++) {
+			if(i > 0)
+				System.out.print(", ");
+			System.out.print(treePosition.get(i));
+			
+		}
+		System.out.println("]");
 	}
 
 	@Override
