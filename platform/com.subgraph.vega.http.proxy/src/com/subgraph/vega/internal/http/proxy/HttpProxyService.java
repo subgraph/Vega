@@ -21,7 +21,6 @@ import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.requestlog.IRequestLog;
 import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -34,7 +33,6 @@ public class HttpProxyService implements IHttpProxyService {
 	private IModel model;
 	private IWebModel webModel;
 	private IScanModel scanModel;
-	private IRequestLog requestLog;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IUrlExtractor urlExtractor;
 	private IScannerModuleRegistry moduleRepository;
@@ -54,7 +52,6 @@ public class HttpProxyService implements IHttpProxyService {
 	public void start(int proxyPort) {
 		responseProcessingModules = moduleRepository.getResponseProcessingModules();
 		webModel = model.getCurrentWorkspace().getWebModel();
-		requestLog = model.getCurrentWorkspace().getRequestLog();
 		scanModel = model.getCurrentWorkspace().getScanModel();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, requestEngine);
@@ -64,8 +61,7 @@ public class HttpProxyService implements IHttpProxyService {
 
 	private void processTransaction(IProxyTransaction transaction) {
 
-		requestLog.addRequestResponse(transaction.getRequest(), transaction.getResponse().getRawResponse(), transaction.getHttpHost());
-
+		transaction.getResponse().logResponse();
 		HttpEntity responseEntity = transaction.getResponse().getRawResponse().getEntity();
 		if(responseEntity == null)
 			return;

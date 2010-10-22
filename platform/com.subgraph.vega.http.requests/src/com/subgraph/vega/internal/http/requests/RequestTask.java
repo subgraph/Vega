@@ -8,10 +8,12 @@ import java.util.zip.GZIPInputStream;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
@@ -19,6 +21,7 @@ import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
+import com.subgraph.vega.api.requestlog.IRequestLog;
 
 class RequestTask implements Callable<IHttpResponse> {
 
@@ -27,13 +30,15 @@ class RequestTask implements Callable<IHttpResponse> {
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
+	private final IRequestLog requestLog;
 
-	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser, IRequestLog requestLog) {
 		this.client = client;
 		this.request = request;
 		this.context = context;
 		this.config = config;
 		this.htmlParser = htmlParser;
+		this.requestLog = requestLog;
 	}
 
 	@Override
@@ -49,8 +54,8 @@ class RequestTask implements Callable<IHttpResponse> {
 			final HttpEntity newEntity = processEntity(httpResponse, entity);
 			httpResponse.setEntity(newEntity);
 		}
-		
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), request, httpResponse, htmlParser);
+		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host, request, httpResponse, htmlParser, requestLog);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		
