@@ -16,3 +16,13 @@ var window = {
 		}
 };
 var navigator = { userAgent: "" };
+
+var jQuery = function(selector, context) {
+	if(context)
+		window.document = context;
+	return window.jQuery(selector, context);
+};
+
+var $ = function(selector, context) {
+	return this.jQuery(selector, context);
+};
