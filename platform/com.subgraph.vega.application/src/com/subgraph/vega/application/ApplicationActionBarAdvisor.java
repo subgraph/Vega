@@ -1,8 +1,11 @@
 package com.subgraph.vega.application;
 
+import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
@@ -34,6 +37,12 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     	viewMenu.add(viewList);
     	winMenu.add(viewMenu);
     	menuBar.add(winMenu);
+    }
+    
+    protected void fillStatusLine(IStatusLineManager statusLine) {
+    	ContributionItem statusLineItem = com.subgraph.vega.ui.http.Activator.getDefault().getStatusLineContribution();
+    	statusLine.appendToGroup(StatusLineManager.END_GROUP, statusLineItem);
+    	
     }
     
 }

@@ -6,7 +6,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.services.ISourceProviderService;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
-import com.subgraph.vega.internal.ui.http.Activator;
+import com.subgraph.vega.ui.http.Activator;
 
 abstract class AbstractProxyCommandHandler extends AbstractHandler {
 	

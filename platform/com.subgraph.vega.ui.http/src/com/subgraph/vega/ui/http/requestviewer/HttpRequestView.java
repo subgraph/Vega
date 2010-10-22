@@ -21,7 +21,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.internal.ui.http.Activator;
+import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.requestlog.IRequestLogRecord;

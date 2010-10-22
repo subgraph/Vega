@@ -1,5 +1,6 @@
-package com.subgraph.vega.internal.ui.http;
+package com.subgraph.vega.ui.http;
 
+import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -7,6 +8,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -18,6 +20,8 @@ public class Activator extends AbstractUIPlugin {
 	
 	private ServiceTracker modelTracker;
 	private ServiceTracker proxyServiceTracker;
+	
+	private ProxyStatusLineContribution statusLineContribution = new ProxyStatusLineContribution();
 	
 	/**
 	 * The constructor
@@ -75,5 +79,17 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IHttpProxyService getProxyService() {
 		return (IHttpProxyService) proxyServiceTracker.getService();
+	}
+	
+	public ContributionItem getStatusLineContribution() {
+		return statusLineContribution;
+	}
+	
+	public void setStatusLineProxyRunning(int port) {
+		statusLineContribution.setProxyRunning(port);
+	}
+	
+	public void setStatusLineProxyStopped() {
+		statusLineContribution.setProxyStopped();
 	}
 }

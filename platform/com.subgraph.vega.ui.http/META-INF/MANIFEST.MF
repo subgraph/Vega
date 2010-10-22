@@ -15,5 +15,6 @@ Import-Package: com.subgraph.vega.api.events,
  org.apache.http;version="4.0.0"
 Require-Bundle: org.eclipse.ui;bundle-version="3.6.0",
  org.eclipse.core.runtime;bundle-version="3.6.0"
-Bundle-Activator: com.subgraph.vega.internal.ui.http.Activator
+Bundle-Activator: com.subgraph.vega.ui.http.Activator
 Bundle-ActivationPolicy: lazy
+Export-Package: com.subgraph.vega.ui.http

@@ -3,7 +3,7 @@ package com.subgraph.vega.ui.http.preferencepage;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import com.subgraph.vega.internal.ui.http.Activator;
+import com.subgraph.vega.ui.http.Activator;
 
 public class HTTPPreferenceInitializer extends AbstractPreferenceInitializer {
 

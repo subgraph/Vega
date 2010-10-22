@@ -5,7 +5,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 
-import com.subgraph.vega.internal.ui.http.Activator;
+import com.subgraph.vega.ui.http.Activator;
 
 public class HttpPreferencePage extends FieldEditorPreferencePage implements
 		IWorkbenchPreferencePage {
