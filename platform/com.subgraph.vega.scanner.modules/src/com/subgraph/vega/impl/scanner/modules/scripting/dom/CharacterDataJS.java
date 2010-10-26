@@ -12,8 +12,8 @@ public class CharacterDataJS extends NodeJS {
 		this.characterData = null;
 	}
 	
-	public CharacterDataJS(CharacterData data) {
-		super(data);
+	public CharacterDataJS(CharacterData data, DocumentJS document) {
+		super(data, document);
 		this.characterData = data;
 	}
 	

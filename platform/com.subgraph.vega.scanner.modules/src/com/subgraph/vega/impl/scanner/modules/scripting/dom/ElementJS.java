@@ -14,8 +14,8 @@ public class ElementJS extends NodeJS {
 		this.element = null;
 	}
 	
-	public ElementJS(Element element) {
-		super(element);
+	public ElementJS(Element element, DocumentJS document) {
+		super(element, document);
 		this.element = element;
 	}
 	
@@ -85,7 +85,6 @@ public class ElementJS extends NodeJS {
 	}
 	
 	public Scriptable jsFunction_removeAttributeNode(Scriptable oldAttr) {
-		
 		return null;
 	}
 	

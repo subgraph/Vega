@@ -66,8 +66,12 @@ public class ElementImpl extends NodeImpl implements Element {
 	public String getAttribute(String name) {
 		if(jsoupElement.hasAttr(name))
 			return jsoupElement.attr(name);
+		else if(getTagName().equals("LABEL") && name.equals("htmlFor") && jsoupElement.hasAttr("for")) 
+				return jsoupElement.attr("for");
+		else if(name.equals("className") && jsoupElement.hasAttr("class"))
+			return jsoupElement.attr("class");
 		else
-			return null;
+			return null;				
 	}
 
 	@Override
@@ -102,15 +106,24 @@ public class ElementImpl extends NodeImpl implements Element {
 	@Override
 	public NodeList getElementsByTagName(String name) {
 		final List<NodeImpl> elements = new ArrayList<NodeImpl>();
+		
+		// Special case
+		if(getTagName().equals("HTML") && name.equalsIgnoreCase("html")) {
+			elements.add(this);
+			return new NodeListImpl(elements);
+		}
+		
 		for(org.jsoup.nodes.Element e: jsoupElementsForTag(name)) {
-			elements.add(HTMLElementImpl.create(e, getOwnerDocument()));
+			if(e != jsoupElement)
+				elements.add(HTMLElementImpl.create(e, getOwnerDocument()));
 		}
 		return new NodeListImpl(elements);
 	}
 
 	private Elements jsoupElementsForTag(String name) {
-		if("*".equals(name))
+		if("*".equals(name)) {
 			return jsoupElement.getAllElements();
+		}
 		else
 			return jsoupElement.getElementsByTag(name);
 	}

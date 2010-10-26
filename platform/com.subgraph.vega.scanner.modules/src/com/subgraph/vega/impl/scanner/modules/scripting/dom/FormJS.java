@@ -14,8 +14,8 @@ public class FormJS extends HTMLElementJS {
 		this.formElement = null;
 	}
 	
-	public FormJS(HTMLFormElement element) {
-		super(element);
+	public FormJS(HTMLFormElement element, DocumentJS document) {
+		super(element, document);
 		this.formElement = element;
 	}
 	
@@ -25,7 +25,7 @@ public class FormJS extends HTMLElementJS {
 	}
 	
 	public Scriptable jsGet_elements() {
-		final HTMLCollectionJS collection = new HTMLCollectionJS(formElement.getElements(), ScriptableObject.getTopLevelScope(this));
+		final HTMLCollectionJS collection = new HTMLCollectionJS(formElement.getElements(), ScriptableObject.getTopLevelScope(this), getDocumentJS());
 		exportObject(collection);
 		return collection;
 	}

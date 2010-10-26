@@ -14,8 +14,8 @@ public class TextJS extends CharacterDataJS {
 		this.textNode = null;
 	}
 	
-	public TextJS(Text textNode) {
-		super(textNode);
+	public TextJS(Text textNode, DocumentJS document) {
+		super(textNode, document);
 		this.textNode = textNode;
 	}
 	
@@ -28,14 +28,7 @@ public class TextJS extends CharacterDataJS {
 	}
 
 	public Scriptable jsFunction_splitText(int offset) throws DOMException {
-		final Text txt = textNode.splitText(offset);
-		if(txt == null)
-			return null;
-		else {
-			NodeJS textNode = new TextJS(txt);
-			exportObject(textNode);
-			return textNode;
-		}
+		return exportNode(textNode.splitText(offset));
 	}
 
 }

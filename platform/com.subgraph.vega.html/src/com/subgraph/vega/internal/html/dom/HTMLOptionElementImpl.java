@@ -7,12 +7,14 @@ import org.w3c.dom.html2.HTMLOptionElement;
 
 public class HTMLOptionElementImpl extends HTMLElementImpl implements HTMLOptionElement {
 
+	private final HTMLSelectElementImpl select;
 	private final HTMLFormElement form;
 	private final int index;
 	
-	HTMLOptionElementImpl(Element jsoupElement, HTMLFormElement form, int index, Document ownerDocument) {
+	HTMLOptionElementImpl(Element jsoupElement, HTMLSelectElementImpl select, int index, Document ownerDocument) {
 		super(jsoupElement, ownerDocument);
-		this.form = form;
+		this.select = select;
+		this.form = select.getForm();
 		this.index = index;
 	}
 	
@@ -20,6 +22,8 @@ public class HTMLOptionElementImpl extends HTMLElementImpl implements HTMLOption
 		super(jsoupElement, ownerDocument);
 		Element formElement = HTMLElementImpl.findEnclosingFormElement(jsoupElement);
 		this.form = new HTMLFormElementImpl(formElement, ownerDocument);
+		Element selectElement = HTMLElementImpl.findEnclosingSelectElement(jsoupElement);
+		this.select = new HTMLSelectElementImpl(selectElement, form, ownerDocument);
 		this.index = calculateIndex(jsoupElement);
 	}
 	
@@ -78,7 +82,7 @@ public class HTMLOptionElementImpl extends HTMLElementImpl implements HTMLOption
 
 	@Override
 	public boolean getSelected() {
-		return hasAttribute("selected");
+		return hasAttribute("selected") || select.getSelectedIndex() == index;
 	}
 
 	@Override

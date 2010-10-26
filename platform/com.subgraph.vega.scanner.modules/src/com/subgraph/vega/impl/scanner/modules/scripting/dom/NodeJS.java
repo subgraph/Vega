@@ -19,28 +19,41 @@ import org.w3c.dom.html2.HTMLElement;
 
 public class NodeJS extends ScriptableObject {
 	
-	static NodeJS domNodeToJS(Node node) {
-
+	static NodeJS domNodeToJS(Node node, DocumentJS document) {
+		synchronized(document) {
+			if(node == null)
+				return null;
+			NodeJS cachedNode = document.findCachedNode(node);
+			if(cachedNode != null)
+				return cachedNode;
+			NodeJS newNode = createNodeJSFromDomNode(node, document);
+			if(newNode != null)
+				document.putCachedNode(node, newNode);
+			return newNode;
+		}
+	}
+	
+	private static NodeJS createNodeJSFromDomNode(Node node, DocumentJS document) {
 		if(node == null) {
 			return null;
 		} else if (node instanceof HTMLElement) {
-			return HTMLElementJS.domHTMLElementToJS((HTMLElement) node);
+			return HTMLElementJS.domHTMLElementToJS((HTMLElement) node, document);
 		} else if (node instanceof HTMLDocument) {
-			return new HTMLDocumentJS((HTMLDocument) node);
+			return document;
 		} else if(node instanceof Comment) {
-			return new CommentJS((Comment) node);
+			return new CommentJS((Comment) node, document);
 		} else if(node instanceof Text) {
-			return new TextJS((Text) node);
+			return new TextJS((Text) node, document);
 		} else if(node instanceof CharacterData) {
-			return new CharacterDataJS((CharacterData) node);
+			return new CharacterDataJS((CharacterData) node, document);
 		} else if(node instanceof Attr) {
-			return new AttrJS((Attr) node);
+			return new AttrJS((Attr) node, document);
 		} else if(node instanceof Document) {
-			return new DocumentJS((Document) node);
+			return document;
 		} else if(node instanceof Element) {
-			return new ElementJS((Element) node);
+			return new ElementJS((Element) node, document);
 		} else {
-			return new NodeJS(node);
+			return new NodeJS(node, document);
 		}
 	}
 	
@@ -48,19 +61,29 @@ public class NodeJS extends ScriptableObject {
 	private static final long serialVersionUID = 1L;
 	
 	private Node node;
-	
+	private DocumentJS documentJS;
 	public NodeJS() {
 		this.node = null;
+		this.documentJS = null;
 	}
 	
-	public NodeJS(Node node) {
+	public NodeJS(Node node, DocumentJS document) {
 		if(node == null)
 			throw new NullPointerException("Node cannot be null");
 		this.node = node;
+		this.documentJS = document;
 	}
 
 	protected void setNode(Node node) {
 		this.node = node;
+	}
+	
+	protected void setDocumentJS(DocumentJS document) {
+		this.documentJS = document;
+	}
+	
+	DocumentJS getDocumentJS() {
+		return documentJS;
 	}
 	
 	public void jsConstructor(Object ob) {		
@@ -75,7 +98,9 @@ public class NodeJS extends ScriptableObject {
 	}
 	
 	protected NodeJS exportNode(Node node) {
-		NodeJS nodeJS = domNodeToJS(node);
+		if(node == null)
+			return null;
+		NodeJS nodeJS = domNodeToJS(node, documentJS);
 		exportObject(nodeJS);
 		return nodeJS;
 	}
@@ -83,7 +108,7 @@ public class NodeJS extends ScriptableObject {
 	protected NodeListJS exportNodeList(NodeList nodeList) {
 		if(nodeList == null)
 			return null;
-		NodeListJS nl = new NodeListJS(nodeList, ScriptableObject.getTopLevelScope(this));
+		NodeListJS nl = new NodeListJS(nodeList, ScriptableObject.getTopLevelScope(this), documentJS);
 		exportObject(nl);
 		return nl;
 	}
@@ -102,8 +127,7 @@ public class NodeJS extends ScriptableObject {
 		
 		for(int i = 0; i < attributes.getLength(); i++)  {
 			nodes[i] = exportNode(attributes.item(i));
-		}
-		
+		}		
 		return createNodeArray(nodes);
 	}
 	

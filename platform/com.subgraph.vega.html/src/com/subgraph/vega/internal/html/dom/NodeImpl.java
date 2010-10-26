@@ -315,4 +315,14 @@ public class NodeImpl implements Node {
 		throw createNoLevel3SupportException();
 	}
 
+	public boolean equals(Object other) {
+		if(!(other instanceof NodeImpl))
+			return false;
+		NodeImpl that = (NodeImpl) other;
+		return jsoupNode.equals(that.jsoupNode);
+	}
+	
+	public int hashCode() {
+		return jsoupNode.hashCode();
+	}
 }

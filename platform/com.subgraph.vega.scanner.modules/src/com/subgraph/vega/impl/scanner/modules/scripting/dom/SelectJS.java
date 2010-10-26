@@ -1,7 +1,6 @@
 package com.subgraph.vega.impl.scanner.modules.scripting.dom;
 
 import org.mozilla.javascript.Scriptable;
-import org.w3c.dom.html2.HTMLFormElement;
 import org.w3c.dom.html2.HTMLSelectElement;
 
 public class SelectJS extends HTMLElementJS {
@@ -14,8 +13,8 @@ public class SelectJS extends HTMLElementJS {
 		selectElement = null;
 	}
 	
-	public SelectJS(HTMLSelectElement element) {
-		super(element);
+	public SelectJS(HTMLSelectElement element, DocumentJS document) {
+		super(element, document);
 		this.selectElement = element;
 	}
 	
@@ -30,10 +29,7 @@ public class SelectJS extends HTMLElementJS {
 	}
 	
 	public Scriptable jsGet_form() {
-		HTMLFormElement formElement = selectElement.getForm();
-		FormJS jsform = new FormJS(formElement);
-		exportObject(jsform);
-		return jsform;
+		return exportNode(selectElement.getForm());
 	}
 	
 	public int jsGet_length() {

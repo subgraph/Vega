@@ -8,21 +8,21 @@ import java.util.Map;
 import org.jsoup.nodes.Element;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
-import org.w3c.dom.html2.HTMLFormElement;
 import org.w3c.dom.html2.HTMLOptionElement;
 import org.w3c.dom.html2.HTMLOptionsCollection;
 
 public class HTMLOptionsCollectionImpl implements HTMLOptionsCollection {
 
-	private List<HTMLOptionElementImpl> byIndex = new ArrayList<HTMLOptionElementImpl>();
-	private Map<String, HTMLOptionElement> byId = new HashMap<String, HTMLOptionElement>();
-	private Map<String, HTMLOptionElement> byName = new HashMap<String, HTMLOptionElement>();
+	private final List<HTMLOptionElementImpl> byIndex = new ArrayList<HTMLOptionElementImpl>();
+	private final Map<String, HTMLOptionElement> byId = new HashMap<String, HTMLOptionElement>();
+	private final Map<String, HTMLOptionElement> byName = new HashMap<String, HTMLOptionElement>();
+	private final HTMLSelectElementImpl select;
 	
-	
-	HTMLOptionsCollectionImpl(List<Element> jsoupElements, HTMLFormElement form, Document document) {
+	HTMLOptionsCollectionImpl(List<Element> jsoupElements, HTMLSelectElementImpl select, Document document) {
+		this.select = select;
 		for(Element e: jsoupElements) {
 			int index = byIndex.size();
-			HTMLOptionElementImpl htmlElement = new HTMLOptionElementImpl(e, form, index, document);
+			HTMLOptionElementImpl htmlElement = new HTMLOptionElementImpl(e, select, index, document);
 			addElement(htmlElement);
 		}
 	}
@@ -66,10 +66,13 @@ public class HTMLOptionsCollectionImpl implements HTMLOptionsCollection {
 	
 	int getSelectedIndex() {
 		for(HTMLOptionElement option: byIndex) {
-			if(option.getSelected())
+			if(option.hasAttribute("selected"))
 				return option.getIndex();
 		}
-		return -1;
+		if(select.getMultiple())
+			return -1;
+		else
+			return 0;
 	}
 	
 	String getValue() {

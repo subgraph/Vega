@@ -11,21 +11,21 @@ import org.w3c.dom.html2.HTMLSelectElement;
 
 public class HTMLElementJS extends ElementJS {
 
-	static HTMLElementJS domHTMLElementToJS(HTMLElement element) {
+	static HTMLElementJS domHTMLElementToJS(HTMLElement element, DocumentJS document) {
 		if(element instanceof HTMLAnchorElement) {
-			return new AnchorJS((HTMLAnchorElement) element);
+			return new AnchorJS((HTMLAnchorElement) element, document);
 		} else if(element instanceof HTMLFormElement) {
-			return new FormJS((HTMLFormElement) element);
+			return new FormJS((HTMLFormElement) element, document);
 		} else if(element instanceof HTMLInputElement) {
-			return new InputJS((HTMLInputElement) element);
+			return new InputJS((HTMLInputElement) element, document);
 		} else if(element instanceof HTMLLinkElement) {
 			return new LinkJS((HTMLLinkElement) element);
 		} else if(element instanceof HTMLOptionElement) {
-			return new OptionJS((HTMLOptionElement) element);
+			return new OptionJS((HTMLOptionElement) element, document);
 		} else if(element instanceof HTMLSelectElement) {
-			return new SelectJS((HTMLSelectElement) element);
+			return new SelectJS((HTMLSelectElement) element, document);
 		} else {
-			return new HTMLElementJS(element);
+			return new HTMLElementJS(element, document);
 		}
 	}
 	
@@ -36,8 +36,8 @@ public class HTMLElementJS extends ElementJS {
 		this.htmlElement = null;
 	}
 	
-	public HTMLElementJS(HTMLElement element) {
-		super(element);
+	public HTMLElementJS(HTMLElement element, DocumentJS document) {
+		super(element, document);
 		this.htmlElement = element;
 	}
 	

@@ -9,8 +9,8 @@ public class AnchorJS extends HTMLElementJS {
 	public AnchorJS() {
 	}
 	
-	public AnchorJS(HTMLAnchorElement element) {
-		super(element);
+	public AnchorJS(HTMLAnchorElement element, DocumentJS document) {
+		super(element, document);
 	}
 	
 	@Override 

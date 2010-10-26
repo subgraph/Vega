@@ -66,7 +66,7 @@ public class HTMLSelectElementImpl extends HTMLElementImpl implements HTMLSelect
 	@Override
 	public HTMLOptionsCollectionImpl getOptions() {
 		if(options == null) {
-			options = new HTMLOptionsCollectionImpl(jsoupElement.select("option"), form, getOwnerDocument());
+			options = new HTMLOptionsCollectionImpl(jsoupElement.select("option"), this, getOwnerDocument());
 		}
 		return options;
 	}

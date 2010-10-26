@@ -23,17 +23,17 @@ public class HTMLCollectionJS extends ScriptableObject {
 		
 	}
 	
-	public HTMLCollectionJS(HTMLCollection elements, Scriptable scope) {
+	public HTMLCollectionJS(HTMLCollection elements, Scriptable scope, DocumentJS document) {
 		for(int i = 0; i < elements.getLength(); i++) {
 			Node n = elements.item(i);
 			if(n instanceof HTMLElement) {
-				addHTMLElement((HTMLElement) n, scope);
+				addHTMLElement((HTMLElement) n, scope, document);
 			}			
 		}
 	}
 	
-	private void addHTMLElement(HTMLElement element, Scriptable scope) {
-		Scriptable ob = HTMLElementJS.domHTMLElementToJS(element);
+	private void addHTMLElement(HTMLElement element, Scriptable scope, DocumentJS document) {
+		Scriptable ob = HTMLElementJS.domHTMLElementToJS(element, document);
 		ob.setParentScope(scope);
 		ob.setPrototype(ScriptableObject.getClassPrototype(scope, ob.getClassName()));
 		byIndex.add(ob);
@@ -80,6 +80,4 @@ public class HTMLCollectionJS extends ScriptableObject {
 			return byName.get(name);
 		}
 	}
-	
-
 }

@@ -4,7 +4,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.html2.HTMLDocument;
-import org.w3c.dom.html2.HTMLElement;
 
 public class HTMLDocumentJS extends DocumentJS {
 
@@ -27,6 +26,7 @@ public class HTMLDocumentJS extends DocumentJS {
 		this.htmlDocument = d;
 		this.document = d;
 		setNode(d);
+		setDocumentJS(this);
 	}
 	
 	@Override
@@ -35,24 +35,19 @@ public class HTMLDocumentJS extends DocumentJS {
 	}
 	
 	public Scriptable jsGet_anchors() {
-		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getAnchors(), ScriptableObject.getTopLevelScope(this));
+		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getAnchors(), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(collection);
 		return collection;
 	}
 	
 	public Scriptable jsGet_applets() {
-		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getApplets(), ScriptableObject.getTopLevelScope(this));
+		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getApplets(), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(collection);
 		return collection;
 	}
 	
 	public Scriptable jsGet_body() {
-		HTMLElement element = htmlDocument.getBody();
-		if(element == null)
-			return null;
-		HTMLElementJS jselement = new HTMLElementJS(element);
-		exportObject(jselement);
-		return jselement;
+		return exportNode(htmlDocument.getBody());
 	}
 	
 	public String jsGet_cookie() {
@@ -64,19 +59,19 @@ public class HTMLDocumentJS extends DocumentJS {
 	}
 	
 	public Scriptable jsGet_forms() {
-		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getForms(), ScriptableObject.getTopLevelScope(this));
+		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getForms(), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(collection);
 		return collection;
 	}
 	
 	public Scriptable jsGet_images() {
-		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getImages(), ScriptableObject.getTopLevelScope(this));
+		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getImages(), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(collection);
 		return collection;
 	}
 	
 	public Scriptable jsGet_links() {
-		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getLinks(), ScriptableObject.getTopLevelScope(this));
+		HTMLCollectionJS collection = new HTMLCollectionJS(htmlDocument.getLinks(), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(collection);
 		return collection;
 	}
@@ -97,8 +92,8 @@ public class HTMLDocumentJS extends DocumentJS {
 		htmlDocument.close();
 	}
 	
-	public Scriptable jsFunction_getElementsByName(String elementName) {
-		final NodeListJS nodeList = new NodeListJS(htmlDocument.getElementsByName(elementName), ScriptableObject.getTopLevelScope(this));
+	public Scriptable jsFunction_getElementsByName(String elementName) {		
+		final NodeListJS nodeList = new NodeListJS(htmlDocument.getElementsByName(elementName), ScriptableObject.getTopLevelScope(this), this);
 		exportObject(nodeList);
 		return nodeList;
 	}

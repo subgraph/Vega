@@ -17,14 +17,14 @@ public class NodeListJS extends ScriptableObject {
 	public NodeListJS() {
 	}
 	
-	public NodeListJS(NodeList nodeList, Scriptable scope) {
+	public NodeListJS(NodeList nodeList, Scriptable scope, DocumentJS document) {
 		for(int i = 0; i < nodeList.getLength(); i++) {
-			addNode(nodeList.item(i), scope);
+			addNode(nodeList.item(i), scope, document);
 		}
 	}
 	
-	private void addNode(Node n, Scriptable scope) {
-		Scriptable ob = NodeJS.domNodeToJS(n);
+	private void addNode(Node n, Scriptable scope, DocumentJS document) {
+		Scriptable ob = NodeJS.domNodeToJS(n, document);
 		ob.setParentScope(scope);
 		ob.setPrototype(ScriptableObject.getClassPrototype(scope, ob.getClassName()));
 		nodeList.add(ob);

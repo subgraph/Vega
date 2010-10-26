@@ -1,7 +1,6 @@
 package com.subgraph.vega.impl.scanner.modules.scripting.dom;
 
 import org.mozilla.javascript.Scriptable;
-import org.w3c.dom.html2.HTMLFormElement;
 import org.w3c.dom.html2.HTMLOptionElement;
 
 public class OptionJS extends HTMLElementJS {
@@ -14,8 +13,8 @@ public class OptionJS extends HTMLElementJS {
 		optionElement = null;
 	}
 	
-	public OptionJS(HTMLOptionElement element) {
-		super(element);
+	public OptionJS(HTMLOptionElement element, DocumentJS document) {
+		super(element, document);
 		this.optionElement = element;
 	}
 	
@@ -38,12 +37,7 @@ public class OptionJS extends HTMLElementJS {
 	}
 
 	public Scriptable jsGet_form() {
-		HTMLFormElement formElement = optionElement.getForm();
-		if(formElement == null)
-			return null;
-		FormJS form = new FormJS(formElement);
-		exportObject(form);
-		return form;
+		return exportNode(optionElement.getForm());
 	}
 	
 	public int jsGet_index() {

@@ -8,8 +8,8 @@ public class CommentJS extends NodeJS {
 	public CommentJS() {
 	}
 	
-	public CommentJS(Comment comment) {
-		super(comment);
+	public CommentJS(Comment comment, DocumentJS document) {
+		super(comment, document);
 	}
 	
 	@Override

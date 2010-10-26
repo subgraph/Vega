@@ -1,7 +1,6 @@
 package com.subgraph.vega.impl.scanner.modules.scripting.dom;
 
 import org.mozilla.javascript.Scriptable;
-import org.w3c.dom.html2.HTMLFormElement;
 import org.w3c.dom.html2.HTMLInputElement;
 
 public class InputJS extends HTMLElementJS {
@@ -14,8 +13,8 @@ public class InputJS extends HTMLElementJS {
 		this.inputElement = null;
 	}
 	
-	public InputJS(HTMLInputElement element) {
-		super(element);
+	public InputJS(HTMLInputElement element, DocumentJS document) {
+		super(element, document);
 		this.inputElement = element;
 	}
 	
@@ -26,7 +25,7 @@ public class InputJS extends HTMLElementJS {
 	
 	@Override
 	public String getClassName() {
-		return "HTMLElement";
+		return "Input";
 	}
 	
 	public String jsGet_accept() {
@@ -62,12 +61,7 @@ public class InputJS extends HTMLElementJS {
 	}
 	
 	public Scriptable jsGet_form() {
-		final HTMLFormElement formElement = inputElement.getForm();
-		if(formElement == null)
-			return null;
-		final FormJS form = new FormJS(formElement);
-		exportObject(form);
-		return form;
+		return exportNode(inputElement.getForm());
 	}
 	
 	public int jsGet_maxLength() {
@@ -133,5 +127,4 @@ public class InputJS extends HTMLElementJS {
 	public void jsFunction_select() {
 		inputElement.select();
 	}
-
 }

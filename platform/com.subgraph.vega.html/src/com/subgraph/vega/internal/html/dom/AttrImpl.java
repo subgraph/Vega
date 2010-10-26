@@ -69,4 +69,19 @@ public class AttrImpl extends NodeImpl implements Attr {
 	public boolean isId() {
 		throw createNoLevel3SupportException();
 	}
+	
+	private String nulltoEmpty(String s) {
+		return (s == null) ? "" : s;
+	}
+	public boolean equals(Object other) {
+		if(!(other instanceof AttrImpl)) 
+			return false;
+		AttrImpl that = (AttrImpl) other;
+		return nulltoEmpty(name).equals(nulltoEmpty(that.name)) && nulltoEmpty(value).equals(nulltoEmpty(that.value));
+	}
+	
+	public int hashCode() {
+		return nulltoEmpty(name).hashCode() * 41 + nulltoEmpty(value).hashCode();
+	}
+	
 }

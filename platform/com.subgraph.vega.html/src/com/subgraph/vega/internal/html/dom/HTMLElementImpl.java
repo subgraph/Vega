@@ -11,7 +11,18 @@ public class HTMLElementImpl extends ElementImpl implements HTMLElement {
 	static Element findEnclosingFormElement(Element insideElement) {
 		Element e = insideElement;
 		while(e != null) {
-			if(e.tagName().equals("FORM"))
+			if(e.tagName().toUpperCase().equals("FORM"))
+				return e;
+			e = e.parent();
+		}
+		return null;
+	}
+	
+	static Element findEnclosingSelectElement(Element insideElement) {
+		
+		Element e = insideElement;
+		while(e != null) {
+			if(e.tagName().toUpperCase().equals("SELECT"))
 				return e;
 			e = e.parent();
 		}
@@ -19,7 +30,7 @@ public class HTMLElementImpl extends ElementImpl implements HTMLElement {
 	}
 	
 	static HTMLElementImpl create(Element jsoupElement, Document ownerDocument) {
-		final String tag = jsoupElement.tagName();
+		final String tag = jsoupElement.tagName().toUpperCase();
 		if(tag == null)
 			throw new IllegalArgumentException();
 		if(tag.equals("FORM")) {

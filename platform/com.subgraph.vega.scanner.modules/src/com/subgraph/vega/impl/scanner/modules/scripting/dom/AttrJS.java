@@ -2,7 +2,6 @@ package com.subgraph.vega.impl.scanner.modules.scripting.dom;
 
 import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
 
 public class AttrJS extends NodeJS {
 	
@@ -13,8 +12,8 @@ public class AttrJS extends NodeJS {
 		this.attr = null;
 	}
 	
-	public AttrJS(Attr attr) {
-		super(attr);
+	public AttrJS(Attr attr, DocumentJS document) {
+		super(attr, document);
 		this.attr = attr;
 	}
 	
@@ -32,11 +31,7 @@ public class AttrJS extends NodeJS {
 	}
 	
 	public Scriptable jsGet_ownerElement() {
-		final Element element = attr.getOwnerElement();
-		if(element == null)
-			return null;
-		
-		return exportNode(element);
+		return exportNode(attr.getOwnerElement());
 	}
 	
 	public boolean jsGet_specified() {

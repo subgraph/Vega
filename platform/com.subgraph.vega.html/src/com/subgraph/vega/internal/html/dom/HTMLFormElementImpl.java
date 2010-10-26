@@ -31,7 +31,7 @@ public class HTMLFormElementImpl extends HTMLElementImpl implements HTMLFormElem
 	}
 	
 	private void addFormElementsToList(Element jsoupElement, List<HTMLElementImpl> formElements) {
-		String tag = jsoupElement.tagName();
+		String tag = jsoupElement.tagName().toUpperCase();
 		if("INPUT".equals(tag)) {
 			formElements.add(new HTMLInputElementImpl(jsoupElement, this, getOwnerDocument()));
 			return;

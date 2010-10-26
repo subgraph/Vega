@@ -1,22 +1,33 @@
 package com.subgraph.vega.impl.scanner.modules.scripting.dom;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class DocumentJS extends NodeJS {
 
 	private static final long serialVersionUID = 1L;
 	protected Document document;
+	private Map<Node, NodeJS> nodeCache = new HashMap<Node, NodeJS>();
 	
 	public DocumentJS() {
 		this.document = null;
 	}
 	
+	NodeJS findCachedNode(Node node) {
+		return nodeCache.get(node);
+	}
+	void putCachedNode(Node node, NodeJS nodeJS) {
+		nodeCache.put(node, nodeJS);
+	}
 	
 	public DocumentJS(Document document) {
-		super(document);
+		super(document, null);
 		this.document = document;
 	}
 	
@@ -24,6 +35,7 @@ public class DocumentJS extends NodeJS {
 		final Document d = (Document) Context.jsToJava(ob, Document.class);
 		this.document = d;
 		setNode(d);
+		setDocumentJS(this);
 	}
 	
 	@Override
@@ -116,7 +128,6 @@ public class DocumentJS extends NodeJS {
 	}
 	
 	public Scriptable jsFunction_importNode(Scriptable importedNode, boolean deep) throws DOMException {
-		
 		return null;
 	}
 	
