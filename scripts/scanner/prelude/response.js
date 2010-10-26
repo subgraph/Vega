@@ -58,7 +58,7 @@ Response.prototype.__defineGetter__("document", function()  {
 	if(!html || !html.getDOMDocument())
 		return null;
 	
-	return (this.cachedDocument = new Document(html.getDOMDocument()));
+	return (this.cachedDocument = new HTMLDocument(html.getDOMDocument()));
 	
 });
 
