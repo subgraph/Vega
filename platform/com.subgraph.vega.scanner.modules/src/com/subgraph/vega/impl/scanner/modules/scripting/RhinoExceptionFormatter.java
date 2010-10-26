@@ -1,6 +1,7 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
 import org.mozilla.javascript.RhinoException;
+import org.mozilla.javascript.WrappedException;
 
 public class RhinoExceptionFormatter {
 	private final String message;
@@ -22,6 +23,17 @@ public class RhinoExceptionFormatter {
 					sb.append(" ");
 				sb.append("^\n");
 			}
+		}
+		if(e instanceof WrappedException) {
+			WrappedException wrapped = (WrappedException) e;
+			Throwable ex = wrapped.getWrappedException();
+			for(StackTraceElement el: ex.getStackTrace()) {
+				sb.append("\tat ");
+				sb.append(el);
+				sb.append("\n");
+
+			}
+			
 		}
 		return sb.toString();
 	}
