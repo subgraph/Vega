@@ -13,24 +13,20 @@
  *
  * Date: Thu Oct 14 23:10:06 2010 -0400
  */
-(function( window, undefined ) {
 
-// Use the correct document accordingly with window argument (sandbox)
-var document = window.document;
+
+(function(undefined) {
+	
+var document;
+
 var jQuery = (function() {
-
-// Define a local copy of jQuery
-var jQuery = function( selector, context ) {
-		document = window.document;
-		// The jQuery object is actually just the init constructor 'enhanced'
+	
+var jQuery = function(selector, context) {
+		if(context && context.nodeType && context.nodeType === 9) {
+			jQuery.setDocument(context);
+		}
 		return new jQuery.fn.init( selector, context );
 	},
-
-	// Map over jQuery in case of overwrite
-	_jQuery = window.jQuery,
-
-	// Map over the $ in case of overwrite
-	_$ = window.$,
 
 	// A central reference to the root jQuery(document)
 	rootjQuery,
@@ -64,27 +60,6 @@ var jQuery = function( selector, context ) {
 	rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 	rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 	rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
-
-	// Useragent RegExp
-	rwebkit = /(webkit)[ \/]([\w.]+)/,
-	ropera = /(opera)(?:.*version)?[ \/]([\w.]+)/,
-	rmsie = /(msie) ([\w.]+)/,
-	rmozilla = /(mozilla)(?:.*? rv:([\w.]+))?/,
-
-	// Keep a UserAgent string for use with jQuery.browser
-	userAgent = navigator.userAgent,
-
-	// For matching the engine and version of the browser
-	browserMatch,
-	
-	// Has the ready events already been bound?
-	readyBound = false,
-	
-	// The functions to execute on DOM ready
-	readyList = [],
-
-	// The ready event handler
-	DOMContentLoaded,
 
 	// Save a reference to some core methods
 	toString = Object.prototype.toString,
@@ -161,12 +136,6 @@ jQuery.fn = jQuery.prototype = {
 					// Check parentNode to catch when Blackberry 4.6 returns
 					// nodes that are no longer in the document #6963
 					if ( elem && elem.parentNode ) {
-						// Handle the case where IE and Opera return items
-						// by name instead of ID
-						if ( elem.id !== match[2] ) {
-							return rootjQuery.find( selector );
-						}
-
 						// Otherwise, we inject the element directly into the jQuery object
 						this.length = 1;
 						this[0] = elem;
@@ -194,11 +163,8 @@ jQuery.fn = jQuery.prototype = {
 				return jQuery( context ).find( selector );
 			}
 
-		// HANDLE: $(function)
-		// Shortcut for document ready
-		} else if ( jQuery.isFunction( selector ) ) {
-			return rootjQuery.ready( selector );
-		}
+		
+		} 
 
 		if (selector.selector !== undefined) {
 			this.selector = selector.selector;
@@ -271,24 +237,6 @@ jQuery.fn = jQuery.prototype = {
 	// only used internally.)
 	each: function( callback, args ) {
 		return jQuery.each( this, callback, args );
-	},
-	
-	ready: function( fn ) {
-		// Attach the listeners
-		jQuery.bindReady();
-
-		// If the DOM is already ready
-		if ( jQuery.isReady ) {
-			// Execute the function immediately
-			fn.call( document, jQuery );
-
-		// Otherwise, remember the function for later
-		} else if ( readyList ) {
-			// Add the function to the wait list
-			readyList.push( fn );
-		}
-
-		return this;
 	},
 	
 	eq: function( i ) {
@@ -392,109 +340,10 @@ jQuery.extend = jQuery.fn.extend = function() {
 };
 
 jQuery.extend({
-	noConflict: function( deep ) {
-		window.$ = _$;
-
-		if ( deep ) {
-			window.jQuery = _jQuery;
-		}
-
-		return jQuery;
+	setDocument: function(d) {
+		document = d;
+		rootjQuery = jQuery(d);
 	},
-	
-	// Is the DOM ready to be used? Set to true once it occurs.
-	isReady: false,
-
-	// A counter to track how many items to wait for before
-	// the ready event fires. See #6781
-	readyWait: 1,
-	
-	// Handle when the DOM is ready
-	ready: function( wait ) {
-		// A third-party is pushing the ready event forwards
-		if ( wait === true ) {
-			jQuery.readyWait--;
-		}
-
-		// Make sure that the DOM is not already loaded
-		if ( !jQuery.readyWait || (wait !== true && !jQuery.isReady) ) {
-			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-			if ( !document.body ) {
-				return setTimeout( jQuery.ready, 1 );
-			}
-
-			// Remember that the DOM is ready
-			jQuery.isReady = true;
-
-			// If a normal DOM Ready event fired, decrement, and wait if need be
-			if ( wait !== true && --jQuery.readyWait > 0 ) {
-				return;
-			}
-
-			// If there are functions bound, to execute
-			if ( readyList ) {
-				// Execute all of them
-				var fn, i = 0;
-				while ( (fn = readyList[ i++ ]) ) {
-					fn.call( document, jQuery );
-				}
-
-				// Reset the list of functions
-				readyList = null;
-			}
-
-			// Trigger any bound ready events
-			if ( jQuery.fn.triggerHandler ) {
-				jQuery( document ).triggerHandler( "ready" );
-			}
-		}
-	},
-	
-	bindReady: function() {
-		if ( readyBound ) {
-			return;
-		}
-
-		readyBound = true;
-
-		// Catch cases where $(document).ready() is called after the
-		// browser event has already occurred.
-		if ( document.readyState === "complete" ) {
-			// Handle it asynchronously to allow scripts the opportunity to delay ready
-			return setTimeout( jQuery.ready, 1 );
-		}
-
-		// Mozilla, Opera and webkit nightlies currently support this event
-		if ( document.addEventListener ) {
-			// Use the handy event callback
-			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
-			
-			// A fallback to window.onload, that will always work
-			window.addEventListener( "load", jQuery.ready, false );
-
-		// If IE event model is used
-		} else if ( document.attachEvent ) {
-			// ensure firing before onload,
-			// maybe late but safe also for iframes
-			document.attachEvent("onreadystatechange", DOMContentLoaded);
-			
-			// A fallback to window.onload, that will always work
-			window.attachEvent( "onload", jQuery.ready );
-
-			// If IE and not a frame
-			// continually check to see if the document is ready
-			var toplevel = false;
-
-			try {
-				toplevel = window.frameElement == null;
-			} catch(e) {}
-
-			if ( document.documentElement.doScroll && toplevel ) {
-				doScrollCheck();
-			}
-		}
-	},
-
 	// See test/unit/core.js for details concerning isFunction.
 	// Since version 1.3, DOM methods and functions like alert
 	// aren't supported. They return false on IE (#2968).
@@ -556,54 +405,9 @@ jQuery.extend({
 		throw msg;
 	},
 	
-	parseJSON: function( data ) {
-		if ( typeof data !== "string" || !data ) {
-			return null;
-		}
-
-		// Make sure leading/trailing whitespace is removed (IE can't handle it)
-		data = jQuery.trim( data );
-		
-		// Make sure the incoming data is actual JSON
-		// Logic borrowed from http://json.org/json2.js
-		if ( rvalidchars.test(data.replace(rvalidescape, "@")
-			.replace(rvalidtokens, "]")
-			.replace(rvalidbraces, "")) ) {
-
-			// Try to use the native JSON parser first
-			return window.JSON && window.JSON.parse ?
-				window.JSON.parse( data ) :
-				(new Function("return " + data))();
-
-		} else {
-			jQuery.error( "Invalid JSON: " + data );
-		}
-	},
 
 	noop: function() {},
 
-	// Evalulates a script in a global context
-	globalEval: function( data ) {
-		if ( data && rnotwhite.test(data) ) {
-			// Inspired by code by Andrea Giammarchi
-			// http://webreflection.blogspot.com/2007/08/global-scope-evaluation-and-dom.html
-			var head = document.getElementsByTagName("head")[0] || document.documentElement,
-				script = document.createElement("script");
-
-			script.type = "text/javascript";
-
-			if ( jQuery.support.scriptEval ) {
-				script.appendChild( document.createTextNode( data ) );
-			} else {
-				script.text = data;
-			}
-
-			// Use insertBefore instead of appendChild to circumvent an IE6 bug.
-			// This arises when a base node is used (#2709).
-			head.insertBefore( script, head.firstChild );
-			head.removeChild( script );
-		}
-	},
 
 	nodeName: function( elem, name ) {
 		return elem.nodeName && elem.nodeName.toUpperCase() === name.toUpperCase();
@@ -811,40 +615,13 @@ jQuery.extend({
 
 	now: function() {
 		return (new Date()).getTime();
-	},
-
-	// Use of jQuery.browser is frowned upon.
-	// More details: http://docs.jquery.com/Utilities/jQuery.browser
-	uaMatch: function( ua ) {
-		ua = ua.toLowerCase();
-
-		var match = rwebkit.exec( ua ) ||
-			ropera.exec( ua ) ||
-			rmsie.exec( ua ) ||
-			ua.indexOf("compatible") < 0 && rmozilla.exec( ua ) ||
-			[];
-
-		return { browser: match[1] || "", version: match[2] || "0" };
-	},
-
-	browser: {}
+	}
 });
 
 // Populate the class2type map
 jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" "), function(i, name) {
 	class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
-
-browserMatch = jQuery.uaMatch( userAgent );
-if ( browserMatch.browser ) {
-	jQuery.browser[ browserMatch.browser ] = true;
-	jQuery.browser.version = browserMatch.version;
-}
-
-// Deprecated, use jQuery.browser.webkit instead
-if ( jQuery.browser.webkit ) {
-	jQuery.browser.safari = true;
-}
 
 if ( indexOf ) {
 	jQuery.inArray = function( elem, array ) {
@@ -860,48 +637,14 @@ if ( !rwhite.test( "\xA0" ) ) {
 }
 
 // All jQuery objects should point back to these
-rootjQuery = jQuery(document);
-
-// Cleanup functions for the document ready method
-if ( document.addEventListener ) {
-	DOMContentLoaded = function() {
-		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
-		jQuery.ready();
-	};
-
-} else if ( document.attachEvent ) {
-	DOMContentLoaded = function() {
-		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-		if ( document.readyState === "complete" ) {
-			document.detachEvent( "onreadystatechange", DOMContentLoaded );
-			jQuery.ready();
-		}
-	};
-}
-
-// The DOM ready check for Internet Explorer
-function doScrollCheck() {
-	if ( jQuery.isReady ) {
-		return;
-	}
-
-	try {
-		// If IE is used, use the trick by Diego Perini
-		// http://javascript.nwbox.com/IEContentLoaded/
-		document.documentElement.doScroll("left");
-	} catch(e) {
-		setTimeout( doScrollCheck, 1 );
-		return;
-	}
-
-	// and execute any waiting functions
-	jQuery.ready();
-}
+//rootjQuery = jQuery(document);
 
 // Expose jQuery to the global object
-return (window.jQuery = window.$ = jQuery);
+return (this.jQuery = this.$ = jQuery);
 
 })();
+
+
 (function( jQuery ) {
 
 var rclass = /[\n\t]/g,
@@ -916,116 +659,6 @@ var rclass = /[\n\t]/g,
 jQuery.fn.extend({
 	attr: function( name, value ) {
 		return jQuery.access( this, name, value, true, jQuery.attr );
-	},
-
-	removeAttr: function( name, fn ) {
-		return this.each(function(){
-			jQuery.attr( this, name, "" );
-			if ( this.nodeType === 1 ) {
-				this.removeAttribute( name );
-			}
-		});
-	},
-
-	addClass: function( value ) {
-		if ( jQuery.isFunction(value) ) {
-			return this.each(function(i) {
-				var self = jQuery(this);
-				self.addClass( value.call(this, i, self.attr("class")) );
-			});
-		}
-
-		if ( value && typeof value === "string" ) {
-			var classNames = (value || "").split( rspaces );
-
-			for ( var i = 0, l = this.length; i < l; i++ ) {
-				var elem = this[i];
-
-				if ( elem.nodeType === 1 ) {
-					if ( !elem.className ) {
-						elem.className = value;
-
-					} else {
-						var className = " " + elem.className + " ", setClass = elem.className;
-						for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
-							if ( className.indexOf( " " + classNames[c] + " " ) < 0 ) {
-								setClass += " " + classNames[c];
-							}
-						}
-						elem.className = jQuery.trim( setClass );
-					}
-				}
-			}
-		}
-
-		return this;
-	},
-
-	removeClass: function( value ) {
-		if ( jQuery.isFunction(value) ) {
-			return this.each(function(i) {
-				var self = jQuery(this);
-				self.removeClass( value.call(this, i, self.attr("class")) );
-			});
-		}
-
-		if ( (value && typeof value === "string") || value === undefined ) {
-			var classNames = (value || "").split( rspaces );
-
-			for ( var i = 0, l = this.length; i < l; i++ ) {
-				var elem = this[i];
-
-				if ( elem.nodeType === 1 && elem.className ) {
-					if ( value ) {
-						var className = (" " + elem.className + " ").replace(rclass, " ");
-						for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
-							className = className.replace(" " + classNames[c] + " ", " ");
-						}
-						elem.className = jQuery.trim( className );
-
-					} else {
-						elem.className = "";
-					}
-				}
-			}
-		}
-
-		return this;
-	},
-
-	toggleClass: function( value, stateVal ) {
-		var type = typeof value, isBool = typeof stateVal === "boolean";
-
-		if ( jQuery.isFunction( value ) ) {
-			return this.each(function(i) {
-				var self = jQuery(this);
-				self.toggleClass( value.call(this, i, self.attr("class"), stateVal), stateVal );
-			});
-		}
-
-		return this.each(function() {
-			if ( type === "string" ) {
-				// toggle individual class names
-				var className, i = 0, self = jQuery(this),
-					state = stateVal,
-					classNames = value.split( rspaces );
-
-				while ( (className = classNames[ i++ ]) ) {
-					// check each className given, space seperated list
-					state = isBool ? state : !self.hasClass( className );
-					self[ state ? "addClass" : "removeClass" ]( className );
-				}
-
-			} else if ( type === "undefined" || type === "boolean" ) {
-				if ( this.className ) {
-					// store className if set
-					jQuery.data( this, "__className__", this.className );
-				}
-
-				// toggle whole className
-				this.className = this.className || value === false ? "" : jQuery.data( this, "__className__" ) || "";
-			}
-		});
 	},
 
 	hasClass: function( selector ) {
@@ -1992,40 +1625,7 @@ var makeArray = function(array, results) {
 	return array;
 };
 
-// Perform a simple check to determine if the browser is capable of
-// converting a NodeList to an array using builtin methods.
-// Also verifies that the returned array holds DOM nodes
-// (which is not the case in the Blackberry browser)
-try {
-	Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
-
-// Provide a fallback method if it does not work
-} catch(e){
-	makeArray = function(array, results) {
-		var ret = results || [], i = 0;
-
-		if ( toString.call(array) === "[object Array]" ) {
-			Array.prototype.push.apply( ret, array );
-		} else {
-			if ( typeof array.length === "number" ) {
-				for ( var l = array.length; i < l; i++ ) {
-					ret.push( array[i] );
-				}
-			} else {
-				for ( ; array[i]; i++ ) {
-					ret.push( array[i] );
-				}
-			}
-		}
-
-		return ret;
-	};
-}
-
-var sortOrder, siblingCheck;
-
-if ( document.documentElement.compareDocumentPosition ) {
-	sortOrder = function( a, b ) {
+var sortOrder = function( a, b ) {
 		if ( a === b ) {
 			hasDuplicate = true;
 			return 0;
@@ -2036,77 +1636,7 @@ if ( document.documentElement.compareDocumentPosition ) {
 		}
 
 		return a.compareDocumentPosition(b) & 4 ? -1 : 1;
-	};
-} else {
-	sortOrder = function( a, b ) {
-		var ap = [], bp = [], aup = a.parentNode, bup = b.parentNode,
-			cur = aup, al, bl;
-
-		// The nodes are identical, we can exit early
-		if ( a === b ) {
-			hasDuplicate = true;
-			return 0;
-
-		// If the nodes are siblings (or identical) we can do a quick check
-		} else if ( aup === bup ) {
-			return siblingCheck( a, b );
-
-		// If no parents were found then the nodes are disconnected
-		} else if ( !aup ) {
-			return -1;
-
-		} else if ( !bup ) {
-			return 1;
-		}
-
-		// Otherwise they're somewhere else in the tree so we need
-		// to build up a full list of the parentNodes for comparison
-		while ( cur ) {
-			ap.unshift( cur );
-			cur = cur.parentNode;
-		}
-
-		cur = bup;
-
-		while ( cur ) {
-			bp.unshift( cur );
-			cur = cur.parentNode;
-		}
-
-		al = ap.length;
-		bl = bp.length;
-
-		// Start walking down the tree looking for a discrepancy
-		for ( var i = 0; i < al && i < bl; i++ ) {
-			if ( ap[i] !== bp[i] ) {
-				return siblingCheck( ap[i], bp[i] );
-			}
-		}
-
-		// We ended someplace up the tree so do a sibling check
-		return i === al ?
-			siblingCheck( a, bp[i], -1 ) :
-			siblingCheck( ap[i], b, 1 );
-	};
-
-	siblingCheck = function( a, b, ret ) {
-		if ( a === b ) {
-			return ret;
-		}
-
-		var cur = a.nextSibling;
-
-		while ( cur ) {
-			if ( cur === b ) {
-				return -1;
-			}
-
-			cur = cur.nextSibling;
-		}
-
-		return 1;
-	};
-}
+};
 
 // Utility function for retreiving the text value of an array of DOM nodes
 Sizzle.getText = function( elems ) {
@@ -2127,190 +1657,6 @@ Sizzle.getText = function( elems ) {
 
 	return ret;
 };
-
-// Check to see if the browser returns elements by name when
-// querying by getElementById (and provide a workaround)
-(function(){
-	// We're going to inject a fake input element with a specified name
-	var form = document.createElement("div"),
-		id = "script" + (new Date()).getTime();
-	form.innerHTML = "<a name='" + id + "'/>";
-
-	// Inject it into the root element, check its status, and remove it quickly
-	var root = document.documentElement;
-	root.insertBefore( form, root.firstChild );
-
-	// The workaround has to do additional checks after a getElementById
-	// Which slows things down for other browsers (hence the branching)
-	if ( document.getElementById( id ) ) {
-		Expr.find.ID = function(match, context, isXML){
-			if ( typeof context.getElementById !== "undefined" && !isXML ) {
-				var m = context.getElementById(match[1]);
-				return m ? m.id === match[1] || typeof m.getAttributeNode !== "undefined" && m.getAttributeNode("id").nodeValue === match[1] ? [m] : undefined : [];
-			}
-		};
-
-		Expr.filter.ID = function(elem, match){
-			var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
-			return elem.nodeType === 1 && node && node.nodeValue === match;
-		};
-	}
-
-	root.removeChild( form );
-	root = form = null; // release memory in IE
-})();
-
-(function(){
-	// Check to see if the browser returns only elements
-	// when doing getElementsByTagName("*")
-
-	// Create a fake element
-	var div = document.createElement("div");
-	div.appendChild( document.createComment("") );
-
-	// Make sure no comments are found
-	if ( div.getElementsByTagName("*").length > 0 ) {
-		Expr.find.TAG = function(match, context){
-			var results = context.getElementsByTagName(match[1]);
-
-			// Filter out possible comments
-			if ( match[1] === "*" ) {
-				var tmp = [];
-
-				for ( var i = 0; results[i]; i++ ) {
-					if ( results[i].nodeType === 1 ) {
-						tmp.push( results[i] );
-					}
-				}
-
-				results = tmp;
-			}
-
-			return results;
-		};
-	}
-
-	// Check to see if an attribute returns normalized href attributes
-	div.innerHTML = "<a href='#'></a>";
-	if ( div.firstChild && typeof div.firstChild.getAttribute !== "undefined" &&
-			div.firstChild.getAttribute("href") !== "#" ) {
-		Expr.attrHandle.href = function(elem){
-			return elem.getAttribute("href", 2);
-		};
-	}
-
-	div = null; // release memory in IE
-})();
-
-if ( document.querySelectorAll ) {
-	(function(){
-		var oldSizzle = Sizzle, div = document.createElement("div");
-		div.innerHTML = "<p class='TEST'></p>";
-
-		// Safari can't handle uppercase or unicode characters when
-		// in quirks mode.
-		if ( div.querySelectorAll && div.querySelectorAll(".TEST").length === 0 ) {
-			return;
-		}
-	
-		Sizzle = function(query, context, extra, seed){
-			context = context || document;
-
-			// Only use querySelectorAll on non-XML documents
-			// (ID selectors don't work in non-HTML documents)
-			if ( !seed && !Sizzle.isXML(context) ) {
-				if ( context.nodeType === 9 ) {
-					try {
-						return makeArray( context.querySelectorAll(query), extra );
-					} catch(qsaError) {}
-
-				// qSA works strangely on Element-rooted queries
-				// We can work around this by specifying an extra ID on the root
-				// and working up from there (Thanks to Andrew Dupont for the technique)
-				// IE 8 doesn't work on object elements
-				} else if ( context.nodeType === 1 && context.nodeName.toLowerCase() !== "object" ) {
-					var old = context.id, id = context.id = "__sizzle__";
-
-					try {
-						return makeArray( context.querySelectorAll( "#" + id + " " + query ), extra );
-
-					} catch(pseudoError) {
-					} finally {
-						if ( old ) {
-							context.id = old;
-
-						} else {
-							context.removeAttribute( "id" );
-						}
-					}
-				}
-			}
-		
-			return oldSizzle(query, context, extra, seed);
-		};
-
-		for ( var prop in oldSizzle ) {
-			Sizzle[ prop ] = oldSizzle[ prop ];
-		}
-
-		div = null; // release memory in IE
-	})();
-}
-
-(function(){
-	var html = document.documentElement,
-		matches = html.matchesSelector || html.mozMatchesSelector || html.webkitMatchesSelector || html.msMatchesSelector,
-		pseudoWorks = false;
-
-	try {
-		// This should fail with an exception
-		// Gecko does not error, returns false instead
-		matches.call( document.documentElement, ":sizzle" );
-	
-	} catch( pseudoError ) {
-		pseudoWorks = true;
-	}
-
-	if ( matches ) {
-		Sizzle.matchesSelector = function( node, expr ) {
-				try { 
-					if ( pseudoWorks || !Expr.match.PSEUDO.test( expr ) ) {
-						return matches.call( node, expr );
-					}
-				} catch(e) {}
-
-				return Sizzle(expr, null, null, [node]).length > 0;
-		};
-	}
-})();
-
-(function(){
-	var div = document.createElement("div");
-
-	div.innerHTML = "<div class='test e'></div><div class='test'></div>";
-
-	// Opera can't find a second classname (in 9.6)
-	// Also, make sure that getElementsByClassName actually exists
-	if ( !div.getElementsByClassName || div.getElementsByClassName("e").length === 0 ) {
-		return;
-	}
-
-	// Safari caches class attributes, doesn't catch changes (in 3.2)
-	div.lastChild.className = "e";
-
-	if ( div.getElementsByClassName("e").length === 1 ) {
-		return;
-	}
-	
-	Expr.order.splice(1, 0, "CLASS");
-	Expr.find.CLASS = function(match, context, isXML) {
-		if ( typeof context.getElementsByClassName !== "undefined" && !isXML ) {
-			return context.getElementsByClassName(match[1]);
-		}
-	};
-
-	div = null; // release memory in IE
-})();
 
 function dirNodeCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
 	for ( var i = 0, l = checkSet.length; i < l; i++ ) {
@@ -2381,9 +1727,7 @@ function dirCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
 	}
 }
 
-Sizzle.contains = document.documentElement.contains ? function(a, b){
-	return a !== b && (a.contains ? a.contains(b) : true);
-} : function(a, b){
+Sizzle.contains =  function(a, b){
 	return !!(a.compareDocumentPosition(b) & 16);
 };
 
@@ -2688,6 +2032,19 @@ jQuery.extend({
 	}
 });
 
+jQuery.fn.extend({
+    text: function( text ) {
+            if ( jQuery.isFunction(text) ) {
+                    return this.each(function(i) {
+                            var self = jQuery(this);
+                            self.text( text.call(this, i, self.text()) );
+                    });
+            }
+            return jQuery.text( this );
+    }
+});
+
+
 // Implement the identical functionality for filter and not
 function winnow( elements, qualifier, keep ) {
 	if ( jQuery.isFunction( qualifier ) ) {
@@ -2719,4 +2076,4 @@ function winnow( elements, qualifier, keep ) {
 }
 
 })( jQuery );
-})(window);
+})();
