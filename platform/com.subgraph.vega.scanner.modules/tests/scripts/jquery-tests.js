@@ -1,22 +1,4 @@
-/**
- * 
- */
-// Test passing wrong document type to javascript document constructor
-	// document.getELementsByTagName("*");
-	// context.parentNode
-	// element.getAttribute("href")
-	// elem.previousSibling
-	// context.getElementById
-	// context.getElementsByName
-	// context.getElementsByTagName
-	// elem.className
-	// elem.disabled
-	// elem.type
-	// elem.checked
-	// elem.parentNode.selectedIndex
-	// elem.textContent
-	// elem.innerText
-	// elem.nodeIndex
+
 var module = {
 	name : "DOM testing module",
 	type : "dom-test",
@@ -27,7 +9,7 @@ var module = {
 function q() {
 	var r = [];
 	for(var i = 0; i < arguments.length; i++) {
-		r.push(document.getElementById(arguments[i]));
+		r.push(doc.getElementById(arguments[i]));
 	}
 	return r;
 }
@@ -40,18 +22,12 @@ function t(a,b,c) {
 	same(f, q.apply(q,c), a + " ("+ b + ")");
 }
 
-
-var jQuery = function(selector) {
-	return window.jQuery(selector, document);
-}
 function run() {
 	print("Running dom test");
-	print("Hello world");
 	
-	var doc = new HTMLDocument(testDom);
-	this.document = doc;
-
-try{	
+	this.doc = new HTMLDocument(testDom);
+	jQuery.setDocument(doc);
+	
 	basic_tests();
 	broken_tests();
 	id_test();
@@ -65,12 +41,10 @@ try{
 	pseudo_not_tests();
 	pseudo_position_tests();
 	pseudo_form_tests();
+	trac_bugs();
+	
 	summary();
-} catch(e) {
-	print(e);
-    print(e.rhinoException.getScriptStackTrace());
 
-}
 }
 
 function basic_tests() {
@@ -87,7 +61,7 @@ function basic_tests() {
 	t( "Element Selector", "html", ["html"] );
 	t( "Parent Element", "div p", ["firstp","ap","sndp","en","sap","first"] );
 	equals( jQuery("param", "#object1").length, 2, "Object/param as context" );
-	same( jQuery("p", document.getElementsByTagName("div")).get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
+	same( jQuery("p", doc.getElementsByTagName("div")).get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
 	same( jQuery("p", "div").get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
 	same( jQuery("p", jQuery("div")).get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
 	same( jQuery("div").find("p").get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
@@ -165,7 +139,7 @@ function class_tests() {
 	t( "Class Selector w/ Element", "a.blog", ["mark","simon"] );
 	t( "Parent Class Selector", "p .blog", ["mark","simon"] );
 
-	same( jQuery(".blog", document.getElementsByTagName("p")).get(), q("mark", "simon"), "Finding elements with a context." );
+	same( jQuery(".blog", doc.getElementsByTagName("p")).get(), q("mark", "simon"), "Finding elements with a context." );
 	same( jQuery(".blog", "p").get(), q("mark", "simon"), "Finding elements with a context." );
 	same( jQuery(".blog", jQuery("p")).get(), q("mark", "simon"), "Finding elements with a context." );
 	same( jQuery("p").find(".blog").get(), q("mark", "simon"), "Finding elements with a context." );
@@ -209,9 +183,8 @@ function child_and_adjacent_tests() {
 	t( "Child", "p>a", ["simon1","google","groups","mark","yahoo","simon"] );
 	t( "Child w/ Class", "p > a.blog", ["mark","simon"] );
 	t( "All Children", "code > *", ["anchor1","anchor2"] );
-	// XXX Throws exception
-	ok(false, "Fix this test");
-	//t( "All Grandchildren", "p > * > *", ["anchor1","anchor2"] );
+
+	t( "All Grandchildren", "p > * > *", ["anchor1","anchor2"] );
 	t( "Adjacent", "a + a", ["groups"] );
 	t( "Adjacent", "a +a", ["groups"] );
 	t( "Adjacent", "a+ a", ["groups"] );
@@ -231,9 +204,9 @@ function child_and_adjacent_tests() {
 
 	t( "No element deep selector", "div.foo > span > a", [] );
 
-	same( jQuery("> :first", document.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
-	same( jQuery("> :eq(0)", document.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
-	same( jQuery("> *:first", document.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
+	same( jQuery("> :first", doc.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
+	same( jQuery("> :eq(0)", doc.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
+	same( jQuery("> *:first", doc.getElementById("nothiddendiv")).get(), q("nothiddendivchild"), "Verify child context positional selctor" );
 
 	t( "Non-existant ancestors", ".fototab > .thumbnails > a", [] );
 }
@@ -250,7 +223,7 @@ function attributes_tests() {
 	t( "Attribute Equals", "a[href='http://www.google.com/']", ["google"] );
 	t( "Attribute Equals", "a[ rel = 'bookmark' ]", ["simon1"] );
 
-	document.getElementById("anchor2").href = "#2";
+	doc.getElementById("anchor2").href = "#2";
 	t( "href Attribute", "p a[href^=#]", ["anchor2"] );
 	t( "href Attribute", "p a[href*=#]", ["simon1", "anchor2"] );
 
@@ -410,4 +383,9 @@ function pseudo_form_tests() {
 	t( "Form element :radio:checked, :checkbox:checked", "#form :radio:checked, #form :checkbox:checked", ["radio2", "check1"] );
 
 	t( "Selected Option Element", "#form option:selected", ["option1a","option2d","option3b","option3c","option4b","option4c","option4d","option5a"] );
+}
+
+function trac_bugs() {
+	same( jQuery("div").has("em").get(), q("main", "siblingTest"), "Trac ticket #20 has()");
+	same( jQuery("#nonnodes").text(), "hi there ", "Trac ticket #23 text()");
 }
