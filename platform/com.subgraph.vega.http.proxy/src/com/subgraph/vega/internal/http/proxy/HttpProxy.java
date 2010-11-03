@@ -106,16 +106,22 @@ public class HttpProxy implements IHttpInterceptProxy {
 
 	@Override
 	public void registerEventHandler(IHttpInterceptProxyEventHandler handler) {
-		eventHandlers.add(handler);
+		synchronized(eventHandlers) {
+			eventHandlers.add(handler);
+		}
 	}
 
 	@Override
 	public void unregisterEventHandler(IHttpInterceptProxyEventHandler handler) {
-		eventHandlers.remove(handler);
+		synchronized(eventHandlers) {
+			eventHandlers.remove(handler);
+		}
 	}
 
 	void completeRequest(ProxyTransaction transaction) {
-		for(IHttpInterceptProxyEventHandler h: eventHandlers)
-			h.handleRequest(transaction);
+		synchronized(eventHandlers) {
+			for(IHttpInterceptProxyEventHandler h: eventHandlers)
+				h.handleRequest(transaction);
+		}
 	}
 }
