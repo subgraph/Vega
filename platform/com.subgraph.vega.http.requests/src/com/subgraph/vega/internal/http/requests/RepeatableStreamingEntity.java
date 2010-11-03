@@ -178,7 +178,8 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 				setActiveByteArrayEntity(buffer.toByteArray());
 		}
 
-		private void processEOF() {
+		private void processEOF() throws IOException {
+			wrappedInput.close();
 			eof = true;
 			setActiveByteArrayEntity(buffer.toByteArray());
 		}
