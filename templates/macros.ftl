@@ -101,7 +101,7 @@ ${text}
 <div class="section" id="resourcecontentsection">
 <table>
 <tr>
-	<td><span class="resourcecontent">${text}</span></td>	
+	<td><span class="resourcecontent"><pre>${text}</pre></span></td>	
 </tr>
 </table>
 </div>
