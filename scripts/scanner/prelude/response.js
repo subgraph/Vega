@@ -29,17 +29,7 @@ Response.prototype.consumeContent = function() {
 };
 
 Response.prototype.__defineGetter__("bodyAsString", function() {
-    var e = this.rawResponse.entity;
-    if(!e) {
-      return null; /* or "" ? */
-    }
-    if(this.entityString) {
-      return this.entityString;
-    }
-    this.entityString = EntityUtils.toString(e);
-    return this.entityString;
-    /* XXX exceptions */
-    //return (this.entityString || (this.entityString = EntityUtils.toString(e)));
+	return this.entityString || (this.entityString = this.httpResponse.getBodyAsString());
 });
 
 Response.prototype.__defineGetter__("allHeaders", function() {
