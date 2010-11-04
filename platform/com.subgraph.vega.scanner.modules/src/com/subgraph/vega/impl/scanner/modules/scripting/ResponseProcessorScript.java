@@ -32,7 +32,7 @@ public class ResponseProcessorScript extends AbstractScriptModule implements IRe
 
 	@Override
 	public boolean mimeTypeFilter(String mimeType) {
-		return true;
+	     return mimeType.toLowerCase().matches("^.*?(text|html|script|xml|json).*$");
 	}
 
 }
