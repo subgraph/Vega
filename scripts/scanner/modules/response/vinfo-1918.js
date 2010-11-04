@@ -3,43 +3,30 @@ var module = {
   type: "response-processor"
 };
 
+function validateAddress(ip) {
+	var ps = ip.split(".");
+	if(ps.length != 4)
+		return false;
+	for(var i = 0; i < 4; i++) {
+		var n = parseInt(ps[i]);
+		if(isNaN(n) || n < 0 || n > 255)
+			return false;
+	}
+	return true;
+}
+
 function run() {
-  var banner = response.header("Server");
-  var host = response.header("Host");
+	var regex = /1(?:92|0|72)(?:\.[12]?\d{1,2}){3}/g,
+		body = response.bodyAsString,
+		result = [];
 
-  var regexp = /(\d+\.\d+\.\d+\.\d+)/;
+	while(r = regex.exec(body)) {
+		if(validateAddress(r[0]) && result.indexOf(r[0]) == -1) {
+			result.push(r[0]);
+		}
+	}
 
-  var regexp1 = /((10)\.([0-9]|[1-9][0-9]|[1-2][0-5][0-5])\.([0-9]|[1-9][0-9]|[1-2][0-5][0-5])\.([0-9]|[1-9][0-9]|[1-2][0-5][0-5]))/g;
-  var regexp2 = /((172)\.(1[6-9]|2[0-9]|3[0-1])\.([0-9]|[1-9][0-9]|[1-2][0-5][0-5])\.([0-9]|[1-9][0-9]|[1-2][0-5][0-5]))/g;
-  var regexp3 = /((192\.168)(\.)([0-9]|[1-9][0-9]|[1-2][0-5][0-5])(\.)([0-9]|[1-9][0-9]|[1-2][0-5][0-5]))/g;
-
-  var res;
-  var ips = [];
-  if(!banner)
-	  return;
-
-  while(res = regexp1.exec(response.bodyAsString)) {
-    if (ips.indexOf(res[0]) < 0)
-    {
-      ips.push(res[0]);
-    }
-  }
-
-  while(res = regexp2.exec(response.bodyAsString)) {
-    if (ips.indexOf(res[0]) < 0)
-    {
-      ips.push(res[0]);
-    }
-  }
-
-  while(res = regexp3.exec(response.bodyAsString)) {
-    if (ips.indexOf(res[0]) < 0)
-    {
-      ips.push(res[0]);
-    }
-  }
-
-  if (ips.length) {
-    model.alert("vinfo-1918", {"output": ips.join(" "), "resource": httpRequest.requestLine.uri} );
-  }
+	if (result.length) {
+	    model.alert("vinfo-1918", {"output": result.join(" "), "resource": httpRequest.requestLine.uri} );
+	 }
 }
