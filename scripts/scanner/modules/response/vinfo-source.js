@@ -3,75 +3,65 @@ var module = {
   type: "response-processor"
 };
 
+
+var xmlReject = /<?\s*xml/i;
+
+function runTest(test) {
+	var output = "";
+	for(var i in test.regex) {
+		var regex = test.regex[i];
+		var res = regex.exec(response.bodyAsString);
+		if(res) {
+			print("Searching: "+ res[0]);
+			if(!xmlReject.test(res[0])) {
+				print("not found");
+				output += res[0];
+			} else {
+				print("found");
+			}
+		}
+	}
+	if(output.length > 0)
+		return output;
+	else 
+		return null;
+}
+
 function run() {
-  var banner = response.header("Server");
-  var host = response.header("Host");
+	var testData = [ 
+	  {
+		  type: "ASP or JSP",
+		  regex: [
+		    /<!--\s*%[\s\S]+%\s*(--)?>/g,
+		    /<%(?:(?!%>)[\s\S])+%>/g
+		  ]
+	  },
+	  {
+		  type: "PHP",
+		  regex: [
+		    /<!--\s*\?[\s\S]+\?\s*(--)?>/g,
+		    /<\?(?:(?!\?>)[\s\S])+\?>/g
+		  ]
+	  },
+	  {
+		  type: "JSP Tag",
+		  regex: [
+		    /<jsp:.+\s+(?:(?!\/>)[\s\S])+\/>/g,
+		    /<jsp:.+>(?:(:!<\/jsp:)[\s\S])<\/jsp:[^>]*>/g
+		  ]
+	  }
+	];
 
-  var regexpasp = new Array(new RegExp("(<!--[^]*%[^]*?%(--)?>)","ig"), new RegExp("<%[^]*?%>","ig"));
-  var regexpphp = new Array(new RegExp("<\\?(?! *xml).*\\?>","ig"), new RegExp("<!--[^]*\\?[^]*?\\?(--)?>","ig"));
-  var regexpjsp = new Array(new RegExp("<jsp:[^]*?>","gi"), new RegExp("<!--[^]*jsp:[^]?(--)?>","ig"));
-  var i = 0;
-  var output = "";
-  var found = 0;
-  var tmp = "";
+	var output = "";
 
-  if(!banner)
-	  return;
+	for(var idx in testData) {
+		var result = runTest(testData[idx]);
+		if(result) {
+			output += ("Possible "+ testData[idx].type +" code: \n"+ result);
+		}
+	}
 
-
-  for (i = 0; i < regexpasp.length; i++)
-  {
-    var res = regexpasp[i].exec(response.bodyAsString);
-    if (res)
-    {
-      tmp += res.join("\n");
-      found = 1;
-    }
-  }
-
-  if (found)
-  {
-    output += "Possible ASP or JSP code: \n" + tmp;
-    found = 0;
-    tmp = "";
-  }
-
-  for (i = 0; i < regexpasp.length; i++)
-  {
-    var res = regexpphp[i].exec(response.bodyAsString);
-    if (res)
-    {
-      tmp += res.join("\n");
-      found = 1;
-    }
-  }
-
-  if (found)
-  {
-    output += "Possible PHP code: \n" + tmp;
-    found = 0;
-    tmp = "";
-  }
-
-  for (i = 0; i < regexpjsp.length; i++)
-  {
-    var res = regexpjsp[i].exec(response.bodyAsString);
-    if (res)
-    {
-      tmp += res.join("\n");
-      found = 1;
-    }
-  }
-
-  if (found)
-  {
-    output += "Possible JSP code: \n" + tmp;
-  }
-
-  found = 0;
-  tmp = "";
-
-  if (output != "") {
+	if(output.length > 0) {
     model.alert("vinfo-source", {"output": output, "resource": httpRequest.requestLine.uri} );
-  }
+	}
 }
