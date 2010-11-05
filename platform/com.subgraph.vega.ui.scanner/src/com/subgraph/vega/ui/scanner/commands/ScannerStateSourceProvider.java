@@ -67,6 +67,7 @@ public class ScannerStateSourceProvider extends AbstractSourceProvider implement
 			switch(statusChange.getScannerStatus()) {
 			case SCAN_IDLE:
 			case SCAN_COMPLETED:
+			case SCAN_CANCELED:
 				setScannerStopped();
 				break;
 			case SCAN_AUDITING:

@@ -55,13 +55,19 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		scanner.getScanModel().addDiscoveredURI(scannerConfig.getBaseURI());
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
-		scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
+		if(!stopRequested)
+			scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
 		if(!stopRequested)
 			runPerHostModulePhase();
 		if(!stopRequested)
 			runPerDirectoryModulePhase();
-		scanner.setScannerStatus(ScannerStatus.SCAN_COMPLETED);
-		logger.info("Scanner completed");
+		if(stopRequested) {
+			scanner.setScannerStatus(ScannerStatus.SCAN_CANCELED);
+			logger.info("Scanner cancelled.");
+		} else {
+			scanner.setScannerStatus(ScannerStatus.SCAN_COMPLETED);
+			logger.info("Scanner completed");
+		}
 	}
 	
 	private void runCrawlerPhase() {

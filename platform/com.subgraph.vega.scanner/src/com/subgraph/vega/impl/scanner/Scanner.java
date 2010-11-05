@@ -59,7 +59,7 @@ public class Scanner implements IScanner {
 	void setScannerStatus(ScannerStatus newStatus) {
 		synchronized(this) {
 			this.scannerStatus = newStatus;
-			if(newStatus == ScannerStatus.SCAN_COMPLETED)
+			if(newStatus == ScannerStatus.SCAN_COMPLETED || newStatus == ScannerStatus.SCAN_CANCELED)
 				scannerTask = null;
 		}
 		scanStatusListeners.fireEvent(new ScannerStatusChangeEvent(newStatus));
@@ -71,7 +71,7 @@ public class Scanner implements IScanner {
 	
 	@Override
 	public synchronized void startScanner(IScannerConfig config) {
-		if(scannerStatus != ScannerStatus.SCAN_IDLE && scannerStatus != ScannerStatus.SCAN_COMPLETED) 
+		if(scannerStatus != ScannerStatus.SCAN_IDLE && scannerStatus != ScannerStatus.SCAN_COMPLETED && scannerStatus != ScannerStatus.SCAN_CANCELED) 
 			throw new IllegalStateException("Scanner is already running.  Verify scanner is not running with getScannerStatus() before trying to start.");
 		
 		if(config.getBaseURI() == null)
