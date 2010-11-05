@@ -12,13 +12,9 @@ function runTest(test) {
 		var regex = test.regex[i];
 		var res = regex.exec(response.bodyAsString);
 		if(res) {
-			print("Searching: "+ res[0]);
 			if(!xmlReject.test(res[0])) {
-				print("not found");
 				output += res[0];
-			} else {
-				print("found");
-			}
+			} 
 		}
 	}
 	if(output.length > 0)
