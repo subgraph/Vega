@@ -3,6 +3,7 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
@@ -45,46 +46,55 @@ public class PreludeLoader {
 		this.preludeCompiler = new ScriptCompiler(scope);
 	}
 	
-	void load() {
+	boolean load() {
 		try {
 			Context cx = Context.enter();
 			Scriptable scope = preludeCompiler.newScope(cx);
 			for(File ps: preludeDirectory.listFiles(scriptFilter)) {
 				preludeCompiler.compileFile(ps, cx, scope);
 			}
-				
-			ScriptableObject.defineClass(scope, NodeJS.class, true, true);
-			ScriptableObject.defineClass(scope, DocumentJS.class, true, true);
-			ScriptableObject.defineClass(scope, ElementJS.class, true, true);
-			ScriptableObject.defineClass(scope, AttrJS.class, true, true);
-			ScriptableObject.defineClass(scope, CharacterDataJS.class, true, true);
-			ScriptableObject.defineClass(scope, TextJS.class, true, true);
-			ScriptableObject.defineClass(scope, AnchorJS.class, true, true);
-			ScriptableObject.defineClass(scope, FormJS.class, true, true);
-			ScriptableObject.defineClass(scope, CommentJS.class, true, true);
-			ScriptableObject.defineClass(scope, HTMLCollectionJS.class, true, true);
-			ScriptableObject.defineClass(scope, HTMLDocumentJS.class, true, true);
-			ScriptableObject.defineClass(scope, InputJS.class, true, true);
-			ScriptableObject.defineClass(scope, LinkJS.class, true, true);
-			ScriptableObject.defineClass(scope, OptionJS.class, true, true);
-			ScriptableObject.defineClass(scope, SelectJS.class, true, true);
-			ScriptableObject.defineClass(scope, NodeListJS.class, true, true);
+			
+			defineHostObject(scope, NodeJS.class);
+			defineHostObject(scope, DocumentJS.class);
+			defineHostObject(scope, ElementJS.class);
+			defineHostObject(scope, AttrJS.class);
+			defineHostObject(scope, CharacterDataJS.class);
+			defineHostObject(scope, TextJS.class);
+			defineHostObject(scope, AnchorJS.class);
+			defineHostObject(scope, FormJS.class);
+			defineHostObject(scope, CommentJS.class);
+			defineHostObject(scope, HTMLCollectionJS.class);
+			defineHostObject(scope, HTMLDocumentJS.class);
+			defineHostObject(scope, InputJS.class);
+			defineHostObject(scope, LinkJS.class);
+			defineHostObject(scope, OptionJS.class);
+			defineHostObject(scope, SelectJS.class);
+			defineHostObject(scope, NodeListJS.class);
+
 			preludeScope = scope;
+			return true;
 			
 		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Failed to load Prelude and DOM wrapper classes", e).toString());
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warning(new RhinoExceptionFormatter("Failed to load Prelude", e).toString());
+			return false;
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Unexpected exception loading prelude: "+ e);
+			return false;
 		} finally {
 			Context.exit();
 		}
+	}
+	
+	private void defineHostObject(Scriptable scope, Class<? extends ScriptableObject> klass) {
+		try {
+			ScriptableObject.defineClass(scope, klass, true, true);
+		} catch (IllegalAccessException e) {
+			logger.warning("IllegalAccessException defining class '"+ klass.getName() + "' : "+ e.getMessage());
+		} catch (InstantiationException e) {
+			logger.warning("InstantiationException defining class '"+ klass.getName() + "' : "+ e.getMessage());
+		} catch (InvocationTargetException e) {
+			logger.warning("InvocationTargetException defining class '"+ klass.getName() + "' : "+ e.getMessage());
+		}		
 	}
 	
 	Scriptable getPreludeScope() {
