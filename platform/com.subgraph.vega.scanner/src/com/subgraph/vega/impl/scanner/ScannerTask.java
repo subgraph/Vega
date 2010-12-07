@@ -57,7 +57,6 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	public void run() {
 		IWebPath basePath = workspace.getWebModel().getWebPathByUri(scannerConfig.getBaseURI());
 		
-		//scanner.getScanModel().addDiscoveredURI(scannerConfig.getBaseURI());
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
 		if(!stopRequested)
