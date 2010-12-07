@@ -22,9 +22,15 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
 
 public class HttpRequestView extends ViewPart {
 	private TableViewer tableViewer;
@@ -48,8 +54,24 @@ public class HttpRequestView extends ViewPart {
 		tableViewer.setContentProvider(new HttpViewContentProvider());
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		IModel model = Activator.getDefault().getModel();
-		if(model != null)
-			tableViewer.setInput(model.getCurrentWorkspace().getRequestLog());
+		
+		if(model != null) {
+			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+				@Override
+				public void handleEvent(IEvent event) {
+					if(event instanceof WorkspaceOpenEvent)
+						handleWorkspaceOpen((WorkspaceOpenEvent) event);
+					else if(event instanceof WorkspaceCloseEvent)
+						handleWorkspaceClose((WorkspaceCloseEvent) event);
+					else if(event instanceof WorkspaceResetEvent)
+						handleWorkspaceReset((WorkspaceResetEvent) event);
+				}
+			});
+			if(currentWorkspace != null)
+				tableViewer.setInput(currentWorkspace.getRequestLog());
+
+		}
+
 		requestResponseViewer = new RequestResponseViewer(form);
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
@@ -73,6 +95,19 @@ public class HttpRequestView extends ViewPart {
 				}				
 			}
 		});
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		tableViewer.setInput(event.getWorkspace().getRequestLog());
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		tableViewer.setInput(null);
+	}
+	
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		tableViewer.setInput(null);
+		tableViewer.setInput(event.getWorkspace().getRequestLog());
 	}
 
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {

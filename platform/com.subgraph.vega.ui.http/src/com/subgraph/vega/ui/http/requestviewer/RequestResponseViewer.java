@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.httpeditor.HttpImage;
 import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.httpeditor.RequestRenderer;

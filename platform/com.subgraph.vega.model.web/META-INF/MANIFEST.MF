@@ -9,6 +9,7 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.google.common.collect;version="1.6.0",
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.model.web,
+ com.subgraph.vega.api.model.web.old,
  org.apache.http;version="4.0.0",
  org.apache.http.client.utils
 Service-Component: OSGI-INF/web-model.xml

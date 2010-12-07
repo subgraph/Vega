@@ -10,10 +10,10 @@ import java.util.Set;
 
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.old.IWebEntity;
+import com.subgraph.vega.api.model.web.old.IWebHost;
+import com.subgraph.vega.api.model.web.old.IWebModel;
+import com.subgraph.vega.api.model.web.old.IWebPath;
 
 public class WebModel implements IWebModel {
 	

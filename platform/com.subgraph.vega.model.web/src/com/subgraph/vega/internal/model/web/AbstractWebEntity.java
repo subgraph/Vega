@@ -2,7 +2,7 @@ package com.subgraph.vega.internal.model.web;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.subgraph.vega.api.model.web.IWebEntity;
+import com.subgraph.vega.api.model.web.old.IWebEntity;
 
 abstract class AbstractWebEntity implements IWebEntity {
 	

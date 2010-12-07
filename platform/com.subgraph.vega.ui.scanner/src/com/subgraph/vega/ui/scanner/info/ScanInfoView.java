@@ -15,8 +15,13 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.api.scanner.model.IScanAlert;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.dashboard.DashboardPane;
 
@@ -77,8 +82,31 @@ public class ScanInfoView extends ViewPart {
 			}
 			
 		});
+		
 		stackLayout.topControl = dashboard;
 		contentPanel.layout();
+		
+		final IModel model = Activator.getDefault().getModel();
+		if(model != null)
+			addWorkspaceListener(model);
+	}
+	
+	private void addWorkspaceListener(IModel model) {
+		model.addWorkspaceListener(new IEventHandler() {
+
+			@Override
+			public void handleEvent(IEvent event) {
+				if((event instanceof WorkspaceCloseEvent) || (event instanceof WorkspaceResetEvent)) {
+					resetState();
+				}				
+			}
+			
+		});
+	}
+	
+	private void resetState() {
+		browser.setText("");
+		showDashboard();
 	}
 
 	private void displayAlert(IScanAlert alert) {

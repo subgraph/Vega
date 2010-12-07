@@ -4,20 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.api.model.web.IWebModelChangeEvent;
+import com.subgraph.vega.api.model.web.NewWebEntityEvent;
+import com.subgraph.vega.api.model.web.UpdatedWebEntityEvent;
 import com.subgraph.vega.ui.tree.web.WebModelAdapter;
 
 public class WebsiteContentProvider implements ITreeContentProvider {
 	private final Object[] NULL_OB = new Object[0];
-	private IWebModel model;
-	private Viewer viewer;
+	private IWorkspace workspace;
+	private StructuredViewer viewer;
 	private final IEventHandler modelListener = createModelListener();
 	private final List<IWebHost> webHosts = new ArrayList<IWebHost>();
 	private final WebModelAdapter treeAdapter = new WebModelAdapter();
@@ -35,7 +37,7 @@ public class WebsiteContentProvider implements ITreeContentProvider {
 	}
 	
 	public Object[] getElements(Object inputElement) {
-		if(inputElement instanceof IWebModel) {
+		if(inputElement instanceof IWorkspace) {
 			return webHosts.toArray(NULL_OB);
 		} else {
 			return treeAdapter.getChildren(inputElement);
@@ -44,23 +46,24 @@ public class WebsiteContentProvider implements ITreeContentProvider {
 	
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if(newInput == null)
-			setNullModel();
-		else if(newInput instanceof IWebModel)
-			setNewModelAndViewer((IWebModel) newInput, viewer);
+			setNullWorkspace();
+		else if(newInput instanceof IWorkspace)
+			setNewWorkspaceAndViewer((IWorkspace) newInput, (StructuredViewer)viewer);
 	}
 	
-	private void setNullModel() {
+	private void setNullWorkspace() {
 		webHosts.clear();
-		model = null;
+		workspace = null;
 	}
 	
-	private void setNewModelAndViewer(IWebModel newModel, Viewer newViewer) {
-		if(newModel != model) {
-			if(model != null) 
-				model.removeChangeListener(modelListener);
-			model = newModel;
+	private void setNewWorkspaceAndViewer(IWorkspace newWorkspace, StructuredViewer newViewer) {
+		if(newWorkspace != workspace) {
+			if(workspace != null) {
+				workspace.getWebModel().removeChangeListener(modelListener);
+			}
+			workspace = newWorkspace;
 			webHosts.clear();
-			model.addChangeListenerAndPopulate(modelListener);
+			workspace.getWebModel().addChangeListenerAndPopulate(modelListener);
 			this.viewer = newViewer;
 		}
 	}
@@ -71,37 +74,51 @@ public class WebsiteContentProvider implements ITreeContentProvider {
 	private IEventHandler createModelListener() {
 		return new IEventHandler() {
 			public void handleEvent(IEvent event) {
-				if(event instanceof IWebModelChangeEvent)
-					handleModelChange((IWebModelChangeEvent) event);
+				if(event instanceof NewWebEntityEvent)
+					handleNewWebEntity((NewWebEntityEvent) event);
+				else if(event instanceof UpdatedWebEntityEvent)
+					handleUpdatedWebEntity((UpdatedWebEntityEvent) event);
 			}
 		};
 	}
 	
-	private void handleModelChange(IWebModelChangeEvent event) {
-		if(event.isEntityAddEvent()) {
-			IWebEntity e = event.getEntity();
-			if(e instanceof IWebHost)
-				addWebHostEntity((IWebHost) e);
-			refreshViewer();
+	private void handleNewWebEntity(NewWebEntityEvent event) {
+		final IWebEntity entity = event.getEntity();
+		if(entity instanceof IWebHost) {
+			webHosts.add((IWebHost) entity);
 		}
-	}
-	
-	private void addWebHostEntity(IWebHost host) {
-		webHosts.add(host);
 		refreshViewer();
 	}
 	
+	private void handleUpdatedWebEntity(UpdatedWebEntityEvent event) {
+		refreshElement(event.getEntity());
+	}
+	
+	private void refreshElement(final IWebEntity element) {
+		guiRun(new Runnable() {
+			@Override
+			public void run() {
+				viewer.refresh(element, true);
+			}
+		});
+	}
+	
 	private void refreshViewer() {
+		guiRun(new Runnable() {
+
+			@Override
+			public void run() {
+				viewer.refresh(true);				
+			}
+			
+		});
+	}
+	
+	private void guiRun(Runnable runnable) {
 		if(viewer != null && !viewer.getControl().isDisposed()) {
-			synchronized (viewer) {
-				viewer.getControl().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						viewer.refresh();						
-					}
-				});
+			synchronized(viewer) {
+				viewer.getControl().getDisplay().asyncExec(runnable);
 			}
 		}
 	}
-
 }

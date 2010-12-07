@@ -1,11 +1,10 @@
 package com.subgraph.vega.ui.tree.web;
 
 import com.google.common.base.Strings;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.ui.tree.ITreeAdapter;
 
-public class WebGetTargetTreeStrategy implements ITreeAdapter<IWebGetTarget> {
-
+public class WebGetTargetTreeStrategy implements ITreeAdapter<Object> {
+/*
 	@Override
 	public Object[] getChildren(IWebGetTarget item) {
 		return new Object[0];
@@ -33,6 +32,30 @@ public class WebGetTargetTreeStrategy implements ITreeAdapter<IWebGetTarget> {
 	
 	private String getQueryLabel(IWebGetTarget item) {
 		return (Strings.isNullOrEmpty(item.getQuery())) ? ("") : (" ["+ item.getQuery() +"]");
+	}
+*/
+	@Override
+	public Object[] getChildren(Object item) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getChildrenCount(Object item) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Object getParent(Object item) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getLabel(Object item) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

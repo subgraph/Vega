@@ -6,11 +6,10 @@ import java.net.URISyntaxException;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
 
 public class HttpViewFilter extends ViewerFilter {
 
@@ -35,8 +34,8 @@ public class HttpViewFilter extends ViewerFilter {
 			return filterWithHost(record, (IWebHost) filterEntity);
 		else if(filterEntity instanceof IWebPath)
 			return filterWithPath(record, (IWebPath) filterEntity);
-		else if(filterEntity instanceof IWebGetTarget) 
-			return filterWithGetTarget(record, (IWebGetTarget) filterEntity);
+//		else if(filterEntity instanceof IWebGetTarget) 
+//			return filterWithGetTarget(record, (IWebGetTarget) filterEntity);
 		else
 			return false;
 	}
@@ -49,13 +48,13 @@ public class HttpViewFilter extends ViewerFilter {
 		try {
 			final URI uri = new URI(record.getRequest().getRequestLine().getUri());
 			final String hostname = record.getHttpHost().getHostName();
-			return (hostname.equals(path.getHost().getHostname()) &&
+			return (hostname.equals(path.getMountPoint().getWebHost().getHostname()) &&
 					uri.getPath().startsWith(path.getFullPath()));
 		} catch (URISyntaxException e) {
 			return false;
 		}
 	}
-	
+	/*
 	private boolean filterWithGetTarget(IRequestLogRecord record, IWebGetTarget get) {
 		try {
 			final URI uri = new URI(record.getRequest().getRequestLine().getUri());
@@ -66,4 +65,5 @@ public class HttpViewFilter extends ViewerFilter {
 			return false;
 		}
 	}
+	*/
 }

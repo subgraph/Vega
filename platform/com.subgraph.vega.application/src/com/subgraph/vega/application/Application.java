@@ -6,11 +6,13 @@ import java.util.logging.Logger;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.api.console.IConsole;
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.application.console.ConsoleHandler;
 import com.subgraph.vega.application.logging.LogFormatter;
 import com.subgraph.vega.application.logging.LogHandler;
@@ -27,6 +29,9 @@ public class Application implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {
 		Display display = PlatformUI.createDisplay();
 		setupLogging();
+		if(!setupWorkspace()) {
+			return IApplication.EXIT_OK;
+		}
 		ConsoleHandler consoleHandler = new ConsoleHandler(display, Activator.getDefault().getConsole());
 		consoleHandler.activate();
 		try {
@@ -57,7 +62,18 @@ public class Application implements IApplication {
 		rootLogger.setLevel(Level.WARNING);
 	}
 	
-	
+	private boolean setupWorkspace() {
+		final IModel model = Activator.getDefault().getModel();
+		if(model == null) {
+			MessageDialog.openError(null, "Initialization Error", "Failed to obtain model service");
+			return false;
+		}
+		if(!model.openDefaultWorkspace()) {
+			MessageDialog.openError(null, "Initialization Error", "Could not open workspace");
+			return false;
+		}
+		return true;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()

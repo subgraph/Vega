@@ -12,7 +12,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.subgraph.vega.api.scanner.model.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 
 /**
  * Renders all the information for a particular alert severity including the

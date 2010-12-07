@@ -1,7 +1,6 @@
 package com.subgraph.vega.ui.http.requestviewer;
 
 import java.util.ArrayList;
-
 import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -9,9 +8,9 @@ import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.requestlog.IRequestLog;
-import com.subgraph.vega.api.requestlog.IRequestLogChangeEvent;
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
+import com.subgraph.vega.api.model.requests.AddRequestRecordEvent;
+import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpViewContentProvider implements IStructuredContentProvider {
 	
@@ -58,19 +57,15 @@ public class HttpViewContentProvider implements IStructuredContentProvider {
 		return new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
-				if(event instanceof IRequestLogChangeEvent) 
-					handleRequestLogChange((IRequestLogChangeEvent) event);				
+				if(event instanceof AddRequestRecordEvent) {
+					handleAddRequestRecord((AddRequestRecordEvent) event);
+				}
 			}
 		};
 	}
 	
-	private void handleRequestLogChange(IRequestLogChangeEvent event) {
-		if(event.isRecordAddEvent() && (event.getRecord() instanceof IRequestLogRecord))
-			addRequestRecord((IRequestLogRecord) event.getRecord());
-	}
-	
-	private void addRequestRecord(IRequestLogRecord record) {
-		requestRecords.add(record);
+	private void handleAddRequestRecord(AddRequestRecordEvent event) {
+		requestRecords.add(event.getRecord());
 		refreshViewer();
 	}
 	

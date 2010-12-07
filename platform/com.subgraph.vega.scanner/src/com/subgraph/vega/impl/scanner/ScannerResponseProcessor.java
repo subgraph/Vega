@@ -10,16 +10,16 @@ import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
-import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public class ScannerResponseProcessor implements IHttpResponseProcessor {
 	private final List<IResponseProcessingModule> responseProcessingModules;
-	private final IScanModel scanModel;
+	private final IWorkspace workspace;
 	
-	public ScannerResponseProcessor(List<IResponseProcessingModule> responseProcessingModules, IScanModel scanModel) {
+	public ScannerResponseProcessor(List<IResponseProcessingModule> responseProcessingModules, IWorkspace workspace) {
 		this.responseProcessingModules = responseProcessingModules;
-		this.scanModel = scanModel;
+		this.workspace = workspace;
 	}
 	
 	@Override
@@ -32,7 +32,7 @@ public class ScannerResponseProcessor implements IHttpResponseProcessor {
 		
 		for(IResponseProcessingModule m: responseProcessingModules) {
 			if(m.responseCodeFilter(statusCode) && m.mimeTypeFilter(mimeType)) 
-				m.processResponse(request, response, scanModel);
+				m.processResponse(request, response, workspace);
 		}
 	}
 	

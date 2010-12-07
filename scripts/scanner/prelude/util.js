@@ -1,7 +1,7 @@
 
 function print(str) {
-	if(scanModel != null) {
-		scanModel.consoleWrite(str);
+	if(workspace != null) {
+		workspace.consoleWrite(str);
 	} else {
 		java.lang.System.out.println(str);
 	}

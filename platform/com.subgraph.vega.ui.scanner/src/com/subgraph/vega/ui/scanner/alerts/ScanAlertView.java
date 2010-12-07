@@ -6,7 +6,13 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.scanner.IScanner;
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 
 public class ScanAlertView extends ViewPart {
@@ -20,16 +26,40 @@ public class ScanAlertView extends ViewPart {
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new ScanAlertContentProvider());
 		viewer.setLabelProvider(new ScanAlertLabelProvider());
-		final IScanner scannerFactory = Activator.getDefault().getScanner();
-		if(scannerFactory == null) {
-			logger.warning("Failed to obtain reference to Scanner Factory");
+		final IModel model = Activator.getDefault().getModel();
+		if(model == null) {
+			logger.warning("Failed to obtain reference to model");
 			return;
 		}
-		
-		viewer.setInput(scannerFactory.getScanModel());
+		final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					handleWorkspaceClose((WorkspaceCloseEvent) event);
+				else if(event instanceof WorkspaceResetEvent)
+					handleWorkspaceReset((WorkspaceResetEvent) event);
+			}
+		});
+		if(currentWorkspace != null)
+			viewer.setInput(currentWorkspace);
 		getSite().setSelectionProvider(viewer);
 	}
 
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		viewer.setInput(event.getWorkspace());
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		viewer.setInput(null);
+	}
+	
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		viewer.setInput(null);
+		viewer.setInput(event.getWorkspace());
+	}
+	
 	@Override
 	public void setFocus() {
 		viewer.getTree().setFocus();

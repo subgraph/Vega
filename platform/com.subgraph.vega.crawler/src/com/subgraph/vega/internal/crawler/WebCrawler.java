@@ -13,12 +13,13 @@ import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.urls.IUrlExtractor;
 
 public class WebCrawler implements IWebCrawler {
 	private final static int CRAWLER_THREAD_COUNT = 5;
-	private final IWebModel model;
+	private final IWorkspace workspace;
+	
 	private final IUrlExtractor urlExtractor;
 	private final IHttpRequestEngine requestEngine;
 	private final ICrawlerConfig config;
@@ -34,8 +35,8 @@ public class WebCrawler implements IWebCrawler {
 	
 	private TaskCounter counter = new TaskCounter();
 	
-	WebCrawler(IWebModel model, IUrlExtractor urlExtractor, IHttpRequestEngine requestEngine, ICrawlerConfig config) {
-		this.model = model;
+	WebCrawler(IWorkspace workspace, IUrlExtractor urlExtractor, IHttpRequestEngine requestEngine, ICrawlerConfig config) {
+		this.workspace = workspace;
 		this.urlExtractor = urlExtractor;
 		this.requestEngine = requestEngine;
 		this.config = config;		
@@ -61,12 +62,12 @@ public class WebCrawler implements IWebCrawler {
 				handler.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
 			}
 		}
-		responseProcessor = new HttpResponseProcessor(requestQueue, responseQueue, model, urlExtractor, config, latch, counter);
+		responseProcessor = new HttpResponseProcessor(requestQueue, responseQueue, workspace, urlExtractor, config, latch, counter);
 		
 		executor.execute( responseProcessor );
 		
 		for(int i = 0; i < CRAWLER_THREAD_COUNT; i++) {
-			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
+			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch, workspace);
 			requestConsumers.add(consumer);
 			executor.execute(consumer);
 		}
@@ -82,10 +83,10 @@ public class WebCrawler implements IWebCrawler {
 		responseQueue.clear();
 		responseQueue.put(CrawlerTask.createExitTask());
 		latch.await();
+		workspace.unlock();
 	}
 	
 	public void waitFinished() throws InterruptedException {
 		latch.await();
 	}
-
 }

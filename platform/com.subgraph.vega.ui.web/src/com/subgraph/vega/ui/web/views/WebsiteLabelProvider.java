@@ -8,8 +8,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebHost;
+import com.subgraph.vega.api.model.web.IWebResponse;
 import com.subgraph.vega.ui.tree.web.WebModelAdapter;
 import com.subgraph.vega.ui.util.ImageCache;
 import com.subgraph.vega.ui.web.Activator;
@@ -47,10 +47,10 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 	}
 	
 	public Image getImage(Object element) {
-		if(element instanceof IWebGetTarget) {
-			IWebGetTarget wgt = (IWebGetTarget) element;
-			if(wgt.getMimeType() != null)
-				return getMimeImage(wgt.getMimeType());
+		if(element instanceof IWebResponse) {
+			IWebResponse response = (IWebResponse) element;
+			if(response.getMimeType() != null)
+				return getMimeImage(response.getMimeType());
 			else
 				return null;
 		}

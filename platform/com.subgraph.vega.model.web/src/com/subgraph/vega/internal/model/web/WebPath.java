@@ -17,10 +17,10 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
-import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.old.IWebEntity;
+import com.subgraph.vega.api.model.web.old.IWebGetTarget;
+import com.subgraph.vega.api.model.web.old.IWebHost;
+import com.subgraph.vega.api.model.web.old.IWebPath;
 
 public class WebPath extends AbstractWebEntity implements IWebPath {
 

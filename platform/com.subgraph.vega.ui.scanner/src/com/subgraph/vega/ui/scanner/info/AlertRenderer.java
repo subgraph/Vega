@@ -12,20 +12,23 @@ import org.eclipse.core.runtime.Path;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 
-import com.subgraph.vega.api.scanner.model.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.ui.scanner.Activator;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.dom.NodeModel;
+import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class AlertRenderer {
-	
+	private final Logger logger = Logger.getLogger("alert-render");
 	private Configuration configuration;
 	private final String imageURL;
+	private final Map<String, Document> alertDocumentCache = new HashMap<String, Document>();
 	
 	AlertRenderer(TemplateLoader templateLoader) {
 		imageURL = findImage();
@@ -39,7 +42,9 @@ public class AlertRenderer {
 		Map<String, Object> root = new HashMap<String, Object>();
 		try {
 			Template t = configuration.getTemplate("main.ftl");
-			Document xmlRoot = alert.getReportXML();
+			Document xmlRoot = getAlertDocument(alert.getName());
+			if(xmlRoot == null)
+				return "";
 			NodeModel nodeModel = NodeModel.wrap(xmlRoot);
 			root.put("doc", nodeModel);
 			Map<String,Object> vars = new HashMap<String,Object>();
@@ -71,6 +76,23 @@ public class AlertRenderer {
 		return null;
 	}
 	
+	private Document getAlertDocument(String name) {
+		if(alertDocumentCache.containsKey(name))
+			return alertDocumentCache.get(name);
+		final IXmlRepository xmlRepository = Activator.getDefault().getXmlRepository();
+		if(xmlRepository == null) {
+			logger.warn("Could not render alert because xml repository service is not available");
+			return null;
+		}
+		
+		final Document alertDocument = xmlRepository.getDocument("alerts/"+ name + ".xml");
+		if(alertDocument == null) {
+			logger.warn("Could not load XML data for alert named '"+ name + "'");
+			return null;
+		}
+		alertDocumentCache.put(name, alertDocument);
+		return alertDocument;
+	}
 	private String findImage() {
 		Bundle b = Activator.getDefault().getBundle();
 		IPath relativePagePath = new Path("icons/vega_logo.png");

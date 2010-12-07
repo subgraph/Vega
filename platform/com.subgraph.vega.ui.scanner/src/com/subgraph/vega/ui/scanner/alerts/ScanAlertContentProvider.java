@@ -10,16 +10,16 @@ import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.scanner.model.INewScanAlertEvent;
-import com.subgraph.vega.api.scanner.model.IScanAlert;
-import com.subgraph.vega.api.scanner.model.IScanAlert.Severity;
-import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlert.Severity;
+import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 
 public class ScanAlertContentProvider implements ITreeContentProvider {
 	private final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private final Map<Severity, List<IScanAlert>> alertMap;
 	private final IEventHandler alertListener = createAlertListener();
-	private IScanModel scanModel;
+	private IWorkspace workspace;
 	private Viewer viewer;
 	
 	ScanAlertContentProvider() {
@@ -34,8 +34,8 @@ public class ScanAlertContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if(newInput instanceof IScanModel)
-			setNewModelAndViewer((IScanModel) newInput, viewer);
+		if(newInput instanceof IWorkspace)
+			setNewModelAndViewer((IWorkspace) newInput, viewer);
 		else
 			setNullModel();		
 	}
@@ -47,16 +47,19 @@ public class ScanAlertContentProvider implements ITreeContentProvider {
 	
 	private void setNullModel() {
 		resetAlertMap();
-		scanModel = null;
+		workspace = null;
 	}
 	
-	private void setNewModelAndViewer(IScanModel newModel, Viewer newViewer) {
-		if(newModel != scanModel) {
-			if(scanModel != null)
-				scanModel.removeAlertListener(alertListener);
-			scanModel = newModel;
+	private void setNewModelAndViewer(IWorkspace newWorkspace, Viewer newViewer) {
+		if(newWorkspace != workspace) {
+			if(workspace != null) {
+				workspace.getScanAlertModel().removeAlertListener(alertListener);
+			}
+			workspace = newWorkspace;
+
 			resetAlertMap();
-			scanModel.addAlertListenerAndPopulate(alertListener);
+			workspace.getScanAlertModel().addAlertListenerAndPopulate(alertListener);
+			
 			this.viewer = newViewer;
 		}
 	}
@@ -108,14 +111,14 @@ public class ScanAlertContentProvider implements ITreeContentProvider {
 		return new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
-				if(event instanceof INewScanAlertEvent) {
-					handleNewScanAlert((INewScanAlertEvent) event);
+				if(event instanceof NewScanAlertEvent) {
+					handleNewScanAlert((NewScanAlertEvent) event);
 				}				
 			}
 		};
 	}
 	
-	private void handleNewScanAlert(INewScanAlertEvent event) {
+	private void handleNewScanAlert(NewScanAlertEvent event) {
 		synchronized(alertMap) {
 			final IScanAlert alert = event.getAlert();
 			final Severity severity = alert.getSeverity();

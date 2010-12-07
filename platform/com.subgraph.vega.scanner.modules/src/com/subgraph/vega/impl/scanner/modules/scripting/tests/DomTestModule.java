@@ -16,7 +16,7 @@ import org.osgi.framework.Bundle;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
-import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.impl.scanner.modules.scripting.AbstractScriptModule;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
 
@@ -33,12 +33,12 @@ public class DomTestModule extends AbstractScriptModule {
 		this.htmlParser = parser;
 	}
 	
-	public void run(IScanModel model) throws IOException {
+	public void run(IWorkspace workspace) throws IOException {
 		String html = lookupModuleString("html");
 		IHTMLParseResult parseResult = loadHTML(html);
 		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
 		export(exports, "testDom", parseResult.getDOMDocument());
-		export(exports, "scanModel", model);
+		export(exports, "workspace", workspace);
 		runScript(exports);
 		
 	}

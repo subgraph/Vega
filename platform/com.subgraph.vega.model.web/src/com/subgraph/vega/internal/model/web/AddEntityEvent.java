@@ -1,7 +1,7 @@
 package com.subgraph.vega.internal.model.web;
 
-import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebModelChangeEvent;
+import com.subgraph.vega.api.model.web.old.IWebEntity;
+import com.subgraph.vega.api.model.web.old.IWebModelChangeEvent;
 
 public class AddEntityEvent implements IWebModelChangeEvent {
 	

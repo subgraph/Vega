@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.subgraph.vega.api.model,
- com.subgraph.vega.api.requestlog,
+ com.subgraph.vega.api.model.requests,
  com.subgraph.vega.ui.hexeditor,
  org.apache.commons.codec;version="1.4.0",
  org.apache.commons.codec.binary;version="1.4.0",

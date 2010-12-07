@@ -3,8 +3,8 @@ package com.subgraph.vega.ui.tree.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.subgraph.vega.api.model.web.IWebGetTarget;
 import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.IWebResponse;
 import com.subgraph.vega.ui.tree.ITreeAdapter;
 
 public class WebPathTreeStrategy implements ITreeAdapter<IWebPath> {
@@ -16,17 +16,20 @@ public class WebPathTreeStrategy implements ITreeAdapter<IWebPath> {
 			Object node = collapsedNode(item, cp);
 			if(node != null)
 				children.add(node);
-			for(IWebGetTarget t: cp.getTargets())
-				children.add(t);
+			for(IWebResponse r: cp.getGetResponses()) 
+				children.add(r);
+			for(IWebResponse r: cp.getPostResponses())
+				children.add(r);
 		}
 		
 		return children.toArray();
 	}
 	
 	private Object collapsedNode(IWebPath root, IWebPath p) {
-		if(p.getChildPaths().size() == 1 && p.getTargets().isEmpty())
+		boolean noResponses = (p.getGetResponses().size() == 0) && (p.getPostResponses().size() == 0);
+		if(p.getChildPaths().size() == 1 && noResponses)
 			return collapsedNode(root, p.getChildPaths().iterator().next());
-		else if(p.getChildPaths().isEmpty() && !p.getTargets().isEmpty()) {
+		else if(p.getChildPaths().isEmpty() && !noResponses) {
 			IWebPath pp = p.getParentPath();
 			if(pp == null || pp == root)
 				return null;
@@ -45,7 +48,7 @@ public class WebPathTreeStrategy implements ITreeAdapter<IWebPath> {
 	@Override
 	public Object getParent(IWebPath item) {
 		if(item.getParentPath() == null)
-			return item.getHost();
+			return item.getMountPoint().getWebHost();
 		else if(item.getParentPath().getChildPaths().size() == 1)
 			return getParent(item.getParentPath());
 		else
@@ -57,7 +60,7 @@ public class WebPathTreeStrategy implements ITreeAdapter<IWebPath> {
 		if(item.getParentPath() == null)
 			return "/";
 		else
-			return prevLabel(item) + "/" + item.getPath();
+			return prevLabel(item) + "/" + item.getPathComponent();
 	}
 	
 	private String prevLabel(IWebPath item) {

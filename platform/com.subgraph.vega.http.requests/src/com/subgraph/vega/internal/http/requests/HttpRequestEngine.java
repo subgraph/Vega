@@ -18,7 +18,6 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
-import com.subgraph.vega.api.requestlog.IRequestLog;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -26,20 +25,18 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
-	private final IRequestLog requestLog;
 
-	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser, IRequestLog requestLog) {
+	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.executor = executor;
 		this.client = client;
 		this.config = config;
 		this.htmlParser = htmlParser;
-		this.requestLog = requestLog;
 	}
 	
 	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
-		Future<IHttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config, htmlParser, requestLog));
+		Future<IHttpResponse> future = executor.submit(new RequestTask(client, request, requestContext, config, htmlParser));
 		try {
 			return future.get();
 		} catch (InterruptedException e) {

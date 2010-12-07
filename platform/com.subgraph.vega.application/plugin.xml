@@ -43,6 +43,11 @@
             id="com.subgraph.vega.commands.switchWorkspace"
             name="Switch Workspace">
       </command>
+      <command
+            categoryId="com.subgraph.vega.commands.category.workspaces"
+            id="com.subgraph.vega.commands.resetWorkspace"
+            name="Reset Workspace">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -53,6 +58,18 @@
       <handler
             class="com.subgraph.vega.application.workspaces.SwitchWorkspaceHandler"
             commandId="com.subgraph.vega.commands.switchWorkspace">
+      </handler>
+      <handler
+            class="com.subgraph.vega.application.workspaces.ResetWorkspaceHandler"
+            commandId="com.subgraph.vega.commands.resetWorkspace">
+         <enabledWhen>
+            <with
+                  variable="vega.workspaceLockState">
+               <equals
+                     value="unlocked">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -66,6 +83,32 @@
                relationship="fast">
          </view>
       </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="fileMenu"
+               label="File">
+            <command
+                  commandId="com.subgraph.vega.commands.resetWorkspace"
+                  label="Reset Current Workspace"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="com.subgraph.vega.application.workspaces.WorkspaceLockStateSourceProvider">
+         <variable
+               name="vega.workspaceLockState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
    </extension>
 
 </plugin>

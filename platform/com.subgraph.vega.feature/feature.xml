@@ -88,13 +88,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.subgraph.vega.requestlog"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.subgraph.vega.urls"
          download-size="0"
          install-size="0"
@@ -158,13 +151,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.subgraph.vega.model.web"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.subgraph.vega.http.requests"
          download-size="0"
          install-size="0"
@@ -187,20 +173,6 @@
 
    <plugin
          id="com.subgraph.vega.scanner"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.subgraph.vega.scanner"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.subgraph.vega.scanner.modules"
          download-size="0"
          install-size="0"
          version="0.0.0"

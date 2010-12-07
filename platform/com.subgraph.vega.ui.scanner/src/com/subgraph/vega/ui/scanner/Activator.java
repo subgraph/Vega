@@ -4,8 +4,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.IScanner;
+import com.subgraph.vega.api.xml.IXmlRepository;
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -19,6 +21,8 @@ public class Activator extends AbstractUIPlugin {
 	
 	private ServiceTracker scannerTracker;
 	private ServiceTracker pathFinderTracker;
+	private ServiceTracker modelTracker;
+	private ServiceTracker xmlRepositoryTracker;
 	
 	/**
 	 * The constructor
@@ -39,6 +43,12 @@ public class Activator extends AbstractUIPlugin {
 		
 		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
+		
+		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
+		modelTracker.open();
+		
+		xmlRepositoryTracker = new ServiceTracker(context, IXmlRepository.class.getName(), null);
+		xmlRepositoryTracker.open();
 	}
 
 	/*
@@ -66,5 +76,12 @@ public class Activator extends AbstractUIPlugin {
 	public IPathFinder getPathFinder() {
 		return (IPathFinder) pathFinderTracker.getService();
 	}
-
+	
+	public IModel getModel() {
+		return (IModel) modelTracker.getService();
+	}
+	
+	public IXmlRepository getXmlRepository() {
+		return (IXmlRepository) xmlRepositoryTracker.getService();
+	}
 }

@@ -15,8 +15,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
-import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.urls.IUrlExtractor;
 
@@ -24,7 +23,7 @@ public class HttpResponseProcessor implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
-	private final IWebModel model;
+	private final IWorkspace workspace;
 	private final IUrlExtractor extractor;
 	private final ICrawlerConfig config;
 	private final CountDownLatch latch;
@@ -32,10 +31,10 @@ public class HttpResponseProcessor implements Runnable {
 	private volatile boolean stop;
 	private volatile HttpUriRequest currentRequest;
 	
-	HttpResponseProcessor(BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, IWebModel model, IUrlExtractor extractor, ICrawlerConfig config, CountDownLatch latch, TaskCounter counter) {
+	HttpResponseProcessor(BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, IWorkspace workspace, IUrlExtractor extractor, ICrawlerConfig config, CountDownLatch latch, TaskCounter counter) {
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
-		this.model = model;
+		this.workspace = workspace;
 		this.extractor = extractor;
 		this.config = config;
 		this.latch = latch;
@@ -49,7 +48,11 @@ public class HttpResponseProcessor implements Runnable {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
-			latch.countDown();
+			synchronized(latch) {
+				latch.countDown();
+				if(latch.getCount() == 0)
+					workspace.unlock();
+			}
 		}
 	}
 	
@@ -104,9 +107,9 @@ public class HttpResponseProcessor implements Runnable {
 	private void processEntity(IHttpResponse response, HttpEntity entity, URI page) {
 		Header contentType = entity.getContentType();
 		String mimeType = (contentType == null) ? (null) : (contentType.getValue());
-		IWebPath path = model.addURI(page);
-		IWebGetTarget getTarget = path.addGetTarget(page.getQuery(), mimeType);
-		getTarget.setVisited(true);
+		IWebPath path = workspace.getWebModel().getWebPathByUri(page);
+		path.addGetResponse(page.getQuery(), mimeType);
+		path.setVisited(true);
 		if(mimeType != null && mimeType.contains("html")) {
 			List<URI> uris = extractor.findUrls(response);
 			filterAndQueueURIs(uris);

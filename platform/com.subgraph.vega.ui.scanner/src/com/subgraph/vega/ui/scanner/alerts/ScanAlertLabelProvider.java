@@ -3,8 +3,8 @@ package com.subgraph.vega.ui.scanner.alerts;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.subgraph.vega.api.scanner.model.IScanAlert;
-import com.subgraph.vega.api.scanner.model.IScanAlert.Severity;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlert.Severity;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 

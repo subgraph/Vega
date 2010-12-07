@@ -8,7 +8,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 

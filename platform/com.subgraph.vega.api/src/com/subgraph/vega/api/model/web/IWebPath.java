@@ -1,17 +1,28 @@
 package com.subgraph.vega.api.model.web;
 
+import java.net.URI;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
 
 public interface IWebPath extends IWebEntity {
-	IWebHost getHost();
-	String getPath();
 	IWebPath getParentPath();
-	Collection<IWebPath> getChildPaths();
-	Collection<IWebGetTarget> getTargets();
-	IWebPath getChildPath(String path);
-	IWebPath getOrCreateChildPath(String path);
+	String getPathComponent();
 	String getFullPath();
-	Set<IWebPath> getUnvisitedPaths();
-	IWebGetTarget addGetTarget(String query, String mimeType);
+	URI getUri();
+	IWebPath addChildPath(String pathComponent);
+	IWebMountPoint getMountPoint();
+	Collection<IWebPath> getChildPaths();
+	
+	boolean isGetTarget();
+	boolean isPostTarget();
+	IWebPathParameters getGetParameters();
+	IWebPathParameters getPostParameters();
+	
+	List<IWebResponse> getGetResponses();
+	List<IWebResponse> getPostResponses();
+	
+	void addGetResponse(String query, String mimeType);
+	void addPostResponse(List<NameValuePair> parameters, String mimeType);
 }

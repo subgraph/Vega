@@ -5,7 +5,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
-import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.IModel;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -34,7 +34,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		modelTracker = new ServiceTracker(context, IWebModel.class.getName(), null);
+		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
 		modelTracker.open();
 		crawlerTracker = new ServiceTracker(context, IWebCrawlerFactory.class.getName(), null);
 		crawlerTracker.open();
@@ -62,8 +62,8 @@ public class Activator extends AbstractUIPlugin {
 		return (IWebCrawlerFactory) crawlerTracker.getService();
 	}
 	
-	public IWebModel getModel() {
-		return (IWebModel) modelTracker.getService();
+	public IModel getModel() {
+		return (IModel) modelTracker.getService();
 	}
 
 }

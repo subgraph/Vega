@@ -7,9 +7,11 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.events.CrawlerProgressEvent;
 import com.subgraph.vega.impl.scanner.events.ScannerStatusChangeEvent;
@@ -25,13 +27,30 @@ public class Scanner implements IScanner {
 	private IScannerModuleRegistry moduleRegistry;
 	private ScannerTask scannerTask;
 	private Thread scannerThread;
+	private IWorkspace currentWorkspace;
+	
+	protected void activate() {
+		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					handleWorkspaceClose((WorkspaceCloseEvent) event);				
+			}
+		});
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		this.currentWorkspace = event.getWorkspace();
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		this.currentWorkspace = null;
+	}
 	
 	protected void deactivate() {
 		
-	}
-	@Override
-	public IScanModel getScanModel() {
-		return model.getCurrentWorkspace().getScanModel();
 	}
 
 	IWebCrawlerFactory getCrawlerFactory() {
@@ -40,6 +59,10 @@ public class Scanner implements IScanner {
 	
 	IScannerModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
+	}
+	
+	IModel getModel() {
+		return model;
 	}
 	
 	void fireStatusChangeEvent(IEvent event) {
@@ -79,7 +102,9 @@ public class Scanner implements IScanner {
 		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		moduleRegistry.refreshModuleScripts();
-		scannerTask = new ScannerTask(this, config, requestEngine);
+		
+		currentWorkspace.lock();
+		scannerTask = new ScannerTask(this, config, requestEngine, currentWorkspace);
 		scannerThread = new Thread(scannerTask);
 		setScannerStatus(ScannerStatus.SCAN_STARTING);
 

@@ -14,7 +14,6 @@ import org.apache.http.util.EntityUtils;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.requestlog.IRequestLog;
 
 public class EngineHttpResponse implements IHttpResponse {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -23,21 +22,18 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final HttpRequest originalRequest;
 	private final HttpResponse rawResponse;
 	private final IHTMLParser htmlParser;
-	private final IRequestLog requestLog;
 	
 	private String cachedString;
 	private boolean stringExtractFailed;
 	private boolean htmlParseFailed;
-	private boolean requestLogged;
 	private IHTMLParseResult htmlParseResult;
 	
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser, IRequestLog requestLog) {
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = originalRequest;
 		this.rawResponse = rawResponse;
 		this.htmlParser = htmlParser;
-		this.requestLog = requestLog;
 	}
 
 	@Override
@@ -90,14 +86,6 @@ public class EngineHttpResponse implements IHttpResponse {
 				htmlParseFailed = true;
 			return htmlParseResult;
 		}
-	}
-
-	@Override
-	public void logResponse() {
-		if(requestLogged)
-			return;
-		requestLog.addRequestResponse(originalRequest, rawResponse, host);
-		requestLogged = true;
 	}
 
 	@Override

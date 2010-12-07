@@ -10,6 +10,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
@@ -17,11 +19,11 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IModel;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.scanner.model.IScanModel;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.urls.IUrlExtractor;
@@ -31,13 +33,12 @@ public class HttpProxyService implements IHttpProxyService {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
 	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
-	private IWebModel webModel;
-	private IScanModel scanModel;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IUrlExtractor urlExtractor;
 	private IScannerModuleRegistry moduleRepository;
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private HttpProxy proxy;
+	private IWorkspace currentWorkspace;
 
 	public HttpProxyService() {
 		eventHandler = new IHttpInterceptProxyEventHandler() {
@@ -47,12 +48,34 @@ public class HttpProxyService implements IHttpProxyService {
 			}
 		};
 	}
+	
+	public void activate() {
+		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent) 
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent) 
+					handleWorkspaceClose((WorkspaceCloseEvent) event);				
+			}
+		});
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		this.currentWorkspace = event.getWorkspace();
+		
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		this.currentWorkspace = null;
+	}
 
 	@Override
 	public void start(int proxyPort) {
 		responseProcessingModules = moduleRepository.getResponseProcessingModules();
-		webModel = model.getCurrentWorkspace().getWebModel();
-		scanModel = model.getCurrentWorkspace().getScanModel();
+		if(currentWorkspace == null) 
+			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
+		currentWorkspace.lock();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, requestEngine);
 		proxy.registerEventHandler(eventHandler);
@@ -60,8 +83,8 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void processTransaction(IProxyTransaction transaction) {
-
-		transaction.getResponse().logResponse();
+		IHttpResponse response = transaction.getResponse();
+		currentWorkspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 		HttpEntity responseEntity = transaction.getResponse().getRawResponse().getEntity();
 		if(responseEntity == null)
 			return;
@@ -79,7 +102,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private void runResponseProcessingModules(IProxyTransaction transaction, String mimeType) {
 		for(IResponseProcessingModule module: responseProcessingModules) {
 			if(module.mimeTypeFilter(mimeType) && module.responseCodeFilter(transaction.getResponse().getRawResponse().getStatusLine().getStatusCode()))
-					module.processResponse(transaction.getRequest(), transaction.getResponse(), scanModel);
+					module.processResponse(transaction.getRequest(), transaction.getResponse(), currentWorkspace);
 		}
 	}
 	private String transactionToMimeType(IProxyTransaction transaction) {
@@ -102,21 +125,25 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void addGetTargetToModel(HttpHost httpHost, URI uri, String mimeType) {
-		IWebHost hostEntity = webModel.addWebHost(httpHost.getHostName(), httpHost.getPort(), httpHost.getSchemeName().equals("https"));
-		IWebPath pathEntity = hostEntity.addPath(uri.getPath());
-		IWebGetTarget getTarget = pathEntity.addGetTarget(uri.getQuery(), mimeType);
-		getTarget.setVisited(true);
+		IWebHost hostEntity = currentWorkspace.getWebModel().getWebHostByHttpHost(httpHost);
+		IWebPath path = hostEntity.addPath(uri.getPath());
+		path.addGetResponse(uri.getQuery(), mimeType);
+		path.setVisited(true);
 	}
 	
 	private void addDiscoveredLinks(IHttpResponse response) {
-		for(URI u: urlExtractor.findUrls(response))
-			webModel.addURI(u);
+		for(URI u: urlExtractor.findUrls(response)) {
+			currentWorkspace.getWebModel().getWebPathByUri(u);
+		}
 	}
 
 	@Override
 	public void stop() {
+		if(currentWorkspace == null)
+			throw new IllegalStateException("No workspace is open");
 		proxy.unregisterEventHandler(eventHandler);
 		proxy.stopProxy();		
+		currentWorkspace.unlock();
 	}
 
 	protected void setModel(IModel model) {

@@ -7,9 +7,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.google.common.base.Objects;
-import com.subgraph.vega.api.model.web.IWebEntity;
-import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.old.IWebEntity;
+import com.subgraph.vega.api.model.web.old.IWebHost;
+import com.subgraph.vega.api.model.web.old.IWebPath;
 
 public class WebHost extends AbstractWebEntity implements IWebHost {
 	private final static int DEFAULT_HTTP_PORT = 80;

@@ -6,16 +6,20 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base;version="1.6.0",
- com.google.common.collect;version="1.6.0",
  com.subgraph.vega.api.annotations,
  com.subgraph.vega.api.console,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.html,
  com.subgraph.vega.api.model,
+ com.subgraph.vega.api.model.alerts,
+ com.subgraph.vega.api.model.requests,
  com.subgraph.vega.api.model.web,
- com.subgraph.vega.api.requestlog,
- com.subgraph.vega.api.scanner.model,
+ com.subgraph.vega.api.paths,
+ com.subgraph.vega.api.xml,
  org.apache.http;version="4.0.0",
  org.apache.http.client.utils,
- org.apache.http.message;version="4.0.0"
+ org.apache.http.message;version="4.0.0",
+ org.apache.http.util;version="4.0.0"
 Service-Component: OSGI-INF/model.xml
+Bundle-ClassPath: lib/db4o-7.12.156.14667-all-java5.jar,
+ .

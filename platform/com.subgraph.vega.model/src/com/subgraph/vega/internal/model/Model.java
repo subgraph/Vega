@@ -1,49 +1,33 @@
 package com.subgraph.vega.internal.model;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.subgraph.vega.api.console.IConsole;
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.api.requestlog.IRequestLog;
-import com.subgraph.vega.api.scanner.model.IScanAlertRepository;
+import com.subgraph.vega.api.model.IWorkspaceEntry;
+import com.subgraph.vega.api.paths.IPathFinder;
+import com.subgraph.vega.api.xml.IXmlRepository;
 
 public class Model implements IModel {
-		
-	private IWebModel webModel;
-	private IRequestLog requestLog;
+	private final Logger logger = Logger.getLogger("model");
+	private final EventListenerManager workspaceEventManager = new EventListenerManager();
+	private IWorkspace currentWorkspace;
+	
 	private IConsole console;
 	private IHTMLParser htmlParser;
-	private IScanAlertRepository alertRepository;
+	private IXmlRepository xmlRepository;
+	private IPathFinder pathFinder;
 	
-	private IWorkspace workspace;
 	
-	@Override
-	public boolean openWorkspace(String path) {
-		return false;
-	}
-
-	@Override
-	public IWorkspace getCurrentWorkspace() {
-		if(workspace == null)
-			workspace = new Workspace(webModel, requestLog, console, htmlParser, alertRepository);
-		return workspace;
-	}
+	private WorkspaceEntries workspaceEntries;
 	
-	protected void setWebModel(IWebModel webModel) {
-		this.webModel = webModel;
-	}
-	
-	protected void unsetWebModel(IWebModel webModel) {
-		this.webModel = null;
-	}
-	
-	protected void setRequestLog(IRequestLog requestLog) {
-		this.requestLog = requestLog;
-	}
-	
-	protected void unsetRequestLog(IRequestLog requestLog) {
-		this.requestLog = null;
+	public void activate() {
+		workspaceEntries = new WorkspaceEntries(pathFinder);
 	}
 	
 	protected void setConsole(IConsole console) {
@@ -62,11 +46,62 @@ public class Model implements IModel {
 		this.htmlParser = null;
 	}
 	
-	protected void setAlertRepository(IScanAlertRepository alertRepository) {
-		this.alertRepository = alertRepository;
+	protected void setXmlRepository(IXmlRepository xmlRepository) {
+		this.xmlRepository = xmlRepository;
 	}
-	protected void unsetAlertRepository(IScanAlertRepository alertRepository) {
-		this.alertRepository = null;
+	
+	protected void unsetXmlRepository(IXmlRepository xmlRepository) {
+		this.xmlRepository = null;
+	}
+	
+	protected void setPathFinder(IPathFinder pathFinder) {
+		this.pathFinder = pathFinder;
+	}
+	
+	protected void unsetPathFinder(IPathFinder pathFinder) {
+		this.pathFinder = null;
+	}
+
+	@Override
+	public IWorkspace addWorkspaceListener(IEventHandler handler) {
+		workspaceEventManager.addListener(handler);
+		return currentWorkspace;
+		
+	}
+
+	@Override
+	public List<IWorkspaceEntry> getWorkspaceEntries() {
+		return workspaceEntries.getWorkspaceEntries();
+	}
+
+	@Override
+	public boolean openDefaultWorkspace() {
+		final IWorkspaceEntry entry = workspaceEntries.getDefaultWorkspaceEntry();
+		if(entry == null)
+			return false;
+		else
+			return openWorkspaceEntry(entry);
+	}
+
+	@Override
+	public boolean openWorkspaceByIndex(int index) {
+		throw new UnsupportedOperationException("Not implemented yet");
+	}
+	
+	private boolean openWorkspaceEntry(IWorkspaceEntry entry) {
+		IWorkspace workspace = new Workspace(entry, workspaceEventManager, console, htmlParser, xmlRepository);
+		if(!workspace.open()) {
+			logger.warning("Failed to open workspace at path "+ entry.getPath());
+			return false;
+		}
+		currentWorkspace = workspace;
+		return true;
+	}
+
+	@Override
+	public void resetCurrentWorkspace() {
+		if(currentWorkspace != null)
+			currentWorkspace.reset();		
 	}
 }
 

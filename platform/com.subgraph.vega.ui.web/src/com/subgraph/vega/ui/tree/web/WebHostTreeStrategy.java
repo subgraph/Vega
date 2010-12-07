@@ -3,7 +3,7 @@ package com.subgraph.vega.ui.tree.web;
 import java.util.Collection;
 
 import com.google.common.collect.Iterables;
-import com.subgraph.vega.api.model.web.IWebGetTarget;
+
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.ui.tree.ITreeAdapter;
@@ -14,9 +14,11 @@ public class WebHostTreeStrategy implements ITreeAdapter<IWebHost> {
 	@Override
 	public Object[] getChildren(IWebHost item) {
 		IWebPath rootPath = item.getRootPath();
+		boolean noResponses = (rootPath.getGetResponses().size() == 0) && (rootPath.getPostResponses().size() == 0);
+
 		Collection<IWebPath> childPaths = rootPath.getChildPaths();
-		Collection<IWebGetTarget> targets = rootPath.getTargets();
-		if(childPaths.isEmpty() && targets.isEmpty())
+		
+		if(childPaths.isEmpty() && noResponses)
 			return new Object[] { rootPath };
 		else if(childPaths.isEmpty())
 			return Iterables.toArray(childPaths, Object.class);

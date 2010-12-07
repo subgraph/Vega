@@ -1,9 +1,9 @@
 package com.subgraph.vega.api.scanner.modules;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.scanner.model.IScanDirectory;
-import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.web.IWebPath;
 
 public interface IPerDirectoryScannerModule {
-	void runScan(IScanDirectory directory, IHttpRequestEngine requestEngine, IScanModel scanModel);
+	void runScan(IWebPath directory, IHttpRequestEngine requestEngine, IWorkspace workspace);
 }

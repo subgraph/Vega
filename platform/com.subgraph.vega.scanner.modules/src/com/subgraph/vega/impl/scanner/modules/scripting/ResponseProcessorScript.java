@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.http.HttpRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.scanner.model.IScanModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public class ResponseProcessorScript extends AbstractScriptModule implements IResponseProcessingModule {
@@ -17,11 +17,11 @@ public class ResponseProcessorScript extends AbstractScriptModule implements IRe
 	
 	@Override
 	public void processResponse(HttpRequest request, IHttpResponse response,
-			IScanModel scanModel) {
+			IWorkspace workspace) {
 		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
 		export(exports, "httpRequest", request);
 		export(exports, "httpResponse", response);
-		export(exports, "scanModel", scanModel);
+		export(exports, "workspace", workspace);
 		runScript(exports);
 	}
 

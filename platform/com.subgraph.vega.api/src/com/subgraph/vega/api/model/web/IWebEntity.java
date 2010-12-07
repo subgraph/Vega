@@ -1,11 +1,12 @@
 package com.subgraph.vega.api.model.web;
 
-import java.net.URI;
+import com.subgraph.vega.api.model.IModelProperties;
 
-public interface IWebEntity {
-	IWebEntity getParent();
+public interface IWebEntity extends IModelProperties {
 	boolean isVisited();
-	URI toURI();
-	IWebHost getHostEntity();
 	void setVisited(boolean notify);
+	boolean isScanned();
+	void setScanned();
+	IWebEntity getParent();
+
 }

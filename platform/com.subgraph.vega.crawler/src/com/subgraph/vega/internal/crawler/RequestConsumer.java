@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.model.IWorkspace;
 
 public class RequestConsumer implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
@@ -19,14 +20,16 @@ public class RequestConsumer implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
+	private final IWorkspace workspace;
 	private volatile HttpUriRequest currentRequest;
 	private volatile boolean stop;
 	
-	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
+	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, IWorkspace workspace) {
 		this.requestEngine = requestEngine;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.latch = latch;
+		this.workspace = workspace;
 	}
 
 	@Override
@@ -36,7 +39,11 @@ public class RequestConsumer implements Runnable {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
-			latch.countDown();
+			synchronized(latch) {
+				latch.countDown();
+				if(latch.getCount() == 0)
+					workspace.unlock();
+			}
 		}		
 	}
 	

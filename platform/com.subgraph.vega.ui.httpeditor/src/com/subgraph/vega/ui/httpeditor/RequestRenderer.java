@@ -2,8 +2,8 @@ package com.subgraph.vega.ui.httpeditor;
 
 import org.apache.http.Header;
 
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
-import com.subgraph.vega.api.requestlog.IRequestLogRecord;
 
 public class RequestRenderer {
 

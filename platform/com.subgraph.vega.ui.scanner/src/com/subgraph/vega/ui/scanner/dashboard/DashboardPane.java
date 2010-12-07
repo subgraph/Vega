@@ -16,12 +16,17 @@ import org.eclipse.ui.forms.widgets.ScrolledFormText;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.scanner.ICrawlerProgressEvent;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerStatusChangeEvent;
-import com.subgraph.vega.api.scanner.model.INewScanAlertEvent;
-import com.subgraph.vega.api.scanner.model.IScanAlert;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 
@@ -49,14 +54,34 @@ public class DashboardPane extends Composite {
 		super(parent, SWT.NONE);
 		this.display = parent.getDisplay();
 		final IScanner scanner = Activator.getDefault().getScanner();
+		final IModel model = Activator.getDefault().getModel();
 		scanner.registerScannerStatusChangeListener(createEventHandler());
-		currentStatus = scanner.getScannerStatus();
-		scanner.getScanModel().addAlertListenerAndPopulate(createAlertHandler());
-		
+		currentStatus = scanner.getScannerStatus();		
 		setLayout(new FillLayout());
-		
 		toolkit = new FormToolkit(display);
 		toolkit.getColors().createColor("grey", GREY_TEXT_COLOR);
+		createDashboardForm();
+		
+		final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					handleWorkspaceClose((WorkspaceCloseEvent) event);
+				else if(event instanceof WorkspaceResetEvent)
+					handleWorkspaceReset((WorkspaceResetEvent) event);
+			}
+		});
+		if(currentWorkspace != null)
+			currentWorkspace.getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+		renderOutput();
+	}
+	
+	private void createDashboardForm() {
+		if(scrolledForm != null)
+			scrolledForm.dispose();
+		
 		scrolledForm = createForm(this, toolkit);
 		scrolledFormText = createFormText(scrolledForm.getBody(), toolkit);
 		FormText formText = scrolledFormText.getFormText();
@@ -81,10 +106,24 @@ public class DashboardPane extends Composite {
 
 		toolkit.paintBordersFor(formText);
 		toolkit.decorateFormHeading(scrolledForm.getForm());
-		
-		renderOutput();
-		
+		this.layout();
 	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		event.getWorkspace().getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		createDashboardForm();
+		renderOutput();
+	}
+	
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		createDashboardForm();
+		event.getWorkspace().getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+		renderOutput();
+	}
+	
 	
 	private static ScrolledForm createForm(Composite parent, FormToolkit toolkit) {
 		final ScrolledForm form = toolkit.createScrolledForm(parent);
@@ -225,8 +264,8 @@ public class DashboardPane extends Composite {
 		return new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
-				if(event instanceof INewScanAlertEvent) {
-					processAlert(((INewScanAlertEvent)event).getAlert());
+				if(event instanceof NewScanAlertEvent) {
+					processAlert(((NewScanAlertEvent)event).getAlert());
 				}
 			}
 		};

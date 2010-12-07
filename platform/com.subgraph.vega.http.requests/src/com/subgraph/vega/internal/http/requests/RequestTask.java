@@ -21,7 +21,6 @@ import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
-import com.subgraph.vega.api.requestlog.IRequestLog;
 
 class RequestTask implements Callable<IHttpResponse> {
 
@@ -30,15 +29,13 @@ class RequestTask implements Callable<IHttpResponse> {
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
-	private final IRequestLog requestLog;
 
-	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser, IRequestLog requestLog) {
+	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.client = client;
 		this.request = request;
 		this.context = context;
 		this.config = config;
 		this.htmlParser = htmlParser;
-		this.requestLog = requestLog;
 	}
 
 	@Override
@@ -55,7 +52,7 @@ class RequestTask implements Callable<IHttpResponse> {
 			httpResponse.setEntity(newEntity);
 		}
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host, request, httpResponse, htmlParser, requestLog);
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host, request, httpResponse, htmlParser);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		

@@ -10,8 +10,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import com.subgraph.vega.api.scanner.model.IScanAlert;
-import com.subgraph.vega.api.scanner.model.IScanAlert.Severity;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlert.Severity;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 
@@ -29,6 +29,7 @@ public class AlertPane extends Composite {
 		setLayout(new GridLayout());
 		addSeverityCells(parent.getBackground());
 	}
+	
 	
 	private void addSeverityCells(Color background) {
 		for(Severity s: Severity.values()) {

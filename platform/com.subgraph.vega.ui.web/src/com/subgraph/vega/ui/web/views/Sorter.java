@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import com.subgraph.vega.api.model.web.IWebEntity;
 
+
 public class Sorter extends ViewerSorter {
 	public int category(Object element) {
 		if(!(element instanceof IWebEntity))

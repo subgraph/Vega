@@ -11,8 +11,13 @@ import java.util.Properties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
@@ -34,11 +39,30 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	private ScriptLoader scriptLoader;
 	private TestScriptLoader testScriptLoader;
 	private Bundle bundle;
+	private IWorkspace currentWorkspace;
 	
 	void activate(BundleContext context) {
 		this.bundle = context.getBundle();
 		scriptLoader = new ScriptLoader(getScriptDirectory());
 		scriptLoader.load();
+		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					handleWorkspaceClose((WorkspaceCloseEvent) event);				
+			}
+		});
+		
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		this.currentWorkspace = event.getWorkspace();
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		this.currentWorkspace = null;
 	}
 	
 	private File getScriptDirectory() {
@@ -154,7 +178,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			return;
 		final DomTestModule test = new DomTestModule(module, bundle, htmlParser);
 		try {
-			test.run(model.getCurrentWorkspace().getScanModel());
+			test.run(currentWorkspace);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -10,9 +10,11 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.model,
+ com.subgraph.vega.api.model.alerts,
  com.subgraph.vega.api.paths,
  com.subgraph.vega.api.scanner,
- com.subgraph.vega.api.scanner.model,
+ com.subgraph.vega.api.xml,
  com.subgraph.vega.ui.util,
  org.eclipse.ui.forms,
  org.eclipse.ui.forms.widgets

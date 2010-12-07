@@ -7,8 +7,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.subgraph.vega.application.Activator;
-
 public class NewWorkspaceHandler extends AbstractHandler{
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -27,7 +25,7 @@ public class NewWorkspaceHandler extends AbstractHandler{
 			WorkspaceRecord workspaceRecord =  wizard.getWorkspaceRecord();
 			if(restart) {
 				/* close workspace and restart */
-				Activator.getDefault().getModel().getCurrentWorkspace().close();
+				//Activator.getDefault().getModel().getCurrentWorkspace().close();
 				PlatformUI.getWorkbench().restart();
 			}
 			return workspaceRecord;
