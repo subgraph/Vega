@@ -1,9 +1,5 @@
 package com.subgraph.vega.impl.scanner.modules.scripting.tests;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,14 +7,14 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.Bundle;
 
 import com.subgraph.vega.impl.scanner.modules.scripting.ModuleValidator;
 import com.subgraph.vega.impl.scanner.modules.scripting.ModuleValidator.ModuleValidationException;
-import com.subgraph.vega.impl.scanner.modules.scripting.RhinoExceptionFormatter;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptCompiler;
+import com.subgraph.vega.impl.scanner.modules.scripting.ScriptFile;
+import com.subgraph.vega.impl.scanner.modules.scripting.ScriptFile.CompileStatus;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
 
 public class TestScriptLoader {
@@ -39,7 +35,7 @@ public class TestScriptLoader {
 	public void load() {
 		allModules.clear();
 		for(URL scriptURL: allTestScripts()) {
-			ScriptedModule compiledModule = compileModule(scriptURL);
+			ScriptedModule compiledModule = compileModule(new ScriptFile(scriptURL));
 			if(compiledModule != null)
 				allModules.add(compiledModule);
 		}
@@ -49,39 +45,30 @@ public class TestScriptLoader {
 		return Collections.unmodifiableList(allModules);
 	}
 	
-	public void refreshModules() {
-		synchronized (allModules) {
-			for(int i = 0; i < allModules.size(); i++) {
-				ScriptedModule module = allModules.get(i);
-				ScriptedModule newModule = compileModule(module.getScriptURL());
-				if(newModule != null)
-					allModules.set(i, newModule);
-			}
+	private ScriptedModule compileModule(ScriptFile scriptFile) {	
+		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
+			logger.warning(scriptFile.getCompileFailureMessage());
+			return null;
 		}
+			
+		final ModuleValidator validator = validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
+		if(validator == null)
+			return null;
+			
+		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction());
 	}
 	
-	private ScriptedModule compileModule(URL scriptURL) {
+	private ModuleValidator validateModule(Scriptable module, String modulePath) {
+		final ModuleValidator validator = new ModuleValidator(module);
 		try {
-			InputStream input = scriptURL.openStream();
-			Reader r = new InputStreamReader(input);
-			Scriptable module = moduleCompiler.compileReader(r, scriptURL.getPath());
-			if(module  == null)
-				return null;
-			ModuleValidator validator = new ModuleValidator(module);
 			validator.validate();
-			return new ScriptedModule(scriptURL, module, validator.getName(), validator.getType(), validator.getRunFunction());
-		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Failed to compile module script.", e).toString());
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return validator;
 		} catch (ModuleValidationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warning("Failed to validate test module "+ modulePath +" :"+ e.getMessage());
+			return null;
 		}
-		return null;
 	}
+
 	private List<URL> allTestScripts() {
 		List<URL> scriptURLs = new ArrayList<URL>();
 		Enumeration<?> entries = bundle.findEntries("/tests/scripts", "*", true);

@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -51,7 +50,12 @@ public class PreludeLoader {
 			Context cx = Context.enter();
 			Scriptable scope = preludeCompiler.newScope(cx);
 			for(File ps: preludeDirectory.listFiles(scriptFilter)) {
-				preludeCompiler.compileFile(ps, cx, scope);
+				ScriptFile scriptFile = new ScriptFile(ps);
+				if(!preludeCompiler.compile(scriptFile, cx, scope)) {
+					logger.warning("Failed to load module prelude");
+					logger.warning(scriptFile.getCompileFailureMessage());
+					return false;
+				}
 			}
 			
 			defineHostObject(scope, NodeJS.class);
@@ -74,9 +78,6 @@ public class PreludeLoader {
 			preludeScope = scope;
 			return true;
 			
-		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Failed to load Prelude", e).toString());
-			return false;
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Unexpected exception loading prelude: "+ e);
 			return false;

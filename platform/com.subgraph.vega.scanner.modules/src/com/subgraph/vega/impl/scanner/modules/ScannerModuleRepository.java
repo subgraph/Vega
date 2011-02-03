@@ -44,7 +44,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	void activate(BundleContext context) {
 		this.bundle = context.getBundle();
 		scriptLoader = new ScriptLoader(getScriptDirectory());
-		scriptLoader.load();
+		scriptLoader.reloadModules();
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
@@ -124,7 +124,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	
 	@Override
 	public void refreshModuleScripts() {
-		scriptLoader.refreshModules();		
+		scriptLoader.reloadModules();		
 	}
 	
 	protected void setPathFinder(IPathFinder pathFinder) {

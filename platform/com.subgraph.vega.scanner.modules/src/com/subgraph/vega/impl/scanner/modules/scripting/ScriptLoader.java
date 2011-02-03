@@ -3,16 +3,22 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ImporterTopLevel;
-import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+
+import com.subgraph.vega.impl.scanner.modules.scripting.ModuleValidator.ModuleValidationException;
+import com.subgraph.vega.impl.scanner.modules.scripting.ScriptFile.CompileStatus;
 
 public class ScriptLoader {
 	private final Logger logger = Logger.getLogger("script-loader");
@@ -20,7 +26,11 @@ public class ScriptLoader {
 	private final File moduleRoot;
 	private final PreludeLoader preludeLoader;
 	private final ScriptCompiler moduleCompiler;
-	private final List<ScriptedModule> allModules = new ArrayList<ScriptedModule>();
+	
+	private final Map<File, ScriptedModule> modulePathMap = new HashMap<File, ScriptedModule>();
+	
+	/* Script files are tracked separately from modules mainly so that we can track files have failed to compile. */
+	private final Map<File, ScriptFile> scriptPathMap = new HashMap<File, ScriptFile>();
 	
 	private final FileFilter scriptFilter = new FileFilter() {
 		public boolean accept(File pathname) {
@@ -66,57 +76,41 @@ public class ScriptLoader {
 		}
 	}
 	
-	public void load() {
-		allModules.clear();
-		for(File scriptFile: allScriptFiles()) {
-			ScriptedModule compileModule = compileModule(scriptFile);
-			if(compileModule != null)
-				allModules.add(compileModule);
+	public List<ScriptedModule> getAllModules() {
+		synchronized(modulePathMap) {
+			return new ArrayList<ScriptedModule>(modulePathMap.values());
 		}
 	}
 	
-	public List<ScriptedModule> getAllModules() {
-		synchronized(allModules) {
-			return Collections.unmodifiableList(allModules);
-		}
-	}
 	public Scriptable getPreludeScope() {
 		return preludeLoader.getPreludeScope();
 	}
 	
-	public void refreshModules() {
-		synchronized (allModules) {
-			for(int i = 0; i < allModules.size(); i++) {
-				ScriptedModule module = allModules.get(i);
-				if(module.hasFileChanged()) {
-					ScriptedModule newModule = compileModule(module.getScriptFile());
-					if(newModule != null)
-						allModules.set(i, newModule);
-				}
-			}
+	private ScriptedModule compileModule(ScriptFile scriptFile) {
+		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
+			logger.warning(scriptFile.getCompileFailureMessage());
+			return null;
+		}
+		
+		final ModuleValidator validator = validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
+		if(validator == null)
+			return null;
+		
+		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction());
+	}
+	
+	private ModuleValidator validateModule(Scriptable module, String modulePath) {
+		final ModuleValidator validator = new ModuleValidator(module);
+		try {
+			validator.validate();
+			return validator;
+		} catch (ModuleValidationException e) {
+			logger.warning("Failed to validate module script "+ modulePath +" :"+ e.getMessage());
+			return null;
 		}
 	}
 	
-	private ScriptedModule compileModule(File scriptFile) {
-		try {
-			Scriptable module = moduleCompiler.compileFile(scriptFile);
-			if(module == null)
-				return null;
-			ModuleValidator validator = new ModuleValidator(module);
-			validator.validate();
-			return new ScriptedModule(scriptFile, module, validator.getName(), validator.getType(), validator.getRunFunction());
-		} catch (ModuleValidator.ModuleValidationException e) {
-			logger.warning("Failed to validate module script "+ scriptFile.getAbsolutePath() +" :"+ e.getMessage());
-			return null;
-		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Failed to compile module script.", e).toString());
-			return null;
-			
-		}
-		
-		
-	}
-	private List<File> allScriptFiles() {
+	private List<File> allScriptPaths() {
 		final File scriptRoot = new File(moduleRoot, "modules");
 		final List<File> scriptFiles = new ArrayList<File>();
 		crawlDirectory(scriptRoot, scriptFiles);
@@ -128,5 +122,48 @@ public class ScriptLoader {
 			files.add(f);
 		for(File d: dir.listFiles(directoryFilter))
 			crawlDirectory(d, files);
+	}
+	
+	public void reloadModules() {	
+		synchronized(modulePathMap) {
+			synchronizeScriptPaths();
+			for(Map.Entry<File, ScriptFile> entry: scriptPathMap.entrySet()) 
+				compileScriptFileIfNeeded(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	private void synchronizeScriptPaths() {
+		final Set<File> pathSet = new HashSet<File>();
+		
+		for(File path: allScriptPaths()) {
+			pathSet.add(path);
+			if(!scriptPathMap.containsKey(path)) 
+				scriptPathMap.put(path, new ScriptFile(path));
+		}
+		
+		Collection<File> keys = scriptPathMap.keySet();
+		
+		for(File path: keys) {
+			if(!pathSet.contains(path)) {
+				modulePathMap.remove(path);
+				scriptPathMap.remove(path);
+			}
+		}
+	}
+		
+	private void compileScriptFileIfNeeded(File path, ScriptFile scriptFile) {
+		if(!isCompileNeeded(scriptFile))
+			return;
+		
+		if(modulePathMap.containsKey(path))
+			modulePathMap.remove(path);
+			
+		final ScriptedModule module = compileModule(scriptFile);
+		if(module != null)
+			modulePathMap.put(path, module);
+	}
+	
+	private boolean isCompileNeeded(ScriptFile scriptFile) {
+		return ((scriptFile.getCompileStatus() == CompileStatus.NOT_COMPILED) || scriptFile.hasFileChanged());
 	}
 }
