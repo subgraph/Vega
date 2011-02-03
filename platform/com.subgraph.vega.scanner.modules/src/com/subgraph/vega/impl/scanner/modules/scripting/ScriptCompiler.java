@@ -45,8 +45,6 @@ public class ScriptCompiler {
 		} catch (Exception e) {
 			scriptFile.setCompileFailed("Unexpected exception compiling script: "+ e);
 			return false;
-		}finally {
-			Context.exit();
 		}
 	}
 		
