@@ -9,11 +9,13 @@ public class NewScanWizard extends Wizard {
 
 	private NewScanWizardPage page;
 	private URI scanHostURI;
+	private String validTargetField;
 	private boolean isDomTest;
+	private String targetField;
 	
 	@Override
 	public void addPages() {
-		page = new NewScanWizardPage();
+		page = new NewScanWizardPage(targetField);
 		addPage(page);
 	}
 	
@@ -35,11 +37,21 @@ public class NewScanWizard extends Wizard {
 			return true;
 		}
 		scanHostURI = createTargetURI(page.getText());
+		if(scanHostURI != null)
+			validTargetField = target;
 		return (scanHostURI != null);		
+	}
+	
+	public void setTargetField(String value) {
+		targetField = value;
 	}
 	
 	public URI getScanHostURI() {
 		return scanHostURI;
+	}
+	
+	public String getTargetField() {
+		return validTargetField;
 	}
 	
 	public boolean isDomTest() {

@@ -14,11 +14,13 @@ public class NewScanWizardPage extends WizardPage {
 
 	private Composite container;
 	private Text text;
+	private String targetValue;
 	
-	public NewScanWizardPage() {
+	public NewScanWizardPage(String targetValue) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("Create a New Scan");
+		this.targetValue = targetValue;
 	}
 	@Override
 	public void createControl(Composite parent) {
@@ -30,7 +32,10 @@ public class NewScanWizardPage extends WizardPage {
 		label.setText("Input host to scan:");
 		
 		text = new Text(container, SWT.BORDER | SWT.SINGLE);
-		text.setText("");
+		if(targetValue != null)
+			text.setText(targetValue);
+		else
+			text.setText("");
 		text.addKeyListener(new KeyListener() {
 			@Override 
 			public void keyPressed(KeyEvent e) {
@@ -51,7 +56,5 @@ public class NewScanWizardPage extends WizardPage {
 		
 	public String getText() {
 		return text.getText();
-	}
-
-				
+	}			
 }

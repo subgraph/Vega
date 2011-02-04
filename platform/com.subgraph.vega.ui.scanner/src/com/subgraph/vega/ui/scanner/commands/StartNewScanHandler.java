@@ -15,10 +15,14 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
 
 public class StartNewScanHandler extends AbstractHandler {
-
+	private String lastTargetValue = null;
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		NewScanWizard wizard = new NewScanWizard();
+		if(lastTargetValue != null)
+			wizard.setTargetField(lastTargetValue);
+		
 		WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
 			if(wizard.isDomTest()) {
@@ -27,8 +31,10 @@ public class StartNewScanHandler extends AbstractHandler {
 			}
 				
 			URI uri = wizard.getScanHostURI();
-			if(uri != null) 
+			if(uri != null) {
+				lastTargetValue = wizard.getTargetField();
 				launchScanner(uri);
+			}
 		}
 		return null;
 	}
