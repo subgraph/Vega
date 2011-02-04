@@ -12,11 +12,13 @@ import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.web.IWebMountPoint;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
+import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
 
 public class ScannerTask implements Runnable, ICrawlerEventHandler {
 
@@ -57,6 +59,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	public void run() {
 		IWebPath basePath = workspace.getWebModel().getWebPathByUri(scannerConfig.getBaseURI());
 		
+		runMountPointAnalysis(basePath.getMountPoint());
+		
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
 		if(!stopRequested)
@@ -73,6 +77,15 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 			logger.info("Scanner completed");
 		}
 		workspace.unlock();
+	}
+	
+	private void runMountPointAnalysis(IWebMountPoint mountPoint) {
+		logger.info("Analyzing mount point at "+ mountPoint.toString());
+		for(IPerMountPointModule m: scanner.getModuleRegistry().getPerMountPointModules()) {
+			if(stopRequested)
+				return;
+			m.runModule(mountPoint, requestEngine, workspace);
+		}
 	}
 	
 	private void runCrawlerPhase() {

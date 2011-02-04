@@ -8,4 +8,5 @@ public interface IScannerModuleRegistry {
 	List<IPerHostScannerModule> getPerHostModules();
 	List<IPerDirectoryScannerModule> getPerDirectoryModules();
 	List<IResponseProcessingModule> getResponseProcessingModules();
+	List<IPerMountPointModule> getPerMountPointModules();
 }

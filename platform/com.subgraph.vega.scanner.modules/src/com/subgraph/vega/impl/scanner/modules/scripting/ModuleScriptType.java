@@ -4,6 +4,7 @@ public enum ModuleScriptType {
 	DISABLED("disabled"),
 	PER_SERVER("per-server"),
 	PER_DIRECTORY("per-directory"),
+	PER_MOUNTPOINT("per-mountpoint"),
 	RESPONSE_PROCESSOR("response-processor"),
 	DOM_TEST("dom-test");
 

@@ -21,11 +21,13 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
+import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.modules.scripting.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
+import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ResponseProcessorScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptLoader;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
@@ -118,6 +120,17 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
 			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
+		}
+		return modules;
+	}
+	
+
+	@Override
+	public List<IPerMountPointModule> getPerMountPointModules() {
+		final List<IPerMountPointModule> modules = new ArrayList<IPerMountPointModule>();
+		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(m.getModuleType() == ModuleScriptType.PER_MOUNTPOINT)
+				modules.add(new PerMountPointScript(m));
 		}
 		return modules;
 	}
