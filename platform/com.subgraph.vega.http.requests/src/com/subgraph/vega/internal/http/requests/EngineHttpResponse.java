@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.internal.http.errors.HttpNotFoundErrorDetector;
 
 public class EngineHttpResponse implements IHttpResponse {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -22,18 +23,20 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final HttpRequest originalRequest;
 	private final HttpResponse rawResponse;
 	private final IHTMLParser htmlParser;
+	private final HttpNotFoundErrorDetector notFoundDetector;
 	
 	private String cachedString;
 	private boolean stringExtractFailed;
 	private boolean htmlParseFailed;
 	private IHTMLParseResult htmlParseResult;
-	
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
+
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser, HttpNotFoundErrorDetector notFoundDetector) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = originalRequest;
 		this.rawResponse = rawResponse;
 		this.htmlParser = htmlParser;
+		this.notFoundDetector = notFoundDetector;
 	}
 
 	@Override
@@ -91,5 +94,10 @@ public class EngineHttpResponse implements IHttpResponse {
 	@Override
 	public HttpHost getHost() {
 		return host;
+	}
+
+	@Override
+	public boolean isHttpNotFoundError() {
+		return notFoundDetector.isNotFoundErrorResponse(originalRequest, this);
 	}
 }

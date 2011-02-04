@@ -12,4 +12,5 @@ public interface IHttpResponse {
 	HttpHost getHost();
 	String getBodyAsString();
 	IHTMLParseResult getParsedHTML();
+	boolean isHttpNotFoundError();
 }
