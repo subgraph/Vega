@@ -4,25 +4,24 @@ var module = {
 };
 
 function run() {
-  var banner = response.header("Server");
-  var host = response.header("Host");
-  var regexp = /[^\s]+@[^\s]+/gi;
-  var res;
-  var emails = [];
-
-  if(!banner)
-	  return;
-
-  while (res = regexp.exec(response.bodyAsString)) {
-    var match;
-    var regexp2 = /([-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?)/;
-    match = regexp2.exec(res[0]); 
-    if (emails.indexOf(match[0]) < 0)
-    {
-      emails.push(match[0]);
-    }
-  }
-  if (emails.length) {
-    model.alert("vinfo-emails", {"output": emails.join(" "), "resource": httpRequest.requestLine.uri} );
-  }
+	var atDomainRegex = /@(?:[^\s.]{1,64}\.)+\S{2,6}/,
+		mailRegex = /\w[^\s@]*@(?:[^\s.]{1,64}\.)+\S{2,6}/g,
+		strictMailRegex = /[\w!#$%&'*+-\/=?^`{|}~.]+@(?:(([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+(?:aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])/i,
+		body = response.bodyAsString,
+		emails = [],
+		r, sr;
+	
+	if(!atDomainRegex.test(body))
+		return;
+	
+	while(r = mailRegex.exec(body)) {
+		sr = strictMailRegex.exec(r[0]);
+		if(sr && emails.indexOf(sr[0]) == -1) {
+			emails.push(sr[0]);
+		}
+	}
+	
+	if (emails.length) {
+	    model.alert("vinfo-emails", {"output": emails.join(" "), "resource": httpRequest.requestLine.uri} );
+	}
 }
