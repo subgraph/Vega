@@ -17,6 +17,10 @@ public interface IWebPath extends IWebEntity {
 	
 	boolean isGetTarget();
 	boolean isPostTarget();
+
+	void addGetParameterList(List<NameValuePair> params);
+	void addPostParameterList(List<NameValuePair> params);
+
 	IWebPathParameters getGetParameters();
 	IWebPathParameters getPostParameters();
 	

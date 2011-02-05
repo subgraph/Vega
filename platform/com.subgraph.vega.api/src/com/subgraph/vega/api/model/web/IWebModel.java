@@ -14,6 +14,8 @@ public interface IWebModel {
 	IWebHost getWebHostByHttpHost(HttpHost host);
 	IWebPath getWebPathByUri(URI uri);
 	
+	IWebPath addGetTarget(URI uri);
+
 	Collection<IWebHost> getUnscannedHosts();
 	Collection<IWebPath> getUnscannedPaths();
 }

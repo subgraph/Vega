@@ -149,6 +149,18 @@ public class WebPath extends WebEntity implements IWebPath {
 	}
 
 	@Override
+	public void addGetParameterList(List<NameValuePair> params) {
+		activate(ActivationPurpose.READ);
+		getParameters.addParameterList(params);
+	}
+
+	@Override
+	public void addPostParameterList(List<NameValuePair> params) {
+		activate(ActivationPurpose.READ);
+		postParameters.addParameterList(params);
+	}
+
+	@Override
 	public IWebPathParameters getGetParameters() {
 		activate(ActivationPurpose.READ);
 		return getParameters;

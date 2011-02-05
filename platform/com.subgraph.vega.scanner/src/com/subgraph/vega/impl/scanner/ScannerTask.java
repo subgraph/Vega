@@ -106,7 +106,7 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	
 	@Override
 	public void linkDiscovered(URI link) {
-		workspace.getWebModel().getWebPathByUri(link);
+		workspace.getWebModel().addGetTarget(link);
 	}
 
 	private void runPerHostModulePhase() {

@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import com.db4o.ObjectContainer;
 import com.db4o.events.CancellableObjectEventArgs;
@@ -86,6 +88,17 @@ public class WebModel implements IWebModel {
 	
 	private String uriToPath(URI uri) {
 		return uri.getPath();
+	}
+
+	private List<NameValuePair> uriToParameterList(URI uri) {
+		return URLEncodedUtils.parse(uri, "UTF-8");
+	}
+
+	@Override
+	public IWebPath addGetTarget(URI uri) {
+		final IWebPath path = getWebPathByUri(uri);
+		path.addGetParameterList(uriToParameterList(uri));
+		return path;
 	}
 
 	@Override

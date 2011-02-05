@@ -24,6 +24,17 @@ public class WebPathParameters implements IWebPathParameters, Activatable {
 		this.observedParameterLists = new ActivatableHashSet<List<NameValuePair>>();
 		this.observedParameterNames = new ActivatableHashSet<String>();
 	}
+
+	void addParameterList(List<NameValuePair> params) {
+		activate(ActivationPurpose.READ);
+		synchronized(observedParameterLists) {
+			if(observedParameterLists.contains(params))
+				return;
+			observedParameterLists.add(params);
+			for(NameValuePair p: params)
+				observedParameterNames.add(p.getName());
+		}
+	}
 	
 	@Override
 	public boolean hasParameters() {
