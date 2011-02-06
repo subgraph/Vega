@@ -26,6 +26,7 @@ public class ScriptLoader {
 	private final File moduleRoot;
 	private final PreludeLoader preludeLoader;
 	private final ScriptCompiler moduleCompiler;
+	private final boolean preludeLoadFailed;
 	
 	private final Map<File, ScriptedModule> modulePathMap = new HashMap<File, ScriptedModule>();
 	
@@ -50,8 +51,11 @@ public class ScriptLoader {
 		enableDynamicScope();
 		globalScope = createGlobalScope();
 		preludeLoader = new PreludeLoader(new File(moduleRoot, "prelude"), globalScope);
-		preludeLoader.load();
-		moduleCompiler = new ScriptCompiler(preludeLoader.getPreludeScope());
+		preludeLoadFailed = (preludeLoader.load() == false);
+		if(preludeLoadFailed)
+			moduleCompiler = null;
+		else
+			moduleCompiler = new ScriptCompiler(preludeLoader.getPreludeScope());
 	}
 	
 	private void enableDynamicScope() {
@@ -124,7 +128,10 @@ public class ScriptLoader {
 			crawlDirectory(d, files);
 	}
 	
-	public void reloadModules() {	
+	public void reloadModules() {
+		if(preludeLoadFailed)
+			return;
+
 		synchronized(modulePathMap) {
 			synchronizeScriptPaths();
 			for(Map.Entry<File, ScriptFile> entry: scriptPathMap.entrySet()) 
