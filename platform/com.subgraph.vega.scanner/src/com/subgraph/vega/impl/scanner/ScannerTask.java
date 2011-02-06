@@ -19,6 +19,7 @@ import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
+import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
 
 public class ScannerTask implements Runnable, ICrawlerEventHandler {
 
@@ -69,6 +70,8 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 			runPerHostModulePhase();
 		if(!stopRequested)
 			runPerDirectoryModulePhase();
+		if(!stopRequested)
+			runPerResourceModulePhase();
 		if(stopRequested) {
 			scanner.setScannerStatus(ScannerStatus.SCAN_CANCELED);
 			logger.info("Scanner cancelled.");
@@ -137,6 +140,17 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		}
 	}
 
+	private void runPerResourceModulePhase() {
+		logger.info("Starting per resource module phase");
+		final IWebModel webModel = workspace.getWebModel();
+		for(IWebPath path: webModel.getAllPaths()) {
+			for(IPerResourceScannerModule m: scanner.getModuleRegistry().getPerResourceModules()) {
+				if(stopRequested)
+					return;
+				m.runModule(path, requestEngine, workspace);
+			}
+		}
+	}
 	@Override
 	public void progressUpdate(int completed, int total) {
 		scanner.updateCrawlerProgress(completed, total);		
