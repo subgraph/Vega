@@ -7,6 +7,7 @@ public interface IScannerModuleRegistry {
 	void runDomTests();
 	List<IPerHostScannerModule> getPerHostModules();
 	List<IPerDirectoryScannerModule> getPerDirectoryModules();
+	List<IPerResourceScannerModule> getPerResourceModules();
 	List<IResponseProcessingModule> getResponseProcessingModules();
 	List<IPerMountPointModule> getPerMountPointModules();
 }

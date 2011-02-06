@@ -22,12 +22,14 @@ import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
+import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.modules.scripting.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
+import com.subgraph.vega.impl.scanner.modules.scripting.PerResourceScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ResponseProcessorScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptLoader;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
@@ -110,6 +112,16 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
 			if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY)
 				modules.add(new PerDirectoryScript(m));
+		}
+		return modules;
+	}
+
+	@Override
+	public List<IPerResourceScannerModule> getPerResourceModules() {
+		final List<IPerResourceScannerModule> modules = new ArrayList<IPerResourceScannerModule>();
+		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(m.getModuleType() == ModuleScriptType.PER_RESOURCE)
+				modules.add(new PerResourceScript(m));
 		}
 		return modules;
 	}
