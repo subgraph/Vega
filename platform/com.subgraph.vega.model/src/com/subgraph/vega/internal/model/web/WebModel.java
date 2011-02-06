@@ -76,6 +76,11 @@ public class WebModel implements IWebModel {
 	}
 
 	@Override
+	public Collection<IWebPath> getAllPaths() {
+		return database.query(IWebPath.class);
+	}
+
+	@Override
 	public IWebPath getWebPathByUri(URI uri) {
 		WebHost wh = getWebHostByHttpHost(uriToHost(uri));
 		IWebPath path =  wh.addPath(uriToPath(uri));

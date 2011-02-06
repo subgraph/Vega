@@ -18,4 +18,5 @@ public interface IWebModel {
 
 	Collection<IWebHost> getUnscannedHosts();
 	Collection<IWebPath> getUnscannedPaths();
+	Collection<IWebPath> getAllPaths();
 }
