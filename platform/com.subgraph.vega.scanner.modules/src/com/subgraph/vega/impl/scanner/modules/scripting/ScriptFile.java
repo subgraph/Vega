@@ -55,6 +55,7 @@ public class ScriptFile {
 	
 	void setCompiledScript(Scriptable script) {
 		this.compiledScript = script;
+		compileFailureMessage = "";
 		setCompileStatus(CompileStatus.COMPILE_SUCCEEDED);
 	}
 	
@@ -70,7 +71,6 @@ public class ScriptFile {
 	
 	private void setCompileStatus(CompileStatus status) {
 		this.compileStatus = status;
-		compileFailureMessage = "";
 		if(scriptFile != null)
 			fileLastModified = scriptFile.lastModified();
 	}
