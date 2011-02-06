@@ -49,6 +49,7 @@ public class ScriptCompiler {
 	}
 		
 	public Scriptable compileReader(Reader r, String path, Context cx, Scriptable scriptScope) throws IOException {
+		cx.setLanguageVersion(Context.VERSION_1_7);
 		final Script script = cx.compileReader(r, path, 1, null);			
 		script.exec(cx, scriptScope);
 		return scriptScope;
