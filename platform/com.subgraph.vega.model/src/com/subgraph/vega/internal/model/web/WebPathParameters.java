@@ -1,5 +1,6 @@
 package com.subgraph.vega.internal.model.web;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -17,46 +18,72 @@ public class WebPathParameters implements IWebPathParameters, Activatable {
 	
 	private transient Activator activator;
 
-	private final Set<List<NameValuePair>> observedParameterLists;
-	private final Set<String> observedParameterNames;
-
+	private final Set<List<NameValuePair>> parameterLists;
+	
 	WebPathParameters() {
-		this.observedParameterLists = new ActivatableHashSet<List<NameValuePair>>();
-		this.observedParameterNames = new ActivatableHashSet<String>();
+		this.parameterLists = new ActivatableHashSet<List<NameValuePair>>();
 	}
 
 	void addParameterList(List<NameValuePair> params) {
+		if(params.isEmpty())
+			return;
 		activate(ActivationPurpose.READ);
-		synchronized(observedParameterLists) {
-			if(observedParameterLists.contains(params))
+		synchronized(parameterLists) {
+			if(parameterLists.contains(params))
 				return;
-			observedParameterLists.add(params);
-			for(NameValuePair p: params)
-				observedParameterNames.add(p.getName());
+			parameterLists.add(params);
 		}
+	}
+	
+	public Collection<String> getValuesForParameter(String name) {
+		final Set<String> valueSet = new HashSet<String>();
+		for(List<NameValuePair> params: getParameterLists()) {
+			for(NameValuePair pair: params) {
+				if(pair.getName().equals(name)) {
+					valueSet.add(pair.getValue());
+				}
+			}
+		}
+		return valueSet;		
 	}
 	
 	@Override
 	public boolean hasParameters() {
 		activate(ActivationPurpose.READ);
-		synchronized(observedParameterLists) {
-			return !observedParameterLists.isEmpty();
+		synchronized(parameterLists) {
+			return !parameterLists.isEmpty();
 		}
 	}
 
 	@Override
-	public Collection<List<NameValuePair>> getObservedParameterLists() {
+	public Collection<List<NameValuePair>> getParameterLists() {
 		activate(ActivationPurpose.READ);
-		synchronized(observedParameterLists) {
-			return new HashSet<List<NameValuePair>>(observedParameterLists);
+		synchronized(parameterLists) {
+			return new HashSet<List<NameValuePair>>(parameterLists);
 		}
 	}
 	@Override
-	public Collection<String> getObservedParameterNames() {
-		activate(ActivationPurpose.READ);
-		synchronized(observedParameterLists) {
-			return new HashSet<String>(observedParameterNames);
+	public Collection<String> getParameterNames() {
+		final Set<String> nameSet = new HashSet<String>();
+		for(List<NameValuePair> params: getParameterLists()) {
+			for(NameValuePair pair: params) {
+				nameSet.add(pair.getName());
+			}
 		}
+		return nameSet;
+	}
+	
+	@Override
+	public Collection<List<String>> getParameterNameLists() {
+		final Set< List<String> > nameLists = new HashSet<List<String>>();
+		for(List<NameValuePair> params: getParameterLists()) {
+			List<String> nl = new ArrayList<String>();
+			for(NameValuePair pair: params) {
+				nl.add(pair.getName());
+			}
+			nameLists.add(nl);
+		}
+		return nameLists;
 	}
 
 	@Override
