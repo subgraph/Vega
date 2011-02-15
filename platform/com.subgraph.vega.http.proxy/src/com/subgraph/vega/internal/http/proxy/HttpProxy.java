@@ -25,16 +25,19 @@ import org.apache.http.protocol.ResponseContent;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.http.proxy.HttpInterceptor;
 
 public class HttpProxy implements IHttpInterceptProxy {
 	static final String PROXY_CONTEXT_REQUEST = "proxy.request";
 	static final String PROXY_CONTEXT_RESPONSE = "proxy.response";
 	static final String PROXY_HTTP_HOST = "proxy.host";
+	static final String PROXY_HTTP_TRANSACTION = "proxy.transaction";
 
 	private static final int NTHREADS = 10;
 
 	private final Logger logger = Logger.getLogger("proxy");
 
+	private final HttpInterceptor interceptor;
 	private final List<IHttpInterceptProxyEventHandler> eventHandlers;
 	private final int listenPort;
 	private ServerSocket serverSocket;
@@ -42,9 +45,10 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private HttpService httpService;
 	private ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
 	private Thread proxyThread;
-
-	public HttpProxy(int listenPort, IHttpRequestEngine requestEngine) {
+	
+	public HttpProxy(int listenPort, HttpInterceptor interceptor, IHttpRequestEngine requestEngine) {
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
+		this.interceptor = interceptor;
 		this.listenPort = listenPort;
 		this.params = new BasicHttpParams();
 		this.params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0)
@@ -57,7 +61,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		inProcessor.addInterceptor(new ResponseContent());
 
 		HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
-		registry.register("*", new ProxyRequestHandler(requestEngine));
+		registry.register("*", new ProxyRequestHandler(this, requestEngine));
 
 		httpService = new HttpService(inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
 		httpService.setParams(params);
@@ -116,6 +120,14 @@ public class HttpProxy implements IHttpInterceptProxy {
 		synchronized(eventHandlers) {
 			eventHandlers.remove(handler);
 		}
+	}
+
+	public boolean handleRequest(ProxyTransaction transaction) throws InterruptedException {
+		return interceptor.queueTransaction(transaction);
+	}
+
+	public boolean handleResponse(ProxyTransaction transaction) throws InterruptedException {
+		return interceptor.queueTransaction(transaction);
 	}
 
 	void completeRequest(ProxyTransaction transaction) {
