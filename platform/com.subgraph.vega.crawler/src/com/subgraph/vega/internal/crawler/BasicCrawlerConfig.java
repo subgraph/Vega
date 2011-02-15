@@ -17,6 +17,7 @@ public class BasicCrawlerConfig implements ICrawlerConfig {
 	private final Set<URI> initialURIs;
 	private final List<ICrawlerEventHandler> eventHandlers;
 	private ICrawlerFilter filter;
+	private boolean formParsingEnabled;
 	
 	BasicCrawlerConfig(URI baseURI) {
 		this.baseURI = baseURI;
@@ -24,6 +25,7 @@ public class BasicCrawlerConfig implements ICrawlerConfig {
 		initialURIs.add(baseURI);
 		eventHandlers = new ArrayList<ICrawlerEventHandler>();
 		filter = new DefaultURIFilter(baseURI);
+		formParsingEnabled = true;
 	}
 	
 	@Override
@@ -59,6 +61,16 @@ public class BasicCrawlerConfig implements ICrawlerConfig {
 	@Override
 	public List<ICrawlerEventHandler> getEventHandlers() {
 		return Collections.unmodifiableList(eventHandlers);
+	}
+
+	@Override
+	public void setFormParsingEnabled(boolean enabled) {
+		this.formParsingEnabled = enabled;		
+	}
+
+	@Override
+	public boolean isFormParsingEnabled() {
+		return  formParsingEnabled;
 	}
 	
 	

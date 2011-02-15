@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
+import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -113,6 +114,12 @@ public class HttpResponseProcessor implements Runnable {
 		if(mimeType != null && mimeType.contains("html")) {
 			List<URI> uris = extractor.findUrls(response);
 			filterAndQueueURIs(uris);
+			if(config.isFormParsingEnabled()) {
+				IHTMLParseResult html = response.getParsedHTML();
+				if(html != null) {
+					workspace.getWebModel().parseForms(path, html.getDOMDocument());
+				}
+			}
 		}
 	}
 	

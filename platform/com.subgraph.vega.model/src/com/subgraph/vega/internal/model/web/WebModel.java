@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.w3c.dom.html2.HTMLDocument;
 
 import com.db4o.ObjectContainer;
 import com.db4o.events.CancellableObjectEventArgs;
@@ -22,13 +23,17 @@ import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.NewWebEntityEvent;
+import com.subgraph.vega.api.model.web.forms.IWebForm;
+import com.subgraph.vega.internal.model.web.forms.FormParser;
 
 public class WebModel implements IWebModel {
 	private final EventListenerManager eventManager = new EventListenerManager();
 	
 	private final ObjectContainer database;
+	private FormParser formParser;
 	
 	public WebModel(ObjectContainer database) {
+		this.formParser = new FormParser(this);
 		this.database = database;
 		EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
 		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
@@ -150,5 +155,11 @@ public class WebModel implements IWebModel {
 	
 	private void notifyNewEntity(IWebEntity entity) {
 		eventManager.fireEvent(new NewWebEntityEvent(entity));
+	}
+
+	@Override
+	public Collection<IWebForm> parseForms(IWebPath source,
+			HTMLDocument document) {
+		return formParser.parseForms(source, document);
 	}
 }
