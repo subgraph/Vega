@@ -13,8 +13,10 @@ import org.apache.http.HttpResponse;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
+import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
+import com.subgraph.vega.http.proxy.HttpInterceptor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -39,6 +41,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
+	private final HttpInterceptor interceptor = new HttpInterceptor();
 
 	public HttpProxyService() {
 		eventHandler = new IHttpInterceptProxyEventHandler() {
@@ -77,7 +80,7 @@ public class HttpProxyService implements IHttpProxyService {
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
-		proxy = new HttpProxy(proxyPort, requestEngine);
+		proxy = new HttpProxy(proxyPort, interceptor, requestEngine);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
 	}
@@ -144,6 +147,11 @@ public class HttpProxyService implements IHttpProxyService {
 		proxy.unregisterEventHandler(eventHandler);
 		proxy.stopProxy();		
 		currentWorkspace.unlock();
+	}
+
+	@Override
+	public IHttpInterceptor getInterceptor() {
+		return interceptor;
 	}
 
 	protected void setModel(IModel model) {

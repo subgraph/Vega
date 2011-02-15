@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -34,35 +35,46 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		"Keep-Alive", "Proxy-Authenticate", "TE", "Trailers", "Upgrade"
 	};
 
+	private final HttpProxy httpProxy;
 	private final IHttpRequestEngine requestEngine;
 
-	ProxyRequestHandler(IHttpRequestEngine requestEngine) {
+	ProxyRequestHandler(HttpProxy httpProxy, IHttpRequestEngine requestEngine) {
+		this.httpProxy = httpProxy;
 		this.requestEngine = requestEngine;
 	}
 
 	@Override
-	public void handle(HttpRequest request, HttpResponse response,
-			HttpContext context) throws HttpException, IOException {
+	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
+		final ProxyTransaction transaction = new ProxyTransaction(context);
 
-		context.setAttribute(HttpProxy.PROXY_CONTEXT_REQUEST, copyRequest(request));
+		try {
+			if (handleRequest(transaction, request) == false) {
+				return;
+			}
+		} catch (InterruptedException e) {
+			return; // REVISIT return 500 response
+		}
 
-		removeHopByHopHeaders(request);
-		request.removeHeaders("Host");
-		final HttpUriRequest uriRequest = requestToUriRequest(request);
-		if(uriRequest == null)
-			return;
-
+		HttpUriRequest uriRequest = createUriRequest(transaction);
 		BasicHttpContext ctx = new BasicHttpContext();
 		IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
-		if(r == null)
+		if(r == null) {
 			return;
-		context.setAttribute(HttpProxy.PROXY_CONTEXT_RESPONSE, r); 
-		context.setAttribute(HttpProxy.PROXY_HTTP_HOST, ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
+		}
+		transaction.setHttpHost((HttpHost) ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
+
+		try {
+			if (handleResponse(transaction, r) == false) {
+				return;
+			}
+		} catch (InterruptedException e) {
+			return; // REVISIT return 500 response
+		}
+
+		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
 
 		HttpResponse httpResponse = copyResponse(r.getRawResponse());
-
 		removeHopByHopHeaders(httpResponse);
-
 		response.setStatusLine(httpResponse.getStatusLine());
 		response.setHeaders(httpResponse.getAllHeaders());
 		response.setEntity(httpResponse.getEntity());
@@ -84,20 +96,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	private void removeHopByHopHeaders(HttpMessage message) {
 		for(String hdr: HOP_BY_HOP_HEADERS) 
 			message.removeHeaders(hdr);
-	}
-
-	private HttpUriRequest requestToUriRequest(HttpRequest request) {
-		final String uriLine = request.getRequestLine().getUri();
-
-		final URI uri = stringToURI(uriLine);
-		final String method = request.getRequestLine().getMethod();
-		final HttpUriRequest uriRequest =  methodStringToUriRequest(method, uri);
-		if(uriRequest == null)
-			return null;
-
-		uriRequest.setParams(request.getParams());
-		uriRequest.setHeaders(request.getAllHeaders());
-		return uriRequest;
 	}
 
 	private URI stringToURI(String uriString) {
@@ -126,5 +124,42 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			return new HttpTrace(uri);
 		else 
 			throw new IllegalArgumentException("Illegal HTTP method name "+ methodString);
+	}
+
+	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request) throws InterruptedException {
+		removeHopByHopHeaders(request);
+		request.removeHeaders("Host");
+		transaction.setRequest(copyRequest(request));
+		final URI uri = stringToURI(request.getRequestLine().getUri());
+		transaction.setUri(uri);
+
+		if (httpProxy.handleRequest(transaction) == true) {
+			return transaction.getForward();
+		} else {
+			return true;
+		}
+	}
+
+	private HttpUriRequest createUriRequest(ProxyTransaction transaction) {
+		final HttpRequest request = transaction.getRequest();
+		final String method = request.getRequestLine().getMethod();
+		final HttpUriRequest uriRequest =  methodStringToUriRequest(method, transaction.getUri());
+		if(uriRequest == null) {
+			return null;
+		}
+
+		uriRequest.setParams(request.getParams());
+		uriRequest.setHeaders(request.getAllHeaders());
+		return uriRequest;
+	}
+
+	private boolean handleResponse(ProxyTransaction transaction, IHttpResponse response) throws InterruptedException {
+		transaction.setResponse(response);
+
+		if (httpProxy.handleResponse(transaction) == true) {
+			return transaction.getForward();
+		} else {
+			return true;
+		}
 	}
 }
