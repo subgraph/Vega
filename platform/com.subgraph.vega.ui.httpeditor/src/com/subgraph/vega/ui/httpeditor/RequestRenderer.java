@@ -26,7 +26,7 @@ public class RequestRenderer {
 	}
 	
 	private String renderRequestStartLine(HttpRequest request) {
-		return request.toString() + '\n';
+		return request.getRequestLine().toString() + '\n';
 	}
 
 	private String renderResponseStartLine(HttpResponse response) {

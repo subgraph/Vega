@@ -20,11 +20,13 @@ import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.commands.InterceptStateSourceProvider;
 import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
+import com.subgraph.vega.ui.httpeditor.RequestRenderer;
 
 public class InterceptView extends ViewPart {
 	private final IHttpInterceptProxyEventHandler requestListener;
 	private final IHttpInterceptProxyEventHandler responseListener;
 	private Label statusLabel;
+	private final RequestRenderer requestRenderer = new RequestRenderer();
 	private HttpRequestViewer requestViewer;
 	private HttpRequestViewer responseViewer;
 
@@ -77,20 +79,14 @@ public class InterceptView extends ViewPart {
 
 	public void handleTransactionRequest(IProxyTransaction transaction) {
 		indicateInterceptPending();
-
-		HttpRequest request = transaction.getRequest();
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append(request.getRequestLine().toString() + "\n");
-		for(Header h: request.getAllHeaders()) {
-			buffer.append(h.getName() +": "+ h.getValue() + "\n");
-		}
+		final String content = requestRenderer.renderRequestText(transaction.getRequest());
 
 		if (requestViewer != null) {
 			synchronized(requestViewer) {
 				Display display = requestViewer.getControl().getDisplay();
 				display.syncExec (new Runnable () {
 					public void run () {
-						requestViewer.setContent(buffer.toString());
+						requestViewer.setContent(content);
 					}
 				});	
 			}
@@ -99,20 +95,14 @@ public class InterceptView extends ViewPart {
 
 	public void handleTransactionResponse(IProxyTransaction transaction) {
 		indicateInterceptPending();
-
-		HttpResponse response = transaction.getResponse().getRawResponse();
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append(response.getStatusLine().toString() + "\n");
-		for(Header h: response.getAllHeaders()) {
-			buffer.append(h.getName() +": "+ h.getValue() + "\n");
-		}
+		final String content = requestRenderer.renderResponseText(transaction.getResponse().getRawResponse());
 
 		if (responseViewer != null) {
 			synchronized(responseViewer) {
 				Display display = responseViewer.getControl().getDisplay();
 				display.syncExec (new Runnable () {
 					public void run () {
-						responseViewer.setContent(buffer.toString());
+						responseViewer.setContent(content);
 					}
 				});	
 			}
