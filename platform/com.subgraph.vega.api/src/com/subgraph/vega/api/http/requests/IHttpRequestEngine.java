@@ -7,6 +7,13 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
 public interface IHttpRequestEngine {
+	/**
+	 * Instantiate a HttpRequestBuilder.
+	 * 
+	 * @return HttpRequestBuilder instance.
+	 */
+	IHttpRequestBuilder createRequestBuilder();
+	
 	IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException, ClientProtocolException;
 	IHttpResponse sendRequest(HttpUriRequest request) throws IOException, ClientProtocolException;
 	void registerResponseProcessor(IHttpResponseProcessor processor);

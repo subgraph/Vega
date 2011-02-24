@@ -17,6 +17,13 @@
             name="Intercept"
             restorable="true">
       </view>
+      <view
+            allowMultiple="true"
+            class="com.subgraph.vega.ui.http.requesteditviewer.RequestEditView"
+            id="com.subgraph.vega.views.requestEdit"
+            name="Request Editor"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -68,6 +75,10 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
+            commandId="com.subgraph.vega.commands.popup.replayRequest">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -104,6 +115,15 @@
             description="Drop Intercepted Request"
             id="com.subgraph.vega.commands.dropRequest"
             name="Drop Intercepted Request">
+      </command>
+      <category
+            id="com.subgraph.vega.commands.httpRequestViewPopupCategory"
+            name="HTTP Request View Popup">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
+            id="com.subgraph.vega.commands.popup.replayRequest"
+            name="Replay Request">
       </command>
    </extension>
    <extension
@@ -162,6 +182,24 @@
                tooltip="Drop Request">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView">
+         <command
+               commandId="com.subgraph.vega.commands.popup.replayRequest"
+               label="Replay Request"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="+">
+                  </count>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -202,6 +240,9 @@
             id="com.subgraph.vega.perspectives.proxy"
             name="Proxy">
       </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
    </extension>
 
 </plugin>

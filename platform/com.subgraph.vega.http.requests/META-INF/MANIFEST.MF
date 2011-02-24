@@ -7,6 +7,7 @@ Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
+ com.subgraph.vega.api.model.requests,
  org.apache.http;version="4.0.0",
  org.apache.http.client,
  org.apache.http.client.methods,
@@ -18,6 +19,7 @@ Import-Package: com.subgraph.vega.api.html,
  org.apache.http.entity;version="4.0.0",
  org.apache.http.impl.client,
  org.apache.http.impl.conn.tsccm,
+ org.apache.http.message,
  org.apache.http.params;version="4.0.0",
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0"

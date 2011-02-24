@@ -7,6 +7,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 
@@ -20,6 +21,7 @@ public class Activator extends AbstractUIPlugin {
 	
 	private ServiceTracker modelTracker;
 	private ServiceTracker proxyServiceTracker;
+	private ServiceTracker httpRequestEngineFactoryServiceTracker;
 	
 	private ProxyStatusLineContribution statusLineContribution = new ProxyStatusLineContribution();
 	
@@ -42,6 +44,9 @@ public class Activator extends AbstractUIPlugin {
 		
 		proxyServiceTracker = new ServiceTracker(context, IHttpProxyService.class.getName(), null);
 		proxyServiceTracker.open();
+		
+		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
+		httpRequestEngineFactoryServiceTracker.open();
 	}
 
 	/*
@@ -79,6 +84,10 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IHttpProxyService getProxyService() {
 		return (IHttpProxyService) proxyServiceTracker.getService();
+	}
+	
+	public IHttpRequestEngineFactory getHttpRequestEngineFactoryService() {
+		return (IHttpRequestEngineFactory) httpRequestEngineFactoryServiceTracker.getService();
 	}
 	
 	public ContributionItem getStatusLineContribution() {

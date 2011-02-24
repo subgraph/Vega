@@ -1,5 +1,6 @@
 package com.subgraph.vega.ui.http.requestviewer;
 
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -15,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISelectionListener;
@@ -33,6 +35,7 @@ import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
 
 public class HttpRequestView extends ViewPart {
+	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
 	private HttpViewFilter filter;
@@ -50,11 +53,15 @@ public class HttpRequestView extends ViewPart {
 		
 		tableViewer = new TableViewer(comp);
 		createColumns(tableViewer, tcl);
-		
 		tableViewer.setContentProvider(new HttpViewContentProvider());
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
-		IModel model = Activator.getDefault().getModel();
-		
+		MenuManager menuManager = new MenuManager();
+		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
+		tableViewer.getTable().setMenu(menu);
+		getSite().registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
+		getSite().setSelectionProvider(tableViewer);
+
+		IModel model = Activator.getDefault().getModel();		
 		if(model != null) {
 			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 				@Override
