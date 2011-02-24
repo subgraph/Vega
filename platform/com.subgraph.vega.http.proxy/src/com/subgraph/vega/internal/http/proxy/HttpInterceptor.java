@@ -1,4 +1,4 @@
-package com.subgraph.vega.http.proxy;
+package com.subgraph.vega.internal.http.proxy;
 
 import java.util.List;
 import java.util.ArrayList;
