@@ -1,16 +1,20 @@
 package com.subgraph.vega.internal.http.proxy;
 
-import java.util.List;
 import java.util.ArrayList;
 
+import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
+import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointType;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
+import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
 import com.subgraph.vega.internal.http.proxy.ProxyTransaction;
 
 public class HttpInterceptor implements IHttpInterceptor {
 	private IHttpInterceptProxyEventHandler eventHandlerRequest;
 	private IHttpInterceptProxyEventHandler eventHandlerResponse;
-	private final List<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>();
+
+	private final ArrayList<IHttpInterceptorBreakpoint> breakpointList = new ArrayList<IHttpInterceptorBreakpoint>();
+	private final ArrayList<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>();
 
 	public boolean queueTransaction(ProxyTransaction transaction) throws InterruptedException {
 		synchronized(transactionQueue) {
@@ -34,11 +38,15 @@ public class HttpInterceptor implements IHttpInterceptor {
 
 	private boolean handleRequest() {
 		if (eventHandlerRequest != null) {
-			eventHandlerRequest.handleRequest(transactionQueue.get(0));
-			return true;
-		} else {
-			return false;
+			ProxyTransaction transaction = transactionQueue.get(0);
+			for (IHttpInterceptorBreakpoint breakpoint: breakpointList) {
+				if (breakpoint.test(transaction) == true) {
+					eventHandlerRequest.handleRequest(transactionQueue.get(0));
+					return true;
+				}
+			}
 		}
+		return false;
 	}
 	
 	private boolean handleResponse() {
@@ -71,6 +79,33 @@ public class HttpInterceptor implements IHttpInterceptor {
 	}
 
 	@Override
+	public IHttpInterceptorBreakpoint createBreakpoint(HttpInterceptorBreakpointType breakpointType, HttpInterceptorBreakpointMatchType matchType, String pattern, boolean isEnabled) {
+		HttpInterceptorBreakpoint breakpoint = new HttpInterceptorBreakpoint(breakpointType, matchType, pattern, isEnabled);
+		breakpointList.add(breakpoint);
+		return breakpoint;
+	}
+
+	@Override
+	public void removeBreakpoint(IHttpInterceptorBreakpoint breakpoint) {
+		breakpointList.remove(breakpoint);
+	}
+
+	@Override
+	public int getBreakpontIdxOf(IHttpInterceptorBreakpoint breakpoint) {
+		return breakpointList.indexOf(breakpoint);
+	}
+
+	@Override
+	public int getBreakpointCnt() {
+		return breakpointList.size();
+	}
+
+	@Override
+	public IHttpInterceptorBreakpoint[] getBreakpoints() {
+		return breakpointList.toArray(new HttpInterceptorBreakpoint[breakpointList.size()]);
+	}
+
+	@Override
 	public void forwardPending() {
 		synchronized(transactionQueue) {
 			if (!transactionQueue.isEmpty()) {
@@ -90,4 +125,5 @@ public class HttpInterceptor implements IHttpInterceptor {
 		}
 
 	}
+
 }
