@@ -71,7 +71,10 @@ public class HttpInterceptorBreakpoint implements IHttpInterceptorBreakpoint {
 
 	@Override
 	public boolean test(IProxyTransaction transaction) {
-		return tester.test(transaction);
+		if (isEnabled == true) {
+			return tester.test(transaction);
+		}
+		return false;
 	}
 
 }
