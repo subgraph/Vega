@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointType;
@@ -39,8 +38,8 @@ import com.subgraph.vega.ui.http.Activator;
 public class OptionsViewer {
 	private Composite parentComposite;
 	private TableViewer tableViewerBreakpoints;
-	private static final Image CHECKED = ImageDescriptor.createFromFile(null, "icons/checked.gif").createImage();
-	private static final Image UNCHECKED = ImageDescriptor.createFromFile(null, "icons/unchecked.gif").createImage();
+	private static final Image CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
+	private static final Image UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
 	private ComboViewer comboViewerBreakpointTypes;
 	private ComboViewer comboViewerBreakpointMatchTypes;
 	private Text patternBreakpointText;
@@ -98,7 +97,7 @@ public class OptionsViewer {
 	private void createTableBreakpointsColumns(TableViewer viewer, TableColumnLayout layout) {
 		final String[] titles = { "", "Type", "Matches", "Pattern", };
 		final ColumnLayoutData[] layoutData = {
-			new ColumnPixelData(20, false, true),
+			new ColumnPixelData(16, false, true),
 			new ColumnPixelData(150, true, true),
 			new ColumnPixelData(150, true, true),
 			new ColumnPixelData(350, true, true),
