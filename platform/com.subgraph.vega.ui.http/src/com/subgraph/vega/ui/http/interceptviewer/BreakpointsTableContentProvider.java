@@ -4,9 +4,15 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
+import com.subgraph.vega.api.http.proxy.ProxyTransactionDirection;
 
 public class BreakpointsTableContentProvider implements IStructuredContentProvider {
+	private final ProxyTransactionDirection direction;
 	private IHttpInterceptor interceptor;
+
+	public BreakpointsTableContentProvider(ProxyTransactionDirection direction) {
+		this.direction = direction;
+	}
 
 	@Override
 	public void dispose() {
@@ -19,7 +25,7 @@ public class BreakpointsTableContentProvider implements IStructuredContentProvid
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return interceptor.getBreakpoints();
+		return interceptor.getBreakpoints(direction);
 	}
 
 }

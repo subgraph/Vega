@@ -35,42 +35,44 @@ public class HttpInterceptorBreakpoint implements IHttpInterceptorBreakpoint {
 	}
 	
 	@Override
-	public HttpInterceptorBreakpointType getType() {
+	public synchronized HttpInterceptorBreakpointType getType() {
 		return breakpointType;
 	}
 
 	@Override
-	public void setMatchType(HttpInterceptorBreakpointMatchType matchType) {
+	public synchronized void setMatchType(HttpInterceptorBreakpointMatchType matchType) {
 		this.matchType = matchType;
+		tester.setMatchType(this.matchType);
 	}
 
 	@Override
-	public HttpInterceptorBreakpointMatchType getMatchType() {
+	public synchronized HttpInterceptorBreakpointMatchType getMatchType() {
 		return matchType;
 	}
 
 	@Override
-	public void setPattern(String pattern) {
+	public synchronized void setPattern(String pattern) {
 		this.pattern = pattern;
+		tester.setPattern(this.pattern);
 	}
 
 	@Override
-	public String getPattern() {
+	public synchronized String getPattern() {
 		return pattern;
 	}
 
 	@Override
-	public void setIsEnabled(boolean isEnabled) {
+	public synchronized void setIsEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 
 	@Override
-	public boolean getIsEnabled() {
+	public synchronized boolean getIsEnabled() {
 		return isEnabled;
 	}
 
 	@Override
-	public boolean test(IProxyTransaction transaction) {
+	public synchronized boolean test(IProxyTransaction transaction) {
 		if (isEnabled == true) {
 			return tester.test(transaction);
 		}

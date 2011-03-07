@@ -19,6 +19,16 @@ public class BreakpointTesterDomainName implements IHttpInterceptorBreakpointTes
 	}
 	
 	@Override
+	public void setMatchType(HttpInterceptorBreakpointMatchType matchType) {
+		this.matchType = matchType;
+	}
+
+	@Override
+	public void setPattern(String pattern) {
+		this.pattern = Pattern.compile(pattern);		
+	}
+
+	@Override
 	public boolean test(IProxyTransaction transaction) {
 		HttpHost httpHost = transaction.getHttpHost();
 		if (httpHost != null) {

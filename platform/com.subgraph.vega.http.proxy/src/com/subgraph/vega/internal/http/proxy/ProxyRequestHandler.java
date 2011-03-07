@@ -133,7 +133,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		final URI uri = stringToURI(request.getRequestLine().getUri());
 		transaction.setUri(uri);
 
-		if (httpProxy.handleRequest(transaction) == true) {
+		if (httpProxy.handleTransaction(transaction) == true) {
 			return transaction.getForward();
 		} else {
 			return true;
@@ -156,7 +156,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	private boolean handleResponse(ProxyTransaction transaction, IHttpResponse response) throws InterruptedException {
 		transaction.setResponse(response);
 
-		if (httpProxy.handleResponse(transaction) == true) {
+		if (httpProxy.handleTransaction(transaction) == true) {
 			return transaction.getForward();
 		} else {
 			return true;

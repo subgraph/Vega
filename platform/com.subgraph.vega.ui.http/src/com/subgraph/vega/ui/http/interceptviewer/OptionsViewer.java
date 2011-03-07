@@ -1,6 +1,8 @@
 package com.subgraph.vega.ui.http.interceptviewer;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -33,17 +35,23 @@ import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointType;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
+import com.subgraph.vega.api.http.proxy.ProxyTransactionDirection;
 import com.subgraph.vega.ui.http.Activator;
 
 public class OptionsViewer {
+	private static final Image IMAGE_CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
+	private static final Image IMAGE_UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
+	private final ProxyTransactionDirection direction;
 	private Composite parentComposite;
 	private TableViewer tableViewerBreakpoints;
-	private static final Image CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
-	private static final Image UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
 	private ComboViewer comboViewerBreakpointTypes;
 	private ComboViewer comboViewerBreakpointMatchTypes;
 	private Text patternBreakpointText;
 	private IHttpInterceptor interceptor;
+
+	public OptionsViewer(ProxyTransactionDirection direction) {
+		this.direction = direction;
+	}
 
 	public Composite createViewer(Composite parent) {
 		parentComposite = new Composite(parent, SWT.NONE);
@@ -55,6 +63,10 @@ public class OptionsViewer {
 		return parentComposite;
 	}
 	
+	public ProxyTransactionDirection getDirection() {
+		return direction;
+	}
+
 	public Composite getViewer() {
 		return parentComposite;
 	}
@@ -85,7 +97,7 @@ public class OptionsViewer {
 
 		tableViewerBreakpoints = new TableViewer(rootControl, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createTableBreakpointsColumns(tableViewerBreakpoints, tcl);
-		tableViewerBreakpoints.setContentProvider(new BreakpointsTableContentProvider());
+		tableViewerBreakpoints.setContentProvider(new BreakpointsTableContentProvider(direction));
 		final Table table = tableViewerBreakpoints.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -118,9 +130,9 @@ public class OptionsViewer {
 				@Override
 				public Image getImage(Object element) {
 					if (((IHttpInterceptorBreakpoint) element).getIsEnabled()) {
-						return CHECKED;
+						return IMAGE_CHECKED;
 					} else {
-						return UNCHECKED;
+						return IMAGE_UNCHECKED;
 					}
 				}
 			},
@@ -173,11 +185,21 @@ public class OptionsViewer {
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerBreakpoints.getSelection();
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					interceptor.removeBreakpoint((IHttpInterceptorBreakpoint) i.next());
+					interceptor.removeBreakpoint(direction, (IHttpInterceptorBreakpoint) i.next());
 				}
 				tableViewerBreakpoints.refresh();
 			}
 		};
+	}
+
+	private List<HttpInterceptorBreakpointType> getBreakpointTypesList() {
+		final List<HttpInterceptorBreakpointType> typesList = new ArrayList<HttpInterceptorBreakpointType>();
+		for (HttpInterceptorBreakpointType t: HttpInterceptorBreakpointType.values()) {
+			if ((t.getMask() & direction.getMask()) != 0) {
+				typesList.add(t);
+			}
+		}
+		return typesList;
 	}
 
 	private Composite createCreatorBreakpoints(Composite parent) {
@@ -191,9 +213,11 @@ public class OptionsViewer {
 				return ((HttpInterceptorBreakpointType) element).getName();
 			}
 		});
-		final HttpInterceptorBreakpointType[] typesList = HttpInterceptorBreakpointType.values();
+		final List<HttpInterceptorBreakpointType> typesList = getBreakpointTypesList();
 		comboViewerBreakpointTypes.setInput(typesList);
-		comboViewerBreakpointTypes.setSelection(new StructuredSelection(typesList[0]));
+		if (typesList.size() != 0) {
+			comboViewerBreakpointTypes.setSelection(new StructuredSelection(typesList.get(0)));
+		}
 
 		comboViewerBreakpointMatchTypes = new ComboViewer(rootControl, SWT.READ_ONLY);
 		comboViewerBreakpointMatchTypes.setContentProvider(new ArrayContentProvider());
@@ -232,7 +256,7 @@ public class OptionsViewer {
 				HttpInterceptorBreakpointMatchType matchType = (HttpInterceptorBreakpointMatchType) ((IStructuredSelection) comboViewerBreakpointMatchTypes.getSelection()).getFirstElement();
 				String pattern = patternBreakpointText.getText();
 				if (breakpointType != null && matchType != null && pattern != null) {
-					interceptor.createBreakpoint(breakpointType, matchType, pattern, true);
+					interceptor.createBreakpoint(direction, breakpointType, matchType, pattern, true);
 					tableViewerBreakpoints.refresh();
 				}
 			}

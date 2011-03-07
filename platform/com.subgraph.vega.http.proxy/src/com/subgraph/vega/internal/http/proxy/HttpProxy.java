@@ -122,12 +122,12 @@ public class HttpProxy implements IHttpInterceptProxy {
 		}
 	}
 
-	public boolean handleRequest(ProxyTransaction transaction) throws InterruptedException {
-		return interceptor.queueTransaction(transaction);
-	}
-
-	public boolean handleResponse(ProxyTransaction transaction) throws InterruptedException {
-		return interceptor.queueTransaction(transaction);
+	public boolean handleTransaction(ProxyTransaction transaction) throws InterruptedException {
+		boolean rv = interceptor.handleTransaction(transaction);
+		if (rv == true) {
+			transaction.await();
+		}
+		return rv;
 	}
 
 	void completeRequest(ProxyTransaction transaction) {

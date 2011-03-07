@@ -19,6 +19,16 @@ public class BreakpointTesterRequestType implements IHttpInterceptorBreakpointTe
 	}
 
 	@Override
+	public void setMatchType(HttpInterceptorBreakpointMatchType matchType) {
+		this.matchType = matchType;
+	}
+
+	@Override
+	public void setPattern(String pattern) {
+		this.pattern = Pattern.compile(pattern);		
+	}
+
+	@Override
 	public boolean test(IProxyTransaction transaction) {
 		HttpRequest request = transaction.getRequest();
 		if (request != null) {

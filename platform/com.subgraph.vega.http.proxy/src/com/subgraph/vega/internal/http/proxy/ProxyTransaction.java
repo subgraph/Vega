@@ -10,17 +10,21 @@ import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
+import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyTransaction implements IProxyTransaction {
 	private final HttpContext context;
+	private IProxyTransactionEventHandler eventHandler;
 	private HttpRequest request;
 	private URI uri;
 	private IHttpResponse response;
 	private HttpHost httpHost;
+    private HttpInterceptor interceptor; 
+    private boolean isPending = false;
+    private boolean doForward = false;
     private Lock lock = new ReentrantLock();
     private Condition cv = lock.newCondition();
-    private boolean doForward = false;
 
 	ProxyTransaction(HttpContext context) {
 		this.context = context;
@@ -55,31 +59,24 @@ public class ProxyTransaction implements IProxyTransaction {
 			lock.unlock();
 		}
 	}
-	
-	public void signalForward() {
-		lock.lock();
-		try {
-			doForward = true;
-			cv.signal();
-		}
-		finally {
-			lock.unlock();
-		}
+		
+	public synchronized void setPending(HttpInterceptor interceptor) {
+		this.interceptor = interceptor;
+		isPending = true;
+		doForward = false;
 	}
 
-	public void signalDrop() {
-		lock.lock();
-		try {
-			doForward = false;
-			cv.signal();
-		}
-		finally {
-			lock.unlock();
-		}
+	public synchronized void setUnqueued() {
+		interceptor = null;
 	}
 
-	public boolean getForward() {
+	public synchronized boolean getForward() {
 		return doForward;
+	}
+
+	@Override
+	public void setEventHandler(IProxyTransactionEventHandler eventHandler) {
+		this.eventHandler = eventHandler;
 	}
 	
 	@Override
@@ -110,5 +107,45 @@ public class ProxyTransaction implements IProxyTransaction {
 	@Override
 	public IHttpResponse getResponse() {
 		return response;
+	}
+
+	@Override
+	public void doForward() {
+		lock.lock();
+		try {
+			if (isPending == true) {
+				if (interceptor != null) {
+					interceptor.notifyHandled(this);
+					interceptor = null;
+				}
+
+				isPending = false;
+				doForward = true;
+				cv.signal();
+			}
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void doDrop() {
+		lock.lock();
+		try {
+			if (isPending == true) {
+				if (interceptor != null) {
+					interceptor.notifyHandled(this);
+					interceptor = null;
+				}
+
+				isPending = false;
+				doForward = false;
+				cv.signal();
+			}
+		}
+		finally {
+			lock.unlock();
+		}
 	}
 }
