@@ -5,6 +5,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 public class CrawlerPane extends Composite {
@@ -62,7 +63,10 @@ public class CrawlerPane extends Composite {
 		if(!changed)
 			return;
 		
-		getDisplay().syncExec(new Runnable() {
+		final Display display = getDisplay();
+		if(display.isDisposed())
+			return;
+		display.syncExec(new Runnable() {
 			@Override
 			public void run() {
 				renderProgress();
