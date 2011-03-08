@@ -27,6 +27,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			ps.error(request, response, "during initial resource fetch");
 			return;
 		}
+		ps.getPath().setVisited(true);
 
 		final PageFingerprint fp = PageFingerprint.generateFromCodeAndString(response.getResponseCode(), response.getBodyAsString());
 		final PathState par = ps.get404Parent();

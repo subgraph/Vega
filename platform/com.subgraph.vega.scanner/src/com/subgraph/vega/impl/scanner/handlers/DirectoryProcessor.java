@@ -22,6 +22,8 @@ public class DirectoryProcessor implements ICrawlerResponseProcessor {
 		final ScanRequestData data = (ScanRequestData) argument;
 		final PathState ps = data.getPathState();
 		
+		ps.getPath().setVisited(true);
+
 		ps.setResponse(response);
 		//System.out.println("DirectoryProcessor: "+ request.getMethod() + " "+ request.getURI());
 		// Pivot checks for PIVOT_SERV

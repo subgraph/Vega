@@ -18,7 +18,8 @@ public class FileProcessor implements ICrawlerResponseProcessor {
 		final ScanRequestData data = (ScanRequestData) argument;
 		final PathState ps = data.getPathState();
 		ps.debug("FileProcessor: "+ request.getMethod() + " "+ request.getURI());
-		
+		ps.getPath().setVisited(true);
+
 		ps.setResponse(response);
 		if(response.isFetchFail()) {
 			ps.error(request, response, "during initial file fetch");
