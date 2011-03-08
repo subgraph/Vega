@@ -5,10 +5,11 @@ import org.apache.http.HttpRequest;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 
-public interface IResponseProcessingModule {
+public interface IResponseProcessingModule extends IScannerModule {
 	boolean responseCodeFilter(int code);
 	boolean mimeTypeFilter(String mimeType);
 	
 	void processResponse(HttpRequest request, IHttpResponse response, IWorkspace workspace);
+
 	
 }

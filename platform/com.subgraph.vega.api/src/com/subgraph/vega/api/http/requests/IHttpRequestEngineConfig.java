@@ -11,4 +11,6 @@ public interface IHttpRequestEngineConfig {
 	boolean getUndoURLEncoding();
 	void registerResponseProcessor(IHttpResponseProcessor processor);
 	List<IHttpResponseProcessor> getResponseProcessors();
+	void setCookieString(String cookieString);
+	String getCookieString();
 }

@@ -23,6 +23,20 @@
                   </with>
                </visibleWhen>
             </command>
+            <command
+                  commandId="com.subgraph.vega.ui.scanner.configurescan"
+                  label="Configure Scan"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.scanner">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -52,7 +66,7 @@
                id="com.subgraph.vega.toolbars.main">
             <command
                   commandId="com.subgraph.vega.ui.scanner.startnewscan"
-                  icon="icons/new_scan.gif"
+                  icon="icons/wand.png"
                   label="Start New Scan"
                   style="push">
                <visibleWhen
@@ -81,6 +95,10 @@
       <command
             id="com.subgraph.vega.ui.scanner.stopscan"
             name="Stop Scanner">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.configurescan"
+            name="Configure Scan">
       </command>
    </extension>
    <extension
@@ -136,6 +154,18 @@
       <handler
             class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             commandId="com.subgraph.vega.ui.scanner.startnewscan">
+         <enabledWhen>
+            <with
+                  variable="vega.scannerState">
+               <equals
+                     value="idle">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.ConfigureScanHandler"
+            commandId="com.subgraph.vega.ui.scanner.configurescan">
          <enabledWhen>
             <with
                   variable="vega.scannerState">

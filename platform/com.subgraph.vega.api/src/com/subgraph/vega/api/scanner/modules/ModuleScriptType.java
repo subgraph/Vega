@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.modules.scripting;
+package com.subgraph.vega.api.scanner.modules;
 
 public enum ModuleScriptType {
 	DISABLED("disabled"),
@@ -14,7 +14,7 @@ public enum ModuleScriptType {
 		this.name = name;
 	}
 	
-	static ModuleScriptType lookup(String name) {
+	public static ModuleScriptType lookup(String name) {
 		for(ModuleScriptType type: ModuleScriptType.values()) {
 			if(type.name.equals(name))
 				return type;

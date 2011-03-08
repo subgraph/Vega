@@ -10,7 +10,10 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.WrappedException;
 
-public abstract class AbstractScriptModule {
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
+import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
+
+public abstract class AbstractScriptModule implements IScannerModule {
 	private static final Logger logger = Logger.getLogger("script-module");
 	protected static class ExportedObject {
 		private final String identifier;
@@ -25,6 +28,14 @@ public abstract class AbstractScriptModule {
 	
 	protected AbstractScriptModule(ScriptedModule module) {
 		this.module = module;
+	}
+	
+	public String getModuleName() {
+		return module.getModuleName();
+	}
+	
+	public ModuleScriptType getModuleType() {
+		return module.getModuleType();
 	}
 	
 	protected void runScript(List<ExportedObject> exports) {
@@ -54,5 +65,6 @@ public abstract class AbstractScriptModule {
 			ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
 		}
 	}
+	
 
 }

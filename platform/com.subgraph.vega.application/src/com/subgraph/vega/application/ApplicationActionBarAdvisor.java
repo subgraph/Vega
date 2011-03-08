@@ -18,6 +18,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
 	private IContributionItem viewList;
 	private IWorkbenchAction preferenceAction;
+	IWorkbenchAction aboutAction;
 		
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
         super(configurer);
@@ -26,17 +27,24 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     protected void makeActions(IWorkbenchWindow window) {
     	viewList = ContributionItemFactory.VIEWS_SHORTLIST.create(window);
     	preferenceAction = ActionFactory.PREFERENCES.create(window);
+        aboutAction = ActionFactory.ABOUT.create(window);
+        register(aboutAction);
     	register(preferenceAction);
     }
 
     protected void fillMenuBar(IMenuManager menuBar) {
     	MenuManager winMenu = new MenuManager("&Window", IWorkbenchActionConstants.M_WINDOW);
+        MenuManager helpMenu = new MenuManager("&Help", IWorkbenchActionConstants.M_HELP);
+        
     	winMenu.add(preferenceAction);
     	
     	MenuManager viewMenu = new MenuManager("Show View");
     	viewMenu.add(viewList);
     	winMenu.add(viewMenu);
     	menuBar.add(winMenu);
+    	menuBar.add(helpMenu);
+        helpMenu.add(aboutAction);
+
     }
     
     protected void fillStatusLine(IStatusLineManager statusLine) {

@@ -6,6 +6,7 @@ import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
@@ -22,6 +23,7 @@ public class Scanner implements IScanner {
 	private IModel model;
 	private ScannerStatus scannerStatus = ScannerStatus.SCAN_IDLE;
 	private final EventListenerManager scanStatusListeners = new EventListenerManager();
+	private IScannerConfig persistentConfig;
 	
 	private IWebCrawlerFactory crawlerFactory;
 	private IHttpRequestEngineFactory requestEngineFactory;
@@ -67,8 +69,14 @@ public class Scanner implements IScanner {
 		return model;
 	}
 	
+	
 	void fireStatusChangeEvent(IEvent event) {
 		scanStatusListeners.fireEvent(event);
+	}
+	
+	@Override
+	public IScannerConfig getScannerConfig() {
+		return persistentConfig;
 	}
 	
 	@Override
@@ -81,6 +89,11 @@ public class Scanner implements IScanner {
 		return scannerStatus;
 	}
 
+	@Override 
+	public void setScannerConfig(IScannerConfig config) {
+		persistentConfig = config;
+	}
+	
 	void setScannerStatus(ScannerStatus newStatus) {
 		synchronized(this) {
 			this.scannerStatus = newStatus;
@@ -102,7 +115,10 @@ public class Scanner implements IScanner {
 		if(config.getBaseURI() == null)
 			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
 		
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+		IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
+		requestEngineConfig.setCookieString(config.getCookieString());
+		
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
 		moduleRegistry.refreshModuleScripts();
 		
 		currentWorkspace.lock();
