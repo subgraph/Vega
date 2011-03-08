@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.w3c.dom.html2.HTMLCollection;
 import org.w3c.dom.html2.HTMLDocument;
 import org.w3c.dom.html2.HTMLElement;
@@ -62,6 +64,13 @@ public class FormParser {
 				logger.warning("Form field not an HTMLElement" + fieldNode);
 			}	
 		}
+		
+		NodeList labelList = formElement.getElementsByTagName("label");
+		for(int i = 0; i < labelList.getLength(); i++) {
+			Node n = labelList.item(i);
+			if(n instanceof HTMLElement) 
+				processLabelElement(form, (HTMLElement) n);
+		}
 		return form;
 	}
 	
@@ -108,23 +117,57 @@ public class FormParser {
 		final String fieldType = input.getType();
 		final String fieldName = input.getName();
 		final String fieldValue = input.getValue();
+		final String fieldId = input.getId();
+		
 		// HTML 4.01 section 17.4
 		// This attribute specifies the type of control to create. The default value for this attribute is "text".
 		if(fieldType == null || fieldType.equalsIgnoreCase("text")) {
-			form.addTextField(fieldName, fieldValue);
+			form.addTextField(fieldName, fieldValue, fieldId, searchLabelText(input));
 		} else if(fieldType.equalsIgnoreCase("password")) {
-			form.addPasswordField(fieldName, fieldValue);
+			form.addPasswordField(fieldName, fieldValue, fieldId, searchLabelText(input));
 		} else if(fieldType.equalsIgnoreCase("hidden")) {
-			form.addHiddenField(fieldName, fieldValue);
+			form.addHiddenField(fieldName, fieldId, fieldValue);
 		} else if(fieldType.equalsIgnoreCase("checkbox")) {
-			form.addCheckboxField(fieldName, fieldValue, input.getChecked());
+			form.addCheckboxField(fieldName, fieldValue, fieldId, input.getChecked());
 		} else if(fieldType.equalsIgnoreCase("radio")) {
-			form.addCheckboxField(fieldName, fieldValue, input.getChecked());
+			form.addCheckboxField(fieldName, fieldValue, fieldId, input.getChecked());
 		} else if(fieldType.equalsIgnoreCase("file")) {
 			form.addFileField(fieldName);
 		}
 		String msg = "<input> name="+ input.getName() + " type = "+ input.getType() + " value = "+ input.getValue();
 		logger.warning(msg);
+	}
+	
+	private String searchLabelText(HTMLElement elem) {
+		Node n = elem;
+		while(n != null && !(n instanceof HTMLFormElement)) {
+			Node previousNode = getPreviousNonCommentNode(n);
+			System.out.println("previousNode: "+ previousNode);
+			if(previousNode != null) {
+				String text = previousNode.getTextContent();
+				if(text != null && text.length() != 0)
+					return text;
+			}
+			n = n.getParentNode();
+		}
+		return null;
+	}
+	
+	private Node getPreviousNonCommentNode(Node node) {
+		Node previousNode = node.getPreviousSibling();
+
+		System.out.println("CC previousNode: "+ previousNode);
+		while(previousNode != null && (previousNode.getNodeType() == Node.COMMENT_NODE || isWhitespaceTextNode(previousNode))) 
+			previousNode = previousNode.getPreviousSibling();
+			
+		return previousNode;
+	}
+	
+	private boolean isWhitespaceTextNode(Node node) {
+		if(!(node instanceof Text))
+			return false;
+		final Text text = (Text) node;
+		return text.isElementContentWhitespace();
 	}
 	
 	private void processFormHTMLElement(WebForm form, HTMLElement elem) {
@@ -134,5 +177,17 @@ public class FormParser {
 		} else {
 			logger.warning("Failed to parse HTMLElement in form: "+ elem.getTagName());
 		}
+	}
+	
+	private void processLabelElement(WebForm form, HTMLElement label) {
+		if(label.getTagName() == null || !label.getTagName().equals("LABEL"))
+			return;
+		String id = label.getAttribute("id");
+		if(id == null)
+			return;
+		String content = label.getTextContent();
+		if(content == null || content.trim().isEmpty())
+			return;
+		form.addLabelToField(id, content);
 	}
 }

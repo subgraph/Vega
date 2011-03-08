@@ -15,6 +15,4 @@ public class ScannerStatusChangeEvent implements IScannerStatusChangeEvent {
 	public ScannerStatus getScannerStatus() {
 		return newStatus;
 	}
-	
-
 }

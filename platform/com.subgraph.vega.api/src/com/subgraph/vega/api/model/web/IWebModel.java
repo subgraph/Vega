@@ -14,6 +14,7 @@ public interface IWebModel {
 	void removeChangeListener(IEventHandler listener);
 	Collection<IWebHost> getAllWebHosts();
 	IWebHost getWebHostByHttpHost(HttpHost host);
+	IWebHost createWebHostFromHttpHost(HttpHost host);
 	IWebPath getWebPathByUri(URI uri);
 	
 	IWebPath addGetTarget(URI uri);

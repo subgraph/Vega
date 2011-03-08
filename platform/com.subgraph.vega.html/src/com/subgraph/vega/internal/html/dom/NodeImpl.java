@@ -267,7 +267,7 @@ public class NodeImpl implements Node {
 
 	@Override
 	public String getTextContent() throws DOMException {
-		throw createNoLevel3SupportException();
+		return null;
 	}
 
 	@Override

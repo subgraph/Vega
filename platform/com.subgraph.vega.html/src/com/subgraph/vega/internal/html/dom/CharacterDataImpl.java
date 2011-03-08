@@ -45,6 +45,11 @@ public class CharacterDataImpl extends NodeImpl implements CharacterData {
 	}
 
 	@Override
+	public String getTextContent() {
+		return data;
+	}
+	
+	@Override
 	public String substringData(int offset, int count) throws DOMException {
 		String data = getData();
 		if(offset < 0 || offset >= data.length())

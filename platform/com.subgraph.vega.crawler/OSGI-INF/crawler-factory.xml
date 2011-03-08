@@ -4,7 +4,5 @@
    <service>
       <provide interface="com.subgraph.vega.api.crawler.IWebCrawlerFactory"/>
    </service>
-   <reference bind="setModel" cardinality="1..1" interface="com.subgraph.vega.api.model.IModel" name="IModel" policy="static" unbind="unsetModel"/>
-   <reference bind="setUrlExtractor" cardinality="1..1" interface="com.subgraph.vega.urls.IUrlExtractor" name="IUrlExtractor" policy="static" unbind="unsetUrlExtractor"/>
    <reference bind="setRequestEngineFactory" cardinality="1..1" interface="com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory" name="IHttpRequestEngineFactory" policy="static" unbind="unsetRequestEngineFactory"/>
 </scr:component>

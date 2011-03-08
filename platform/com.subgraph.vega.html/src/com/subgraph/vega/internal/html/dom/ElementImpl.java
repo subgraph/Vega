@@ -41,6 +41,33 @@ public class ElementImpl extends NodeImpl implements Element {
 		return jsoupElement.tagName().toUpperCase();
 	}
 
+	@Override
+	public String getTextContent() {
+		final short type = getNodeType();
+		switch(type) {
+		case Node.TEXT_NODE:
+		case Node.CDATA_SECTION_NODE:
+		case Node.COMMENT_NODE:
+			return getNodeValue();
+		default:
+			return concatenateChildTextContent();
+		}
+	}
+	
+	private String concatenateChildTextContent() {
+		final StringBuilder sb = new StringBuilder();
+		final NodeList nlist = getChildNodes();
+		for(int i = 0; i < nlist.getLength(); i++) {
+			Node node = nlist.item(i);
+			if((node.getNodeType() != Node.COMMENT_NODE) && (node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE)) {
+				String text = node.getTextContent();
+				if(text != null)
+					sb.append(text);
+			}
+		}
+		return sb.toString();
+	}
+	
 	Element getElementById(String elementId) {
 		org.jsoup.nodes.Element elementById = jsoupElement.getElementById(elementId);
 		if(elementById == null)

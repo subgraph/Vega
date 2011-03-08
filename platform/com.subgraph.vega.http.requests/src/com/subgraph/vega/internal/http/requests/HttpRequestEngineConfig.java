@@ -11,6 +11,7 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 
 	private boolean forceIdentityEncoding = false;
 	private boolean decompressGzipEncoding = true;
+	private boolean undoURLEncoding = false;
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
 
 	@Override
@@ -31,6 +32,16 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	@Override
 	public boolean getDecompressGzipEncoding() {
 		return decompressGzipEncoding;
+	}
+
+	@Override
+	public void setUndoURLEncoding(boolean value) {
+		undoURLEncoding = value;
+	}
+
+	@Override
+	public boolean getUndoURLEncoding() {
+		return undoURLEncoding;
 	}
 
 	@Override

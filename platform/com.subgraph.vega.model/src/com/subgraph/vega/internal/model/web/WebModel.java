@@ -86,8 +86,11 @@ public class WebModel implements IWebModel {
 	}
 
 	@Override
-	public IWebPath getWebPathByUri(URI uri) {
-		WebHost wh = getWebHostByHttpHost(uriToHost(uri));
+	public synchronized IWebPath getWebPathByUri(URI uri) {
+		final HttpHost host = uriToHost(uri);
+		IWebHost wh = getWebHostByHttpHost(host);
+		if(wh == null)
+			wh = createWebHostFromHttpHost(host);
 		IWebPath path =  wh.addPath(uriToPath(uri));
 		return path;
 	}
@@ -113,29 +116,29 @@ public class WebModel implements IWebModel {
 
 	@Override
 	synchronized public WebHost getWebHostByHttpHost(HttpHost host) {
-		final WebHost wh = lookupWebHost(host);
-		if(wh != null)
-			return wh;
-		final WebHost newHost = WebHost.createWebHost(eventManager, database, host);
-		newHost.setDatabase(database);
-		newHost.getRootPath().setDatabase(database);
-		synchronized (database) {
-			database.store(newHost);
-			database.store(newHost.getRootMountPoint());
-			database.store(newHost.getRootPath());
-		}
-		newHost.getRootPath().setDatabase(database);
-		notifyNewEntity(newHost);
-		return newHost;
-	}
-	
-	
-	private WebHost lookupWebHost(HttpHost host) {
 		for(WebHost wh: database.query(WebHost.class)) {
 			if(wh.getHttpHost().equals(host))
 				return wh;
 		}		
 		return null;
+	}
+	
+	@Override
+	synchronized public IWebHost createWebHostFromHttpHost(HttpHost host) {
+		final WebHost wh = getWebHostByHttpHost(host);
+		if(wh != null)
+			return wh;
+		final WebHost newHost = WebHost.createWebHost(eventManager, database, host);
+		newHost.setDatabase(database);
+		newHost.getRootPath().setDatabase(database);
+		synchronized(database) {
+			database.store(newHost);
+			database.store(newHost.getRootMountPoint());
+			database.store(newHost.getRootPath());
+		}
+		//newHost.getRootPath().setDatabase(database);
+		notifyNewEntity(newHost);
+		return newHost;
 	}
 
 	@Override

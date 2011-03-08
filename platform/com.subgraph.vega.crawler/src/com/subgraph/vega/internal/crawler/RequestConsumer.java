@@ -12,7 +12,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.model.IWorkspace;
 
 public class RequestConsumer implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
@@ -20,16 +19,14 @@ public class RequestConsumer implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
-	private final IWorkspace workspace;
 	private volatile HttpUriRequest currentRequest;
 	private volatile boolean stop;
 	
-	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, IWorkspace workspace) {
+	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
 		this.requestEngine = requestEngine;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.latch = latch;
-		this.workspace = workspace;
 	}
 
 	@Override
@@ -41,8 +38,6 @@ public class RequestConsumer implements Runnable {
 		} finally {
 			synchronized(latch) {
 				latch.countDown();
-				if(latch.getCount() == 0)
-					workspace.unlock();
 			}
 		}		
 	}
@@ -56,7 +51,7 @@ public class RequestConsumer implements Runnable {
 	
 	private void runLoop() throws InterruptedException {
 		while(!stop) {
-			CrawlerTask task = crawlerRequestQueue.take();
+			CrawlerTask task = (CrawlerTask) crawlerRequestQueue.take();
 			
 			if(task.isExitTask()) {
 				// Put poison pill back in queue so every other RequestConsumer task will see it.
@@ -64,8 +59,9 @@ public class RequestConsumer implements Runnable {
 				return;
 			}
 			
-			logger.info("Retrieving: " + task.getRequest().getURI());
+			logger.info("Retrieving: " + task.getRequest().getRequestLine().getUri());			
 			IHttpResponse response = sendRequest(task.getRequest());
+
 			if(response == null) {
 				logger.log(Level.WARNING, "No response was received for request to "+ task.getRequest().getURI());
 			}

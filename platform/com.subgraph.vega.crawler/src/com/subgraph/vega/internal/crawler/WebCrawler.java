@@ -1,6 +1,5 @@
 package com.subgraph.vega.internal.crawler;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -9,25 +8,24 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.subgraph.vega.api.crawler.ICrawlerConfig;
-import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
+import org.apache.http.client.methods.HttpUriRequest;
+
+import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
+import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.urls.IUrlExtractor;
 
 public class WebCrawler implements IWebCrawler {
 	private final static int CRAWLER_THREAD_COUNT = 5;
-	private final IWorkspace workspace;
 	
-	private final IUrlExtractor urlExtractor;
 	private final IHttpRequestEngine requestEngine;
-	private final ICrawlerConfig config;
 
 	private final Executor executor = Executors.newFixedThreadPool(CRAWLER_THREAD_COUNT + 1);
 	private final BlockingQueue<CrawlerTask> requestQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final BlockingQueue<CrawlerTask> responseQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final List<RequestConsumer> requestConsumers = new ArrayList<RequestConsumer>(CRAWLER_THREAD_COUNT);
+	private final List<ICrawlerProgressTracker> eventHandlers;
+
 	private HttpResponseProcessor responseProcessor;
 	volatile private CountDownLatch latch;
 	
@@ -35,11 +33,9 @@ public class WebCrawler implements IWebCrawler {
 	
 	private TaskCounter counter = new TaskCounter();
 	
-	WebCrawler(IWorkspace workspace, IUrlExtractor urlExtractor, IHttpRequestEngine requestEngine, ICrawlerConfig config) {
-		this.workspace = workspace;
-		this.urlExtractor = urlExtractor;
+	WebCrawler(IHttpRequestEngine requestEngine) {
 		this.requestEngine = requestEngine;
-		this.config = config;		
+		this.eventHandlers = new ArrayList<ICrawlerProgressTracker>();
 	}
 	
 	@Override
@@ -49,25 +45,13 @@ public class WebCrawler implements IWebCrawler {
 	
 		latch = new CountDownLatch(CRAWLER_THREAD_COUNT + 1);
 		
-		for(URI uri: config.getInitialURIs())
-			if(config.getURIFilter().filter(uri)) {
-				synchronized(counter) {
-					counter.addNewTask();
-				}
-				requestQueue.add(CrawlerTask.createGetTask(uri));
-			}
-		
-		synchronized(counter) {
-			for(ICrawlerEventHandler handler: config.getEventHandlers()) {
-				handler.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
-			}
-		}
-		responseProcessor = new HttpResponseProcessor(requestQueue, responseQueue, workspace, urlExtractor, config, latch, counter);
+		updateProgress();
+		responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
 		
 		executor.execute( responseProcessor );
 		
 		for(int i = 0; i < CRAWLER_THREAD_COUNT; i++) {
-			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch, workspace);
+			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
 			requestConsumers.add(consumer);
 			executor.execute(consumer);
 		}
@@ -83,10 +67,39 @@ public class WebCrawler implements IWebCrawler {
 		responseQueue.clear();
 		responseQueue.put(CrawlerTask.createExitTask());
 		latch.await();
-		workspace.unlock();
 	}
 	
 	public void waitFinished() throws InterruptedException {
 		latch.await();
+	}
+
+	@Override
+	public void submitTask(HttpUriRequest request, ICrawlerResponseProcessor callback) {
+		submitTask(request, callback, null);
+	}
+	
+	@Override
+	public void submitTask(HttpUriRequest request,
+			ICrawlerResponseProcessor callback, Object argument) {
+		CrawlerTask task = CrawlerTask.createTask(request, callback, argument);
+		synchronized(counter) {
+			//System.out.println("Queuing: "+ request.getRequestLine().getMethod() + " "+ request.getRequestLine().getUri());
+			counter.addNewTask();
+			requestQueue.add(task);
+		}
+	}
+
+	@Override
+	public void registerProgressTracker(ICrawlerProgressTracker progress) {
+		synchronized(counter) {
+			eventHandlers.add(progress);
+		}		
+	}
+	
+	void updateProgress() {
+		synchronized(counter) {
+			for(ICrawlerProgressTracker pt: eventHandlers) 
+				pt.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
+		}
 	}
 }

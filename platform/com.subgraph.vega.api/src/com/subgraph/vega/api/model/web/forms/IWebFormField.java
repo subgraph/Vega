@@ -11,5 +11,6 @@ public interface IWebFormField {
 	String getValue();
 	boolean hasMultipleValues();
 	Set<String> getMultipleValues();
+	Set<String> getCheckedValues();
 
 }

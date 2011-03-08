@@ -1,44 +1,27 @@
 package com.subgraph.vega.internal.crawler;
 
-import java.net.URI;
-
-import com.subgraph.vega.api.crawler.ICrawlerConfig;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
-import com.subgraph.vega.api.events.IEvent;
-import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
-import com.subgraph.vega.api.model.IModel;
-import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.WorkspaceCloseEvent;
-import com.subgraph.vega.api.model.WorkspaceOpenEvent;
-import com.subgraph.vega.urls.IUrlExtractor;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {
 
-	private IModel model;
-	private IUrlExtractor urlExtractor;
 	private IHttpRequestEngineFactory requestEngineFactory;
-	private IWorkspace currentWorkspace;
 	
 	@Override
-	public IWebCrawler create(ICrawlerConfig config) {
+	public IWebCrawler create() {
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
-		return create(config, requestEngine);
-	}
-	
-	@Override
-	public IWebCrawler create(ICrawlerConfig config, IHttpRequestEngine requestEngine) {
-		currentWorkspace.lock();
-		return new WebCrawler(currentWorkspace, urlExtractor, requestEngine, config);
+		return create(requestEngine);
 	}
 
-	
-	public ICrawlerConfig createBasicConfig(URI baseURI) {
-		return new BasicCrawlerConfig(baseURI);
+	@Override
+	public IWebCrawler create(IHttpRequestEngine requestEngine) {
+		return new WebCrawler(requestEngine);
 	}
 	
+
+	/*
 	protected void activate() {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 
@@ -66,14 +49,9 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 	protected void unsetModel(IModel model) {
 		this.model = null;
 	}
+	*/
 	
-	protected void setUrlExtractor(IUrlExtractor extractor) {
-		this.urlExtractor = extractor;
-	}
 	
-	protected void unsetUrlExtractor(IUrlExtractor extractor) {
-		this.urlExtractor = null;
-	}
 	
 	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
 		this.requestEngineFactory = factory;

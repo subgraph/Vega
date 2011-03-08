@@ -15,6 +15,7 @@ import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.events.CrawlerProgressEvent;
 import com.subgraph.vega.impl.scanner.events.ScannerStatusChangeEvent;
+import com.subgraph.vega.urls.IUrlExtractor;
 
 public class Scanner implements IScanner {
 
@@ -28,6 +29,7 @@ public class Scanner implements IScanner {
 	private ScannerTask scannerTask;
 	private Thread scannerThread;
 	private IWorkspace currentWorkspace;
+	private IUrlExtractor urlExtractor;
 	
 	protected void activate() {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
@@ -104,7 +106,7 @@ public class Scanner implements IScanner {
 		moduleRegistry.refreshModuleScripts();
 		
 		currentWorkspace.lock();
-		scannerTask = new ScannerTask(this, config, requestEngine, currentWorkspace);
+		scannerTask = new ScannerTask(this, config, requestEngine, currentWorkspace, urlExtractor);
 		scannerThread = new Thread(scannerTask);
 		setScannerStatus(ScannerStatus.SCAN_STARTING);
 
@@ -157,5 +159,13 @@ public class Scanner implements IScanner {
 	
 	protected void unsetModel(IModel model) {
 		this.model = null;
+	}
+	
+	protected void setUrlExtractor(IUrlExtractor extractor) {
+		this.urlExtractor = extractor;
+	}
+	
+	protected void unsetUrlExtractor(IUrlExtractor extractor) {
+		this.urlExtractor = null;
 	}
 }

@@ -46,17 +46,25 @@ public class WebForm implements IWebForm {
 		return new ArrayList<IWebFormField>(fields.values());
 	}
 	
-	void addTextField(String name, String value) {
-		fields.put(name, new WebFormField(FieldType.INPUT_TEXT, name, value));
+	void addTextField(String name, String value, String id, String label) {
+		System.out.println("Text field name = "+ name + " value = "+ value + " label = "+ label);
+		final WebFormField field = new WebFormField(FieldType.INPUT_TEXT, name, value, id);
+		if(label != null && label.length() > 0)
+			field.setLabel(label);
+		fields.put(name, field);
 	}
 	
-	void addPasswordField(String name, String value) {
-		fields.put(name, new WebFormField(FieldType.INPUT_PASSWORD, name, value));
+	void addPasswordField(String name, String value, String id, String label) {
+		System.out.println("Password field name = "+ name + " value = "+ value + " label = "+ label);
+		final WebFormField field = new WebFormField(FieldType.INPUT_PASSWORD, name, value, id);
+		if(label != null && label.length() > 0)
+			field.setLabel(label);
+		fields.put(name, field);
 	}
 	
-	void addCheckboxField(String name, String value, boolean checked) {
+	void addCheckboxField(String name, String value, String id, boolean checked) {
 		if(!fields.containsKey(name)) 
-			fields.put(name, new WebFormField(FieldType.INPUT_CHECKBOX, name, null));
+			fields.put(name, new WebFormField(FieldType.INPUT_CHECKBOX, name, null, id));
 		final WebFormField f = fields.get(name);
 		if(f.getType() != FieldType.INPUT_CHECKBOX) {
 			logger.warning("Cannot add checkbox field because field name "+ name +" is duplicated");
@@ -65,9 +73,9 @@ public class WebForm implements IWebForm {
 		f.addValue(value, checked);		
 	}
 	
-	void addRadioField(String name, String value, boolean checked) {
+	void addRadioField(String name, String value, String id, boolean checked) {
 		if(!fields.containsKey(name))
-			fields.put(name, new WebFormField(FieldType.INPUT_RADIO, name, null));
+			fields.put(name, new WebFormField(FieldType.INPUT_RADIO, name, null, id));
 		final WebFormField f = fields.get(name);
 		if(f.getType() != FieldType.INPUT_RADIO) {
 			logger.warning("Cannot add radio field because field name "+ name + " is duplicated");
@@ -76,12 +84,12 @@ public class WebForm implements IWebForm {
 		f.addValue(value, checked);	
 	}
 	
-	void addHiddenField(String name, String value) {
-		fields.put(name, new WebFormField(FieldType.INPUT_HIDDEN, name, value));
+	void addHiddenField(String name, String value, String id) {
+		fields.put(name, new WebFormField(FieldType.INPUT_HIDDEN, name, value, id));
 	}
 	
 	void addFileField(String name) {
-		fields.put(name, new WebFormField(FieldType.INPUT_FILE, name, null));
+		fields.put(name, new WebFormField(FieldType.INPUT_FILE, name, null, null));
 	}
 	
 	void addSelectOption(String name, String value, boolean multiple) {
@@ -89,9 +97,16 @@ public class WebForm implements IWebForm {
 	}
 	
 	void addTextArea(String name, String value) {
-		fields.put(name, new WebFormField(FieldType.TEXTAREA, name, value));
+		fields.put(name, new WebFormField(FieldType.TEXTAREA, name, value, null));
 	}
-
-
-
+	
+	void addLabelToField(String fieldId, String label) {
+		for(WebFormField field: fields.values()) {
+			if(field.getId() != null && field.getId().equalsIgnoreCase(fieldId)) {
+				field.setLabel(label);
+				return;
+			}
+		}
+		logger.warning("Could not find corresponding field element with id = "+ fieldId + " for <LABEL> content "+ label);
+	}
 }

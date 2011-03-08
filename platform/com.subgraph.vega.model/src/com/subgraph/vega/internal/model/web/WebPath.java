@@ -42,6 +42,8 @@ public class WebPath extends WebEntity implements IWebPath {
 	private final List<IWebResponse> getResponses = new ActivatableArrayList<IWebResponse>();
 	private final List<IWebResponse> postResponses = new ActivatableArrayList<IWebResponse>();
 	
+	private PathType pathType;
+		
 	private transient URI cachedUri;
 	private transient String cachedFullPath;
 	
@@ -54,6 +56,7 @@ public class WebPath extends WebEntity implements IWebPath {
 		this.parentPath = parentPath;
 		this.pathComponent = pathComponent;
 		this.mountPoint = mountPoint;
+		this.pathType = PathType.PATH_UNKNOWN;
 	}
 	
 	@Override
@@ -77,9 +80,8 @@ public class WebPath extends WebEntity implements IWebPath {
 	}
 
 	public String getFullPath() {
-		if(cachedFullPath == null) {
+		if(cachedFullPath == null) 
 			cachedFullPath = generateFullPath();
-		}
 		return cachedFullPath;
 	}
 	
@@ -87,6 +89,7 @@ public class WebPath extends WebEntity implements IWebPath {
 		activate(ActivationPurpose.READ);
 		if(parentPath == null)
 			return "/";
+		
 		final String parentFullPath = parentPath.getFullPath();
 		if(parentFullPath.endsWith("/"))
 			return parentFullPath + pathComponent;
@@ -173,6 +176,14 @@ public class WebPath extends WebEntity implements IWebPath {
 	}
 	
 	@Override
+	public IWebPath getChildPath(String pathComponent) {
+		activate(ActivationPurpose.READ);
+		synchronized(childPathMap) {
+			return childPathMap.get(pathComponent);
+		}
+	}
+	
+	@Override
 	public WebPath addChildPath(String pathComponent) {
 		activate(ActivationPurpose.READ);
 		synchronized(childPathMap) {
@@ -202,13 +213,17 @@ public class WebPath extends WebEntity implements IWebPath {
 	@Override
 	public List<IWebResponse> getGetResponses() {
 		activate(ActivationPurpose.READ);
-		return Collections.unmodifiableList(getResponses);
+		synchronized(getResponses) {
+			return Collections.unmodifiableList(new ArrayList<IWebResponse>(getResponses));
+		}
 	}
 
 	@Override
 	public List<IWebResponse> getPostResponses() {
 		activate(ActivationPurpose.READ);
-		return Collections.unmodifiableList(postResponses);
+		synchronized(postResponses) {
+			return Collections.unmodifiableList(new ArrayList<IWebResponse>(postResponses));
+		}
 	}
 
 	@Override
@@ -259,5 +274,19 @@ public class WebPath extends WebEntity implements IWebPath {
 			parameterList.add(new BasicNameValuePair(query, null));
 		}
 		return parameterList;
+	}
+
+	@Override
+	public void setPathType(PathType type) {
+		activate(ActivationPurpose.WRITE);
+		this.pathType = type;
+		cachedFullPath = null;
+		cachedUri = null;
+	}
+
+	@Override
+	public PathType getPathType() {
+		activate(ActivationPurpose.READ);
+		return pathType;
 	}
 }

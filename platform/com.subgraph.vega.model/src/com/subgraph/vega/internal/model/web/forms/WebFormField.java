@@ -10,13 +10,16 @@ public class WebFormField implements IWebFormField {
 	private final FieldType type;
 	private final String name;
 	private final String value;
+	private final String id;
 	private final Set<String> multipleValues;
 	private final Set<String> checkedValues;
+	private String label;
 	
-	WebFormField(FieldType type, String name, String value) {
+	WebFormField(FieldType type, String name, String value, String id) {
 		this.type = type;
 		this.name = name;
 		this.value = value;
+		this.id = id;
 		if(type == FieldType.INPUT_CHECKBOX || type == FieldType.INPUT_RADIO || type == FieldType.SELECT_OPTION) {
 			this.multipleValues = new HashSet<String>();
 			this.checkedValues = new HashSet<String> ();
@@ -34,6 +37,14 @@ public class WebFormField implements IWebFormField {
 		if(checked)
 			checkedValues.add(value);
 	}
+	
+	void setLabel(String label) {
+		this.label = label;
+	}
+	
+	String getLabel() {
+		return label;
+	}
 
 	@Override
 	public FieldType getType() {
@@ -49,6 +60,10 @@ public class WebFormField implements IWebFormField {
 	public String getValue() {
 		return value;
 	}
+	
+	String getId() {
+		return id;
+	}
 
 	@Override
 	public boolean hasMultipleValues() {
@@ -58,5 +73,10 @@ public class WebFormField implements IWebFormField {
 	@Override
 	public Set<String> getMultipleValues() {
 		return multipleValues;
+	}
+
+	@Override
+	public Set<String> getCheckedValues() {
+		return checkedValues;
 	}
 }

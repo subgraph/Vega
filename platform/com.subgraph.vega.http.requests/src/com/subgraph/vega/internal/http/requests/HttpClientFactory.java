@@ -8,8 +8,6 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
-
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
@@ -18,25 +16,28 @@ import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+
+import com.subgraph.vega.internal.http.requests.unencoding.UnencodingThreadSafeClientConnectionManager;
 
 public class HttpClientFactory {
 
 	static HttpClient createHttpClient() {
 		final HttpParams params = createHttpParams();
 		final ClientConnectionManager ccm = createConnectionManager(params);
-		final HttpClient client = new DefaultHttpClient(ccm, params);
+		final DefaultHttpClient client = new DefaultHttpClient(ccm, params);
+		
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		return client;
 	}
 
 	private static ClientConnectionManager createConnectionManager(HttpParams params) {
 		final SchemeRegistry sr = createSchemeRegistry();
-		return new ThreadSafeClientConnManager(params, sr);
+		return new UnencodingThreadSafeClientConnectionManager(params, sr);
 	}
 
 	private static HttpParams createHttpParams() {

@@ -1,11 +1,15 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.subgraph.vega.api.crawler.ICrawlerConfig;
-import com.subgraph.vega.api.crawler.ICrawlerEventHandler;
+import org.apache.http.client.methods.HttpUriRequest;
+
+import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
@@ -20,13 +24,18 @@ import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
 import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
+import com.subgraph.vega.impl.scanner.urls.UriFilter;
+import com.subgraph.vega.impl.scanner.urls.UriParser;
+import com.subgraph.vega.urls.IUrlExtractor;
 
-public class ScannerTask implements Runnable, ICrawlerEventHandler {
+public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	private final Logger logger = Logger.getLogger("scanner");
 	private final Scanner scanner;
 	private final IScannerConfig scannerConfig;
 	private final IWorkspace workspace;
+	private final IUrlExtractor urlExtractor;
+	
 
 
 	private final IHttpRequestEngine requestEngine;
@@ -35,10 +44,11 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
-	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace) {
+	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IUrlExtractor urlExtractor) {
 		this.scanner = scanner;
 		this.scannerConfig = config;
 		this.workspace = workspace;
+		this.urlExtractor = urlExtractor;
 		this.requestEngine = requestEngine;
 		this.logger.setLevel(Level.ALL);
 		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(), workspace);
@@ -58,9 +68,7 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	
 	@Override
 	public void run() {
-		IWebPath basePath = workspace.getWebModel().getWebPathByUri(scannerConfig.getBaseURI());
-		
-		runMountPointAnalysis(basePath.getMountPoint());
+		workspace.lock();
 		
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
@@ -82,20 +90,14 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		workspace.unlock();
 	}
 	
-	private void runMountPointAnalysis(IWebMountPoint mountPoint) {
-		logger.info("Analyzing mount point at "+ mountPoint.toString());
-		for(IPerMountPointModule m: scanner.getModuleRegistry().getPerMountPointModules()) {
-			if(stopRequested)
-				return;
-			m.runModule(mountPoint, requestEngine, workspace);
-		}
-	}
-	
 	private void runCrawlerPhase() {
 		logger.info("Starting crawling phase");
-		ICrawlerConfig config = scanner.getCrawlerFactory().createBasicConfig(scannerConfig.getBaseURI());
-		config.addEventHandler(this);
-		currentCrawler = scanner.getCrawlerFactory().create(config, requestEngine);
+		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
+		currentCrawler.registerProgressTracker(this);
+		
+		UriParser uriParser = new UriParser(workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), urlExtractor);
+		URI baseURI = scannerConfig.getBaseURI();
+		uriParser.processUri(baseURI);
 		currentCrawler.start();
 		try {
 			currentCrawler.waitFinished();
@@ -105,11 +107,6 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 		}
 		currentCrawler = null;
 		logger.info("Crawler finished");
-	}
-	
-	@Override
-	public void linkDiscovered(URI link) {
-		workspace.getWebModel().addGetTarget(link);
 	}
 
 	private void runPerHostModulePhase() {
@@ -154,10 +151,5 @@ public class ScannerTask implements Runnable, ICrawlerEventHandler {
 	@Override
 	public void progressUpdate(int completed, int total) {
 		scanner.updateCrawlerProgress(completed, total);		
-	}
-
-	@Override
-	public void responseProcessed(URI uri) {
-		// XXX This is not currently called by crawler
 	}
 }
