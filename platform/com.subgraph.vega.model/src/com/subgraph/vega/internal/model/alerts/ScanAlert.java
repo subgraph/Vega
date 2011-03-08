@@ -13,17 +13,21 @@ public class ScanAlert implements IScanAlert, Activatable {
 	private final String name;
 	private final Severity severity;
 	private final String title;
+	private final String key;
+	private final long requestId;
 	private String templateName = "main";
 	private String resource;
 	private final ModelProperties properties;
 	
 	private transient Activator activator;
 	
-	ScanAlert(String name, String title, Severity severity) {
+	ScanAlert(String key, String name, String title, Severity severity, long requestId) {
+		this.key = key;
 		this.name = name;
 		this.title = title;
 		this.severity = severity;
 		this.properties = new ModelProperties();
+		this.requestId = requestId;
 	}
 	
 	@Override
@@ -107,6 +111,24 @@ public class ScanAlert implements IScanAlert, Activatable {
 		return resource;
 	}
 
+	@Override
+	public String getKey() {
+		activate(ActivationPurpose.READ);
+		return key;
+	}
+
+	@Override
+	public boolean hasAssociatedRequest() {
+		activate(ActivationPurpose.READ);
+		return requestId != -1;
+	}
+
+	@Override
+	public long getRequestId() {
+		activate(ActivationPurpose.READ);
+		return requestId;
+	}
+	
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if(activator != null) {

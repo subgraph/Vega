@@ -1,6 +1,9 @@
 package com.subgraph.vega.internal.model.alerts;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import com.db4o.ObjectContainer;
 import com.db4o.query.Predicate;
@@ -12,9 +15,11 @@ import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.xml.IXmlRepository;
 
 public class ScanAlertModel implements IScanAlertModel {
+	private final Logger logger = Logger.getLogger("alerts");
 	private final EventListenerManager eventManager;
 	private final ObjectContainer database;
 	private final ScanAlertFactory alertFactory;
+	private final Lock lock = new ReentrantLock();
 	
 	public ScanAlertModel(ObjectContainer database, IXmlRepository xmlRepository) {
 		this.database = database;
@@ -36,15 +41,50 @@ public class ScanAlertModel implements IScanAlertModel {
 	}
 
 	@Override
-	public IScanAlert createAlert(String type) {
-		return alertFactory.createAlert(type);
+	public IScanAlert createAlert(String type, String key) {
+		return alertFactory.createAlert(key, type, -1);
 	}
 
 	@Override
-	public void addAlert(IScanAlert alert) {
+	public IScanAlert createAlert(String type, String key, long requestId) {
+		return alertFactory.createAlert(key, type, requestId);
+	}
+	
+	@Override
+	public IScanAlert createAlert(String type) {
+		return alertFactory.createAlert(null, type, -1);
+	}
+
+	@Override
+	public IScanAlert getAlertByKey(final String key) {
+		if(key == null)
+			return null;
 		synchronized(database) {
-			if(rejectDuplicateAlert(alert))
-				return;
+			final List<IScanAlert> results = getAlertListForKey(key);
+			if(results.size() == 0)
+				return null;
+			if(results.size() > 1)
+				logger.warning("Multiple alert model entries for key "+ key);
+			return results.get(0);
+		}
+	}
+	
+	private List<IScanAlert> getAlertListForKey(final String key) {
+		return database.query(new Predicate<IScanAlert>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IScanAlert alert) {
+				return key.equals(alert.getKey());
+			}
+		});
+	}
+	
+	@Override
+	public void addAlert(IScanAlert alert) {
+		
+		if(rejectDuplicateAlert(alert))
+			return;
+		synchronized(database) {
 			database.store(alert);
 		}
 		eventManager.fireEvent(new NewScanAlertEvent(alert));		
@@ -52,9 +92,21 @@ public class ScanAlertModel implements IScanAlertModel {
 
 	@Override
 	public List<IScanAlert> getAlerts() {
-		return database.query(IScanAlert.class);
+		synchronized(database) {
+			return database.query(IScanAlert.class);
+		}
 	}
 
+	@Override
+	public void lock() {
+		lock.lock();
+	}
+
+	@Override
+	public void unlock() {
+		lock.unlock();
+	}
+	
 	private boolean rejectDuplicateAlert(IScanAlert alert) {
 		if(alert.getResource() == null)
 			return false;
@@ -62,10 +114,19 @@ public class ScanAlertModel implements IScanAlertModel {
 			if(a.equals(alert))
 				return true;
 		}
-		return false;
+		if(alert.getKey() == null)
+			return false;
+		else
+			return hasAlertKey(alert.getKey());
+	}
+	
+	@Override
+	public boolean hasAlertKey(String key) {
+		return getAlertByKey(key) != null;
 	}
 	
 	private List<IScanAlert> getAlertListForResource(final String resource) {
+		synchronized(database) {
 		return database.query(new Predicate<IScanAlert>() {
 			private static final long serialVersionUID = 1L;
 
@@ -74,5 +135,6 @@ public class ScanAlertModel implements IScanAlertModel {
 				return resource.equals(alert.getResource());
 			}
 		});
+		}
 	}
 }

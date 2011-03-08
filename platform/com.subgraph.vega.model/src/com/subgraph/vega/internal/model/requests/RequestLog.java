@@ -43,10 +43,12 @@ public class RequestLog implements IRequestLog {
 	}
 	
 	@Override
-	public synchronized long allocateRequestId() {
+	public long allocateRequestId() {
 		final long id = requestLogId.allocateId();
-		database.store(requestLogId);
-		return id;
+		synchronized(database) {
+			database.store(requestLogId);
+			return id;
+		}
 	}
 
 	
@@ -58,18 +60,22 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
-	public void addRequest(long requestId, HttpRequest request, HttpHost host) {
+	public synchronized void addRequest(long requestId, HttpRequest request, HttpHost host) {
 		final RequestLogRecord record = new RequestLogRecord(requestId, request, host);
-		database.store(record);
+		synchronized(database) {
+			database.store(record);
+		}
 		eventManager.fireEvent(new AddRequestRecordEvent(record));		
 	}
 
 	@Override
-	public long addRequestResponse(HttpRequest request, HttpResponse response,
+	public synchronized long addRequestResponse(HttpRequest request, HttpResponse response,
 			HttpHost host) {
 		final long id = allocateRequestId();
 		final RequestLogRecord record = new RequestLogRecord(id, request, response, host);
-		database.store(record);
+		synchronized(database) {
+			database.store(record);
+		}
 		eventManager.fireEvent(new AddRequestRecordEvent(record));
 		return id;
 	}
@@ -87,36 +93,40 @@ public class RequestLog implements IRequestLog {
 
 	@Override
 	public RequestLogRecord lookupRecord(final long requestId) {
-		List<RequestLogRecord> result = database.query(new Predicate<RequestLogRecord>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(RequestLogRecord record) {
-				return record.getRequestId() == requestId;	
-			}
-		});
+		synchronized (database) {
+			List<RequestLogRecord> result = database.query(new Predicate<RequestLogRecord>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(RequestLogRecord record) {
+					return record.getRequestId() == requestId;	
+				}
+			});
 		
-		if(result.size() == 0)
-			return null;
-		else if(result.size() == 1)
-			return result.get(0);
-		else
-			throw new IllegalStateException("Database corrupted, found multiple RequestLogRecords for id == "+ requestId);
+			if(result.size() == 0)
+				return null;
+			else if(result.size() == 1)
+				return result.get(0);
+			else
+				throw new IllegalStateException("Database corrupted, found multiple RequestLogRecords for id == "+ requestId);
+		}
 	}
 
 	@Override
 	public Iterable<IRequestLogRecord> getAllRecords() {
-		return database.query(IRequestLogRecord.class);
+		synchronized(database) {
+			return database.query(IRequestLogRecord.class);
+		}
 	}
 
 	@Override
-	public void addChangeListenerAndPopulate(IEventHandler listener) {
+	public synchronized void addChangeListenerAndPopulate(IEventHandler listener) {
 		for(IRequestLogRecord record: getAllRecords())
 			listener.handleEvent(new AddRequestRecordEvent(record));
 		eventManager.addListener(listener);		
 	}
 
 	@Override
-	public void removeChangeListener(IEventHandler listener) {
+	public synchronized void removeChangeListener(IEventHandler listener) {
 		eventManager.removeListener(listener);		
 	}
 }

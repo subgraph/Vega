@@ -70,7 +70,9 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	
 	void setResponse(HttpResponse response) {
 		activate(ActivationPurpose.WRITE);
-		this.response = copyResponseHeader(response);
+		synchronized(response) {
+			this.response = copyResponseHeader(response);
+		}
 	}
 	
 	@Override
@@ -94,7 +96,9 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	@Override
 	public HttpResponse getResponse() {
 		activate(ActivationPurpose.READ);
-		return response;
+		synchronized(response) {
+			return response;
+		}
 	}
 
 	@Override

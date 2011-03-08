@@ -10,4 +10,7 @@ public interface IScanAlert extends IModelProperties {
 	String getResource();
 	void setTemplateName(String name);
 	String getTemplateName();
+	String getKey();
+	boolean hasAssociatedRequest();
+	long getRequestId();
 }
