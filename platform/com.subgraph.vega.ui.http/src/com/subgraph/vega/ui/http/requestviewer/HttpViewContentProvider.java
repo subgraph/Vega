@@ -65,8 +65,10 @@ public class HttpViewContentProvider implements IStructuredContentProvider {
 	}
 	
 	private void handleAddRequestRecord(AddRequestRecordEvent event) {
-		requestRecords.add(event.getRecord());
-		refreshViewer();
+		synchronized(requestRecords) {
+			requestRecords.add(event.getRecord());
+			refreshViewer();
+		}
 	}
 	
 	private void refreshViewer() {
