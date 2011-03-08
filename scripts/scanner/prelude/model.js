@@ -22,7 +22,7 @@ Model.prototype.set = function(name, value) {
 };
 
 Model.prototype.alert = function(type, vars) {
-	this.alertWith(type, null, -1, vars);
+	this.alertWith(type, null, null, vars);
 };
 
 Model.prototype.alertWith = function(type, key, response, vars) {
