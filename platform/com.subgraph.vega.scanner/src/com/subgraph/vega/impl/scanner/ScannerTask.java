@@ -68,7 +68,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	@Override
 	public void run() {
-		workspace.lock();
 		
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
