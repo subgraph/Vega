@@ -20,8 +20,8 @@ function run() {
 			emails.push(sr[0]);
 		}
 	}
-	
+	var key = emails.join(" ");
 	if (emails.length) {
-	    model.alert("vinfo-emails", {"output": emails.join(" "), "resource": httpRequest.requestLine.uri} );
+	    model.alertWith("vinfo-emails", key, response, {"output": emails.join(" "), "resource": httpRequest.requestLine.uri} );
 	}
 }

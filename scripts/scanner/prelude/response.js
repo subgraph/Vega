@@ -14,6 +14,8 @@ __defineGetter__("response", function() {
 function Response(httpResponse) {
   this.httpResponse = httpResponse;
   this.rawResponse = httpResponse.rawResponse;
+	this.rawRequest = httpResponse.originalRequest;
+	this.host = httpResponse.host;
   this.entityString = null;
   this.cachedDocument = null;
 }

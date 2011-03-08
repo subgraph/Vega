@@ -71,6 +71,7 @@ function run() {
 
   
   if (matches.length) {
-    model.alert("vinfo-paths", {"output": output.join(" "), "resource": httpRequest.requestLine.uri} );
+		var key = output.join(" ")
+    model.alertWith("vinfo-paths", key, response, {"output": output.join(" "), "resource": httpRequest.requestLine.uri} );
   }
 }
