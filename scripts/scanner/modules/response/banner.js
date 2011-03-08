@@ -1,5 +1,5 @@
 var module = {
-  name : "HTTP Banner Module",
+  name: "HTTP Banner Module",
   type: "response-processor"
 };
 
