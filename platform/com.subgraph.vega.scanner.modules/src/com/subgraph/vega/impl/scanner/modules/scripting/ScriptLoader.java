@@ -81,9 +81,14 @@ public class ScriptLoader {
 	}
 	
 	public List<ScriptedModule> getAllModules() {
+		final List<ScriptedModule> result = new ArrayList<ScriptedModule>();
 		synchronized(modulePathMap) {
-			return new ArrayList<ScriptedModule>(modulePathMap.values());
+			for(ScriptedModule m : modulePathMap.values()) {
+				if(!m.isDisabled())
+					result.add(m);
+			}
 		}
+		return result;
 	}
 	
 	public Scriptable getPreludeScope() {
@@ -100,7 +105,7 @@ public class ScriptLoader {
 		if(validator == null)
 			return null;
 		
-		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction());
+		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
 	}
 	
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {

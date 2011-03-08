@@ -36,7 +36,7 @@ public class TestScriptLoader {
 		allModules.clear();
 		for(URL scriptURL: allTestScripts()) {
 			ScriptedModule compiledModule = compileModule(new ScriptFile(scriptURL));
-			if(compiledModule != null)
+			if(compiledModule != null && !compiledModule.isDisabled())
 				allModules.add(compiledModule);
 		}
 	}
@@ -55,7 +55,7 @@ public class TestScriptLoader {
 		if(validator == null)
 			return null;
 			
-		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction());
+		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
 	}
 	
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {

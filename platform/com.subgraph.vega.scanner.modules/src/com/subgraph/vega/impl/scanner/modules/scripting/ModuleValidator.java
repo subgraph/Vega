@@ -13,6 +13,7 @@ public class ModuleValidator {
 	private ModuleScriptType moduleType;
 	private Function runFunction;
 	private boolean isValidated;
+	private boolean isDisabled;
 	
 	public ModuleValidator(Scriptable moduleScope) {
 		this.moduleScope = moduleScope;
@@ -32,6 +33,7 @@ public class ModuleValidator {
 		moduleName = getStringFromModuleObject(moduleObject, "name");
 		moduleType = getScriptType(moduleObject);
 		runFunction = getGlobalFunction("run");
+		isDisabled = getFlagFromModuleObject(moduleObject, "disabled");
 		isValidated = true;
 	}
 	
@@ -39,6 +41,12 @@ public class ModuleValidator {
 		if(!isValidated)
 			throw new IllegalStateException("Cannot get name because module is not validated");
 		return moduleName;
+	}
+	
+	public boolean isDisabled() {
+		if(!isValidated)
+			throw new IllegalStateException("Cannot get disabled flag because module is not validated");
+		return isDisabled;
 	}
 	
 	public ModuleScriptType getType() {
@@ -76,6 +84,11 @@ public class ModuleValidator {
 		if(!(ob instanceof String)) 
 			throw new ModuleValidationException("Module property '"+ name +"' is not a string type as expected.");
 		return (String) ob;
+	}
+	
+	private boolean getFlagFromModuleObject(Scriptable module, String name) {
+		final Object ob = module.get(name, moduleScope);
+		return !(ob == Scriptable.NOT_FOUND);
 	}
 	
 	private Function getGlobalFunction(String name) throws ModuleValidationException {
