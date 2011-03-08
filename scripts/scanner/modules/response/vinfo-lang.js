@@ -1,6 +1,7 @@
 var module = {
 	name: "Language detection module",
-	type: "response-processor"
+	type: "response-processor",
+	disabled: true
 };
 
 function run() {

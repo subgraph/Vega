@@ -1,6 +1,7 @@
 var module = {
 	name : "HTML Interesting Comments Detection",
-	type: "response-processor"
+	type: "response-processor",
+	disabled: true
 };
 
 var res;
