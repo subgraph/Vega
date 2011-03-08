@@ -1,7 +1,6 @@
 var module = {
 	name : "Directory Listing Detection",
 	type: "response-processor"
-        type: "disabled"
 };
 
 function run() {
