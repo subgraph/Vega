@@ -25,7 +25,7 @@
             locationURI="toolbar:com.subgraph.vega.views.website">
          <command
                commandId="com.subgraph.vega.ui.command.crawl"
-               icon="icons/start_crawling.png"
+               icon="icons/start_crawling2.png"
                label="Start Crawling"
                style="push">
          </command>
