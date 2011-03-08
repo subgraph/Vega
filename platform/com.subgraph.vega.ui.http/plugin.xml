@@ -17,6 +17,13 @@
             name="Intercept"
             restorable="true">
       </view>
+      <view
+            allowMultiple="true"
+            class="com.subgraph.vega.ui.http.requesteditviewer.RequestEditView"
+            id="com.subgraph.vega.views.requestEdit"
+            name="Request Editor"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -45,28 +52,8 @@
          </enabledWhen>
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ForwardRequest"
-            commandId="com.subgraph.vega.commands.forwardRequest">
-         <enabledWhen>
-            <with
-                  variable="vega.interceptState">
-               <equals
-                     value="pending">
-               </equals>
-            </with>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="com.subgraph.vega.ui.http.commands.DropRequest"
-            commandId="com.subgraph.vega.commands.dropRequest">
-         <enabledWhen>
-            <with
-                  variable="vega.interceptState">
-               <equals
-                     value="pending">
-               </equals>
-            </with>
-         </enabledWhen>
+            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
+            commandId="com.subgraph.vega.commands.popup.replayRequest">
       </handler>
    </extension>
    <extension
@@ -89,21 +76,13 @@
             name="Stop HTTP Proxy">
       </command>
       <category
-            description="Commands for controlling the HTTP Proxy Intercept Functionality"
-            id="com.subgraph.vega.commands.proxyInterceptCategory"
-            name="Intercept Commands">
+            id="com.subgraph.vega.commands.httpRequestViewPopupCategory"
+            name="HTTP Request View Popup">
       </category>
       <command
-            categoryId="com.subgraph.vega.commands.proxyInterceptCategory"
-            description="Forward Intercepted Request"
-            id="com.subgraph.vega.commands.forwardRequest"
-            name="Forward Intercepted Request">
-      </command>
-      <command
-            categoryId="com.subgraph.vega.commands.proxyInterceptCategory"
-            description="Drop Intercepted Request"
-            id="com.subgraph.vega.commands.dropRequest"
-            name="Drop Intercepted Request">
+            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
+            id="com.subgraph.vega.commands.popup.replayRequest"
+            name="Replay Request">
       </command>
    </extension>
    <extension
@@ -146,20 +125,20 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:com.subgraph.vega.views.intercept">
+            locationURI="popup:com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView">
          <command
-               commandId="com.subgraph.vega.commands.forwardRequest"
-               icon="icons/start_16x16.png"
-               label="Forward Request"
-               style="push"
-               tooltip="Forward Request">
-         </command>
-         <command
-               commandId="com.subgraph.vega.commands.dropRequest"
-               icon="icons/stop_16x16.png"
-               label="Drop Request"
-               style="push"
-               tooltip="Drop Request">
+               commandId="com.subgraph.vega.commands.popup.replayRequest"
+               label="Replay Request"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="+">
+                  </count>
+               </with>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -169,13 +148,6 @@
             provider="com.subgraph.vega.ui.http.commands.ProxyStateSourceProvider">
          <variable
                name="vega.proxyState"
-               priorityLevel="workbench">
-         </variable>
-      </sourceProvider>
-      <sourceProvider
-            provider="com.subgraph.vega.ui.http.commands.InterceptStateSourceProvider">
-         <variable
-               name="vega.interceptState"
                priorityLevel="workbench">
          </variable>
       </sourceProvider>
@@ -202,6 +174,9 @@
             id="com.subgraph.vega.perspectives.proxy"
             name="Proxy">
       </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
    </extension>
 
 </plugin>

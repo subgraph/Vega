@@ -25,7 +25,7 @@ import org.apache.http.protocol.ResponseContent;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.http.proxy.HttpInterceptor;
+import com.subgraph.vega.internal.http.proxy.HttpInterceptor;
 
 public class HttpProxy implements IHttpInterceptProxy {
 	static final String PROXY_CONTEXT_REQUEST = "proxy.request";
@@ -122,12 +122,12 @@ public class HttpProxy implements IHttpInterceptProxy {
 		}
 	}
 
-	public boolean handleRequest(ProxyTransaction transaction) throws InterruptedException {
-		return interceptor.queueTransaction(transaction);
-	}
-
-	public boolean handleResponse(ProxyTransaction transaction) throws InterruptedException {
-		return interceptor.queueTransaction(transaction);
+	public boolean handleTransaction(ProxyTransaction transaction) throws InterruptedException {
+		boolean rv = interceptor.handleTransaction(transaction);
+		if (rv == true) {
+			transaction.await();
+		}
+		return rv;
 	}
 
 	void completeRequest(ProxyTransaction transaction) {
