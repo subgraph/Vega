@@ -14,8 +14,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 
+import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
 import com.subgraph.vega.ui.util.ImageCache;
@@ -35,7 +37,7 @@ public class NewScanWizardPage extends WizardPage {
 	public NewScanWizardPage(String targetValue) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
-		setDescription("New Scan Prameters");
+		setDescription("New Scan Parameters");
 		setImageDescriptor(ImageDescriptor.createFromImage(imageCache.get(VEGA_LOGO)));
 		this.targetValue = targetValue;
 		registry = Activator.getDefault().getIScannerModuleRegistry();
@@ -43,7 +45,6 @@ public class NewScanWizardPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		container = new Composite(parent, SWT.NULL);
-		Label cookieLabel;
 		Label modulesLabel;
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
@@ -75,15 +76,18 @@ public class NewScanWizardPage extends WizardPage {
 		viewer = new CheckboxTreeViewer(container,SWT.BORDER| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ModuleRegistryContentProvider());
 		viewer.setLabelProvider(new ModuleRegistryLabelProvider());
+		viewer.setCheckStateProvider(new ModuleRegistryCheckStateProvider());
 		
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH)); 
 
 	    viewer.setInput(registry);
         viewer.addCheckStateListener(new ICheckStateListener(){
-            public void checkStateChanged(CheckStateChangedEvent event){
-                if(event.getChecked()){
-                    viewer.setSubtreeChecked(event.getElement(), true);
+            public void checkStateChanged(CheckStateChangedEvent event) {
+            	if(event.getElement() instanceof IEnableableModule) {
+                	final IEnableableModule m = (IEnableableModule) event.getElement();
+                	m.setEnabled(event.getChecked());
                 }
+            	viewer.setSubtreeChecked(event.getElement(), event.getChecked());
             }
         });  
 		

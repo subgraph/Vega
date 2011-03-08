@@ -45,7 +45,7 @@ public class ModuleRegistryContentProvider implements ITreeContentProvider {
 			
 			modulesMap.clear();
 			
-			List<IScannerModule> modules = ((IScannerModuleRegistry)newInput).getAllModules();
+			List<IScannerModule> modules = ((IScannerModuleRegistry)newInput).getAllModules(false);
 			
 			for(ModuleScriptType s: ModuleScriptType.values()) 
 				modulesMap.put(s, new ArrayList<IScannerModule>());
