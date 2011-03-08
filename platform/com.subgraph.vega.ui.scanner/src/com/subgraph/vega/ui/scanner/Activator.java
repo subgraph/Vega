@@ -8,6 +8,8 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.xml.IXmlRepository;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -23,6 +25,7 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceTracker pathFinderTracker;
 	private ServiceTracker modelTracker;
 	private ServiceTracker xmlRepositoryTracker;
+	private ServiceTracker moduleRegistryTracker;
 	
 	/**
 	 * The constructor
@@ -49,6 +52,9 @@ public class Activator extends AbstractUIPlugin {
 		
 		xmlRepositoryTracker = new ServiceTracker(context, IXmlRepository.class.getName(), null);
 		xmlRepositoryTracker.open();
+		
+		moduleRegistryTracker = new ServiceTracker(context, IScannerModuleRegistry.class.getName(), null);
+		moduleRegistryTracker.open();
 	}
 
 	/*
@@ -83,5 +89,9 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IXmlRepository getXmlRepository() {
 		return (IXmlRepository) xmlRepositoryTracker.getService();
+	}
+	
+	public IScannerModuleRegistry getIScannerModuleRegistry() {
+		return (IScannerModuleRegistry) moduleRegistryTracker.getService();
 	}
 }
