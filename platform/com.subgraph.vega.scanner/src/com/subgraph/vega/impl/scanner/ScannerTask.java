@@ -47,7 +47,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		this.requestEngine = requestEngine;
 		this.logger.setLevel(Level.ALL);
 		scanner.getModuleRegistry().resetAllModuleTimestamps();
-		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(), workspace);
+		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(true), workspace);
 		this.requestEngine.registerResponseProcessor(responseProcessor);
 	}
 	
@@ -88,7 +88,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	private void printModuleRuntimeStats() {
 		logger.info("Scanning module runtime statistics:");
-		for(IScannerModule m: scanner.getModuleRegistry().getAllModules()) {
+		for(IScannerModule m: scanner.getModuleRegistry().getAllModules(true)) {
 			IScannerModuleRunningTime profile = m.getRunningTimeProfile();
 			if(profile.getInvocationCount() > 0)
 				logger.info(profile.toString());
@@ -119,7 +119,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 		final IWebModel webModel = workspace.getWebModel();
 		for(IWebHost host: webModel.getUnscannedHosts()) {
-			for(IPerHostScannerModule m: scanner.getModuleRegistry().getPerHostModules()) {
+			for(IPerHostScannerModule m: scanner.getModuleRegistry().getPerHostModules(true)) {
 				if(stopRequested)
 					return;
 				m.runScan(host, requestEngine, workspace);
@@ -132,7 +132,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		logger.info("Starting per directory module phase");
 		final IWebModel webModel = workspace.getWebModel();
 		for(IWebPath path: webModel.getUnscannedPaths()) {
-			for(IPerDirectoryScannerModule m: scanner.getModuleRegistry().getPerDirectoryModules()) {
+			for(IPerDirectoryScannerModule m: scanner.getModuleRegistry().getPerDirectoryModules(true)) {
 				if(stopRequested)
 					return;
 				m.runScan(path, requestEngine, workspace);
@@ -146,7 +146,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		logger.info("Starting per resource module phase");
 		final IWebModel webModel = workspace.getWebModel();
 		for(IWebPath path: webModel.getAllPaths()) {
-			for(IPerResourceScannerModule m: scanner.getModuleRegistry().getPerResourceModules()) {
+			for(IPerResourceScannerModule m: scanner.getModuleRegistry().getPerResourceModules(true)) {
 				if(stopRequested)
 					return;
 				m.runModule(path, requestEngine, workspace);

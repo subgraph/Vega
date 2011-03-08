@@ -13,16 +13,18 @@ public class ScriptedModule {
 	private final String moduleName;
 	private final ModuleScriptType moduleType;
 	private final Function runFunction;
-	private final boolean isDisabled;
+	private final boolean isDisabledInScript;
 	private final ScriptedModuleRunningTime runningTime;
 	
+	private boolean isEnabled;
 	
 	public ScriptedModule(ScriptFile scriptFile, String moduleName, ModuleScriptType moduleType, Function moduleEntry, boolean isDisabled) {
 		this.scriptFile = scriptFile;
 		this.moduleName = moduleName;
 		this.moduleType = moduleType;
 		this.runFunction = moduleEntry;
-		this.isDisabled = isDisabled;
+		this.isDisabledInScript = isDisabled;
+		this.isEnabled = !isDisabled;
 		this.runningTime = new ScriptedModuleRunningTime(moduleName);
 	}
 	
@@ -57,9 +59,16 @@ public class ScriptedModule {
 	}
 	
 	public boolean isDisabled() {
-		return isDisabled;
+		return isDisabledInScript;
 	}
 	
+	public void setEnabledState(boolean flag) {
+		isEnabled = flag;
+	}
+	
+	public boolean getEnabledState() {
+		return isEnabled;
+	}
 	public IScannerModuleRunningTime getRunningTime() {
 		return runningTime;
 	}

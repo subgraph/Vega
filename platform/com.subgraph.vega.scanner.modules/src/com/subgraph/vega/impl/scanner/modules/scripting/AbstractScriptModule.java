@@ -10,11 +10,12 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.WrappedException;
 
+import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 
-public abstract class AbstractScriptModule implements IScannerModule {
+public abstract class AbstractScriptModule implements IScannerModule, IEnableableModule {
 	private static final Logger logger = Logger.getLogger("script-module");
 	protected static class ExportedObject {
 		private final String identifier;
@@ -56,10 +57,20 @@ public abstract class AbstractScriptModule implements IScannerModule {
 		}
 	}
 	
+	@Override
 	public IScannerModuleRunningTime getRunningTimeProfile() {
 		return module.getRunningTime();
 	}
-
+	
+	@Override
+	public void setEnabled(boolean flag) {
+		module.setEnabledState(flag);
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		return module.getEnabledState();
+	}
 	
 	protected void export(List<ExportedObject> exports, String name, Object object) {
 			exports.add(new ExportedObject(name, object));

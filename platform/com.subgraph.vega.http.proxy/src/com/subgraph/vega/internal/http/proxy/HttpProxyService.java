@@ -75,7 +75,7 @@ public class HttpProxyService implements IHttpProxyService {
 
 	@Override
 	public void start(int proxyPort) {
-		responseProcessingModules = moduleRepository.getResponseProcessingModules();
+		responseProcessingModules = moduleRepository.getResponseProcessingModules(true);
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();

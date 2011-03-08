@@ -98,10 +98,12 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	
 	@Override
 	
-	public List<IScannerModule> getAllModules() {
+	public List<IScannerModule> getAllModules(boolean enabledOnly) {
 		final List<IScannerModule> modules = new ArrayList<IScannerModule>();
 		
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.PER_SERVER)
 				modules.add(new PerHostScript(m));
 			else if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY) 
@@ -116,10 +118,12 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 
 	}
 	@Override
-	public List<IPerHostScannerModule> getPerHostModules() {
+	public List<IPerHostScannerModule> getPerHostModules(boolean enabledOnly) {
 		final List<IPerHostScannerModule> modules = new ArrayList<IPerHostScannerModule>();
 		
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.PER_SERVER)
 				modules.add(new PerHostScript(m));
 		}
@@ -127,9 +131,11 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-	public List<IPerDirectoryScannerModule> getPerDirectoryModules() {
+	public List<IPerDirectoryScannerModule> getPerDirectoryModules(boolean enabledOnly) {
 		final List<IPerDirectoryScannerModule> modules = new ArrayList<IPerDirectoryScannerModule>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY)
 				modules.add(new PerDirectoryScript(m));
 		}
@@ -137,9 +143,11 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-	public List<IPerResourceScannerModule> getPerResourceModules() {
+	public List<IPerResourceScannerModule> getPerResourceModules(boolean enabledOnly) {
 		final List<IPerResourceScannerModule> modules = new ArrayList<IPerResourceScannerModule>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.PER_RESOURCE)
 				modules.add(new PerResourceScript(m));
 		}
@@ -147,9 +155,11 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-	public List<IResponseProcessingModule> getResponseProcessingModules() {
+	public List<IResponseProcessingModule> getResponseProcessingModules(boolean enabledOnly) {
 		final List<IResponseProcessingModule> modules = new ArrayList<IResponseProcessingModule>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
 		}
@@ -158,9 +168,11 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	
 
 	@Override
-	public List<IPerMountPointModule> getPerMountPointModules() {
+	public List<IPerMountPointModule> getPerMountPointModules(boolean enabledOnly) {
 		final List<IPerMountPointModule> modules = new ArrayList<IPerMountPointModule>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
 			if(m.getModuleType() == ModuleScriptType.PER_MOUNTPOINT)
 				modules.add(new PerMountPointScript(m));
 		}
@@ -231,7 +243,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 
 	@Override
 	public void resetAllModuleTimestamps() {
-		for(IScannerModule m: getAllModules())
+		for(IScannerModule m: getAllModules(true))
 			m.getRunningTimeProfile().reset();
 	}
 }
