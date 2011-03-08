@@ -9,4 +9,6 @@ public interface IHttpRequestEngineConfig {
 	boolean getDecompressGzipEncoding();
 	void registerResponseProcessor(IHttpResponseProcessor processor);
 	List<IHttpResponseProcessor> getResponseProcessors();
+	void setCookieString(String cookieString);
+	String getCookieString();
 }

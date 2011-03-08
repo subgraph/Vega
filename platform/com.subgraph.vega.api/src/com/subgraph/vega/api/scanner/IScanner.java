@@ -7,6 +7,9 @@ public interface IScanner {
 	
 	ScannerStatus getScannerStatus();
 	IScannerConfig createScannerConfig();
+	void setScannerConfig(IScannerConfig config);
+	IScannerConfig getScannerConfig();
+	
 	void startScanner(IScannerConfig config);
 	void stopScanner();
 	void registerScannerStatusChangeListener(IEventHandler listener);

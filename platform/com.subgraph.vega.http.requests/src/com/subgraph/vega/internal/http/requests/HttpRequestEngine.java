@@ -20,6 +20,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.internal.http.errors.HttpNotFoundErrorDetector;
 
+
 public class HttpRequestEngine implements IHttpRequestEngine {
 	private final Logger logger = Logger.getLogger("request-engine");
 	private final ExecutorService executor;
@@ -52,7 +53,6 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		return null;
 	}
 
-	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request)
 			throws IOException, ClientProtocolException {
 		return sendRequest(request, null);

@@ -11,8 +11,20 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 
 	private boolean forceIdentityEncoding = false;
 	private boolean decompressGzipEncoding = true;
+	private String cookieString = null;
+	
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
 
+	@Override
+	public String getCookieString() {
+		return cookieString;
+	}
+	
+	@Override
+	public void setCookieString(String cookieString) {
+		this.cookieString = cookieString;
+	}
+	
 	@Override
 	public void setForceIdentityEncoding(boolean value) {
 		forceIdentityEncoding = value;		

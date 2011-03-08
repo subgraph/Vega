@@ -45,6 +45,8 @@ class RequestTask implements Callable<IHttpResponse> {
 	public IHttpResponse call() throws Exception {
 		if(config.getForceIdentityEncoding())
 			request.setHeader(HTTP.CONTENT_ENCODING, HTTP.IDENTITY_CODING);
+		if(config.getCookieString() != null)
+			request.setHeader("Cookie",config.getCookieString());
 
 		final HttpResponse httpResponse = client.execute(request, context);
 
