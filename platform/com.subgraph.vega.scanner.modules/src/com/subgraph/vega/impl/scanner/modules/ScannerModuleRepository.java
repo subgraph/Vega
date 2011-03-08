@@ -24,8 +24,9 @@ import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
 import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
-import com.subgraph.vega.impl.scanner.modules.scripting.ModuleScriptType;
+import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
@@ -95,6 +96,25 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		return null;
 	}
 	
+	@Override
+	
+	public List<IScannerModule> getAllModules() {
+		final List<IScannerModule> modules = new ArrayList<IScannerModule>();
+		
+		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(m.getModuleType() == ModuleScriptType.PER_SERVER)
+				modules.add(new PerHostScript(m));
+			else if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY) 
+				modules.add(new PerDirectoryScript(m));
+			else if(m.getModuleType() == ModuleScriptType.PER_RESOURCE)
+				modules.add(new PerResourceScript(m));
+			else if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
+				modules.add(new ResponseProcessorScript(m));
+		}
+
+		return modules;
+
+	}
 	@Override
 	public List<IPerHostScannerModule> getPerHostModules() {
 		final List<IPerHostScannerModule> modules = new ArrayList<IPerHostScannerModule>();

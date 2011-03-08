@@ -10,4 +10,5 @@ public interface IScannerModuleRegistry {
 	List<IPerResourceScannerModule> getPerResourceModules();
 	List<IResponseProcessingModule> getResponseProcessingModules();
 	List<IPerMountPointModule> getPerMountPointModules();
+	List<IScannerModule> getAllModules();
 }

@@ -4,6 +4,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
+import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
+
 public class ScriptedModule {
 	private final ScriptFile scriptFile;
 	
@@ -41,7 +43,7 @@ public class ScriptedModule {
 	public ModuleScriptType getModuleType() {
 		return moduleType;
 	}
-		
+	
 	public Scriptable getModuleScope() {
 		return scriptFile.getCompiledScript();
 	}
