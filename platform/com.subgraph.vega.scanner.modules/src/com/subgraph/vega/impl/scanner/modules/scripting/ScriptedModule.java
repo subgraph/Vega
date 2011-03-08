@@ -4,6 +4,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 
 public class ScriptedModule {
@@ -12,6 +13,7 @@ public class ScriptedModule {
 	private final String moduleName;
 	private final ModuleScriptType moduleType;
 	private final Function runFunction;
+	private final ScriptedModuleRunningTime runningTime;
 	
 	
 	public ScriptedModule(ScriptFile scriptFile, String moduleName, ModuleScriptType moduleType, Function moduleEntry) {
@@ -19,6 +21,7 @@ public class ScriptedModule {
 		this.moduleName = moduleName;
 		this.moduleType = moduleType;
 		this.runFunction = moduleEntry;
+		this.runningTime = new ScriptedModuleRunningTime(moduleName);
 	}
 	
 	public Scriptable createInstanceScope(Context cx) {
@@ -28,8 +31,11 @@ public class ScriptedModule {
 		return scope;
 	}
 	
-	public void runModule(Context cx, Scriptable instanceScope) {
+	public void runModule(Context cx, Scriptable instanceScope, String target) {
+		final long startTS = System.currentTimeMillis();
 		runFunction.call(cx, instanceScope, instanceScope, new Object[0]);
+		final long endTS = System.currentTimeMillis();
+		runningTime.addTimestamp((int) (endTS - startTS), target);
 	}
 	
 	public ScriptFile getScriptFile() {
@@ -46,5 +52,9 @@ public class ScriptedModule {
 	
 	public Scriptable getModuleScope() {
 		return scriptFile.getCompiledScript();
+	}
+	
+	public IScannerModuleRunningTime getRunningTime() {
+		return runningTime;
 	}
 }

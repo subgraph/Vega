@@ -228,4 +228,10 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void resetAllModuleTimestamps() {
+		for(IScannerModule m: getAllModules())
+			m.getRunningTimeProfile().reset();
+	}
 }

@@ -1,13 +1,8 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
@@ -16,14 +11,14 @@ import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.api.model.web.IWebMountPoint;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
-import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
 import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 import com.subgraph.vega.urls.IUrlExtractor;
@@ -51,6 +46,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		this.urlExtractor = urlExtractor;
 		this.requestEngine = requestEngine;
 		this.logger.setLevel(Level.ALL);
+		scanner.getModuleRegistry().resetAllModuleTimestamps();
 		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(), workspace);
 		this.requestEngine.registerResponseProcessor(responseProcessor);
 	}
@@ -87,6 +83,16 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 			logger.info("Scanner completed");
 		}
 		workspace.unlock();
+		printModuleRuntimeStats();
+	}
+	
+	private void printModuleRuntimeStats() {
+		logger.info("Scanning module runtime statistics:");
+		for(IScannerModule m: scanner.getModuleRegistry().getAllModules()) {
+			IScannerModuleRunningTime profile = m.getRunningTimeProfile();
+			if(profile.getInvocationCount() > 0)
+				logger.info(profile.toString());
+		}
 	}
 	
 	private void runCrawlerPhase() {

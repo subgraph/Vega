@@ -20,7 +20,7 @@ public class PerDirectoryScript extends AbstractScriptModule implements IPerDire
 		export(exports, "directory", directory);
 		export(exports, "requestEngine", requestEngine);
 		export(exports, "workspace", workspace);
-		runScript(exports);		
+		runScript(exports, directory.getUri().toString());		
 	}
 
 }

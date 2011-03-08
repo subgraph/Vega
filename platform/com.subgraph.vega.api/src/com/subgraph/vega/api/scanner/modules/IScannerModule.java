@@ -4,4 +4,5 @@ public interface IScannerModule {
 
 	String getModuleName();
 	ModuleScriptType getModuleType();
+	IScannerModuleRunningTime getRunningTimeProfile();
 }

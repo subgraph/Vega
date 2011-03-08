@@ -11,6 +11,7 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.WrappedException;
 
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 
 public abstract class AbstractScriptModule implements IScannerModule {
@@ -38,12 +39,13 @@ public abstract class AbstractScriptModule implements IScannerModule {
 		return module.getModuleType();
 	}
 	
-	protected void runScript(List<ExportedObject> exports) {
+	protected void runScript(List<ExportedObject> exports, String target) {
 		try {
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
 			processExports(exports, instance);
-			module.runModule(cx, instance);
+			module.runModule(cx, instance, target);
+			
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
 			e.printStackTrace();
@@ -54,6 +56,10 @@ public abstract class AbstractScriptModule implements IScannerModule {
 		}
 	}
 	
+	public IScannerModuleRunningTime getRunningTimeProfile() {
+		return module.getRunningTime();
+	}
+
 	
 	protected void export(List<ExportedObject> exports, String name, Object object) {
 			exports.add(new ExportedObject(name, object));
@@ -65,6 +71,4 @@ public abstract class AbstractScriptModule implements IScannerModule {
 			ScriptableObject.putProperty(instance, exp.identifier, wrappedObject);
 		}
 	}
-	
-
 }

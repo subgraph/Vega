@@ -21,7 +21,7 @@ public class PerResourceScript extends AbstractScriptModule implements IPerResou
 		export(exports, "path", path);
 		export(exports, "requestEngine", requestEngine);
 		export(exports, "workspace", workspace);
-		runScript(exports);
+		runScript(exports, path.getUri().toString());
 	}
 
 }

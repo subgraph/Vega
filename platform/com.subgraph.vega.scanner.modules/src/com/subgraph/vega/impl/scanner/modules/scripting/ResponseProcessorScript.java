@@ -22,7 +22,7 @@ public class ResponseProcessorScript extends AbstractScriptModule implements IRe
 		export(exports, "httpRequest", request);
 		export(exports, "httpResponse", response);
 		export(exports, "workspace", workspace);
-		runScript(exports);
+		runScript(exports, request.getRequestLine().getUri());
 	}
 
 	@Override

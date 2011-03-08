@@ -39,7 +39,7 @@ public class DomTestModule extends AbstractScriptModule {
 		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
 		export(exports, "testDom", parseResult.getDOMDocument());
 		export(exports, "workspace", workspace);
-		runScript(exports);
+		runScript(exports, "domtest");
 		
 	}
 

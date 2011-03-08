@@ -21,7 +21,7 @@ public class PerMountPointScript extends AbstractScriptModule implements IPerMou
 		export(exports, "mountpoint", mountPoint);
 		export(exports, "requestEngine", requestEngine);
 		export(exports, "workspace", workspace);
-		runScript(exports);		
+		runScript(exports, mountPoint.getMountPath().getUri().toString());		
 	}
 
 }

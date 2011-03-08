@@ -20,6 +20,6 @@ public class PerHostScript extends AbstractScriptModule implements IPerHostScann
 		export(exports, "host", host);
 		export(exports, "requestEngine", requestEngine);
 		export(exports, "workspace", workspace);
-		runScript(exports);
+		runScript(exports, host.getUri().toString());
 	}
 }
