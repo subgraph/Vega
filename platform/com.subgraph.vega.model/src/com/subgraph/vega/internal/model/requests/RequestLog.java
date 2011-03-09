@@ -63,6 +63,8 @@ public class RequestLog implements IRequestLog {
 	public synchronized void addRequest(long requestId, HttpRequest request, HttpHost host) {
 		final RequestLogRecord record = new RequestLogRecord(requestId, request, host);
 		synchronized(database) {
+			if(record.getResponse().getEntity() != null)
+				database.store(record.getResponse().getEntity());
 			database.store(record);
 		}
 		eventManager.fireEvent(new AddRequestRecordEvent(record));		

@@ -1,15 +1,19 @@
 package com.subgraph.vega.internal.model.requests;
 
+import java.io.IOException;
 import java.util.Date;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.util.EntityUtils;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
@@ -43,6 +47,13 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		return newResponse;
 	}
 	
+	private static HttpEntity createEntityCopy(HttpEntity entity) {
+		try {
+			return new ByteArrayEntity(EntityUtils.toByteArray(entity));
+		} catch (IOException e) {
+			return null;
+		}
+	}
 	private static void copyHeaders(HttpMessage source, HttpMessage target) {
 		for(Header h: source.getAllHeaders())
 			target.addHeader(new BasicHeader(h.getName(), h.getValue()));
@@ -60,6 +71,12 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		this.requestId = requestId;
 		this.request = copyRequestHeader(request);
 		this.response = copyResponseHeader(response);
+		if(response.getEntity() != null) {
+			final HttpEntity e = createEntityCopy(response.getEntity());
+			if(e != null) {
+				this.response.setEntity(e);
+			}
+		}
 		this.host = host;
 		this.timestamp = new Date().getTime();
 	}

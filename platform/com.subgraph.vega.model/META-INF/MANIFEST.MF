@@ -19,6 +19,7 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.xml,
  org.apache.http;version="4.0.0",
  org.apache.http.client.utils,
+ org.apache.http.entity;version="4.0.0",
  org.apache.http.message;version="4.0.0",
  org.apache.http.util;version="4.0.0",
  org.w3c.dom.html2
