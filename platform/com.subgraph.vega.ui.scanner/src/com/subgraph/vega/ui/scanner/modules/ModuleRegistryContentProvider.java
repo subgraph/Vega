@@ -1,12 +1,5 @@
 package com.subgraph.vega.ui.scanner.modules;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -16,11 +9,11 @@ import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 public class ModuleRegistryContentProvider implements ITreeContentProvider {
 
 	private final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-	private  Map<String, List<IScannerModule>> modulesMap;
-	Set<String> types = new HashSet<String>();
+	private final ModuleRegistryCheckStateProvider checkStateProvider;
+	private ModuleTreeData treeData;
 	
-	public ModuleRegistryContentProvider() {
-		modulesMap = new LinkedHashMap<String, List<IScannerModule>>();
+	public ModuleRegistryContentProvider(ModuleRegistryCheckStateProvider checkStateProvider) {
+		this.checkStateProvider = checkStateProvider;
 	}
 
 	@Override
@@ -29,43 +22,24 @@ public class ModuleRegistryContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		
 		if (newInput instanceof IScannerModuleRegistry) {
-			
-			modulesMap.clear();
-			
-			List<IScannerModule> modules = ((IScannerModuleRegistry)newInput).getAllModules(false);
-			
-			for(IScannerModule m: modules) {
-				getModuleListByCategory(m.getModuleCategoryName()).add(m);
-			}
-			
+			treeData = new ModuleTreeData((IScannerModuleRegistry) newInput);
+			checkStateProvider.setTreeData(treeData);	
 		}	
-	}
-	
-	private List<IScannerModule> getModuleListByCategory(String categoryName) {
-		if(!modulesMap.containsKey(categoryName)) 
-			modulesMap.put(categoryName, new ArrayList<IScannerModule>());
-		return modulesMap.get(categoryName);
-		
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		final List<String> roots = new ArrayList<String>();
-		for(String category: modulesMap.keySet()) {
-			if(!modulesMap.get(category).isEmpty())
-				roots.add(category);
-		}
-		return roots.toArray();
+		if(treeData != null)
+			return treeData.getAllCategories().toArray();
+		else
+			return EMPTY_OBJECT_ARRAY;
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof String) {
-			String category = (String) parentElement;
-			List<IScannerModule> modules = modulesMap.get(category);
-			return modules.toArray();
+		if ((parentElement instanceof String) && (treeData != null)) {
+			return treeData.getModuleListForCategory((String) parentElement).toArray();
 		}
 		return EMPTY_OBJECT_ARRAY;
 	}
@@ -80,11 +54,9 @@ public class ModuleRegistryContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof String) {
-			final String category = (String) element;
-			return (modulesMap.containsKey(category) && modulesMap.get(category).size() > 0);
+		if ((element instanceof String) && (treeData != null)) {
+			return treeData.getModuleListForCategory((String) element).size() > 0;
 		}
 		return false;
 	}
-
 }

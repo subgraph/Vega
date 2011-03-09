@@ -1,20 +1,17 @@
 package com.subgraph.vega.ui.scanner.wizards;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
@@ -74,25 +71,16 @@ public class NewScanWizardPage extends WizardPage {
 		modulesLabel.setText("Select the modules to run:");
 		
 		viewer = new CheckboxTreeViewer(container,SWT.BORDER| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		viewer.setContentProvider(new ModuleRegistryContentProvider());
+		final ModuleRegistryCheckStateProvider checkStateProvider = new ModuleRegistryCheckStateProvider(viewer);
+		viewer.setContentProvider(new ModuleRegistryContentProvider(checkStateProvider));
 		viewer.setLabelProvider(new ModuleRegistryLabelProvider());
-		viewer.setCheckStateProvider(new ModuleRegistryCheckStateProvider());
+		viewer.setCheckStateProvider(checkStateProvider);
 		
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH)); 
 
 	    viewer.setInput(registry);
-        viewer.addCheckStateListener(new ICheckStateListener(){
-            public void checkStateChanged(CheckStateChangedEvent event) {
-            	if(event.getElement() instanceof IEnableableModule) {
-                	final IEnableableModule m = (IEnableableModule) event.getElement();
-                	m.setEnabled(event.getChecked());
-                }
-            	viewer.setSubtreeChecked(event.getElement(), event.getChecked());
-            }
-        });  
-		
-
-		
+        viewer.addCheckStateListener(checkStateProvider);
+            	
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		scanTarget.setLayoutData(gd);
 

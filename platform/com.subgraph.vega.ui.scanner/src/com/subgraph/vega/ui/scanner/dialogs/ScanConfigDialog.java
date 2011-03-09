@@ -2,31 +2,30 @@ package com.subgraph.vega.ui.scanner.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
 
@@ -67,19 +66,15 @@ public class ScanConfigDialog extends Dialog {
 			label.setText("Select Modules");
 			
 			viewer = new CheckboxTreeViewer(tabItemArea,SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-			viewer.setContentProvider(new ModuleRegistryContentProvider());
+			final ModuleRegistryCheckStateProvider checkStateProvider = new ModuleRegistryCheckStateProvider(viewer);
+			viewer.setContentProvider(new ModuleRegistryContentProvider(checkStateProvider));
 			viewer.setLabelProvider(new ModuleRegistryLabelProvider());
+			viewer.setCheckStateProvider(checkStateProvider);
 			
 			viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH)); 
 
 		    viewer.setInput(registry);
-	        viewer.addCheckStateListener(new ICheckStateListener(){
-	            public void checkStateChanged(CheckStateChangedEvent event){
-	                if(event.getChecked()){
-	                    viewer.setSubtreeChecked(event.getElement(), true);
-	                }
-	            }
-	        });  
+	        viewer.addCheckStateListener(checkStateProvider);
 			
 			tabItem.setControl(tabItemArea);
 			
