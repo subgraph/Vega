@@ -1,17 +1,19 @@
 package com.subgraph.vega.api.scanner.modules;
 
 public enum ModuleScriptType {
-	DISABLED("disabled"),
-	PER_SERVER("per-server"),
-	PER_DIRECTORY("per-directory"),
-	PER_MOUNTPOINT("per-mountpoint"),
-	PER_RESOURCE("per-resource"),
-	RESPONSE_PROCESSOR("response-processor"),
-	DOM_TEST("dom-test");
+	PER_SERVER("per-server", "Host Modules"),
+	PER_DIRECTORY("per-directory", "Directory Modules"),
+	PER_MOUNTPOINT("per-mountpoint", "Mountpoint Modules"),
+	PER_RESOURCE("per-resource", "Resource Modules"),
+	RESPONSE_PROCESSOR("response-processor", "Response Processing Modules"),
+	DOM_TEST("dom-test", "DOM testing Modules");
 
 	private final String name;
-	private ModuleScriptType(String name) {
+	private final String verboseName;
+	
+	private ModuleScriptType(String name, String verbose) {
 		this.name = name;
+		this.verboseName = verbose;
 	}
 	
 	public static ModuleScriptType lookup(String name) {
@@ -20,5 +22,13 @@ public enum ModuleScriptType {
 				return type;
 		}
 		return null;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getVerboseName() {
+		return verboseName;
 	}
 }

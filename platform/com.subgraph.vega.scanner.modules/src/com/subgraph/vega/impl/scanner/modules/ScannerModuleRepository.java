@@ -27,6 +27,7 @@ import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
+import com.subgraph.vega.impl.scanner.modules.internal.InternalModuleManager;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
@@ -38,6 +39,7 @@ import com.subgraph.vega.impl.scanner.modules.scripting.tests.DomTestModule;
 import com.subgraph.vega.impl.scanner.modules.scripting.tests.TestScriptLoader;
 
 public class ScannerModuleRepository implements IScannerModuleRegistry {
+	private final InternalModuleManager internalModules = new InternalModuleManager();
 	private IPathFinder pathFinder;
 	private IHTMLParser htmlParser;
 	private IModel model;
@@ -113,6 +115,8 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			else if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
 		}
+		for(IScannerModule m: getInternalModules(enabledOnly))
+			modules.add(m);
 
 		return modules;
 
@@ -179,6 +183,11 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		return modules;
 	}
 	
+	@Override
+	public List<IScannerModule> getInternalModules(boolean enabledOnly) {
+		return internalModules.getModules(enabledOnly);
+	}
+
 	@Override
 	public void refreshModuleScripts() {
 		scriptLoader.reloadModules();		
