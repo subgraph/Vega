@@ -1,9 +1,8 @@
 package com.subgraph.vega.internal.http.proxy;
 
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.http.HttpHost;
 
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpointTester;
@@ -30,9 +29,9 @@ public class BreakpointTesterDomainName implements IHttpInterceptorBreakpointTes
 
 	@Override
 	public boolean test(IProxyTransaction transaction) {
-		HttpHost httpHost = transaction.getHttpHost();
-		if (httpHost != null) {
-			Matcher matcher = pattern.matcher(httpHost.getHostName());
+		URI uri = transaction.getUri();
+		if (uri != null) {
+			Matcher matcher = pattern.matcher(uri.getHost());
 			if (matcher.find() == (matchType == HttpInterceptorBreakpointMatchType.MATCH)) {
 				return true;
 			}
