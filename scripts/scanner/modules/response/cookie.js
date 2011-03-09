@@ -36,16 +36,17 @@ function run() {
 		  }
 	  }
 	  var param_prefix = uri.getScheme() + "." + uri.getHost  + "." +  uri.getPort  + name;
+		var key = serverHeaders[x];
 	  if(httponly!=true){
 		if(!model.get( param_prefix + ".cookie.httponly")){
-			model.alert("cookie-httponly", { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });
+			model.alertWith("cookie-httponly", key, response, { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });
 		  	model.set(param_prefix+".cookie.httponly", "false");
 	  	}
 	  }
 	  
 	  if(uri.getScheme().match("https") && secure!=true){
 		if(!model.get(param_prefix + ".cookie.secure.")){
-			model.alert("cookie-secure", { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });		  
+			model.alertWith("cookie-secure", key, response, { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });		  
 			model.set(param_prefix + ".cookie.secure.", "false");
 		}
 	  }
