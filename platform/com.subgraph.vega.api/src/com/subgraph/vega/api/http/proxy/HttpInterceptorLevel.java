@@ -2,7 +2,7 @@ package com.subgraph.vega.api.http.proxy;
 
 public enum HttpInterceptorLevel {
 	DISABLED("disabled"),
-	ENABLED_ALL("all requests"),
+	ENABLED_ALL("all transactions"),
 	ENABLED_BREAKPOINTS("breakpoints");
 
 	private final String name;
