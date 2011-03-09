@@ -12,5 +12,5 @@ public interface IHttpColorConstants {
 	RGB HTTP_DATE = new RGB(0xA9, 0xA1, 0x6E);
 	RGB HTTP_INTEGER = new RGB(0x63, 0x91, 0x5E);
 	RGB ENCODED_CHARACTER = new RGB(0xE8, 0x17, 0x74);
-	RGB IMAGE_TAG = new RGB(77, 150, 44);	
+	RGB IMAGE_TAG = new RGB(70, 70, 70);
 }
