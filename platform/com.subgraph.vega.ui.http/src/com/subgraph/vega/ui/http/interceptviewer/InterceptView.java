@@ -58,7 +58,8 @@ public class InterceptView extends ViewPart {
 		};
 		transactionEventHandler = new IProxyTransactionEventHandler() {
 			@Override
-			public void notifyCancel() {
+			public void notifyComplete() {
+				handleTransactionComplete();
 			}
 		};
 
@@ -82,40 +83,60 @@ public class InterceptView extends ViewPart {
 		// TODO Auto-generated method stub
 	}
 
-	public void handleTransactionRequest(final IProxyTransaction transaction) {
-		if (transactionCurr == null) {
-			if (requestViewer != null) {
-				synchronized(requestViewer) {
-					transactionCurr = transaction;
-					Display display = requestViewer.getControl().getDisplay();
-					display.syncExec (new Runnable () {
-						public void run () {
-							setRequestPending();
-						}
-					});	
-				}
+	private void handleTransactionRequest(final IProxyTransaction transaction) {
+		synchronized(this) {
+			if (transactionCurr == null && requestViewer != null) {
+				transactionCurr = transaction;
+				Display display = requestViewer.getControl().getDisplay();
+				display.syncExec (new Runnable () {
+					public void run () {
+						setRequestPending();
+					}
+				});	
 			}
 		}
 	}
 
-	public void handleTransactionResponse(final IProxyTransaction transaction) {
-		if (transactionCurr == null || transactionCurr == transaction) {
-			if (responseViewer != null) {
-				synchronized(responseViewer) {
-					final boolean wasSet = (transactionCurr != null);
-					transactionCurr = transaction;
-					Display display = responseViewer.getControl().getDisplay();
-					display.syncExec (new Runnable () {
-						public void run () {
-							transactionCurr.setEventHandler(null);
-							setResponsePending();
-							if (wasSet == false) {
-								setRequestSent();
-							}
+	private void handleTransactionResponse(final IProxyTransaction transaction) {
+		synchronized(this) {
+			if ((transactionCurr == null || transactionCurr == transaction) && responseViewer != null) {
+				final boolean wasSet = (transactionCurr != null);
+				transactionCurr = transaction;
+				Display display = responseViewer.getControl().getDisplay();
+				display.syncExec (new Runnable () {
+					public void run () {
+						transactionCurr.setEventHandler(null);
+						setResponsePending();
+						if (wasSet == false) {
+							setRequestSent();
 						}
-					});	
-				}
+					}
+				});
 			}
+		}
+	}
+
+	private void handleTransactionComplete() {
+		synchronized(this) {
+			transactionCurr.setEventHandler(null);
+			transactionCurr = interceptor.transactionQueuePop();
+			Display display = responseViewer.getControl().getDisplay();
+			display.syncExec (new Runnable () {
+				public void run () {
+					if (transactionCurr != null) {
+						if (transactionCurr.hasRequest() == false) {
+							setRequestPending();
+							setResponseInactive();
+						} else {
+							setRequestSent();
+							setResponsePending();
+						}
+					} else {
+						setRequestInactive();
+						setResponseInactive();
+					}
+				}
+			});	
 		}
 	}
 
@@ -167,12 +188,31 @@ public class InterceptView extends ViewPart {
 		return rootControl;
 	}
 
+	private void doRequestForward() {
+		synchronized(this) {
+			transactionCurr.setEventHandler(transactionEventHandler);
+			transactionCurr.doForward();
+			setRequestSent();
+		}
+	}
+
+	private void doRequestDrop() {
+		synchronized(this) {
+			transactionCurr.setEventHandler(null);
+			transactionCurr.doDrop();
+			transactionCurr = interceptor.transactionQueuePop();
+			if (transactionCurr != null) {
+				setRequestPending();
+			} else {
+				setRequestInactive();
+			}
+		}
+	}
+
 	private SelectionListener createSelectionListenerRequestButtonForward() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				setRequestSent();
-				transactionCurr.setEventHandler(transactionEventHandler);
-				transactionCurr.doForward();
+				doRequestForward();
 			}
 		};
 	}
@@ -180,14 +220,7 @@ public class InterceptView extends ViewPart {
 	private SelectionListener createSelectionListenerRequestButtonDrop() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				transactionCurr.setEventHandler(null);
-				transactionCurr.doDrop();
-				transactionCurr = interceptor.transactionQueuePop();
-				if (transactionCurr != null) {
-					setRequestPending();
-				} else {
-					setRequestInactive();
-				}
+				doRequestDrop();
 			}
 		};
 	}
@@ -261,23 +294,48 @@ public class InterceptView extends ViewPart {
 		return rootControl;
 	}
 
+	private void doResponseForward() {
+		synchronized(this) {
+			transactionCurr.doForward();
+			transactionCurr = interceptor.transactionQueuePop();
+			if (transactionCurr != null) {
+				if (transactionCurr.hasRequest() == false) {
+					setRequestPending();
+					setResponseInactive();
+				} else {
+					setRequestSent();
+					setResponsePending();
+				}
+			} else {
+				setRequestInactive();
+				setResponseInactive();
+			}
+		}
+	}
+
+	private void doResponseDrop() {
+		synchronized(this) {
+			transactionCurr.doDrop();
+			transactionCurr = interceptor.transactionQueuePop();
+			if (transactionCurr != null) {
+				if (transactionCurr.hasRequest() == false) {
+					setRequestPending();
+					setResponseInactive();
+				} else {
+					setRequestSent();
+					setResponsePending();
+				}
+			} else {
+				setRequestInactive();
+				setResponseInactive();
+			}
+		}
+	}
+
 	private SelectionListener createSelectionListenerResponseButtonForward() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				transactionCurr.doForward();
-				transactionCurr = interceptor.transactionQueuePop();
-				if (transactionCurr != null) {
-					if (transactionCurr.hasRequest() == false) {
-						setRequestPending();
-						setResponseInactive();
-					} else {
-						setRequestSent();
-						setResponsePending();
-					}
-				} else {
-					setRequestInactive();
-					setResponseInactive();
-				}
+				doResponseForward();
 			}
 		};
 	}
@@ -285,20 +343,7 @@ public class InterceptView extends ViewPart {
 	private SelectionListener createSelectionListenerResponseButtonDrop() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				transactionCurr.doDrop();
-				transactionCurr = interceptor.transactionQueuePop();
-				if (transactionCurr != null) {
-					if (transactionCurr.hasRequest() == false) {
-						setRequestPending();
-						setResponseInactive();
-					} else {
-						setRequestSent();
-						setResponsePending();
-					}
-				} else {
-					setRequestInactive();
-					setResponseInactive();
-				}
+				doResponseDrop();
 			}
 		};
 	}

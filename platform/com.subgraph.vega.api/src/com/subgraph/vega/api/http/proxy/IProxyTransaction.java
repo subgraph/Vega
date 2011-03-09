@@ -17,4 +17,5 @@ public interface IProxyTransaction {
 	IHttpResponse getResponse();
 	void doForward();
 	void doDrop();
+	void signalComplete();
 }
