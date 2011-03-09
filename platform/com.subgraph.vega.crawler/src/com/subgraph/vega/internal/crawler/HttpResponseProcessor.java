@@ -53,6 +53,7 @@ public class HttpResponseProcessor implements Runnable {
 			CrawlerTask task = (CrawlerTask)crawlerResponseQueue.take();
 			if(task.isExitTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
+				crawlerResponseQueue.add(task);
 				return;
 			}
 			
@@ -80,6 +81,7 @@ public class HttpResponseProcessor implements Runnable {
 
 			if(task.finishTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
+				crawlerResponseQueue.add(CrawlerTask.createExitTask());
 				return;
 			}
 		}

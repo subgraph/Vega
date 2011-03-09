@@ -16,17 +16,20 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 public class WebCrawler implements IWebCrawler {
-	private final static int CRAWLER_THREAD_COUNT = 5;
+	private final static int REQUEST_THREAD_COUNT = 10;
+	private final static int RESPONSE_THREAD_COUNT = 3;
+	
 	
 	private final IHttpRequestEngine requestEngine;
 
-	private final Executor executor = Executors.newFixedThreadPool(CRAWLER_THREAD_COUNT + 1);
+	private final Executor executor = Executors.newFixedThreadPool(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
 	private final BlockingQueue<CrawlerTask> requestQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final BlockingQueue<CrawlerTask> responseQueue = new LinkedBlockingQueue<CrawlerTask>();
-	private final List<RequestConsumer> requestConsumers = new ArrayList<RequestConsumer>(CRAWLER_THREAD_COUNT);
+	private final List<RequestConsumer> requestConsumers = new ArrayList<RequestConsumer>(REQUEST_THREAD_COUNT);
+	private final List<HttpResponseProcessor> responseProcessors = new ArrayList<HttpResponseProcessor>(RESPONSE_THREAD_COUNT);
 	private final List<ICrawlerProgressTracker> eventHandlers;
 
-	private HttpResponseProcessor responseProcessor;
+	//private HttpResponseProcessor responseProcessor;
 	volatile private CountDownLatch latch;
 	
 	volatile private boolean crawlerRunning;
@@ -43,14 +46,19 @@ public class WebCrawler implements IWebCrawler {
 		if(crawlerRunning)
 			throw new IllegalStateException("Cannot call start() on running crawler instance");
 	
-		latch = new CountDownLatch(CRAWLER_THREAD_COUNT + 1);
+		latch = new CountDownLatch(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
 		
 		updateProgress();
-		responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
+		//responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
 		
-		executor.execute( responseProcessor );
+		for(int i = 0; i < RESPONSE_THREAD_COUNT; i++) {
+			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
+			responseProcessors.add(responseProcessor);
+			executor.execute(responseProcessor);
+		}
+		//executor.execute( responseProcessor );
 		
-		for(int i = 0; i < CRAWLER_THREAD_COUNT; i++) {
+		for(int i = 0; i < REQUEST_THREAD_COUNT; i++) {
 			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
 			requestConsumers.add(consumer);
 			executor.execute(consumer);
@@ -59,7 +67,9 @@ public class WebCrawler implements IWebCrawler {
 	}
 	
 	public synchronized void stop() throws InterruptedException {
-		responseProcessor.stop();
+		for(HttpResponseProcessor responseProcessor: responseProcessors)
+			responseProcessor.stop();
+		//responseProcessor.stop();
 		for(RequestConsumer consumer: requestConsumers)
 			consumer.stop();
 		requestQueue.clear();
