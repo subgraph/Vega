@@ -27,6 +27,8 @@ public class EngineHttpResponse implements IHttpResponse {
 	private boolean stringExtractFailed;
 	private boolean htmlParseFailed;
 	private IHTMLParseResult htmlParseResult;
+	private boolean isMostlyAsciiTestDone;
+	private boolean isMostlyAscii;
 
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
 		this.requestUri = uri;
@@ -102,5 +104,30 @@ public class EngineHttpResponse implements IHttpResponse {
 	public boolean isFetchFail() {
 		final int code = getResponseCode();
 		return code == 503 || code == 504;
+	}
+
+	@Override
+	public boolean isMostlyAscii() {
+		if(isMostlyAsciiTestDone)
+			return isMostlyAscii;
+		
+		final String body = getBodyAsString();
+		if(body == null || body.isEmpty()) {
+			isMostlyAscii = false;
+			isMostlyAsciiTestDone = true;
+			return false;
+		}
+		
+		int total = (body.length() > 200) ? (200) : (body.length());
+		int printable = 0;
+		
+		for(int i = 0; i < total; i++) {
+			char c = body.charAt(i);
+			if((c >= 0x20 && c <= 0x7F) || Character.isWhitespace(c))
+				printable += 1;
+		}
+		isMostlyAscii = ((printable * 100) / total) > 90;
+		isMostlyAsciiTestDone = true;
+		return isMostlyAscii;
 	}
 }
