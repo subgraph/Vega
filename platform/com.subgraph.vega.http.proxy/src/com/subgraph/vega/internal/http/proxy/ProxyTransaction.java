@@ -34,19 +34,19 @@ public class ProxyTransaction implements IProxyTransaction {
 		return context;
 	}
 
-	public void setRequest(HttpRequest request) {
+	public synchronized void setRequest(HttpRequest request) {
 		this.request = request;
 	}
 
-	public void setUri(URI uri) {
+	public synchronized void setUri(URI uri) {
 		this.uri = uri;
 	}
 
-	public void setResponse(IHttpResponse response) {
+	public synchronized void setResponse(IHttpResponse response) {
 		this.response = response;
 	}
 
-	public void setHttpHost(HttpHost httpHost) {
+	public synchronized void setHttpHost(HttpHost httpHost) {
 		this.httpHost = httpHost;
 	}
 
@@ -75,37 +75,37 @@ public class ProxyTransaction implements IProxyTransaction {
 	}
 
 	@Override
-	public void setEventHandler(IProxyTransactionEventHandler eventHandler) {
+	public synchronized void setEventHandler(IProxyTransactionEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 	}
 	
 	@Override
-	public HttpHost getHttpHost() {
+	public synchronized HttpHost getHttpHost() {
 		return httpHost;
 	}
 
 	@Override
-	public URI getUri() {
+	public synchronized URI getUri() {
 		return uri;
 	}
 
 	@Override
-	public boolean hasRequest() {
+	public synchronized boolean hasRequest() {
 		return (request != null);
 	}
 
 	@Override
-	public HttpRequest getRequest() {
+	public synchronized HttpRequest getRequest() {
 		return request;
 	}
 
 	@Override
-	public boolean hasResponse() {
+	public synchronized boolean hasResponse() {
 		return (response != null);
 	}
 
 	@Override
-	public IHttpResponse getResponse() {
+	public synchronized IHttpResponse getResponse() {
 		return response;
 	}
 
