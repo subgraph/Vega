@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -112,7 +113,7 @@ public class OptionsViewer {
 			new ColumnPixelData(16, false, true),
 			new ColumnPixelData(150, true, true),
 			new ColumnPixelData(150, true, true),
-			new ColumnPixelData(350, true, true),
+			new ColumnWeightData(100, 100, true),
 		};
 		final EditingSupport editorList[] = {
 				new BreakpointEnabledEditingSupport(viewer),
@@ -258,6 +259,9 @@ public class OptionsViewer {
 				if (breakpointType != null && matchType != null && pattern != null) {
 					interceptor.createBreakpoint(direction, breakpointType, matchType, pattern, true);
 					tableViewerBreakpoints.refresh();
+					comboViewerBreakpointTypes.setSelection(new StructuredSelection(comboViewerBreakpointTypes.getElementAt(0)));
+					comboViewerBreakpointMatchTypes.setSelection(new StructuredSelection(comboViewerBreakpointMatchTypes.getElementAt(0)));
+					patternBreakpointText.setText("");
 				}
 			}
 		};

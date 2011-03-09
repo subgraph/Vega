@@ -36,13 +36,15 @@ public class InterceptView extends ViewPart {
 	private IHttpInterceptor interceptor;
 	private IHttpInterceptorEventHandler interceptorEventHandler;
 	private IProxyTransactionEventHandler transactionEventHandler;
-	private IProxyTransaction transactionCurr;
+	private IProxyTransaction transactionCurr; /**< Current intercepted transaction. */
 	private final RequestRenderer requestRenderer = new RequestRenderer();
 	private HttpRequestViewer requestViewer;
+	private IProxyTransaction requestTransactionCurr; /**< Transaction currently displayed in request viewer. */
 	private Label requestLabelStatus;
 	private ToolItem requestButtonForward;
 	private ToolItem requestButtonDrop;
 	private HttpRequestViewer responseViewer;
+	private IProxyTransaction responseTransactionCurr; /**< Transaction currently displayed in response viewer. */
 	private Label responseLabelStatus;
 	private ToolItem responseButtonForward;
 	private ToolItem responseButtonDrop;
@@ -87,12 +89,14 @@ public class InterceptView extends ViewPart {
 
 	private void handleTransactionRequest(final IProxyTransaction transaction) {
 		synchronized(this) {
-			if (transactionCurr == null && requestViewer != null) {
+			if (transactionCurr == null) {
 				transactionCurr = transaction;
 				Display display = requestViewer.getControl().getDisplay();
-				display.syncExec (new Runnable () {
+				display.asyncExec (new Runnable () {
 					public void run () {
-						setRequestPending();
+						if (requestViewer != null && responseViewer != null) {							
+							setRequestPending();
+						}
 					}
 				});	
 			}
@@ -101,19 +105,33 @@ public class InterceptView extends ViewPart {
 
 	private void handleTransactionResponse(final IProxyTransaction transaction) {
 		synchronized(this) {
-			if ((transactionCurr == null || transactionCurr == transaction) && responseViewer != null) {
-				final boolean wasSet = (transactionCurr != null);
+			if (transactionCurr == null || transactionCurr == transaction) {
 				transactionCurr = transaction;
+				transactionCurr.setEventHandler(null);
 				Display display = responseViewer.getControl().getDisplay();
-				display.syncExec (new Runnable () {
+				display.asyncExec (new Runnable () {
 					public void run () {
-						transactionCurr.setEventHandler(null);
-						setResponsePending();
-						if (wasSet == false) {
-							setRequestSent();
+						if (requestViewer != null && responseViewer != null) {							
+							setResponsePending();
 						}
 					}
 				});
+			}
+		}
+	}
+
+	private void setTransactionComplete() {
+		synchronized(this) {
+			if (transactionCurr != null) {
+				if (transactionCurr.hasResponse() == false) {
+					setRequestPending();
+					setResponseInactive();
+				} else {
+					setResponsePending();
+				}
+			} else {
+				setRequestInactive();
+				setResponseInactive();
 			}
 		}
 	}
@@ -123,22 +141,13 @@ public class InterceptView extends ViewPart {
 			transactionCurr.setEventHandler(null);
 			transactionCurr = interceptor.transactionQueuePop();
 			Display display = responseViewer.getControl().getDisplay();
-			display.syncExec (new Runnable () {
+			display.asyncExec (new Runnable () {
 				public void run () {
-					if (transactionCurr != null) {
-						if (transactionCurr.hasRequest() == false) {
-							setRequestPending();
-							setResponseInactive();
-						} else {
-							setRequestSent();
-							setResponsePending();
-						}
-					} else {
-						setRequestInactive();
-						setResponseInactive();
+					if (requestViewer != null && responseViewer != null) {
+						setTransactionComplete();
 					}
 				}
-			});	
+			});
 		}
 	}
 
@@ -228,29 +237,42 @@ public class InterceptView extends ViewPart {
 	}
 
 	private void setRequestInactive() {
-		requestLabelStatus.setText("No request pending");
-		requestButtonForward.setEnabled(false);
-		requestButtonDrop.setEnabled(false);
-		requestViewer.clearContent();
+		synchronized(this) {
+			requestLabelStatus.setText("No request pending");
+			requestButtonForward.setEnabled(false);
+			requestButtonDrop.setEnabled(false);
+			requestViewer.clearContent();
+			requestTransactionCurr = null;
+		}
 	}
 
 	private void setRequestSent() {
-		requestLabelStatus.setText("Request sent, awaiting response");
-		requestButtonForward.setEnabled(false);
-		requestButtonDrop.setEnabled(false);
-		requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
+		synchronized(this) {
+			requestLabelStatus.setText("Request sent, awaiting response");
+			requestButtonForward.setEnabled(false);
+			requestButtonDrop.setEnabled(false);
+			requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
+			requestTransactionCurr = transactionCurr;			
+		}
 	}
 
-	private void setRequestPending() {
-		URI uri = transactionCurr.getUri();
+	private String getTransactionHostPart(IProxyTransaction transaction) {
+		final URI uri = transactionCurr.getUri();
 		String httpHost = uri.getScheme() + "://" + uri.getHost();
 		if (uri.getPort() != -1) {
 			httpHost += ":" + uri.getPort();
 		}
-		requestLabelStatus.setText("Request pending to " + httpHost);
-		requestButtonForward.setEnabled(true);
-		requestButtonDrop.setEnabled(true);
-		requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
+		return httpHost;
+	}
+
+	private void setRequestPending() {
+		synchronized(this) {
+			requestLabelStatus.setText("Request pending to " + getTransactionHostPart(transactionCurr));
+			requestButtonForward.setEnabled(true);
+			requestButtonDrop.setEnabled(true);
+			requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));			
+			requestTransactionCurr = transactionCurr;			
+		}
 	}
 
 	private Composite createTabFolderResponse(Composite parent) {
@@ -310,7 +332,6 @@ public class InterceptView extends ViewPart {
 					setRequestPending();
 					setResponseInactive();
 				} else {
-					setRequestSent();
 					setResponsePending();
 				}
 			} else {
@@ -329,7 +350,6 @@ public class InterceptView extends ViewPart {
 					setRequestPending();
 					setResponseInactive();
 				} else {
-					setRequestSent();
 					setResponsePending();
 				}
 			} else {
@@ -356,17 +376,26 @@ public class InterceptView extends ViewPart {
 	}
 
 	private void setResponseInactive() {
-		responseLabelStatus.setText("No response pending");
-		responseButtonForward.setEnabled(false);
-		responseButtonDrop.setEnabled(false);
-		responseViewer.clearContent();
+		synchronized(this) {
+			responseLabelStatus.setText("No response pending");
+			responseButtonForward.setEnabled(false);
+			responseButtonDrop.setEnabled(false);
+			responseViewer.clearContent();
+			responseTransactionCurr = null;
+		}
 	}
 
 	private void setResponsePending() {
-		responseLabelStatus.setText("Response pending");
-		responseButtonForward.setEnabled(true);
-		responseButtonForward.setEnabled(true);
-		responseViewer.setContent(requestRenderer.renderResponseText(transactionCurr.getResponse().getRawResponse()));
+		synchronized(this) {
+			responseLabelStatus.setText("Response pending");
+			responseButtonForward.setEnabled(true);
+			responseButtonForward.setEnabled(true);
+			responseViewer.setContent(requestRenderer.renderResponseText(transactionCurr.getResponse().getRawResponse()));
+			responseTransactionCurr = transactionCurr;
+			if (requestTransactionCurr != transactionCurr) {
+				setRequestSent();
+			}
+		}
 	}
 
 }
