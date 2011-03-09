@@ -1,5 +1,7 @@
 package com.subgraph.vega.ui.http.interceptviewer;
 
+import java.net.URI;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -240,7 +242,12 @@ public class InterceptView extends ViewPart {
 	}
 
 	private void setRequestPending() {
-		requestLabelStatus.setText("Request pending");
+		URI uri = transactionCurr.getUri();
+		String httpHost = uri.getScheme() + "://" + uri.getHost();
+		if (uri.getPort() != -1) {
+			httpHost += ":" + uri.getPort();
+		}
+		requestLabelStatus.setText("Request pending to " + httpHost);
 		requestButtonForward.setEnabled(true);
 		requestButtonDrop.setEnabled(true);
 		requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
