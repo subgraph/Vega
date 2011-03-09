@@ -33,18 +33,19 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     }
 
     protected void fillMenuBar(IMenuManager menuBar) {
+    	MenuManager fileMenu = new MenuManager("&File", IWorkbenchActionConstants.M_FILE);
     	MenuManager winMenu = new MenuManager("&Window", IWorkbenchActionConstants.M_WINDOW);
         MenuManager helpMenu = new MenuManager("&Help", IWorkbenchActionConstants.M_HELP);
         
     	winMenu.add(preferenceAction);
+    	helpMenu.add(aboutAction);
     	
     	MenuManager viewMenu = new MenuManager("Show View");
     	viewMenu.add(viewList);
     	winMenu.add(viewMenu);
-    	menuBar.add(winMenu);
-    	menuBar.add(helpMenu);
-        helpMenu.add(aboutAction);
-
+    	menuBar.add(fileMenu);
+    	menuBar.insertAfter(IWorkbenchActionConstants.M_FILE, winMenu);
+    	menuBar.insertAfter(IWorkbenchActionConstants.M_WINDOW, helpMenu);
     }
     
     protected void fillStatusLine(IStatusLineManager statusLine) {
