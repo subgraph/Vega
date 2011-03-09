@@ -11,11 +11,11 @@ import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpointTester;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 
-public class BreakpointTesterHeader implements IHttpInterceptorBreakpointTester {
+public class BreakpointTesterRequestHeader implements IHttpInterceptorBreakpointTester {
 	private HttpInterceptorBreakpointMatchType matchType;
 	Pattern pattern;
 
-	BreakpointTesterHeader(HttpInterceptorBreakpointMatchType matchType, String pattern) {
+	BreakpointTesterRequestHeader(HttpInterceptorBreakpointMatchType matchType, String pattern) {
 		this.matchType = matchType;
 		this.pattern = Pattern.compile(pattern);
 	}
@@ -27,7 +27,7 @@ public class BreakpointTesterHeader implements IHttpInterceptorBreakpointTester 
 
 	@Override
 	public void setPattern(String pattern) {
-		this.pattern = Pattern.compile(pattern);		
+		this.pattern = Pattern.compile(pattern);
 	}
 
 	@Override
