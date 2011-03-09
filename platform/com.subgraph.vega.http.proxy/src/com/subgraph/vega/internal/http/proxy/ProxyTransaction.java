@@ -148,4 +148,11 @@ public class ProxyTransaction implements IProxyTransaction {
 			lock.unlock();
 		}
 	}
+
+	@Override
+	public synchronized void signalComplete() {
+		if (eventHandler != null) {
+			eventHandler.notifyComplete();
+		}		
+	}
 }

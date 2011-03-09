@@ -46,38 +46,42 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 		final ProxyTransaction transaction = new ProxyTransaction(context);
-
 		try {
 			if (handleRequest(transaction, request) == false) {
+				response.setStatusCode(503);
+				transaction.signalComplete();
 				return;
 			}
-		} catch (InterruptedException e) {
-			return; // REVISIT return 500 response
-		}
 
-		HttpUriRequest uriRequest = createUriRequest(transaction);
-		BasicHttpContext ctx = new BasicHttpContext();
-		IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
-		if(r == null) {
-			return;
-		}
-		transaction.setHttpHost((HttpHost) ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
+			HttpUriRequest uriRequest = createUriRequest(transaction);
+			BasicHttpContext ctx = new BasicHttpContext();
+			IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
+			if(r == null) {
+				response.setStatusCode(503);
+				transaction.signalComplete();
+				return;
+			}
+			transaction.setHttpHost((HttpHost) ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
 
-		try {
 			if (handleResponse(transaction, r) == false) {
+				response.setStatusCode(503);
+				transaction.signalComplete();
 				return;
 			}
+
+			context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
+
+			HttpResponse httpResponse = copyResponse(r.getRawResponse());
+			removeHopByHopHeaders(httpResponse);
+			response.setStatusLine(httpResponse.getStatusLine());
+			response.setHeaders(httpResponse.getAllHeaders());
+			response.setEntity(httpResponse.getEntity());
 		} catch (InterruptedException e) {
-			return; // REVISIT return 500 response
+			response.setStatusCode(503);
+			e.printStackTrace();
+		} finally {
+			transaction.signalComplete();
 		}
-
-		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
-
-		HttpResponse httpResponse = copyResponse(r.getRawResponse());
-		removeHopByHopHeaders(httpResponse);
-		response.setStatusLine(httpResponse.getStatusLine());
-		response.setHeaders(httpResponse.getAllHeaders());
-		response.setEntity(httpResponse.getEntity());
 	}
 
 	private HttpRequest copyRequest(HttpRequest originalRequest) {
