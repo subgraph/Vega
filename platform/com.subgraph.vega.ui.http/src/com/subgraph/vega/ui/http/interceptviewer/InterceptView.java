@@ -187,9 +187,11 @@ public class InterceptView extends ViewPart {
 		requestButtonForward = new ToolItem(toolBar, SWT.PUSH);
 		requestButtonForward.setImage(IMAGE_FORWARD);
 		requestButtonForward.addSelectionListener(createSelectionListenerRequestButtonForward());
+		requestButtonForward.setToolTipText("Forward");
 		requestButtonDrop = new ToolItem(toolBar, SWT.PUSH);
 		requestButtonDrop.setImage(IMAGE_DROP);
 		requestButtonDrop.addSelectionListener(createSelectionListenerRequestButtonDrop());
+		requestButtonDrop.setToolTipText("Drop");
 
 		final Group requestViewerGroup = new Group(rootControl, SWT.NONE);
 		requestViewerGroup.setLayout(new FillLayout());

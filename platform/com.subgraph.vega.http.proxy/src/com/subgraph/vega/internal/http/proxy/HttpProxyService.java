@@ -128,7 +128,7 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void addGetTargetToModel(HttpHost httpHost, URI uri, String mimeType) {
-		IWebHost hostEntity = currentWorkspace.getWebModel().getWebHostByHttpHost(httpHost);
+		IWebHost hostEntity = currentWorkspace.getWebModel().createWebHostFromHttpHost(httpHost);
 		IWebPath path = hostEntity.addPath(uri.getPath());
 		path.addGetResponse(uri.getQuery(), mimeType);
 		path.setVisited(true);
