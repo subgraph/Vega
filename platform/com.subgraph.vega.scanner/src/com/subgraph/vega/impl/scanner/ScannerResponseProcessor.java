@@ -24,7 +24,7 @@ public class ScannerResponseProcessor implements IHttpResponseProcessor {
 	
 	@Override
 	public void processResponse(HttpRequest request, IHttpResponse response, HttpContext context) {
-		if(responseProcessingModules.isEmpty())
+		if(responseProcessingModules.isEmpty() || !response.isMostlyAscii())
 			return;
 		final HttpResponse httpResponse = response.getRawResponse();
 		final int statusCode = httpResponse.getStatusLine().getStatusCode();
