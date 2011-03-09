@@ -128,6 +128,7 @@ public class HttpRequestView extends ViewPart {
 			return;
 		
 		tableViewer.setSelection(new StructuredSelection(record), true);
+		requestResponseViewer.setDisplayResponse();
 	}
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
 		final String[] titles = {"Host", "Method", "Request", "Status", "Length", };
