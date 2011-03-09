@@ -29,6 +29,9 @@ public class HttpInterceptorBreakpoint implements IHttpInterceptorBreakpoint {
 			case REQUEST_HEADER:
 				this.tester = new BreakpointTesterRequestHeader(this.matchType, this.pattern);
 				break;
+			case RESPONSE_HEADER:
+				this.tester = new BreakpointTesterResponseHeader(this.matchType, this.pattern);
+				break;
 
 			// TODO: default
 		}
