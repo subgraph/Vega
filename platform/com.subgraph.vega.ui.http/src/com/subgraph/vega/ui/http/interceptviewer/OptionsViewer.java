@@ -12,8 +12,10 @@ import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -22,18 +24,19 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointType;
+import com.subgraph.vega.api.http.proxy.HttpInterceptorLevel;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
 import com.subgraph.vega.api.http.proxy.ProxyTransactionDirection;
@@ -44,6 +47,7 @@ public class OptionsViewer {
 	private static final Image IMAGE_UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
 	private final ProxyTransactionDirection direction;
 	private Composite parentComposite;
+	private ComboViewer comboViewerInterceptorLevel;
 	private TableViewer tableViewerBreakpoints;
 	private ComboViewer comboViewerBreakpointTypes;
 	private ComboViewer comboViewerBreakpointMatchTypes;
@@ -56,9 +60,11 @@ public class OptionsViewer {
 
 	public Composite createViewer(Composite parent) {
 		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new FillLayout());
-		createBreakpointsEditor(parentComposite);
+		parentComposite.setLayout(new GridLayout(1, true));
+		createInterceptorOptions(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		createBreakpointsEditor(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		interceptor = Activator.getDefault().getProxyService().getInterceptor();
+		comboViewerInterceptorLevel.setSelection(new StructuredSelection(interceptor.getInterceptLevel(direction)));
 		tableViewerBreakpoints.setInput(interceptor);
 
 		return parentComposite;
@@ -72,6 +78,37 @@ public class OptionsViewer {
 		return parentComposite;
 	}
 
+	private Composite createInterceptorOptions(Composite parent) {
+		final Group rootControl = new Group(parent, SWT.NONE);
+		rootControl.setText("Interceptor Options");
+		rootControl.setLayout(new GridLayout(2, false));
+
+		final Label label = new Label(rootControl, SWT.NONE);
+		label.setText("Intercept for:");
+
+		comboViewerInterceptorLevel = new ComboViewer(rootControl, SWT.READ_ONLY);
+		comboViewerInterceptorLevel.setContentProvider(new ArrayContentProvider());
+		comboViewerInterceptorLevel.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((HttpInterceptorLevel) element).getName();
+			}
+		});
+		comboViewerInterceptorLevel.setInput(HttpInterceptorLevel.values());
+		comboViewerInterceptorLevel.addSelectionChangedListener(createSelectionChangedListenerComboViewerInterceptorLevel());
+		
+		return rootControl;
+	}
+
+	private ISelectionChangedListener createSelectionChangedListenerComboViewerInterceptorLevel() {
+		return new ISelectionChangedListener() {
+			public void selectionChanged(final SelectionChangedEvent e) {
+				HttpInterceptorLevel level = (HttpInterceptorLevel) ((IStructuredSelection) comboViewerInterceptorLevel.getSelection()).getFirstElement();
+				if (level != null) {
+					interceptor.setInterceptLevel(direction, level);
+				}
+			}
+		};
+	}
 	private Composite createBreakpointsEditor(Composite parent) {
 		final Group rootControl = new Group(parent, SWT.NONE);
 		rootControl.setText("Breakpoints");
