@@ -56,14 +56,14 @@ function run() {
         for (j = 0; j < res.length; j++)
         {
          if (output.indexOf(res[j]) < 0) {
-          print("match "+j+": *" + res[j] + "* regex: " + r);
+          //print("match "+j+": *" + res[j] + "* regex: " + r);
           output.push(res[j]);
          }
         }
       }
       else
       {
-        print("did not match: "+r);
+        //print("did not match: "+r);
       }
     }
   }
@@ -72,6 +72,6 @@ function run() {
   
   if (matches.length) {
 		var key = output.join(" ")
-    model.alertWith("vinfo-paths", key, response, {"output": output.join(" "), "resource": httpRequest.requestLine.uri} );
+    model.alert("vinfo-paths", {"output": output.join(" "), "resource": httpRequest.requestLine.uri, key: key, response: response} );
   }
 }

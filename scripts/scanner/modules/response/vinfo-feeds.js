@@ -18,6 +18,6 @@ function run() {
 	if (z) { output += z[1]; output += "\n"; res = 1; }
 
 	if (res) {
-		model.alert("vinfo-feeds", {"output": output, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-feeds", {"output": output, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

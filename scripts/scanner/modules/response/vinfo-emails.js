@@ -22,6 +22,6 @@ function run() {
 	}
 	var key = emails.join(" ");
 	if (emails.length) {
-	    model.alertWith("vinfo-emails", key, response, {"output": emails.join(" "), "resource": httpRequest.requestLine.uri} );
+	    model.alert("vinfo-emails", {"output": emails.join(" "), "resource": httpRequest.requestLine.uri, response: response, key: key} );
 	}
 }

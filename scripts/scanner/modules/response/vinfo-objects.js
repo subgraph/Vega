@@ -20,6 +20,6 @@ function run() {
 
 	if(res) {
 		model.set(url +".object.applet", output);
-		model.alert("vinfo-objects", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-objects", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

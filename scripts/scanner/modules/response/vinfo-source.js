@@ -58,6 +58,6 @@ function run() {
 	}
 
 	if(output.length > 0) {
-    model.alert("vinfo-source", {"output": output, "resource": httpRequest.requestLine.uri} );
+    model.alert("vinfo-source", {"output": output, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

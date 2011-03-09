@@ -22,25 +22,25 @@ Model.prototype.set = function(name, value) {
 };
 
 Model.prototype.alert = function(type, vars) {
-	this.alertWith(type, null, null, vars);
-};
-
-Model.prototype.alertWith = function(type, key, response, vars) {
 	var requestId = -1;
 	try {
 		this.alertModel.lock();
-		if(key && this.alertModel.hasAlertKey(key))
+		print("type "+ type +" key "+ vars.key + " requset "+ vars.response);
+		if(vars.key && this.alertModel.hasAlertKey(vars.key))
 			return;
-		if(response) {
-			requestId = this.requestLog.addRequestResponse(response.rawRequest, response.rawResponse, response.host);
+		if(vars.response) {
+			requestId = this.requestLog.addRequestResponse(vars.response.rawRequest, vars.response.rawResponse, vars.response.host);
+			print("request id= "+requestId)
 		}
-		var alert = this.alertModel.createAlert(type, key, requestId);
+		var alert = this.alertModel.createAlert(type, vars.key, requestId);
 		if(!alert)
 			throw new Error("Could not locate an alert template with name '"+ type +"'.");
 		for(var name in vars) {
-			var value = vars[name];
-			if(value)
-				alert.setProperty(name, value);
+			if(name != "response" && name != "key") {
+				var value = vars[name];
+				if(value)
+					alert.setProperty(name, value);
+			}
 		}
 		this.alertModel.addAlert(alert);
 	} finally {

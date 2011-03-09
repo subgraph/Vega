@@ -20,7 +20,7 @@ function run()
     if (!found)
     {
       if ((response.code != "401") && (response.code != "304")) {
-        model.alert("vinfo-blank", {"output": "n/a", "resource": httpRequest.requestLine.uri} );
+        model.alert("vinfo-blank", {"output": "n/a", "resource": httpRequest.requestLine.uri, response: response } );
       }
     }
   }

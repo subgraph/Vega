@@ -63,21 +63,21 @@ function run() {
 	}
 
 	if(htmlres) {
-		model.alert("vinfo-errorpages-html", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-html", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(phpres) {
-		model.alert("vinfo-errorpages-php", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-php", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(cfres) {
-		model.alert("vinfo-errorpages-cf", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-cf", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(rubyres) {
-		model.alert("vinfo-errorpages-ruby", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-ruby", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(djangores) {
-		model.alert("vinfo-errorpages-django", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-django", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(javares) {
-		model.alert("vinfo-errorpages-java", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-errorpages-java", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

@@ -30,7 +30,7 @@ function run() {
    var match;
 
    (found > 1) ? match = "instances" : match = "instance";
-   model.alertWith("vautocomplete", null, response, {"output": found + " " + match + " discovered.", "resource": httpRequest.requestLine.uri});
+   model.alert("vautocomplete", {"output": found + " " + match + " discovered.", "resource": httpRequest.requestLine.uri, response: response });
 
   }
 }

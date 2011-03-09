@@ -26,7 +26,7 @@ function run() {
    var match;
 
    (found > 1) ? match = "instances" : match = "instance";
-   model.alertWith("vfileupload", null, response, {"output": found + " " + match + " discovered.", "resource": httpRequest.requestLine.uri});
+   model.alert("vfileupload", {"output": found + " " + match + " discovered.", "resource": httpRequest.requestLine.uri, response: response });
 
   }
 }

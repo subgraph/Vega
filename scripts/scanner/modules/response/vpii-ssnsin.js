@@ -48,9 +48,9 @@ function run() {
 	}
 
 	if(resultssn) {
-		model.alert("vpii-ssnsin-ssn", {"output": outputssn.join("\n"), "resource": httpRequest.requestLine.uri} );
+		model.alert("vpii-ssnsin-ssn", {"output": outputssn.join("\n"), "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(resultsin) {
-		model.alert("vpii-ssnsin-sin", {"output": outputsin.join("\n"), "resource": httpRequest.requestLine.uri} );
+		model.alert("vpii-ssnsin-sin", {"output": outputsin.join("\n"), "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

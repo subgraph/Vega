@@ -14,6 +14,6 @@ function run() {
 
   res = regexp.test(response.bodyAsString);
   if (res) {
-    model.alert("vvcs-users", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+    model.alert("vvcs-users", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response} );
   }
 }

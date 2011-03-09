@@ -27,6 +27,6 @@ function run() {
 	}
 
 	if (result.length) {
-	    model.alert("vinfo-1918", {"output": result.join(" "), "resource": httpRequest.requestLine.uri} );
+	    model.alert("vinfo-1918", {"output": result.join(" "), "resource": httpRequest.requestLine.uri, response: response } );
 	 }
 }
