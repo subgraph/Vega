@@ -12,7 +12,15 @@ import org.eclipse.core.runtime.Path;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.ui.scanner.Activator;
 
@@ -29,12 +37,38 @@ public class AlertRenderer {
 	private Configuration configuration;
 	private final String imageURL;
 	private final Map<String, Document> alertDocumentCache = new HashMap<String, Document>();
+	private IRequestLog requestLog;
 	
 	AlertRenderer(TemplateLoader templateLoader) {
 		imageURL = findImage();
 		configuration = new Configuration();
 		configuration.setTemplateLoader(templateLoader);
 		configuration.setObjectWrapper(new DefaultObjectWrapper());
+		final IWorkspace currentWorkspace = Activator.getDefault().getModel().addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					handleWorkspaceClose((WorkspaceCloseEvent) event);
+				else if(event instanceof WorkspaceResetEvent)
+					handleWorkspaceReset((WorkspaceResetEvent) event);				
+			}
+		});
+		if(currentWorkspace != null)
+			requestLog = currentWorkspace.getRequestLog();
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		requestLog = event.getWorkspace().getRequestLog();
+	}
+	
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		requestLog = null;
+	}
+	
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		requestLog = null;
 	}
 	
 	public String render(IScanAlert alert) {
@@ -61,7 +95,15 @@ public class AlertRenderer {
 			if(imageURL != null)
 				vars.put("imageURL", imageURL);
 			
+			if(alert.getRequestId() >= 0 && requestLog != null) {
+				final IRequestLogRecord record = requestLog.lookupRecord(alert.getRequestId());
+				if(record != null) {
+					vars.put("requestId", Long.toString(alert.getRequestId()));
+					vars.put("requestText", record.getRequest().getRequestLine().getUri());
+				}
+			}
 			root.put("vars", vars);
+			
 			StringWriter out = new StringWriter();
 			t.process(root, out);
 			out.flush();
@@ -138,7 +180,4 @@ public class AlertRenderer {
 		}
 		return null;
 	}
-
-
-
 }

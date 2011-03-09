@@ -186,5 +186,17 @@
          </variable>
       </sourceProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.subgraph.vega.perspectives.scanner">
+         <view
+               id="com.subgraph.vega.views.http"
+               minimized="false"
+               ratio="0.6"
+               relationship="fast">
+         </view>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>

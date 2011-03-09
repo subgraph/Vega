@@ -31,6 +31,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
 
@@ -117,6 +118,17 @@ public class HttpRequestView extends ViewPart {
 		tableViewer.setInput(event.getWorkspace().getRequestLog());
 	}
 
+	public void  focusOnRecord(long requestId) {
+		final Object inputObj = tableViewer.getInput();
+		if(!(inputObj instanceof IRequestLog)) 
+			return;
+		final IRequestLog requestLog = (IRequestLog) inputObj;
+		final IRequestLogRecord record = requestLog.lookupRecord(requestId);
+		if(record == null)
+			return;
+		
+		tableViewer.setSelection(new StructuredSelection(record), true);
+	}
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
 		final String[] titles = {"Host", "Method", "Request", "Status", "Length", };
 		final ColumnLayoutData[] layoutData = {

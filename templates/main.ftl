@@ -35,6 +35,13 @@
   vars.output ! ""
 />
 
+<#if vars.requestText??> 
+<h2>Request</h2>
+<div class="section" id="requestlink">
+<a href="#" onclick="linkClick('${vars.requestId}');"> ${vars.requestText} </a>
+</div>
+</#if>
+
 <@discussion
   doc.alert.discussion
 />

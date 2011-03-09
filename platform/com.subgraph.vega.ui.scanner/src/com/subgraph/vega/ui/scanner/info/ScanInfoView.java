@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISelectionListener;
@@ -38,6 +39,7 @@ public class ScanInfoView extends ViewPart {
 	private Composite contentPanel;
 	private final AlertRenderer renderer;
 	private StackLayout stackLayout = new StackLayout();
+	private BrowserFunction linkClick;
 	
 	public ScanInfoView() {
 		final TemplateLoader loader = createTemplateLoader();
@@ -67,6 +69,9 @@ public class ScanInfoView extends ViewPart {
 		contentPanel.setLayout(stackLayout);
 		dashboard = new DashboardPane(contentPanel);
 		browser = new Browser(contentPanel, SWT.NONE);
+		// Some day I will regret this, but it's currently the only way to have clickable links in the alert viewer
+		browser.setJavascriptEnabled(true);
+		linkClick = new LinkHandler(browser);
 		
 		getSite().getPage().addSelectionListener(new ISelectionListener() {
 
@@ -125,6 +130,11 @@ public class ScanInfoView extends ViewPart {
 	@Override
 	public void setFocus() {
 		browser.setFocus();
+	}
+	
+	public void dispose() {
+		linkClick.dispose();
+		super.dispose();
 	}
 
 }
