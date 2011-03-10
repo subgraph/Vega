@@ -68,7 +68,7 @@ public class AlertRenderer {
 	}
 	
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
-		requestLog = null;
+		requestLog = event.getWorkspace().getRequestLog();
 	}
 	
 	public String render(IScanAlert alert) {
