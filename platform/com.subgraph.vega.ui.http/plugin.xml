@@ -13,6 +13,7 @@
       <view
             allowMultiple="false"
             class="com.subgraph.vega.ui.http.interceptviewer.InterceptView"
+            icon="icons/intercept.png"
             id="com.subgraph.vega.views.intercept"
             name="Intercept"
             restorable="true">
@@ -20,6 +21,7 @@
       <view
             allowMultiple="true"
             class="com.subgraph.vega.ui.http.requesteditviewer.RequestEditView"
+            icon="icons/requestEdit.png"
             id="com.subgraph.vega.views.requestEdit"
             name="Request Editor"
             restorable="true">
