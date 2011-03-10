@@ -31,7 +31,7 @@ public class CrawlerProgressPane extends Composite {
 		progressBar = createProgressBar(progressBarPage);
 		progressBar.setBackground(background);
 		
-		setLabelText("Crawler idle.");
+		setLabelText("Scanner idle.");
 	}
 	
 	private Composite createPage(Composite parent, Color background) {
@@ -45,7 +45,7 @@ public class CrawlerProgressPane extends Composite {
 		final Label label = new Label(parent, SWT.CENTER);
 		label.setFont(JFaceResources.getBannerFont());
 		final GridData gd = new GridData(SWT.FILL, SWT.BOTTOM, true, true);
-		gd.widthHint = 200;
+		gd.widthHint = 300;
 		label.setLayoutData(gd);
 		return label;
 	}
@@ -55,7 +55,7 @@ public class CrawlerProgressPane extends Composite {
 		progress.setMinimum(0);
 		progress.setMaximum(100);
 		final GridData gd = new GridData(SWT.FILL, SWT.BOTTOM, true, true);
-		gd.widthHint = 200;
+		gd.widthHint = 300;
 		progress.setLayoutData(gd);
 		return progress;
 	}

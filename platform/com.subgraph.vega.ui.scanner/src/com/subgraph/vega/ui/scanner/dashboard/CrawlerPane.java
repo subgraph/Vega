@@ -25,13 +25,13 @@ public class CrawlerPane extends Composite {
 		
 		progressPane = new CrawlerProgressPane(this, parent.getBackground());
 		GridData gd = new GridData(SWT.CENTER, SWT.BOTTOM, true, true);
-		gd.widthHint = 200;
+		gd.widthHint = 300;
 		progressPane.setLayoutData(gd);
 		
 		crawlLabel = new Label(this, SWT.CENTER);
 		crawlLabel.setFont(JFaceResources.getBannerFont());
 		gd = new GridData(SWT.CENTER, SWT.CENTER, true, true);
-		gd.widthHint = 200;
+		gd.widthHint = 300;
 		crawlLabel.setLayoutData(gd);
 		crawlLabel.setBackground(parent.getBackground());
 	}
@@ -87,14 +87,14 @@ public class CrawlerPane extends Composite {
 	
 	synchronized private void renderProgress() {
 		if(canceled) {
-			progressPane.setLabelText("Crawler canceled.");
+			progressPane.setLabelText("Scanner canceled.");
 			return;
 		}
 		else if(finished && !canceled) {
-			progressPane.setLabelText("Crawler completed.");
+			progressPane.setLabelText("Scanner completed.");
 			return;
 		} else if(canceled) {
-			progressPane.setLabelText("Crawler canceled.");
+			progressPane.setLabelText("Scanner canceled.");
 			return;
 		} else {
 			progressPane.setProgressBarValue((int) crawlerPercent);
@@ -106,7 +106,7 @@ public class CrawlerPane extends Composite {
 		sb.append(crawlerCompleted);
 		sb.append(" out of ");
 		sb.append(crawlerTotal);
-		sb.append(" crawled (");
+		sb.append(" scanned (");
 		sb.append(String.format("%.1f%%", crawlerPercent));
 		sb.append(")");
 		crawlLabel.setText(sb.toString());

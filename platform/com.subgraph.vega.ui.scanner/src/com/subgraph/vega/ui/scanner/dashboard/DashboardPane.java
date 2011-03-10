@@ -214,17 +214,17 @@ public class DashboardPane extends Composite {
 	}
 	
 	private void renderCrawlerSection(StringBuilder sb) {
-		addDefault(sb, "Crawling Stage");
+		addDefault(sb, "Scanner Progress");
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
-		addIndented(sb, 20, "<control width='350' height='80' href='crawler'/>");
+		addIndented(sb, 20, "<control width='400' height='80' href='crawler'/>");
 	}
 	
 	private void renderAlertSummary(StringBuilder sb) {
 		addVSpaces(sb, 2);
 		addIndented(sb, 10, "<span font='header'>Scan Alert Summary</span>");
 		addVSpaces(sb, 2);
-		addIndented(sb, 20, "<control width='350' href='alerts'/>");
+		addIndented(sb, 20, "<control width='400' href='alerts'/>");
 		addVSpaces(sb, 2);
 	}
 	
