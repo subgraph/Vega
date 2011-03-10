@@ -36,11 +36,17 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
@@ -61,7 +67,8 @@ public class RequestEditView extends ViewPart {
 	private Button buttonMoveDown;
 	private final RequestRenderer requestRenderer = new RequestRenderer();
 	private HttpRequestViewer responseViewer;
-	
+	private IWorkspace currentWorkspace;
+
 	@Override
 	public void createPartControl(Composite parent) {
 		parentComposite = new SashForm(parent, SWT.VERTICAL);
@@ -69,6 +76,35 @@ public class RequestEditView extends ViewPart {
 		createResponseViewer(parentComposite);
 		parentComposite.setWeights(new int[] {40, 60});
 		parentComposite.pack();
+
+		// REVISIT
+		currentWorkspace = Activator.getDefault().getModel().addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent) {
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				} else if(event instanceof WorkspaceCloseEvent) {
+					handleWorkspaceClose((WorkspaceCloseEvent) event);
+				} else if(event instanceof WorkspaceResetEvent) {
+					handleWorkspaceReset((WorkspaceResetEvent) event);
+				}
+			}
+		});
+	}
+
+	// REVISIT
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		this.currentWorkspace = event.getWorkspace();
+	}
+	
+	// REVISIT
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		this.currentWorkspace = null;
+	}
+	
+	// REVISIT
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		this.currentWorkspace = event.getWorkspace();
 	}
 
 	@Override
@@ -143,13 +179,17 @@ public class RequestEditView extends ViewPart {
 		}
 
 		BasicHttpContext ctx = new BasicHttpContext();
+		IHttpResponse response;
 		try {
-			IHttpResponse response = requestEngine.sendRequest(uriRequest, ctx);
+			 response = requestEngine.sendRequest(uriRequest, ctx);
 			responseViewer.setContent(requestRenderer.renderResponseText(response.getRawResponse()));
 		} catch (Exception e) {
 			displayError(e.getMessage());
 			return;
 		}
+
+		// REVISIT
+		currentWorkspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 	}
 
 	private Composite createRequestEditor(Composite parent) {
