@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Password with Autocomplete Enabled</title>
+	
+	<class>Environment</class>
+
+	<severity>Low</severity>
+
+  <impact> A password value may be stored on the local filesystem of the client.</impact>
+  <impact> Locally stored passwords could be retrieved by other users or malicious code.</impact>
+
+  <remediation>
+    The form declaration should have an autocomplete attribute with its value set to "off".
+  </remediation>
+
+
+	<discussion>
+    Vega detected a form that included a password input field.  The autocomplete attribute was not set to off.  This may result in some browsers storing values input by users locally, where they may be retrieved by third parties.
+	</discussion>
+
+  <external>
+    <url address="http://subgraph.com">Subgraph security.</url>
+  </external>
+           
+  <references>
+    <url address="http://msdn.microsoft.com/en-us/library/ms533486(VS.85).aspx">AUTOCOMPLETE attribute (MSDN)</url>
+    <url address="http://msdn.microsoft.com/en-us/library/ms533032(VS.85).aspx">Using Autocomplete in HTML Forms (MSDN)</url>
+  </references>
+
+	
+	
+</alert>
+

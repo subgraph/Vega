@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Foreign language detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>Foreign language is being used on this website.</impact>
+</alert>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>News Feed Detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>This website uses an RSS-style news feed.</impact>
+</alert>

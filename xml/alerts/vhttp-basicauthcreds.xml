@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP authentication credentials detected</title>
+	
+	<class>Information</class>
+	<severity>Medium</severity>		
+	
+	<impact>HTTP authentication credentials have been detected at this URL. These credentials could be abused to allow unauthorized access to server resources.</impact>
+</alert>

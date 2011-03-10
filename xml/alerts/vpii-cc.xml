@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Possible Credit Card Data Detected</title>
+	
+	<class>Personally Identifiable Information (PII)</class>
+	<severity>High</severity>
+
+	<discussion>
+    Vega has found possible credit card numbers on a resource.
+	</discussion>
+
+  <impact>
+    Card numbers inadvertantly exposed may result in identity theft of card holders, monetary loss for the merchant or revocation of card processing privileges.
+  </impact>
+
+  <remediation>
+    The recommendation is to investigate further and remove card data as soon as possible.
+  </remediation>
+
+</alert>
+
