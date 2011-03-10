@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Oracle Application Server Fingerprint</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>
+
+	<discussion>
+    Vega has detected that this resource has been created by Oracle Application Server.
+	</discussion>
+
+  <impact>
+    This resource contains a fingerprint that identifies the underlying platform to attackers.  This knowledge may make other attacks more reliable.
+  </impact>
+
+  <remediation>
+    TBA
+   </remediation>
+
+</alert>
+

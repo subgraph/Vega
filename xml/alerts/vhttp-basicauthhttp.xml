@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP authentication failure detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>An authentication failure status (401) has been returned at this address.</impact>
+</alert>

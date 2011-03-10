@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>WSDL detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>WSDL code has been detected.</impact>
+</alert>

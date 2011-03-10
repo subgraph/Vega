@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Form with File Upload Discovered</title>
+	
+	<class>Injection Point</class>
+
+	<severity>Info</severity>
+
+  <impact>Allowing users to upload files to a server can lead to vulnerabilities</impact>
+
+  <remediation>
+    This is not a confirmed vulnerability.  Developers should make sure that file upload functionality is secure.
+  </remediation>
+
+
+	<discussion>
+    Vega detected a file upload input field in a form.  File uploads are a common source of vulnerability.  This alert is purely informationl, no vulnerability has been confirmed.
+	</discussion>
+
+  <external>
+    <url address="http://subgraph.com">Subgraph security.</url>
+  </external>
+           
+  <references>
+    <url address="http://tstarling.com/blog/2008/12/secure-web-uploads/">Secure Web Uploads (Tim Starling)</url>
+    <url address="http://joginipally.blogspot.com/2008/11/security-considerations-for-file-upload.html">Security Considerations for File Upload (Gopal's Blog)</url>
+  </references>
+
+	
+	
+</alert>
+
