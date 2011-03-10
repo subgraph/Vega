@@ -68,7 +68,7 @@ public class AlertRenderer {
 	}
 	
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
-		requestLog = null;
+		requestLog = event.getWorkspace().getRequestLog();
 	}
 	
 	public String render(IScanAlert alert) {
@@ -127,7 +127,9 @@ public class AlertRenderer {
 			return null;
 		}
 		
-		final Document alertDocument = xmlRepository.getDocument("alerts/"+ name + ".xml");
+		Document alertDocument = xmlRepository.getDocument("alerts/"+ name + ".xml");
+		if(alertDocument == null)
+			alertDocument = xmlRepository.getDocument("alerts/default.xml");
 		if(alertDocument == null) {
 			logger.warn("Could not load XML data for alert named '"+ name + "'");
 			return null;

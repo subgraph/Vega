@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Object/Applet Detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>This website has embedded objects and/or applets.</impact>
+</alert>

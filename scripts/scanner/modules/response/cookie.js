@@ -9,7 +9,6 @@ function run() {
   var serverHeaders=new Array();
   serverHeaders= response.headers("Set-cookie");
   var uri=new URI(this.httpRequest.getRequestLine().getUri());
-  print("Testing cookie security on ressource: " + this.httpRequest.getRequestLine().getUri());
   if(!serverHeaders)
 	  return;
   
@@ -23,11 +22,8 @@ function run() {
 	  cookieproperly=cookie[0].split("=");
 	  var name=cookieproperly[0];
 	  var value=cookieproperly[1];
-	  print("name : "+ name);
-	  print("value: "+ value);
 
 	  for(y in cookie){
-		  print(cookie[y]);
 		  if(cookie[y].match(".*httponly.*")){
 			  httponly=true;
 		  }
@@ -39,14 +35,14 @@ function run() {
 		var key = serverHeaders[x];
 	  if(httponly!=true){
 		if(!model.get( param_prefix + ".cookie.httponly")){
-			model.alertWith("cookie-httponly", key, response, { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });
+			model.alert("cookie-httponly", { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri(), key: key, response: response });
 		  	model.set(param_prefix+".cookie.httponly", "false");
 	  	}
 	  }
 	  
 	  if(uri.getScheme().match("https") && secure!=true){
 		if(!model.get(param_prefix + ".cookie.secure.")){
-			model.alertWith("cookie-secure", key, response, { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri() });		  
+			model.alert("cookie-secure", { "output": serverHeaders[x], "resource": this.httpRequest.getRequestLine().getUri(), key: key, response: response });		  
 			model.set(param_prefix + ".cookie.secure.", "false");
 		}
 	  }

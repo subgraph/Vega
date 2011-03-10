@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>MD5 hash detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>An MD5 hash has been detected. This hash may have been used to encrypt passwords or other valuable data.</impact>
+</alert>

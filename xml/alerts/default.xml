@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Default Alert Template</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>
+	<discussion>
+		This alert template is displayed when the specified template could not be found.
+	</discussion>
+</alert>
+

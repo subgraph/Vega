@@ -25,7 +25,7 @@ public class AlertItemRow extends Composite {
 		label.setText(title);
 		label.setBackground(parent.getBackground());
 		GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		gd.widthHint = 250;
+		gd.widthHint = 300;
 		label.setLayoutData(gd);
 		
 		countLabel = new Label(this, SWT.NONE);

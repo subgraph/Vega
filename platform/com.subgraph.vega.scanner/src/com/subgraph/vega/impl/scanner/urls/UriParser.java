@@ -14,6 +14,7 @@ import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
+import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
@@ -29,14 +30,14 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 	
-	public UriParser(IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IUrlExtractor urlExtractor) {
+	public UriParser(List<IResponseProcessingModule> responseModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IUrlExtractor urlExtractor) {
 		this.workspace = workspace;
 		
 		this.pageAnalyzer = new PageAnalyzer(workspace.getWebModel(), filter, urlExtractor, this);
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(workspace, crawler, pageAnalyzer, new ContentAnalyzer(), new PivotAnalyzer());
+		this.pathStateManager = new PathStateManager(workspace, crawler, pageAnalyzer, new ContentAnalyzer(responseModules, workspace), new PivotAnalyzer());
 	}
 	
 	public void processUri(URI uri) {

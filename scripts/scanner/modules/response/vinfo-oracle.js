@@ -39,6 +39,6 @@ function run() {
  
  if (response.bodyAsString.indexOf("<!-- Created by Oracle ") >= 0)
  {
-    model.alert("vinfo-oracle", { "output": "<!-- Created by Oracle..", "resource": httpRequest.requestLine.uri });
+    model.alert("vinfo-oracle", { "output": "<!-- Created by Oracle..", "resource": httpRequest.requestLine.uri , response: response });
   }
 }

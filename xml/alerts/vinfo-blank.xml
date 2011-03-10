@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Blank Body Detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>
+
+	<discussion>
+    Vega has detected that this URI returned a blank body response.  
+	</discussion>
+
+  <impact>
+    This may be indicative of an error condition and should be manually investigated further.
+  </impact>
+
+  <remediation>
+    Investigate further.
+  </remediation>
+
+</alert>
+

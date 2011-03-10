@@ -19,7 +19,9 @@ public class ScanAlertFactory {
 	}
 	
 	ScanAlert createAlert(String key, String name, long requestId) {
-		final Document doc = xmlRepository.getDocument("alerts/"+ name +".xml");
+		Document doc = xmlRepository.getDocument("alerts/"+ name +".xml");
+		if(doc == null)
+			doc = xmlRepository.getDocument("alerts/default.xml");
 		if(doc == null) {
 			logger.warning("Could not find XML alert description named "+ name);
 			return null;

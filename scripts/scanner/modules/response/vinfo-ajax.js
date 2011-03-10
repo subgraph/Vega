@@ -5,9 +5,6 @@ var module = {
 
 function run()
 {
-  var date1 = new Date();
-  var start = date1.getTime();
-
   if (response.document)
   {
 
@@ -30,10 +27,7 @@ function run()
           output = output.substr(0,199) + "...";
         }
 
-        model.alert("vinfo-ajax", {"output": output, "resource": httpRequest.requestLine.uri} );
+        model.alert("vinfo-ajax", {"output": output, "resource": httpRequest.requestLine.uri, response: response } );
   }
-  var date2 = new Date();
-  var end = date2.getTime();
-  print("ajax detector on "+httpRequest.requestLine.uri+" time: " + (date2 - date1));
 
 }

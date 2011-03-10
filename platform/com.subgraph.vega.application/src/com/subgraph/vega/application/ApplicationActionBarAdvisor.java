@@ -19,6 +19,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 	private IContributionItem viewList;
 	private IWorkbenchAction preferenceAction;
 	IWorkbenchAction aboutAction;
+	private IWorkbenchAction resetPerspectiveAction;
 		
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
         super(configurer);
@@ -27,24 +28,28 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     protected void makeActions(IWorkbenchWindow window) {
     	viewList = ContributionItemFactory.VIEWS_SHORTLIST.create(window);
     	preferenceAction = ActionFactory.PREFERENCES.create(window);
+    	resetPerspectiveAction = ActionFactory.RESET_PERSPECTIVE.create(window);
         aboutAction = ActionFactory.ABOUT.create(window);
         register(aboutAction);
     	register(preferenceAction);
+    	register(resetPerspectiveAction);
     }
 
     protected void fillMenuBar(IMenuManager menuBar) {
+    	MenuManager fileMenu = new MenuManager("&File", IWorkbenchActionConstants.M_FILE);
     	MenuManager winMenu = new MenuManager("&Window", IWorkbenchActionConstants.M_WINDOW);
         MenuManager helpMenu = new MenuManager("&Help", IWorkbenchActionConstants.M_HELP);
         
     	winMenu.add(preferenceAction);
+    	helpMenu.add(aboutAction);
     	
     	MenuManager viewMenu = new MenuManager("Show View");
     	viewMenu.add(viewList);
     	winMenu.add(viewMenu);
-    	menuBar.add(winMenu);
-    	menuBar.add(helpMenu);
-        helpMenu.add(aboutAction);
-
+    	winMenu.add(resetPerspectiveAction);
+    	menuBar.add(fileMenu);
+    	menuBar.insertAfter(IWorkbenchActionConstants.M_FILE, winMenu);
+    	menuBar.insertAfter(IWorkbenchActionConstants.M_WINDOW, helpMenu);
     }
     
     protected void fillStatusLine(IStatusLineManager statusLine) {

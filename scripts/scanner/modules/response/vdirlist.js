@@ -16,6 +16,6 @@ function run() {
 	}
 
 	if(url.search("C=") <=0 && res>=2) {
-		model.alertWith("vdirlist", null, response, {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vdirlist", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

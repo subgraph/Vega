@@ -1,13 +1,13 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
@@ -17,6 +17,7 @@ import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
+import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
@@ -35,7 +36,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	private final IHttpRequestEngine requestEngine;
 	
-	private final IHttpResponseProcessor responseProcessor;
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
@@ -47,8 +47,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		this.requestEngine = requestEngine;
 		this.logger.setLevel(Level.ALL);
 		scanner.getModuleRegistry().resetAllModuleTimestamps();
-		responseProcessor = new ScannerResponseProcessor(scanner.getModuleRegistry().getResponseProcessingModules(true), workspace);
-		this.requestEngine.registerResponseProcessor(responseProcessor);
 	}
 	
 	void stop() {
@@ -100,7 +98,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), urlExtractor);
+		List<IResponseProcessingModule> responseProcessingModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
+		UriParser uriParser = new UriParser(responseProcessingModules, workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), urlExtractor);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

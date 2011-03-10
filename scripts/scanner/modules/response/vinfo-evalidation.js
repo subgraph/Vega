@@ -34,6 +34,6 @@ function run() {
 
 
 	if (z&&x|c&&v) {
-		model.alert("vinfo-validation", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-validation", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

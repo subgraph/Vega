@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Social Security Number detected</title>
+	
+	<class>Information</class>
+	<severity>High</severity>		
+	
+	<impact>A social security number has been detected. Misuse of this number could lead to fraud, or identity theft.</impact>
+</alert>

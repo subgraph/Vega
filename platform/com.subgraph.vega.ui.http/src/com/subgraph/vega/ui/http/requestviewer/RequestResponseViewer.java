@@ -34,6 +34,7 @@ public class RequestResponseViewer {
 	private final RequestRenderer requestRenderer;
 	private final CoolBar coolBar;
 	private SashForm sashForm;
+	private TabFolder tabFolder;
 	private Composite rootComposite;
 	private HttpRequestViewer requestViewer;
 	private HttpRequestViewer responseViewer;
@@ -92,7 +93,7 @@ public class RequestResponseViewer {
 		sashForm = null;
 		recreateRootComposite();
 	
-		final TabFolder tabFolder = new TabFolder(rootComposite, SWT.TOP);
+		tabFolder = new TabFolder(rootComposite, SWT.TOP);
 		
 		final TabItem requestItem = new TabItem(tabFolder, SWT.NONE);
 		requestItem.setText("Request");
@@ -106,9 +107,14 @@ public class RequestResponseViewer {
 		parentComposite.layout();
 		if(currentRecord != null)
 			processCurrentTransaction();
-		
+		setDisplayResponse();
 	}
 	
+	public void setDisplayResponse() {
+		if(tabFolder != null)
+			tabFolder.setSelection(1);
+		
+	}
 	private void recreateRootComposite() {
 		if(rootComposite != null)
 			rootComposite.dispose();
@@ -131,6 +137,7 @@ public class RequestResponseViewer {
 	}
 
 	private void configureSashMode(int mode) {
+		tabFolder = null;
 		if(sashForm != null) {
 			if(sashForm.getOrientation() != mode)
 				sashForm.setOrientation(mode);

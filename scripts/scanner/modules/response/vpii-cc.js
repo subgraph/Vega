@@ -33,6 +33,6 @@ function run()
   }
   if (cards.length)
   {
-    model.alert("vpii-cc", { "output": cards.join("\n"), "resource": httpRequest.requestLine.uri });
+    model.alert("vpii-cc", { "output": cards.join("\n"), "resource": httpRequest.requestLine.uri, response: response });
   }
 }

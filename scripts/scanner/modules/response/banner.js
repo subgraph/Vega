@@ -14,6 +14,11 @@ function run() {
  
   if(!model.get(param_prefix+ ".server.banner")) {
     model.set(param_prefix +".server.banner", banner);
-    model.alertWith("banner", banner, response, { "output": banner, "resource": host });
+    model.alert("banner", { 
+				key: banner,
+				"output": banner, 
+				"resource": host,
+			  response: response
+	  });
   }
 }

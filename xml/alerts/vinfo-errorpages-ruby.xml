@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Ruby on Rails error detected</title>
+	
+	<class>Information</class>
+	<severity>Low</severity>		
+	
+	<impact>A Ruby on Rails error has been detected. This could indicate badly written code, and could disclose sensitive information.</impact>
+</alert>

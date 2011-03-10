@@ -19,10 +19,10 @@ function run() {
 
 	if (md5) {
 		model.set(url+".md5", md5.join("\n"));
-		model.alert("vinfo-hash-md5", {"output": md5.join("\n"), "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-hash-md5", {"output": md5.join("\n"), "resource": httpRequest.requestLine.uri, response: response }  );
 	}
 	if (sha1) {
 		model.set(url+".sha1", md5.join("\n"));
-		model.alert("vinfo-hash-sha1", {"output": sha1.join("\n"), "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-hash-sha1", {"output": sha1.join("\n"), "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

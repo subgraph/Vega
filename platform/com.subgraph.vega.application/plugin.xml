@@ -102,7 +102,7 @@
             allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
-               id="fileMenu"
+               id="file"
                label="File">
             <command
                   commandId="com.subgraph.vega.commands.resetWorkspace"

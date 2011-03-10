@@ -20,6 +20,6 @@ function run() {
 		}
 	}
 	if(res) {
-		model.alert("vinfo-comments", {"output": output, "resource": httpRequest.requestLine.uri} );
+		model.alert("vinfo-comments", {"output": output, "resource": httpRequest.requestLine.uri, response: response } );
 	}
 }

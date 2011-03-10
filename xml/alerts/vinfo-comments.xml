@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Interesting HTML comments</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+	<impact>HTML comments could indicate security-relevant info.</impact>
+</alert>
