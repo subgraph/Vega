@@ -39,13 +39,13 @@ public class UriParser {
 		this.unknownProcessor = new UnknownProcessor();
 		this.pathStateManager = new PathStateManager(workspace, crawler, pageAnalyzer, new ContentAnalyzer(responseModules, workspace), new PivotAnalyzer());
 	}
-	
+
 	public void processUri(URI uri) {
 		final HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 		final IWebHost webHost = getWebHost(host);
 		IWebPath path = webHost.getRootPath();
 		final boolean hasTrailingSlash = uri.getPath().endsWith("/");
-		
+
 		String[] parts = uri.getPath().split("/");
 		IWebPath childPath;
 		for(int i = 1; i < parts.length; i++) {
@@ -59,7 +59,7 @@ public class UriParser {
 			path = childPath;
 		}
 	}
-	
+
 	private IWebHost getWebHost(HttpHost host) {
 		IWebHost webHost = null;
 		synchronized(workspace) {
@@ -67,12 +67,12 @@ public class UriParser {
 			webHost = webModel.getWebHostByHttpHost(host);
 			if(webHost != null)
 				return webHost;
-			webHost = webModel.createWebHostFromHttpHost(host);			
+			webHost = webModel.createWebHostFromHttpHost(host);
 		}
 		processNewWebHost(webHost);
 		return webHost;
 	}
-	
+
 	private void processNewWebHost(IWebHost webHost) {
 		final IWebPath rootPath = webHost.getRootPath();
 		synchronized(pathStateManager) {
@@ -82,7 +82,7 @@ public class UriParser {
 			}
 		}
 	}
-	
+
 	private void processNewPath(IWebPath webPath, URI uri, boolean isLast, boolean hasTrailingSlash) {
 		if(!isLast || (isLast && hasTrailingSlash)) {
 			processDirectory(webPath);
@@ -90,9 +90,9 @@ public class UriParser {
 			processPathWithQuery(webPath, uri);
 		} else {
 			processUnknown(webPath);
-		}	
+		}
 	}
-	
+
 	private void processDirectory(IWebPath webPath) {
 		synchronized(pathStateManager) {
 			if(pathStateManager.hasSeenPath(webPath) && webPath.getPathType() == PathType.PATH_DIRECTORY)
@@ -102,7 +102,7 @@ public class UriParser {
 			maybeSubmit(ps, directoryProcessor);
 		}
 	}
-	
+
 	private void processPathWithQuery(IWebPath path, URI uri) {
 		path.setPathType(PathType.PATH_FILE);
 		List<NameValuePair> plist = URLEncodedUtils.parse(uri, "UTF-8");
@@ -113,7 +113,7 @@ public class UriParser {
 			maybeSubmit(ps, fileProcessor);
 		}
 	}
-	
+
 	private List<PathState> getNewPathStatesForParameters(IWebPath path, List<NameValuePair> plist) {
 		synchronized (pathStateManager) {
 			if(pathStateManager.hasParametersForPath(path, plist))
@@ -121,7 +121,7 @@ public class UriParser {
 			return pathStateManager.createStatesForPathAndParameters(path, plist);
 		}
 	}
-	
+
 	private void processUnknown(IWebPath path) {
 		synchronized(pathStateManager) {
 			if(pathStateManager.hasSeenPath(path))
@@ -130,7 +130,7 @@ public class UriParser {
 			maybeSubmit(ps, unknownProcessor);
 		}
 	}
-	
+
 	private void maybeSubmit(PathState ps, ICrawlerResponseProcessor callback) {
 		final PathState pps = ps.getParentState();
 		if(pps == null || pps.getInitialChecksFinished())
@@ -138,6 +138,4 @@ public class UriParser {
 		else
 			ps.setLocked();
 	}
-		
-		
 }
