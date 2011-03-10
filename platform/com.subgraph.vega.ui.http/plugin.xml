@@ -55,6 +55,10 @@
             class="com.subgraph.vega.ui.http.commands.ReplayRequest"
             commandId="com.subgraph.vega.commands.popup.replayRequest">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.SendRequest"
+            commandId="com.subgraph.vega.commands.sendRequest">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -83,6 +87,17 @@
             categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
             id="com.subgraph.vega.commands.popup.replayRequest"
             name="Replay Request">
+      </command>
+      <category
+            description="Commands for controlling the request editor"
+            id="com.subgraph.vega.commands.requestEditorCategory"
+            name="Request Editor Commands">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.requestEditorCategory"
+            description="Send the HTTP Request"
+            id="com.subgraph.vega.commands.sendRequest"
+            name="Send Request">
       </command>
    </extension>
    <extension
@@ -141,6 +156,15 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            locationURI="toolbar:com.subgraph.vega.views.requestEdit">
+         <command
+               commandId="com.subgraph.vega.commands.sendRequest"
+               icon="icons/start_16x16.png"
+               label="Send Request"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -174,9 +198,6 @@
             id="com.subgraph.vega.perspectives.proxy"
             name="Proxy">
       </perspective>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
    </extension>
 
 </plugin>

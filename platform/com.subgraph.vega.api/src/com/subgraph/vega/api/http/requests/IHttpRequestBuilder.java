@@ -12,15 +12,17 @@ public interface IHttpRequestBuilder {
 	 * Set request fields from a HttpRequest provided by IRequestLogRecord. Any previously set fields are unset.
 	 *
 	 * @param request IRequestLogRecord containing HttpRequest.
+	 * @throws URISyntaxException 
 	 */
-	public void setFromRequest(IRequestLogRecord request);
+	public void setFromRequest(IRequestLogRecord request) throws URISyntaxException;
 
 	/**
 	 * Set request fields from a HttpRequest. Any previously set fields are unset.
 	 *
 	 * @param reqest HttpRequest.
+	 * @throws URISyntaxException 
 	 */
-	public void setFromRequest(HttpRequest request);
+	public void setFromRequest(HttpRequest request) throws URISyntaxException;
 
 	public void setHost(String host);
 	public String getHost();
@@ -29,8 +31,8 @@ public interface IHttpRequestBuilder {
 	
 	public void setMethod(String method);
 	public String getMethod();
-	public void setUri(String uri);
-	public String getUri();
+	public void setPath(String path);
+	public String getPath();
 	public String getRequestLine();
 
 	public IHttpHeaderBuilder addHeader(String name, String value);

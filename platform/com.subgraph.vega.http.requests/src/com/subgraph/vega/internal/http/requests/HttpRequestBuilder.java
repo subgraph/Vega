@@ -24,7 +24,7 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	private String host = "";
 	private int hostPort = 80;
 	private String method = "";
-	private String uri = "";
+	private String path = "";
 	private String protocolVersion = "";
 	private final ArrayList<HttpHeaderBuilder> headerList = new ArrayList<HttpHeaderBuilder>();
 
@@ -32,15 +32,21 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 	
 	@Override
-	public void setFromRequest(IRequestLogRecord request) {
+	public void setFromRequest(IRequestLogRecord request) throws URISyntaxException {
 		setFromRequest(request.getRequest());
 	}
 
 	@Override
-	public void setFromRequest(HttpRequest request) {
+	public void setFromRequest(HttpRequest request) throws URISyntaxException {
 		RequestLine requestLine = request.getRequestLine();
 		method = requestLine.getMethod();
-		uri = requestLine.getUri();
+		final URI requestUri = new URI(requestLine.getUri());
+		host = requestUri.getHost();
+		hostPort = requestUri.getPort();
+		if (hostPort == -1) {
+			hostPort = 80;
+		}
+		path = requestUri.getPath();
 		protocolVersion = requestLine.getProtocolVersion().toString();
 		headerList.clear();
 		for (Header h: request.getAllHeaders()) {
@@ -79,18 +85,18 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 
 	@Override
-	public String getUri() {
-		return uri;
+	public String getPath() {
+		return path;
 	}
 
 	@Override
-	public void setUri(String uri) {
-		this.uri = uri;
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	@Override
 	public String getRequestLine() {
-		return method + " " + uri + " " + protocolVersion;
+		return method + " " + path + " " + protocolVersion;
 	}
 
 	@Override
@@ -135,10 +141,10 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 
 	@Override
 	public HttpUriRequest buildRequest() throws URISyntaxException {
-		final URI uri = new URI(this.uri);
-		final HttpUriRequest uriRequest =  methodStringToUriRequest(method, uri);
+		final URI requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + path);
+		final HttpUriRequest uriRequest =  methodStringToUriRequest(method, requestUri);
 
-		if(uriRequest == null) {
+		if (uriRequest == null) {
 			return null;
 		}
 

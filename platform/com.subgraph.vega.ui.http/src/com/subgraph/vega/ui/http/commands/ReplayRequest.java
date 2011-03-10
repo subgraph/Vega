@@ -1,5 +1,6 @@
 package com.subgraph.vega.ui.http.commands;
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -51,7 +52,12 @@ public class ReplayRequest extends AbstractHandler {
 					return null;
 				}
 
-				view.setRequest((IRequestLogRecord) element);
+				try {
+					view.setRequest((IRequestLogRecord) element);
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				viewMode = IWorkbenchPage.VIEW_VISIBLE;
 			}
 		}
