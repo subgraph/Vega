@@ -133,7 +133,8 @@ public class ScanInfoView extends ViewPart {
 	}
 	
 	public void dispose() {
-		linkClick.dispose();
+		if(linkClick != null)
+			linkClick.dispose();
 		super.dispose();
 	}
 
