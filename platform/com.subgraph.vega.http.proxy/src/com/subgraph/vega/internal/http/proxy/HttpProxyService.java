@@ -1,34 +1,22 @@
 package com.subgraph.vega.internal.http.proxy;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
-import com.subgraph.vega.internal.http.proxy.HttpInterceptor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
-import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
-import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
-import com.subgraph.vega.urls.IUrlExtractor;
 
 public class HttpProxyService implements IHttpProxyService {
 
@@ -36,9 +24,10 @@ public class HttpProxyService implements IHttpProxyService {
 	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
 	private IHttpRequestEngineFactory requestEngineFactory;
-	private IUrlExtractor urlExtractor;
+	private IContentAnalyzerFactory contentAnalyzerFactory;
+	private IContentAnalyzer contentAnalyzer;
+
 	private IScannerModuleRegistry moduleRepository;
-	private List<IResponseProcessingModule> responseProcessingModules;
 	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
 	private final HttpInterceptor interceptor = new HttpInterceptor();
@@ -66,19 +55,21 @@ public class HttpProxyService implements IHttpProxyService {
 	
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
 		this.currentWorkspace = event.getWorkspace();
-		
 	}
-	
+
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
 		this.currentWorkspace = null;
 	}
 
 	@Override
 	public void start(int proxyPort) {
-		responseProcessingModules = moduleRepository.getResponseProcessingModules(true);
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();
+		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer();
+		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
+		contentAnalyzer.setDefaultAddToRequestLog(true);
+		contentAnalyzer.setAddLinksToModel(true);
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, interceptor, requestEngine);
 		proxy.registerEventHandler(eventHandler);
@@ -86,58 +77,9 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void processTransaction(IProxyTransaction transaction) {
-		IHttpResponse response = transaction.getResponse();
-		currentWorkspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
-		HttpEntity responseEntity = transaction.getResponse().getRawResponse().getEntity();
-		if(responseEntity == null)
+		if(transaction.getResponse() == null || contentAnalyzer == null)
 			return;
-
-		final String mimeType = transactionToMimeType(transaction);
-		final URI uri = transactionToURI(transaction);
-		if(uri == null)
-			return;
-
-		addGetTargetToModel(transaction.getHttpHost(), uri, mimeType);
-		addDiscoveredLinks(transaction.getResponse());
-		runResponseProcessingModules(transaction, mimeType);
-	}
-
-	private void runResponseProcessingModules(IProxyTransaction transaction, String mimeType) {
-		for(IResponseProcessingModule module: responseProcessingModules) {
-			if(module.mimeTypeFilter(mimeType) && module.responseCodeFilter(transaction.getResponse().getRawResponse().getStatusLine().getStatusCode()))
-					module.processResponse(transaction.getRequest(), transaction.getResponse(), currentWorkspace);
-		}
-	}
-	private String transactionToMimeType(IProxyTransaction transaction) {
-		HttpResponse response = transaction.getResponse().getRawResponse();
-		Header hdr = response.getFirstHeader("Content-Type");
-		if(hdr == null || hdr.getValue() == null)
-			return "unknown/unknown";
-		else
-			return hdr.getValue();
-	}
-
-	private URI transactionToURI(IProxyTransaction transaction) {
-		String urlPath = transaction.getRequest().getRequestLine().getUri();
-		try {
-			return new URI(urlPath);
-		} catch (URISyntaxException e) {
-			logger.warning("Failed to parse URL from HTTP request: "+ urlPath);
-			return null;
-		}
-	}
-
-	private void addGetTargetToModel(HttpHost httpHost, URI uri, String mimeType) {
-		IWebHost hostEntity = currentWorkspace.getWebModel().createWebHostFromHttpHost(httpHost);
-		IWebPath path = hostEntity.addPath(uri.getPath());
-		path.addGetResponse(uri.getQuery(), mimeType);
-		path.setVisited(true);
-	}
-	
-	private void addDiscoveredLinks(IHttpResponse response) {
-		for(URI u: urlExtractor.findUrls(response)) {
-			currentWorkspace.getWebModel().getWebPathByUri(u);
-		}
+		contentAnalyzer.processResponse(transaction.getResponse());
 	}
 
 	@Override
@@ -145,7 +87,8 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
 		proxy.unregisterEventHandler(eventHandler);
-		proxy.stopProxy();		
+		proxy.stopProxy();
+		contentAnalyzer = null;
 		currentWorkspace.unlock();
 	}
 
@@ -162,12 +105,12 @@ public class HttpProxyService implements IHttpProxyService {
 		this.model = null;
 	}
 
-	protected void setUrlExtractor(IUrlExtractor extractor) {
-		this.urlExtractor = extractor;
+	protected void setContentAnalyzerFactory(IContentAnalyzerFactory factory) {
+		this.contentAnalyzerFactory = factory;
 	}
-
-	protected void unsetUrlExtractor(IUrlExtractor extractor) {
-		this.urlExtractor = null;
+	
+	protected void unsetContentAnalyzerFactory(IContentAnalyzerFactory factory) {
+		this.contentAnalyzerFactory = null;
 	}
 
 	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
