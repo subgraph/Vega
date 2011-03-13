@@ -7,6 +7,7 @@ import com.subgraph.vega.api.events.IEventHandler;
 
 public interface IModel {
 	IWorkspace addWorkspaceListener(IEventHandler handler);
+	void removeWorkspaceListener(IEventHandler handler);
 	void resetCurrentWorkspace();
 	
 	/**
