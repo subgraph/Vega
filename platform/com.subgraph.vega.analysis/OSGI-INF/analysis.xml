@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="vega.analysis">
+   <implementation class="com.subgraph.vega.internal.analysis.ContentAnalyzerFactory"/>
+   <service>
+      <provide interface="com.subgraph.vega.api.analysis.IContentAnalyzerFactory"/>
+   </service>
+   <reference bind="setModel" cardinality="1..1" interface="com.subgraph.vega.api.model.IModel" name="IModel" policy="static" unbind="unsetModel"/>
+</scr:component>
