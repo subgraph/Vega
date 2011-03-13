@@ -19,7 +19,6 @@
 
    <windowImages i16="icons/alt_window_16.gif" i32="/com.subgraph.vega.application/icons/vega-icon-100x100.png"/>
 
-
    <launcher name="Vega">
       <macosx icon="/com.subgraph.vega.application/icons/VegaIcons-OSX.icns"/>
       <solaris/>
@@ -28,10 +27,8 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
       <plugin id="com.ibm.icu"/>
@@ -66,6 +63,7 @@
    </features>
 
    <configurations>
+      <plugin id="com.subgraph.vega.analysis" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.crawler" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.html" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.http.proxy" autoStart="true" startLevel="0" />
@@ -76,7 +74,6 @@
       <plugin id="com.subgraph.vega.scanner" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.scanner.modules" autoStart="true" startLevel="0" />
       <plugin id="com.subgraph.vega.ui.console" autoStart="true" startLevel="0" />
-      <plugin id="com.subgraph.vega.urls" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="0" />
    </configurations>
