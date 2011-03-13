@@ -7,6 +7,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -20,7 +21,6 @@ import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
 import com.subgraph.vega.impl.scanner.state.PathState;
 import com.subgraph.vega.impl.scanner.state.PathStateManager;
-import com.subgraph.vega.urls.IUrlExtractor;
 
 public class UriParser {
 	private final IWorkspace workspace;
@@ -30,10 +30,10 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 	
-	public UriParser(List<IResponseProcessingModule> responseModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IUrlExtractor urlExtractor) {
+	public UriParser(List<IResponseProcessingModule> responseModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
 		this.workspace = workspace;
 		
-		this.pageAnalyzer = new PageAnalyzer(workspace.getWebModel(), filter, urlExtractor, this);
+		this.pageAnalyzer = new PageAnalyzer(filter, contentAnalyzer, this);
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
