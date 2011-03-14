@@ -21,7 +21,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
-	
+	private final MimeDetector mimeDetector = new MimeDetector();
 	private final Object responseProcessingLock = new Object();
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
@@ -60,6 +60,9 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		if(addToRequestLog) 
 			workspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 
+		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
+		result.setSniffedMimeType(mimeDetector.getSniffedMimeType(response));
+		
 		runExtractUrls(result, response, workspace.getWebModel());
 		runResponseProcessingModules(response.getOriginalRequest(), response, workspace);
 		return result;
@@ -75,7 +78,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private void runExtractUrls(ContentAnalyzerResult result, IHttpResponse response, IWebModel webModel) {
 		if(response.isMostlyAscii()) {
 			for(URI u : urlExtractor.findUrls(response)) {
-				if(addLinksToModel)
+				if(addLinksToModel && (u.getScheme().equalsIgnoreCase("http") || u.getScheme().equalsIgnoreCase("https")))
 					webModel.getWebPathByUri(u);
 				result.addUri(u);
 			}
