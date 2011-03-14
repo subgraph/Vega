@@ -22,7 +22,6 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
-	private final Object responseProcessingLock = new Object();
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
@@ -70,9 +69,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 
 	@Override
 	public void setResponseProcessingModules(List<IResponseProcessingModule> modules) {
-		synchronized(responseProcessingLock) {
-			responseProcessingModules = new ArrayList<IResponseProcessingModule>(modules);
-		}
+		responseProcessingModules = new ArrayList<IResponseProcessingModule>(modules);
 	}
 	
 	private void runExtractUrls(ContentAnalyzerResult result, IHttpResponse response, IWebModel webModel) {
@@ -85,12 +82,10 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		}
 	}
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
-		synchronized(responseProcessingLock) {
-			if(responseProcessingModules == null)
-				return;
-			for(IResponseProcessingModule m: responseProcessingModules)
-				m.processResponse(request, response, workspace);
-		}
+		if(responseProcessingModules == null)
+			return;
+		for(IResponseProcessingModule m: responseProcessingModules)
+			m.processResponse(request, response, workspace);
 	}
 
 	@Override
