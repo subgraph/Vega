@@ -1,4 +1,4 @@
-package com.subgraph.vega.internal.urls;
+package com.subgraph.vega.internal.analysis.urls;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +76,4 @@ public class HtmlUrlExtractor {
 			return null;
 		}
 	}
-	
-
 }

@@ -66,7 +66,11 @@ public class Model implements IModel {
 	public IWorkspace addWorkspaceListener(IEventHandler handler) {
 		workspaceEventManager.addListener(handler);
 		return currentWorkspace;
-		
+	}
+
+	@Override
+	public void removeWorkspaceListener(IEventHandler handler) {
+		workspaceEventManager.removeListener(handler);
 	}
 
 	@Override

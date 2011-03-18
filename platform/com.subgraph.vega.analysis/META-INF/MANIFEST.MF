@@ -1,13 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Scanner
-Bundle-SymbolicName: com.subgraph.vega.scanner
+Bundle-Name: Analysis
+Bundle-SymbolicName: com.subgraph.vega.analysis
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.base;version="1.6.0",
- com.subgraph.vega.api.analysis,
- com.subgraph.vega.api.crawler,
+Import-Package: com.subgraph.vega.api.analysis,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
@@ -15,11 +13,9 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.model.alerts,
  com.subgraph.vega.api.model.requests,
  com.subgraph.vega.api.model.web,
- com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.modules,
  org.apache.http;version="4.0.0",
- org.apache.http.client.methods,
- org.apache.http.client.utils,
- org.apache.http.message;version="4.0.0",
- org.apache.http.protocol;version="4.0.0"
-Service-Component: OSGI-INF/scanner-factory.xml
+ org.jsoup,
+ org.jsoup.nodes,
+ org.jsoup.select
+Service-Component: OSGI-INF/analysis.xml
