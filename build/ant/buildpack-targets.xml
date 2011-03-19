@@ -31,7 +31,7 @@
 	<!-- Download the buildpack archive if it is not found in the build/archives directory -->
 
 	<target name="buildpack-download" unless="buildpack.available">
-		<property name="buildpack.source" value="http://mitnick.subgraph.com/buildpacks" />
+		<property name="buildpack.source" value="http://support.subgraph.com/buildpacks" />
 		<property name="buildpack.url" value="${buildpack.source}/${buildpack.filename}" />
 		<echo>
 			The build system will now download a buildpack from ${buildpack.url}
