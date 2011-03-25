@@ -19,6 +19,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
 import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
@@ -28,6 +29,7 @@ import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.internal.InternalModuleManager;
+import com.subgraph.vega.impl.scanner.modules.scripting.BasicModuleScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
@@ -114,6 +116,8 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 				modules.add(new PerResourceScript(m));
 			else if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
+			else if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
+				modules.add(new BasicModuleScript(m));
 		}
 		for(IScannerModule m: getInternalModules(enabledOnly))
 			modules.add(m);
@@ -183,6 +187,18 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		return modules;
 	}
 	
+	@Override
+	public List<IBasicModuleScript> getBasicModules(boolean enabledOnly) {
+		final List<IBasicModuleScript> modules = new ArrayList<IBasicModuleScript>();
+		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(enabledOnly && !m.getEnabledState())
+				continue;
+			if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
+				modules.add(new BasicModuleScript(m));
+		}
+		return modules;
+	}
+
 	@Override
 	public List<IScannerModule> getInternalModules(boolean enabledOnly) {
 		return internalModules.getModules(enabledOnly);
