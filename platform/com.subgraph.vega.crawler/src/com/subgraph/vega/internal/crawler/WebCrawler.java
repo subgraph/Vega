@@ -29,7 +29,6 @@ public class WebCrawler implements IWebCrawler {
 	private final List<HttpResponseProcessor> responseProcessors = new ArrayList<HttpResponseProcessor>(RESPONSE_THREAD_COUNT);
 	private final List<ICrawlerProgressTracker> eventHandlers;
 
-	//private HttpResponseProcessor responseProcessor;
 	volatile private CountDownLatch latch;
 	
 	volatile private boolean crawlerRunning;
@@ -49,14 +48,12 @@ public class WebCrawler implements IWebCrawler {
 		latch = new CountDownLatch(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
 		
 		updateProgress();
-		//responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
 		
 		for(int i = 0; i < RESPONSE_THREAD_COUNT; i++) {
 			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
 			responseProcessors.add(responseProcessor);
 			executor.execute(responseProcessor);
 		}
-		//executor.execute( responseProcessor );
 		
 		for(int i = 0; i < REQUEST_THREAD_COUNT; i++) {
 			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
@@ -69,7 +66,7 @@ public class WebCrawler implements IWebCrawler {
 	public synchronized void stop() throws InterruptedException {
 		for(HttpResponseProcessor responseProcessor: responseProcessors)
 			responseProcessor.stop();
-		//responseProcessor.stop();
+
 		for(RequestConsumer consumer: requestConsumers)
 			consumer.stop();
 		requestQueue.clear();
@@ -93,7 +90,6 @@ public class WebCrawler implements IWebCrawler {
 			ICrawlerResponseProcessor callback, Object argument) {
 		CrawlerTask task = CrawlerTask.createTask(request, callback, argument);
 		synchronized(counter) {
-			//System.out.println("Queuing: "+ request.getRequestLine().getMethod() + " "+ request.getRequestLine().getUri());
 			counter.addNewTask();
 			requestQueue.add(task);
 		}
