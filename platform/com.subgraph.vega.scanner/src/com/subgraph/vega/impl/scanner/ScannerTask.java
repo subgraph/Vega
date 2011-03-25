@@ -59,7 +59,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	@Override
 	public void run() {
-		
+		final List<IResponseProcessingModule> responseModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
+		contentAnalyzer.setResponseProcessingModules(responseModules);
 		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
 		runCrawlerPhase();
 		if(!stopRequested)
@@ -95,8 +96,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		List<IResponseProcessingModule> responseProcessingModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
-		UriParser uriParser = new UriParser(responseProcessingModules, workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), contentAnalyzer);
+		UriParser uriParser = new UriParser(scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), contentAnalyzer);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

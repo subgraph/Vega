@@ -15,7 +15,7 @@ import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
@@ -30,14 +30,14 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 	
-	public UriParser(List<IResponseProcessingModule> responseModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
+	public UriParser(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
 		this.workspace = workspace;
 		
 		this.pageAnalyzer = new PageAnalyzer(filter, contentAnalyzer, this);
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(workspace, crawler, pageAnalyzer, new ContentAnalyzer(responseModules, workspace), new PivotAnalyzer());
+		this.pathStateManager = new PathStateManager(moduleRegistry, workspace, crawler, pageAnalyzer, contentAnalyzer, new PivotAnalyzer());
 	}
 
 	public void processUri(URI uri) {
@@ -53,8 +53,8 @@ public class UriParser {
 				childPath = path.getChildPath(parts[i]);
 				if(childPath == null) {
 					childPath = path.addChildPath(parts[i]);
-					processNewPath(childPath, uri, (i == (parts.length - 1)), hasTrailingSlash);
 				}
+				processPath(childPath, uri, (i == (parts.length - 1)), hasTrailingSlash);
 			}
 			path = childPath;
 		}
@@ -65,15 +65,14 @@ public class UriParser {
 		synchronized(workspace) {
 			final IWebModel webModel = workspace.getWebModel();
 			webHost = webModel.getWebHostByHttpHost(host);
-			if(webHost != null)
-				return webHost;
-			webHost = webModel.createWebHostFromHttpHost(host);
+			if(webHost == null)
+				webHost = webModel.createWebHostFromHttpHost(host);
 		}
-		processNewWebHost(webHost);
+		processWebHost(webHost);
 		return webHost;
 	}
 
-	private void processNewWebHost(IWebHost webHost) {
+	private void processWebHost(IWebHost webHost) {
 		final IWebPath rootPath = webHost.getRootPath();
 		synchronized(pathStateManager) {
 			if(!pathStateManager.hasSeenPath(rootPath)) {
@@ -83,7 +82,7 @@ public class UriParser {
 		}
 	}
 
-	private void processNewPath(IWebPath webPath, URI uri, boolean isLast, boolean hasTrailingSlash) {
+	private void processPath(IWebPath webPath, URI uri, boolean isLast, boolean hasTrailingSlash) {
 		if(!isLast || (isLast && hasTrailingSlash)) {
 			processDirectory(webPath);
 		} else if(uri.getQuery() != null) {

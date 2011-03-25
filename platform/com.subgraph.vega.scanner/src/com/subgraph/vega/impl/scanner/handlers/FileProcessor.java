@@ -6,8 +6,8 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class FileProcessor implements ICrawlerResponseProcessor {
 	private final InjectionChecks injectionChecks = new InjectionChecks();
@@ -15,24 +15,25 @@ public class FileProcessor implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
-		ps.debug("FileProcessor: "+ request.getMethod() + " "+ request.getURI());
+		final IModuleContext ctx = (IModuleContext) argument;
+		
+		final IPathState ps = ctx.getPathState();
+		ctx.debug("FileProcessor: "+ request.getMethod() + " "+ request.getURI());
 		ps.getPath().setVisited(true);
 
 		ps.setResponse(response);
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during initial file fetch");
+			ctx.error(request, response, "during initial file fetch");
 		}
 		
 		if((ps.get404Parent() == null && response.getResponseCode() == 404) || ps.hasParent404FingerprintMatchingThis()) {
 			ps.setPageMissing();
 		} else {
 			if(response.getResponseCode() > 400) {
-				ps.debug("No access code = "+ response.getResponseCode());
+				ctx.debug("No access code = "+ response.getResponseCode());
 			}
 			if(ps.getParentState() == null || !ps.getParentState().matchesPathFingerprint(ps.getPathFingerprint())) {
-				ps.responseChecks(request, response);
+				ctx.responseChecks(request, response);
 				if(ps.get404Parent() != null && !ps.isParametric()) {
 					// XXX secondary ext init
 				}

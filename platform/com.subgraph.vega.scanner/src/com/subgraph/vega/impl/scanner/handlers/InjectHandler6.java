@@ -6,8 +6,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class InjectHandler6 implements ICrawlerResponseProcessor {
 
@@ -16,43 +16,42 @@ public class InjectHandler6 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
-		
+		final IModuleContext ctx = (IModuleContext) argument;
+
 		if(response.getRawResponse().containsHeader("Vega-Inject")) {
 			System.out.println("Problem injected Vega-Inject header");
 		}
 		
-		if(data.getFlag() != 1)
+		if(ctx.getCurrentIndex() != 1)
 			return;
 
-		ps.resetMiscData();
-		boolean isNum = isNumericParameterValue(ps);
+		final IModuleContext newCtx = ctx.getPathState().createModuleContext();
+		boolean isNum = isNumericParameterValue(ctx.getPathState());
 
 		if(isNum) {
-			ps.submitAlteredRequest(injectHandler7, "-0", true, 0);
-			ps.submitAlteredRequest(injectHandler7, "-0-0", true, 1);
-			ps.submitAlteredRequest(injectHandler7, "-0-9", true, 2);
+			newCtx.submitAlteredRequest(injectHandler7, "-0", true, 0);
+			newCtx.submitAlteredRequest(injectHandler7, "-0-0", true, 1);
+			newCtx.submitAlteredRequest(injectHandler7, "-0-9", true, 2);
 		} else {
-			ps.submitAlteredRequest(injectHandler7, "9-8", 0);
-			ps.submitAlteredRequest(injectHandler7, "8-7", 1);
-			ps.submitAlteredRequest(injectHandler7, "9-1", 2);
+			newCtx.submitAlteredRequest(injectHandler7, "9-8", 0);
+			newCtx.submitAlteredRequest(injectHandler7, "8-7", 1);
+			newCtx.submitAlteredRequest(injectHandler7, "9-1", 2);
 		}
 		
-		submitRequest(ps, 3, "\\\'\\\"");
-		submitRequest(ps, 4, "\'\"");
-		submitRequest(ps, 5, "\\\\\'\\\\\"");
+		submitRequest(newCtx, 3, "\\\'\\\"");
+		submitRequest(newCtx, 4, "\'\"");
+		submitRequest(newCtx, 5, "\\\\\'\\\\\"");
 		
 		if(isNum) {
-			ps.submitAlteredRequest(injectHandler7, " - 0 - 0", true, 6);
-			ps.submitAlteredRequest(injectHandler7, " 0 0 - -", true, 7);
+			newCtx.submitAlteredRequest(injectHandler7, " - 0 - 0", true, 6);
+			newCtx.submitAlteredRequest(injectHandler7, " 0 0 - -", true, 7);
 		} else {
-			ps.submitAlteredRequest(injectHandler7, "9 - 1", 6);
-			ps.submitAlteredRequest(injectHandler7, "9 1 -", 7);
+			newCtx.submitAlteredRequest(injectHandler7, "9 - 1", 6);
+			newCtx.submitAlteredRequest(injectHandler7, "9 1 -", 7);
 		}
 	}
 	
-	private boolean isNumericParameterValue(PathState ps) {
+	private boolean isNumericParameterValue(IPathState ps) {
 		if(!ps.isParametric())
 			return false;
 		final NameValuePair p = ps.getFuzzableParameter();
@@ -67,14 +66,14 @@ public class InjectHandler6 implements ICrawlerResponseProcessor {
 		return true;
 	}
 	
-	private void submitRequest(PathState ps, int n, String s) {
-		final HttpUriRequest req = ps.createAlteredRequest(s, true);
+	private void submitRequest(IModuleContext ctx, int n, String s) {
+		final HttpUriRequest req = ctx.getPathState().createAlteredRequest(s, true);
 		final String s1 = "vega"+s;
 		final String s2 = s1 + ",en";
 		req.addHeader("User-Agent", s1);
 		req.addHeader("Referer", s1);
 		req.addHeader("Accept-Language", s2);
-		ps.submitRequest(req, injectHandler7, n);
+		ctx.submitRequest(req, injectHandler7, n);
 	}
 
 }

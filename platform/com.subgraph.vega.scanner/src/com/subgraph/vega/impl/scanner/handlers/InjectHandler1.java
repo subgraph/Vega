@@ -5,8 +5,9 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class InjectHandler1 implements ICrawlerResponseProcessor {
 
@@ -15,56 +16,57 @@ public class InjectHandler1 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
-		if(ps.getInjectSkipFlag(0))
+		final IModuleContext ctx = (IModuleContext) argument;
+		
+		if(ctx.hasModuleFailed())
 			return;
 		
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during directory listing / traversal attack");
-			ps.setInjectSkipFlag(0);
-			scheduleNext(ps);
+			ctx.error(request, response, "during directory listing / traversal attack");
+			ctx.setModuleFailed();
+			scheduleNext(ctx.getPathState());
 			return;
 		}
 		
-		ps.addMiscRequestResponse(data.getFlag(), request, response);
-		
-		if(ps.incrementMiscCount() < 4)
+		ctx.addRequestResponse(ctx.getCurrentIndex(), request, response);
+		if(ctx.incrementResponseCount() < 4)
 			return;
 		
-		if(!ps.isParametric()) {
-			if(ps.getMiscResponseCode(0) < 300 && 
-					!ps.miscFingerprintMatchesPath(0) && !ps.miscFingerprintsMatch(0, 1)) {
-				System.out.println("unique response for /./ for "+ ps.getPath().getFullPath());
-				IHttpResponse resp0 = ps.getMiscResponse(0);
+		final IPageFingerprint pathFP = ctx.getPathState().getPathFingerprint();
+		if(!ctx.getPathState().isParametric()) {
+			if(ctx.getSavedResponse(0).getResponseCode() < 300 && !ctx.isFingerprintMatch(0, pathFP) && 
+					!ctx.isFingerprintMatch(0, 1)) {
+				System.out.println("unique response for /./ for "+ ctx.getPathState().getPath().getFullPath());
+				IHttpResponse resp0 = ctx.getSavedResponse(0);
 				if(resp0 != null)
-					ps.responseChecks(ps.createRequest(), resp0);
+					ctx.responseChecks(ctx.getPathState().createRequest(), resp0);
 				
 			}
-			if(ps.getMiscResponseCode(2) < 300 && !ps.miscFingerprintMatchesPath(2) && !ps.miscFingerprintsMatch(2, 3)) {
+			if(ctx.getSavedResponse(2).getResponseCode() < 300 && !ctx.isFingerprintMatch(2, pathFP) && !ctx.isFingerprintMatch(2, 3)) { 
+			
 				// XXX
 				System.out.println("unique response for \\.\\");
-				ps.miscResponseChecks(2);				
+				ctx.responseChecks(2);				
 			}
 						
 			
 		} else  {
-			if(!ps.miscFingerprintsMatch(0, 1)) {
+			if(!ctx.isFingerprintMatch(0, 1)) {
 				System.out.println("problem: responses for ./val and .../val look different");
-				ps.miscResponseChecks(0);
+				ctx.responseChecks(0);
 			}
-			if(!ps.miscFingerprintsMatch(2, 3)) {
+			if(!ctx.isFingerprintMatch(2, 3)) {
 				System.out.println("responses for .\\val and ...\\val look different");
-				ps.miscResponseChecks(2);
+				ctx.responseChecks(2);
 			}
 		}
 		
-		scheduleNext(ps);
+		scheduleNext(ctx.getPathState());
 	}
 	
-	private void scheduleNext(PathState ps) {
-		ps.resetMiscData();
-		ps.submitMultipleAlteredRequests(injectHandler2, new String[] {"vega>'>\"><vega></vega>", "vega>'>\"></vega><vega>"});
+	private void scheduleNext(IPathState ps) {
+		final IModuleContext ctx = ps.createModuleContext();
+		ctx.submitMultipleAlteredRequests(injectHandler2, new String[] {"vega>'>\"><vega></vega>", "vega>'>\"></vega><vega>"});
 	}
 
 }

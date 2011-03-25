@@ -7,6 +7,7 @@ Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.subgraph.vega.api.annotations,
  com.subgraph.vega.api.console,
+ com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,

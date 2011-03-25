@@ -5,9 +5,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PageFingerprint;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
+import com.subgraph.vega.api.scanner.IModuleContext;
 
 public class InjectPutHandler implements ICrawlerResponseProcessor {
 
@@ -19,20 +18,19 @@ public class InjectPutHandler implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
+		final IModuleContext ctx = (IModuleContext) argument;
 		
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during PUT checks");
+			ctx.error(request, response, "during PUT checks");
 		} else {
 			final int rc = response.getResponseCode();
-			final PageFingerprint fp = PageFingerprint.generateFromCodeAndString(rc, response.getBodyAsString());
+			final IPageFingerprint fp = response.getPageFingerprint();
 			
-			if(rc >= 200 && rc < 300 && !fp.isSame(ps.getPathFingerprint())) {
+			if(rc >= 200 && rc < 300 && !fp.isSame(ctx.getPathState().getPathFingerprint())) {
 				System.out.println("PUT directory");
 			}
 		}
-		injectionChecks.initialize2(ps);
+		injectionChecks.initialize2(ctx.getPathState());
 	}
 
 }

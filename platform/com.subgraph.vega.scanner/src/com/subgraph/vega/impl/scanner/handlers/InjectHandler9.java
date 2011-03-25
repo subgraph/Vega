@@ -5,8 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
 
 public class InjectHandler9 implements ICrawlerResponseProcessor {
 
@@ -15,62 +14,59 @@ public class InjectHandler9 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
+		final IModuleContext ctx = (IModuleContext) argument;
 		
-		if(ps.getInjectSkipFlag(5)) 
+		if(ctx.hasModuleFailed())
 			return;
+		
 		if(response.isFetchFail()) {
-			ps.setInjectSkipAdd(5);
-			scheduleNext(ps);
+			ctx.setModuleFailed();
+			end.endChecks(ctx.getPathState());
 			return;
 		}
 		
-		ps.addMiscRequestResponse(data.getFlag(), request, response);
-		if(ps.incrementMiscCount() < 9)
+		ctx.addRequestResponse(ctx.getCurrentIndex(), request, response);
+		
+		if(ctx.incrementResponseCount() < 9)
 			return;
 		
-		if(!ps.miscFingerprintsMatch(3, 8)) {
-			scheduleNext(ps);
+		if(!ctx.isFingerprintMatch(3, 8)) {
+			end.endChecks(ctx.getPathState());
 			return;
 		}
 		
-		if(!ps.miscFingerprintsMatch(0, 1)) {
+		if(!ctx.isFingerprintMatch(0, 1)) {
 			System.out.println("response to -(2^31-1) different than to -12345");
-			ps.miscResponseChecks(1);
+			ctx.responseChecks(1);
 		}
 		
-		if(!ps.miscFingerprintsMatch(0, 2)) {
+		if(!ctx.isFingerprintMatch(0, 2)) {
 			System.out.println("response to -2^31 different than to -12345");
-			ps.miscResponseChecks(2);
+			ctx.responseChecks(2);
 		}
 
-		if(!ps.miscFingerprintsMatch(3, 4)) {
+		if(!ctx.isFingerprintMatch(3, 4)) {
 			System.out.println("response to 2^31-1 different than to 12345");
-			ps.miscResponseChecks(4);
+			ctx.responseChecks(4);
 		}
 
-		if(!ps.miscFingerprintsMatch(3, 5)) {
+		if(!ctx.isFingerprintMatch(3, 5)) {
 			System.out.println("response to 2^31 different than to 12345");
-			ps.miscResponseChecks(5);
+			ctx.responseChecks(5);
 		}
 
-		if(!ps.miscFingerprintsMatch(3, 6)) {
+		if(!ctx.isFingerprintMatch(3, 6)) {
 			System.out.println("response to 2^32-1 different than to 12345");
-			ps.miscResponseChecks(6);
+			ctx.responseChecks(6);
 		}
 
-		if(!ps.miscFingerprintsMatch(3, 7)) {
+		if(!ctx.isFingerprintMatch(3, 7)) {
 			System.out.println("response to 2^32 different than to 12345");
-			ps.miscResponseChecks(7);
+			ctx.responseChecks(7);
 		}
 
-		scheduleNext(ps);
+		end.endChecks(ctx.getPathState());
 	}
 	
-	private void scheduleNext(PathState ps) {
-		ps.resetMiscData();
-		end.endChecks(ps);
-	}
 
 }

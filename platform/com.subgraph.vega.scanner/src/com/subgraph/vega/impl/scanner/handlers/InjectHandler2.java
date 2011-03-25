@@ -5,8 +5,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class InjectHandler2 implements ICrawlerResponseProcessor {
 	private final ICrawlerResponseProcessor injectHandler3 = new InjectHandler3();
@@ -14,42 +14,41 @@ public class InjectHandler2 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
-		
-		if(ps.getInjectSkipFlag(1))
+		final IModuleContext ctx = (IModuleContext) argument;
+
+		if(ctx.hasModuleFailed())
 			return;
 		
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during backend xml injection attacks");
-			ps.setInjectSkipFlag(1);
-			scheduleNext(ps);
+			ctx.error(request, response, "during backend xml injection attacks");
+			ctx.setModuleFailed();
+			scheduleNext(ctx.getPathState());
 			return;
 		}
-		ps.addMiscRequestResponse(data.getFlag(), request, response);
-		
-		if(ps.incrementMiscCount() < 2)
+		ctx.addRequestResponse(ctx.getCurrentIndex(), request, response);
+		if(ctx.incrementResponseCount() < 2)
 			return;
 		
-		if(!ps.miscFingerprintsMatch(0, 1)) {
+		if(!ctx.isFingerprintMatch(0, 1)) {
 			// XXX
-			System.out.println("responses for <vega></vega> and </vega><vega> look different for "+ ps.getPath().getFullPath());
-			ps.miscResponseChecks(1);
+			System.out.println("responses for <vega></vega> and </vega><vega> look different for "+ ctx.getPathState().getPath().getFullPath());
+			ctx.responseChecks(1);
 		}
 		
-		scheduleNext(ps);
+		scheduleNext(ctx.getPathState());
 		
 	}
 	
-	private void scheduleNext(PathState ps) {
-		ps.resetMiscData();
+	private void scheduleNext(IPathState ps) {
+		final IModuleContext ctx = ps.createModuleContext();
+		
 		final String[] injectme = {
 				"`true`", "`false`", "`uname`", 
 				"\"`true`\"", "\"`false`\"", "\"`uname`\"",
 				"'true'", "'false'", "'uname'" 
 		};
 		
-		ps.submitMultipleAlteredRequests(injectHandler3, injectme, true);
+		ctx.submitMultipleAlteredRequests(injectHandler3, injectme, true);
 		
 	}
 
