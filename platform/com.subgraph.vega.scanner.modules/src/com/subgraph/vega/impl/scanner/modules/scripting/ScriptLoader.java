@@ -105,7 +105,7 @@ public class ScriptLoader {
 		if(validator == null)
 			return null;
 		
-		return new ScriptedModule(scriptFile, validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
+		return new ScriptedModule(scriptFile, validator.getCategoryName(), validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
 	}
 	
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {

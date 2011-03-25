@@ -37,7 +37,7 @@ public abstract class AbstractScriptModule implements IScannerModule, IEnableabl
 	}
 	
 	public String getModuleCategoryName() {
-		return module.getModuleType().getVerboseName();
+		return module.getCategoryName();
 	}
 
 	public ModuleScriptType getModuleType() {
