@@ -1,6 +1,8 @@
-package com.subgraph.vega.impl.scanner.state;
+package com.subgraph.vega.internal.http.requests;
 
-public class PageFingerprint {
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
+
+public class PageFingerprint implements IPageFingerprint {
 	
 	public static PageFingerprint generateFromCodeAndString(int code, String body) {
 		final PageFingerprint fp = new PageFingerprint();
@@ -51,21 +53,25 @@ public class PageFingerprint {
 		return fpCode;
 	}
 	
+	public int[] getData() {
+		return fpData;
+	}
+	
 	public void addWordLength(int length) {
 		if(length <= FP_MAX_LEN) {
 			fpData[length % FP_SIZE]++;
 		}
 	}
 	
-	public boolean isSame(PageFingerprint other) {
-		if(other == null || other.fpCode != fpCode)
+	public boolean isSame(IPageFingerprint other) {
+		if(other == null || other.getCode() != fpCode)
 			return false;
 		int totalDiff = 0;
 		int totalScale = 0;
 		int bucketFail = 0;
 		for(int i = 0; i < FP_SIZE; i++) {
-			int diff = fpData[i] - other.fpData[i];
-			int scale = fpData[i] + other.fpData[i];
+			int diff = fpData[i] - other.getData()[i];
+			int scale = fpData[i] + other.getData()[i];
 			if( (Math.abs(diff) > (1.0d + (scale * FP_T_REL / 100.0))) || (Math.abs(diff) > FP_T_ABS)) {
 				bucketFail++;
 				if(bucketFail > FP_B_FAIL)
@@ -93,6 +99,8 @@ public class PageFingerprint {
 	
 	@Override
 	public boolean equals(Object other) {
+		throw new RuntimeException();
+		/* XXX this is temporary to make sure nobody is calling equals() instead of isSame() by mistake
 		if(this == other) {
 			return true;
 		} else if(other instanceof PageFingerprint) {
@@ -101,6 +109,7 @@ public class PageFingerprint {
 		} else {
 			return false;
 		}
+		*/
 	}
 	
 	@Override
