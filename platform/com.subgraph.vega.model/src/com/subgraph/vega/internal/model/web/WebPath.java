@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.model.web;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,7 +77,13 @@ public class WebPath extends WebEntity implements IWebPath {
 	
 	private URI generateURI() {
 		final URI hostUri = mountPoint.getWebHost().getUri();
-		return hostUri.resolve(getFullPath());
+		try {
+			return new URI(hostUri.getScheme(), hostUri.getAuthority(), getFullPath(), null);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public String getFullPath() {
@@ -123,7 +130,7 @@ public class WebPath extends WebEntity implements IWebPath {
 		} else if(other instanceof WebPath) {
 			WebPath that = (WebPath) other;
 			return this.getMountPoint().getWebHost().equals(that.getMountPoint().getWebHost()) &&
-				this.getUri().getPath().equals(that.getUri().getPath());
+				this.getFullPath().equals(that.getFullPath());
 		} else {
 			return false;
 		}
@@ -131,7 +138,7 @@ public class WebPath extends WebEntity implements IWebPath {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.getMountPoint().getWebHost(), this.getUri().getPath());
+		return Objects.hashCode(this.getMountPoint().getWebHost(), this.getFullPath());
 	}
 	
 	@Override

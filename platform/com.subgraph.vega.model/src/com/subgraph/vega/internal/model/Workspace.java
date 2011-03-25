@@ -159,16 +159,18 @@ public class Workspace implements IWorkspace {
 	private IModelProperties getProperties() {
 		if(workspaceStatus != null)
 			return workspaceStatus.getProperties();
-		List<WorkspaceStatus> result = database.query(WorkspaceStatus.class);
-		if(result.size() == 0) {
-			workspaceStatus = new WorkspaceStatus();
-			database.store(workspaceStatus);
-			return workspaceStatus.getProperties();
-		} else if(result.size() == 1) {
-			workspaceStatus =  result.get(0);
-			return workspaceStatus.getProperties();
-		} else {
-			throw new IllegalStateException("Database corrupted, multiple WorkspaceStatus instances");
+		synchronized(database) {
+			List<WorkspaceStatus> result = database.query(WorkspaceStatus.class);
+			if(result.size() == 0) {
+				workspaceStatus = new WorkspaceStatus();
+				database.store(workspaceStatus);
+				return workspaceStatus.getProperties();
+			} else if(result.size() == 1) {
+				workspaceStatus =  result.get(0);
+				return workspaceStatus.getProperties();
+			} else {
+				throw new IllegalStateException("Database corrupted, multiple WorkspaceStatus instances");
+			}
 		}
 	}
 
