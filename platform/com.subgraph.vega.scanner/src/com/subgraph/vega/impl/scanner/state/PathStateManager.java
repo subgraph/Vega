@@ -9,22 +9,27 @@ import java.util.logging.Logger;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.impl.scanner.urls.ContentAnalyzer;
+import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.urls.PageAnalyzer;
 import com.subgraph.vega.impl.scanner.urls.PivotAnalyzer;
 
 public class PathStateManager {
 	private final Logger logger = Logger.getLogger("scanner");
+	private final IScannerModuleRegistry moduleRegistry;
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
 	private final PageAnalyzer pageAnalyzer;
-	private final ContentAnalyzer contentAnalyzer;
+	private final IContentAnalyzer contentAnalyzer;
 	private final PivotAnalyzer pivotAnalyzer;
+	private boolean logAllRequests = true;
 	
 	private final Map<IWebPath, PathState> modelToScanState = new HashMap<IWebPath, PathState>();
 	
@@ -35,7 +40,8 @@ public class PathStateManager {
 
 	private final int scanId;
 
-	public PathStateManager(IWorkspace workspace, IWebCrawler crawler, PageAnalyzer pageAnalyzer, ContentAnalyzer contentAnalyzer, PivotAnalyzer pivotAnalyzer) {
+	public PathStateManager(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, PageAnalyzer pageAnalyzer, IContentAnalyzer contentAnalyzer, PivotAnalyzer pivotAnalyzer) {
+		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.pageAnalyzer = pageAnalyzer;
@@ -44,6 +50,14 @@ public class PathStateManager {
 		
 		final Random r = new Random();
 		scanId = r.nextInt(999999) + 1; 
+	}
+	
+	public IScannerModuleRegistry getModuleRegistry() {
+		return moduleRegistry;
+	}
+	
+	public boolean requestLoggingEnabled() {
+		return logAllRequests;
 	}
 	
 	public boolean hasSeenPath(IWebPath path) {
@@ -91,15 +105,15 @@ public class PathStateManager {
 		return crawler;
 	}
 	
-	public void analyzePage(HttpUriRequest request, IHttpResponse response, PathState pathState) {
+	public void analyzePage(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
 		pageAnalyzer.analyzePage(request, response, pathState);
 	}
 	
-	public void analyzeContent(HttpUriRequest request, IHttpResponse response, PathState pathState) {
-		contentAnalyzer.analyze(request, response, pathState);
+	public void analyzeContent(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
+		contentAnalyzer.processResponse(response, false, false);
 	}
 	
-	public void analyzePivot(HttpUriRequest request, IHttpResponse response, PathState pathState) {
+	public void analyzePivot(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
 		pivotAnalyzer.analyze(request, response, pathState);
 	}
 	
@@ -131,14 +145,14 @@ public class PathStateManager {
 		}
 	}
 	
-	public IScanAlert createAlert(String type) {
-		return workspace.getScanAlertModel().createAlert(type);
+	public IRequestLog getRequestLog() {
+		return workspace.getRequestLog();
 	}
-	
-	public void addAlert(IScanAlert alert) {
-		workspace.getScanAlertModel().addAlert(alert);
+
+	public IScanAlertModel getScanAlertModel() {
+		return workspace.getScanAlertModel();
 	}
-	
+
 	public void debug(String message) {
 		logger.info(message);
 	}

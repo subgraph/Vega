@@ -10,6 +10,7 @@ import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 public class ScriptedModule {
 	private final ScriptFile scriptFile;
 	
+	private final String categoryName;
 	private final String moduleName;
 	private final ModuleScriptType moduleType;
 	private final Function runFunction;
@@ -18,8 +19,9 @@ public class ScriptedModule {
 	
 	private boolean isEnabled;
 	
-	public ScriptedModule(ScriptFile scriptFile, String moduleName, ModuleScriptType moduleType, Function moduleEntry, boolean isDisabled) {
+	public ScriptedModule(ScriptFile scriptFile, String categoryName, String moduleName, ModuleScriptType moduleType, Function moduleEntry, boolean isDisabled) {
 		this.scriptFile = scriptFile;
+		this.categoryName = categoryName;
 		this.moduleName = moduleName;
 		this.moduleType = moduleType;
 		this.runFunction = moduleEntry;
@@ -36,8 +38,12 @@ public class ScriptedModule {
 	}
 	
 	public void runModule(Context cx, Scriptable instanceScope, String target) {
+		runModule(cx, instanceScope, new Object[0], target);
+	}
+
+	public void runModule(Context cx, Scriptable instanceScope, Object[] arguments, String target) {
 		final long startTS = System.currentTimeMillis();
-		runFunction.call(cx, instanceScope, instanceScope, new Object[0]);
+		runFunction.call(cx, instanceScope, instanceScope, arguments);
 		final long endTS = System.currentTimeMillis();
 		runningTime.addTimestamp((int) (endTS - startTS), target);
 	}
@@ -46,6 +52,10 @@ public class ScriptedModule {
 		return scriptFile;
 	}
 	
+	public String getCategoryName() {
+		return categoryName;
+	}
+
 	public String getModuleName() {
 		return moduleName;
 	}

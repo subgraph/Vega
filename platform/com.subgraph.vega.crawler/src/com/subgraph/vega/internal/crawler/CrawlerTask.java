@@ -1,8 +1,5 @@
 package com.subgraph.vega.internal.crawler;
 
-import java.net.URI;
-
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
@@ -12,13 +9,6 @@ public class CrawlerTask {
 	
 	private static int outstandingTasks = 0;
 	private static Object taskCountLock = new Object();
-	
-	static CrawlerTask createGetTask(URI uri, ICrawlerResponseProcessor responseProcessor, Object argument) {
-		synchronized (taskCountLock) {
-			outstandingTasks++;
-		}
-		return new CrawlerTask(new HttpGet(uri), responseProcessor, argument, false);
-	}
 	
 	static CrawlerTask createTask(HttpUriRequest request, ICrawlerResponseProcessor responseProcessor, Object argument) {
 		synchronized(taskCountLock) {

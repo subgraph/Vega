@@ -5,8 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
 
 public class InjectHandler4 implements ICrawlerResponseProcessor {
 
@@ -14,17 +13,16 @@ public class InjectHandler4 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
+		final IModuleContext ctx = (IModuleContext) argument;
 		
-		ps.contentChecks(request, response);
+		ctx.contentChecks(request, response);
 		
-		if(data.getFlag() > 0)
+		if(ctx.getCurrentIndex() > 0)
 			return;
-		
-		ps.resetMiscData();
+
+		final IModuleContext newCtx = ctx.getPathState().createModuleContext();
 		String injectme[] = { "http://vega.invalid/;?", "//vega.invalid/;?",  "vega://invalid/;?"};
-		ps.submitMultipleAlteredRequests(injectHandler5, injectme);
+		newCtx.submitMultipleAlteredRequests(injectHandler5, injectme);
 	}
 
 }

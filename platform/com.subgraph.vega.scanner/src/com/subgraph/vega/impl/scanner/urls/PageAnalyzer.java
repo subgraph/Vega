@@ -9,7 +9,7 @@ import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class PageAnalyzer {
 	private final UriFilter uriFilter;
@@ -23,8 +23,8 @@ public class PageAnalyzer {
 		this.uriParser = uriParser;
 	}
 	
-	public void analyzePage(HttpUriRequest request, IHttpResponse response, PathState pathState) {
-		IContentAnalyzerResult result = contentAnalyzer.processResponse(response, false);
+	public void analyzePage(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
+		IContentAnalyzerResult result = contentAnalyzer.processResponse(response, false, true);
 		filterAndQueueURIs(result.getDiscoveredURIs());
 		if(isFormParsingEnabled) {
 			final IHTMLParseResult html = response.getParsedHTML();

@@ -8,16 +8,17 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
 
-public class PathState {
-	
-	private final static int MAX_MISC_ENTRIES = 10;
-	
+public class PathState implements IPathState {
+		
 	private final static ICrawlerResponseProcessor fetchFileProcessor = new FileProcessor();
 	private final static ICrawlerResponseProcessor fetchDirProcessor = new DirectoryProcessor();
 	private final static ICrawlerResponseProcessor fetchUnknownProcessor = new UnknownProcessor();
@@ -30,8 +31,8 @@ public class PathState {
 	private final PathState404 state404;
 	private final boolean isParametric;
 	private IHttpResponse response;
-	private PageFingerprint pathFingerprint;
-	private PageFingerprint unknownFingerprint;
+	private IPageFingerprint pathFingerprint;
+	private IPageFingerprint unknownFingerprint;
 	
 	private boolean isDone;
 	
@@ -39,15 +40,8 @@ public class PathState {
 	private boolean isPageMissing;
 	private boolean isBogusParameter;
 	private boolean responseVaries;
-	private int miscCount;
-	private int ognlCount;
 	private boolean lockedFlag;
 	private boolean initialChecksFinished;
-	private boolean injectionSkip[] = new boolean[15];
-	private int injectionSkipAdd = 0;
-	private HttpUriRequest[] miscRequests = new HttpUriRequest[MAX_MISC_ENTRIES];
-	private IHttpResponse[] miscResponses = new IHttpResponse[MAX_MISC_ENTRIES];
-	private PageFingerprint[] miscFingerprints = new PageFingerprint[MAX_MISC_ENTRIES];
 	
 	public PathState(PathStateManager state, PathState parentState, IWebPath path, List<NameValuePair> parameters, int index) {
 		this.scanState = state;
@@ -73,9 +67,13 @@ public class PathState {
 		return parentState;
 	}
 	
+	public IScannerModuleRegistry getModuleRegistry() {
+		return scanState.getModuleRegistry();
+	}
+
 	public void addChildState(PathState state) {
 		synchronized(childStates) {
-			for(PathState cs: childStates) {
+			for(IPathState cs: childStates) {
 				if(cs.getPath().equals(state))
 					return;
 			}
@@ -128,66 +126,29 @@ public class PathState {
 		return path;
 	}
 	
-	public synchronized void incrementOgnlCount() {
-		ognlCount += 1;
-	}
-	
-	public synchronized int getOgnlCount() {
-		return ognlCount;
-	}
-	
-	public void setUnknownFingerprint(PageFingerprint fp) {
+	@Override
+	public void setUnknownFingerprint(IPageFingerprint fp) {
 		unknownFingerprint = fp;
 	}
 	
-	public PageFingerprint getUnknownFingerprint() {
+	@Override
+	public IPageFingerprint getUnknownFingerprint() {
 		return unknownFingerprint;
 	}
+		
 	public void submitRequest(ICrawlerResponseProcessor callback) {
-		submitRequest(callback, 0);
-	}
-	
-	public void submitRequest(ICrawlerResponseProcessor callback, int flag) {
 		final HttpUriRequest req = requestBuilder.createGetRequest();
-		if(req != null)
-			submitRequest(req, callback, flag);
-	}
-	
-	public void submitAlteredRequest(ICrawlerResponseProcessor callback, String value) {
-		submitAlteredRequest(callback, value, false, 0);
-	}
-	
-	public void submitAlteredRequest(ICrawlerResponseProcessor callback, String value, int flag) {
-		submitAlteredRequest(callback, value, false, flag);
-	}
-	
-	public void submitAlteredRequest(ICrawlerResponseProcessor callback, String value, boolean append, int flag) {
-		final HttpUriRequest req = requestBuilder.createAlteredRequest(value, append);
-		if(req != null)
-			submitRequest(req, callback, flag);
-	}
-	
-	public void submitAlteredParameterNameRequest(ICrawlerResponseProcessor callback, String name, int flag) {
-		 final HttpUriRequest req = requestBuilder.createAlteredParameterNameRequest(name);
-		 if(req != null)
-			 submitRequest(req, callback, flag);
+		final IModuleContext ctx = createModuleContext();
+		submitRequest(req, callback, ctx);
 	}
 
-	public void submitMultipleAlteredRequests(ICrawlerResponseProcessor callback, String[] injectables) {
-		submitMultipleAlteredRequests(callback, injectables, false);
-	}
-	
-	public void submitMultipleAlteredRequests(ICrawlerResponseProcessor callback, String[] injectables, boolean append) {
-		for(int i = 0; i < injectables.length; i++) 
-			submitAlteredRequest(callback, injectables[i], append, i);		
-	}
-		
 	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback) {
-		submitRequest(request, callback, 0);
+		final IModuleContext ctx = createModuleContext();
+		submitRequest(request, callback, ctx);
 	}
 	
-	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, int flag) {
-		scanState.getCrawler().submitTask(request, callback, new ScanRequestData(this, flag));
+	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IModuleContext ctx) {
+		scanState.getCrawler().submitTask(request, callback, ctx);
 	}
 	
 	
@@ -203,7 +164,7 @@ public class PathState {
 		return state404.hasMaximum404Fingerprints();
 	}
 	
-	public boolean add404Fingerprint(PageFingerprint fp) {
+	public boolean add404Fingerprint(IPageFingerprint fp) {
 		return state404.add404Fingerprint(fp);
 	}
 	
@@ -215,14 +176,14 @@ public class PathState {
 		return state404.has404Fingerprints();
 	}
 	
-	public PathState get404Parent() {
+	public IPathState get404Parent() {
 		return state404.get404Parent();
 	}
 	
-	public boolean has404FingerprintMatching(PageFingerprint fp) {
+	public boolean has404FingerprintMatching(IPageFingerprint fp) {
 		return state404.has404FingerprintMatching(fp);
 	}
-	public boolean hasParent404Fingerprint(PageFingerprint fp) {
+	public boolean hasParent404Fingerprint(IPageFingerprint fp) {
 		return state404.hasParent404Fingerprint(fp);
 	}
 	
@@ -256,7 +217,7 @@ public class PathState {
 	public void setResponse(IHttpResponse response) {
 		this.response = response;
 		if(response != null) {
-			this.pathFingerprint = PageFingerprint.generateFromCodeAndString(response.getResponseCode(), response.getBodyAsString());
+			this.pathFingerprint = response.getPageFingerprint();
 			debug("Set fp for "+ this + " to "+ pathFingerprint);
 		}
 		else
@@ -282,11 +243,6 @@ public class PathState {
 	public boolean getResponseVaries() {
 		return responseVaries;
 	}
-	public void error(HttpUriRequest request, IHttpResponse response, String message) {
-		// XXX
-		System.out.println("ERROR: "+ message);
-		
-	}
 	
 	public void debug(String msg) {
 		scanState.debug("["+path.getUri()+"] "+ msg);
@@ -300,117 +256,17 @@ public class PathState {
 		scanState.analyzePage(request, response, this);
 	}
 	
-	public synchronized int incrementMiscCount() {
-		final int n = miscCount + 1;
-		miscCount = n;
-		return n;
-	}
-	public void setInjectSkipFlag(int index) {
-		index += injectionSkipAdd;
-		if(index >= 0 && index < injectionSkip.length)
-			injectionSkip[index] = true;
-	}
-	
-	public synchronized void setInjectSkipAdd(int n) {
-		injectionSkipAdd = n;
-	}
-	
-	public synchronized boolean getInjectSkipFlag(int index) {
-		index += injectionSkipAdd;
-		if(index >= 0 && index < injectionSkip.length)
-			return injectionSkip[index];
-		else
-			return false;
-	}
-	
-	private boolean isValidMiscIndex(int index) {
-		return index >= 0 && index < MAX_MISC_ENTRIES;
-	}
-	
-	public void addMiscRequestResponse(int index, HttpUriRequest request, IHttpResponse response) {
-		if(isValidMiscIndex(index)) {
-			synchronized(miscRequests) {
-				miscRequests[index] = request;
-				miscResponses[index] = response;
-				miscFingerprints[index] = PageFingerprint.generateFromCodeAndString(response.getResponseCode(), response.getBodyAsString());
-			}
-		}
-	}
-	
-	public HttpUriRequest getMiscRequest(int index) {
-		if(isValidMiscIndex(index))
-			synchronized(miscRequests) {
-				return miscRequests[index];
-			}
-		else
-			return null;
-	}
-	
-	public IHttpResponse getMiscResponse(int index) {
-		if(isValidMiscIndex(index))
-			synchronized(miscRequests) {
-				return miscResponses[index];
-			}
-		else
-			return null;
-	}
-	
-	public PageFingerprint getMiscFingerprint(int index) {
-		if(isValidMiscIndex(index))
-			synchronized(miscRequests) {
-				return miscFingerprints[index];
-			}
-		else
-			return null;			                    
-	}
-	
-	public boolean miscFingerprintsMatch(int i1, int i2) {
-		PageFingerprint fp1 = getMiscFingerprint(i1);
-		PageFingerprint fp2 = getMiscFingerprint(i2);
-		if(fp1 == null || fp2 == null)
-			return false;
-		
-		return fp1.isSame(fp2);
-	}
-	
-	public boolean miscFingerprintMatchesPath(int i) {
-		PageFingerprint fp = getMiscFingerprint(i);
-		if(fp == null) {
-			debug("No fingerprint for index "+ i + " on " + path.getUri());
-			return false;
-		}
-		return fp.isSame(pathFingerprint);
-	}
-	
-	public PageFingerprint getPathFingerprint() {
+	@Override
+	public IPageFingerprint getPathFingerprint() {
 		return pathFingerprint;
 	}
 	
-	public boolean matchesPathFingerprint(PageFingerprint fp) {
+	public boolean matchesPathFingerprint(IPageFingerprint fp) {
 		if(pathFingerprint == null) {
 			debug("Whoops no path fingerprint for "+ path.getUri() + " : " + this);
 			return false;
 		}
 		return pathFingerprint.isSame(fp);
-	}
-	
-	public int getMiscResponseCode(int i) {
-		final IHttpResponse response = getMiscResponse(i);
-		if(response == null)
-			return 0;
-		else
-			return response.getResponseCode();
-	}
-	
-	public void resetMiscData() {
-		synchronized(miscRequests) {
-			for(int i = 0; i < miscRequests.length; i++) {
-				miscRequests[i] = null;
-				miscResponses[i] = null;
-				miscFingerprints[i] = null;
-			}
-			miscCount = 0;
-		}
 	}
 	
 	public int allocateXssId() {
@@ -436,25 +292,6 @@ public class PathState {
 		return requestBuilder.getFuzzableParameter();
 	}
 	
-	public void miscResponseChecks(int index) {
-		if(isValidMiscIndex(index))
-			responseChecks(getMiscRequest(index), getMiscResponse(index));
-	}
-	
-	public void pivotChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePivot(request, response, this);
-		scanState.analyzeContent(request, response, this);
-		scanState.analyzePage(request, response, this);
-	}
-	public void responseChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, this);
-		scanState.analyzePage(request, response, this);
-	}
-	
-	public void contentChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, this);
-	}
-	
 	public void unlockChildren() {
 		debug("Unlocking "+ this);
 		synchronized(childStates) {
@@ -467,20 +304,20 @@ public class PathState {
 					switch(c.getPath().getPathType()) {
 					case PATH_FILE:
 						if(r != null) 
-							fetchFileProcessor.processResponse(scanState.getCrawler(), request, r, new ScanRequestData(c, 0));
+							fetchFileProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
 						else
 							c.submitRequest(request, fetchFileProcessor);
 						break;
 					case PATH_DIRECTORY:
 						if(r != null) 
-							fetchDirProcessor.processResponse(scanState.getCrawler(), request, r, new ScanRequestData(c, 0));
+							fetchDirProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
 						else
 							c.submitRequest(request, fetchDirProcessor);
 						break;
 					case PATH_UNKNOWN:
 						
 						if(r != null) 
-							fetchUnknownProcessor.processResponse(scanState.getCrawler(), request, r, new ScanRequestData(c, 0));
+							fetchUnknownProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
 						else
 							c.submitRequest(request, fetchUnknownProcessor);
 						break;
@@ -493,5 +330,10 @@ public class PathState {
 	
 	public String toString() {
 		return "STATE: ["+ path.toString() + "]";
+	}
+	
+	@Override
+	public IModuleContext createModuleContext() {
+		return new ModuleContext(scanState, requestBuilder, this);
 	}
 }

@@ -5,84 +5,83 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PageFingerprint;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class Dir404Processor implements ICrawlerResponseProcessor {
-	private static final String PAGE_DOES_NOT_EXIST = "/nosuchpage123";
+	private static final String PAGE_DOES_NOT_EXIST = "nosuchpage123";
 
 	//private final DirParentCallback dirParentCallback = new DirParentCallback();
 	private final InjectionChecks injection = new InjectionChecks();
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
-		
-		if(ps.getSkip404()) {
-			scheduleNext(ps, data.getFlag() == 0);
+		final IModuleContext ctx = (IModuleContext) argument;
+		final IPathState ps = ctx.getPathState();
+		if(ctx.hasModuleFailed()) {
+			scheduleNext(ctx, ps, ctx.getCurrentIndex() == 0);
 			return;
 		}
 		
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during 404 response checks");
-			scheduleNext(ps, data.getFlag() == 0);
+			ctx.error(request, response, "during 404 response checks");
+			scheduleNext(ctx, ps, ctx.getCurrentIndex() == 0);
 			return;
 		}
 		
 		
-		final PageFingerprint fp = PageFingerprint.generateFromCodeAndString(response.getResponseCode(), response.getBodyAsString());
+		final IPageFingerprint fp = response.getPageFingerprint();
 		
 		
-		if(data.getFlag() == 0 && !ps.isSureDirectory() && !ps.isRootPath() && (ps.getResponse() != null)) {
+		
+		if(ctx.getCurrentIndex() == 0 && !ps.isSureDirectory() && !ps.isRootPath() && (ps.getResponse() != null)) {
 			if(ps.getParentState().matchesPathFingerprint(fp)) {
-				ps.debug("First 404 probe identical to parent page");
-				scheduleNext(ps, data.getFlag() == 0);
+				ctx.debug("First 404 probe identical to parent page");
+				scheduleNext(ctx, ps, ctx.getCurrentIndex() == 0);
 				return;
 			}
-		} else if (data.getFlag() == 0) {
-			ps.debug("First 404 probe differs from parent");
+		} else if (ctx.getCurrentIndex() == 0) {
+			ctx.debug("First 404 probe differs from parent");
 		}
 		
 		if(!ps.add404Fingerprint(fp)) {
 			System.out.println("problem too many 404 signatures found");
-			ps.setSkip404();
-			scheduleNext(ps, data.getFlag() == 0);
+			ctx.setModuleFailed();
+			scheduleNext(ctx, ps, ctx.getCurrentIndex() == 0);
 			return;
 		}
 		
-		
-		scheduleNext(ps, data.getFlag() == 0);
+		scheduleNext(ctx, ps, ctx.getCurrentIndex() == 0);
 	}
 
-	public void scheduleNext(PathState ps, boolean first) {
+	public void scheduleNext(IModuleContext ctx, IPathState ps, boolean first) {
 		if(first) {
 			if(!ps.has404Fingerprints()) {
-				ps.debug("First probe failed to yield a signature");
+				ctx.debug("First probe failed to yield a signature");
 			
 			} else {
 			
-				ps.pivotChecks(ps.createRequest(), ps.getResponse());
+				//ps.pivotChecks(ps.createRequest(), ps.getResponse());
 
 				// 	XXX check case
 				// XXX add extension probes
 			
 				if(!ps.isParametric()) {
-					ps.submitAlteredRequest(this, "lpt9", 1);
-					ps.submitAlteredRequest(this, "~"+PAGE_DOES_NOT_EXIST, 1);
-					ps.submitAlteredRequest(this, PAGE_DOES_NOT_EXIST, 1);
+					ctx.submitAlteredRequest(this, "lpt9", 1);
+					ctx.submitAlteredRequest(this, "~"+PAGE_DOES_NOT_EXIST, 1);
+					ctx.submitAlteredRequest(this, PAGE_DOES_NOT_EXIST, 1);
 				}
 			}
 		}
+		int nn = ctx.incrementResponseCount();
 		
-		if(ps.incrementMiscCount() < 4)
+		if(nn < 4)
 			return;
 		
-		
-		if(!ps.has404Fingerprints() || ps.getSkip404() ) {
+		if(!ps.has404Fingerprints() || ctx.hasModuleFailed()) {
 			final int code = (ps.getResponse() == null) ? (0) : (ps.getResponse().getResponseCode());
-			ps.debug("404 detection failed");
+			ctx.debug("404 detection failed");
 			if(code == 404) {
 				ps.setPageMissing();
 			} else if (code > 400) {
@@ -103,11 +102,11 @@ public class Dir404Processor implements ICrawlerResponseProcessor {
 			if(ps.getParentState() == null) {
 				// XXX PIVOT CHECKS
 			} else {
-				PageFingerprint pageFP = ps.getPathFingerprint();
-				PageFingerprint parentFP = ps.getParentState().getPathFingerprint();
+				IPageFingerprint pageFP = ps.getPathFingerprint();
+				IPageFingerprint parentFP = ps.getParentState().getPathFingerprint();
 				if(pageFP != null && !pageFP.isSame(parentFP)) {
 					if(!ps.hasParent404Fingerprint(pageFP)) {
-						ps.pivotChecks(ps.createRequest(), ps.getResponse());
+						ctx.pivotChecks(ps.createRequest(), ps.getResponse());
 					}
 				}
 			}
@@ -119,7 +118,6 @@ public class Dir404Processor implements ICrawlerResponseProcessor {
 		//ps.submitRequest(dirParentCallback);
 		
 		// XXX do replace second last segment test
-		ps.resetMiscData();
 		// XXX move unlock child if you move injection init
 		ps.unlockChildren();
 		injection.intitialize(ps);

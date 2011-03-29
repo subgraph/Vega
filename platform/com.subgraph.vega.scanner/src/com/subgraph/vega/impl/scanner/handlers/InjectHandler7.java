@@ -5,8 +5,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class InjectHandler7 implements ICrawlerResponseProcessor {
 
@@ -15,47 +15,48 @@ public class InjectHandler7 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
 		
-		if(ps.getInjectSkipFlag(3))
+		final IModuleContext ctx = (IModuleContext) argument;
+
+		if(ctx.hasModuleFailed())
 			return;
+
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during SQL injection attacks");
-			ps.setInjectSkipFlag(3);
-			scheduleNext(ps);
-			return;
-		}
-		
-		ps.addMiscRequestResponse(data.getFlag(), request, response);
-		if(ps.incrementMiscCount() < 8)
-			return;
-		
-		if(ps.miscFingerprintsMatch(0, 1) && !ps.miscFingerprintsMatch(0, 2)) {
-			System.out.println("response suggests arithmetic evaluation on server side (type 1)");
-			ps.miscResponseChecks(0);
-			ps.miscResponseChecks(2);
+			ctx.error(request, response, "during SQL injection attacks");
+			ctx.setModuleFailed();
 			
+			scheduleNext(ctx.getPathState());
+			return;
 		}
 		
-		if(ps.miscFingerprintsMatch(1, 6) && !ps.miscFingerprintsMatch(6, 7)) {
+		ctx.addRequestResponse(ctx.getCurrentIndex(), request, response);
+		if(ctx.incrementResponseCount() < 8)
+			return;
+		
+		if(ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(0, 2)) {
+			System.out.println("response suggests arithmetic evaluation on server side (type 1)");
+			ctx.responseChecks(0);
+			ctx.responseChecks(2);
+		}
+		
+		if(ctx.isFingerprintMatch(1, 6) && !ctx.isFingerprintMatch(6, 7)) {
 			System.out.println("response suggests arithmetic evaluation on server side (type 2)");
-			ps.miscResponseChecks(6);
-			ps.miscResponseChecks(7);
+			ctx.responseChecks(6);
+			ctx.responseChecks(7);
 		}
 		
-		if(!ps.miscFingerprintsMatch(3, 4) && !ps.miscFingerprintsMatch(3, 5)) {
+		if(!ctx.isFingerprintMatch(3, 4) && !ctx.isFingerprintMatch(3, 5)) {
 			System.out.println("response to '\" different than to \\'\\\"");
-			ps.miscResponseChecks(3);
-			ps.miscResponseChecks(4);
+			ctx.responseChecks(3);
+			ctx.responseChecks(4);
 		}
 		
-		scheduleNext(ps);
+		scheduleNext(ctx.getPathState());
 	}
 	
-	private void scheduleNext(PathState ps) {
-		ps.resetMiscData();
-		ps.submitMultipleAlteredRequests(injectHandler8, new String[] { "vega%dn%dn%dn%dn%dn%dn%dn%dn", "vega%nd%nd%nd%nd%nd%nd%nd%nd"});
+	private void scheduleNext(IPathState ps) {
+		final IModuleContext ctx = ps.createModuleContext();
+		ctx.submitMultipleAlteredRequests(injectHandler8, new String[] { "vega%dn%dn%dn%dn%dn%dn%dn%dn", "vega%nd%nd%nd%nd%nd%nd%nd%nd"});
 	}
 
 }

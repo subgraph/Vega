@@ -52,37 +52,45 @@ public class WebModel implements IWebModel {
 	}
 	
 	synchronized public Collection<IWebHost> getAllWebHosts() {
-		List<IWebHost> hosts =  database.query(IWebHost.class);
-		return hosts;
+		synchronized(database) {
+			List<IWebHost> hosts =  database.query(IWebHost.class);
+			return hosts;
+		}
 	}
 
 	@Override
 	public Collection<IWebHost> getUnscannedHosts() {
-		final List<IWebHost> hosts =  database.query(new Predicate<IWebHost>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(IWebHost host) {
-				return host.isScanned() == false;
-			}			
-		});
-		return hosts;
+		synchronized(database) {
+			final List<IWebHost> hosts =  database.query(new Predicate<IWebHost>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(IWebHost host) {
+					return host.isScanned() == false;
+				}			
+			});
+			return hosts;
+		}
 	}
 
 	@Override
 	public Collection<IWebPath> getUnscannedPaths() {
-		final List<IWebPath> paths = database.query(new Predicate<IWebPath>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(IWebPath path) {
-				return path.isScanned() == false;
-			}			
-		});
-		return paths;
+		synchronized(database) {
+			final List<IWebPath> paths = database.query(new Predicate<IWebPath>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(IWebPath path) {
+					return path.isScanned() == false;
+				}			
+			});
+			return paths;
+		}
 	}
 
 	@Override
 	public Collection<IWebPath> getAllPaths() {
-		return database.query(IWebPath.class);
+		synchronized(database) {
+			return database.query(IWebPath.class);
+		}
 	}
 
 	@Override
@@ -116,11 +124,13 @@ public class WebModel implements IWebModel {
 
 	@Override
 	synchronized public WebHost getWebHostByHttpHost(HttpHost host) {
-		for(WebHost wh: database.query(WebHost.class)) {
-			if(wh.getHttpHost().equals(host))
-				return wh;
-		}		
-		return null;
+		synchronized(database) {
+			for(WebHost wh: database.query(WebHost.class)) {
+				if(wh.getHttpHost().equals(host))
+					return wh;
+			}		
+			return null;
+		}
 	}
 	
 	@Override

@@ -6,8 +6,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
 
 public class InjectHandler5 implements ICrawlerResponseProcessor {
 
@@ -16,9 +15,7 @@ public class InjectHandler5 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
+		final IModuleContext ctx = (IModuleContext) argument;
 		
 		final Header locationHeader = response.getRawResponse().getFirstHeader("Location");
 		final String location = (locationHeader != null) ? (locationHeader.getValue()) : (null);
@@ -47,13 +44,13 @@ public class InjectHandler5 implements ICrawlerResponseProcessor {
 			}
 		}
 		
-		ps.contentChecks(request, response);
+		ctx.contentChecks(request, response);
 		
-		if(data.getFlag() != 2)
+		if(ctx.getCurrentIndex() != 2)
 			return;
 		
-		ps.submitMultipleAlteredRequests(injectHandler6, new String[] {"bogus\nVega-Inject:bogus", "bogus\rVega-Inject:bogus" }, true);
-
+		IModuleContext newCtx = ctx.getPathState().createModuleContext();
+		newCtx.submitMultipleAlteredRequests(injectHandler6, new String[] {"bogus\nVega-Inject:bogus", "bogus\rVega-Inject:bogus" }, true);
 	}
 
 }

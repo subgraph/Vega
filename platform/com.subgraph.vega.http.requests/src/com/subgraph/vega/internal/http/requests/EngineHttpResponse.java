@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IPageFingerprint;
 
 public class EngineHttpResponse implements IHttpResponse {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -24,6 +25,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final IHTMLParser htmlParser;
 	
 	private String cachedString;
+	private PageFingerprint cachedFingerprint;
 	private boolean stringExtractFailed;
 	private boolean htmlParseFailed;
 	private IHTMLParseResult htmlParseResult;
@@ -129,5 +131,12 @@ public class EngineHttpResponse implements IHttpResponse {
 		isMostlyAscii = ((printable * 100) / total) > 90;
 		isMostlyAsciiTestDone = true;
 		return isMostlyAscii;
+	}
+
+	@Override
+	public IPageFingerprint getPageFingerprint() {
+		if(cachedFingerprint == null)
+			cachedFingerprint = PageFingerprint.generateFromCodeAndString(getResponseCode(), getBodyAsString());
+		return cachedFingerprint;
 	}
 }

@@ -15,4 +15,5 @@ public interface IHttpResponse {
 	String getBodyAsString();
 	IHTMLParseResult getParsedHTML();
 	boolean isMostlyAscii();
+	IPageFingerprint getPageFingerprint();
 }

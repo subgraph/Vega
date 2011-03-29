@@ -6,6 +6,7 @@ public enum ModuleScriptType {
 	PER_MOUNTPOINT("per-mountpoint", "Mountpoint Modules"),
 	PER_RESOURCE("per-resource", "Resource Modules"),
 	RESPONSE_PROCESSOR("response-processor", "Response Processing Modules"),
+	BASIC_MODULE("basic", "Basic module"),
 	DOM_TEST("dom-test", "DOM testing Modules");
 
 	private final String name;

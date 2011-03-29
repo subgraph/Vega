@@ -154,7 +154,7 @@ public class MimeDetector {
 			return MimeType.MIME_AV_MP3;
 		else if(c0 == 0x00 && c1 == 0x00 && c2 == 0x01 && (c3 >> 4) == 0x0B)
 			return MimeType.MIME_AV_MPEG;
-		else if(buffer.substring(0, 4).equalsIgnoreCase("OggS"))
+		else if(buffer.length() >= 4 && buffer.substring(0, 4).equalsIgnoreCase("OggS"))
 			return MimeType.MIME_AV_OGG;
 		else if(c0 == 0x28 && buffer.startsWith("RMF",1))
 			return MimeType.MIME_AV_RA;

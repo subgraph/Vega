@@ -10,6 +10,7 @@ public class ModuleValidator {
 	
 	private final Scriptable moduleScope;
 	private String moduleName;
+	private String categoryName;
 	private ModuleScriptType moduleType;
 	private Function runFunction;
 	private boolean isValidated;
@@ -32,7 +33,12 @@ public class ModuleValidator {
 		final Scriptable moduleObject = getModule();
 		moduleName = getStringFromModuleObject(moduleObject, "name");
 		moduleType = getScriptType(moduleObject);
-		runFunction = getGlobalFunction("run");
+		if(hasStringInModuleObject(moduleObject, "category"))
+			categoryName = getStringFromModuleObject(moduleObject, "category");
+		else
+			categoryName = moduleType.getVerboseName();
+		
+		runFunction = getEntryFunction();
 		isDisabled = getFlagFromModuleObject(moduleObject, "disabled");
 		isValidated = true;
 	}
@@ -43,6 +49,12 @@ public class ModuleValidator {
 		return moduleName;
 	}
 	
+	public String getCategoryName() {
+		if(!isValidated)
+			throw new IllegalStateException("Cannot get category name because module is not validated");
+		return categoryName;
+	}
+
 	public boolean isDisabled() {
 		if(!isValidated)
 			throw new IllegalStateException("Cannot get disabled flag because module is not validated");
@@ -69,6 +81,9 @@ public class ModuleValidator {
 	}
 	
 	private ModuleScriptType getScriptType(Scriptable module) throws ModuleValidationException {
+		if(!hasStringInModuleObject(module, "type"))
+			return ModuleScriptType.BASIC_MODULE;
+		
 		final String typeName = getStringFromModuleObject(module, "type");
 		final ModuleScriptType type = ModuleScriptType.lookup(typeName);
 		if(type == null) 
@@ -77,6 +92,11 @@ public class ModuleValidator {
 			return type;
 	}
 	
+	private boolean hasStringInModuleObject(Scriptable module, String name) {
+		final Object ob = module.get(name, moduleScope);
+		return (ob != Scriptable.NOT_FOUND && (ob instanceof String));
+			
+	}
 	private String getStringFromModuleObject(Scriptable module, String name) throws ModuleValidationException {
 		final Object ob = module.get(name, moduleScope);
 		if(ob == Scriptable.NOT_FOUND) 
@@ -91,14 +111,21 @@ public class ModuleValidator {
 		return !(ob == Scriptable.NOT_FOUND);
 	}
 	
+	private Function getEntryFunction() throws ModuleValidationException {
+		Function entry = getGlobalFunction("run");
+		if(entry == null) 
+			entry = getGlobalFunction("initialize");
+		if(entry == null)
+			throw new ModuleValidationException("Could not find global entry function 'run()' or 'initialize()' in module.");
+		return entry;
+	}
+	
 	private Function getGlobalFunction(String name) throws ModuleValidationException {
 		final Object ob = moduleScope.get(name, moduleScope);
 		if(ob == Scriptable.NOT_FOUND)
-			throw new ModuleValidationException("Could not find global function '"+ name +"()'.");
-		if(!(ob instanceof Function)) 
-			throw new ModuleValidationException("Global identifier '" + name +"' is not a function as expected");
+			return null;
+		if(!(ob instanceof Function))
+			throw new ModuleValidationException("Global identifier '"+ name +"' is not a function as expected");
 		return (Function) ob;
 	}
-	
-	
 }

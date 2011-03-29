@@ -5,8 +5,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.ScanRequestData;
-import com.subgraph.vega.impl.scanner.state.PathState;
+import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IPathState;
 
 public class InjectHandler3 implements ICrawlerResponseProcessor {
 
@@ -14,49 +14,50 @@ public class InjectHandler3 implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final ScanRequestData data = (ScanRequestData) argument;
-		final PathState ps = data.getPathState();
 		
-		if(ps.getInjectSkipFlag(2))
+		final IModuleContext ctx = (IModuleContext) argument;
+
+		if(ctx.hasModuleFailed())
 			return;
 		
 		if(response.isFetchFail()) {
-			ps.error(request, response, "during path based shell injection attacks");
-			ps.setInjectSkipFlag(2);
-			scheduleNext(ps);
+			ctx.error(request, response, "during path based shell injection attacks");
+			ctx.setModuleFailed();
+			scheduleNext(ctx.getPathState());
 			return;
 		}
 		
-		ps.addMiscRequestResponse(data.getFlag(), request, response);
+		ctx.addRequestResponse(ctx.getCurrentIndex(), request, response);
 		
-		if(ps.incrementMiscCount() < 9)
+		if(ctx.incrementResponseCount() < 9)
 			return;
-		if(ps.miscFingerprintsMatch(0, 1) && !ps.miscFingerprintsMatch(0, 2)) {
+		final String fullPath = ctx.getPathState().getPath().getFullPath();
+		if(ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(0, 2)) {
 			// XXX
-			System.out.println("1 responses to `true` and `false` are different than `uname` for "+ ps.getPath().getFullPath());
-			ps.miscResponseChecks(2);
+			System.out.println("1 responses to `true` and `false` are different than `uname` for "+ fullPath);
+			ctx.responseChecks(2);
 
 		}
-		if(ps.miscFingerprintsMatch(3, 4) && !ps.miscFingerprintsMatch(3, 5)) {
+		if(ctx.isFingerprintMatch(3, 4) && !ctx.isFingerprintMatch(3, 5)) {
 			// XXX
-			System.out.println("2 responses to `true` and `false` are different than `uname` for "+ ps.getPath().getFullPath());
-			ps.miscResponseChecks(5);
+			System.out.println("2 responses to `true` and `false` are different than `uname` for "+ fullPath);
+			ctx.responseChecks(5);
+			
 			
 		}
-		if(ps.miscFingerprintsMatch(6, 7) && !ps.miscFingerprintsMatch(6, 8)) {
+		if(ctx.isFingerprintMatch(6, 7) && !ctx.isFingerprintMatch(6, 8)) {
 			// XXX
-			System.out.println("3 responses to `true` and `false` are different than `uname` for "+ ps.getPath().getFullPath());
-			
+			System.out.println("3 responses to `true` and `false` are different than `uname` for "+ fullPath);
+			ctx.responseChecks(8);
 
 			
-			ps.miscResponseChecks(8);
 		}
-		scheduleNext(ps);
+		scheduleNext(ctx.getPathState());
 	}
 	
-	private void scheduleNext(PathState ps) {
+	private void scheduleNext(IPathState ps) {
+		final IModuleContext ctx = ps.createModuleContext();
 		
-		ps.resetMiscData();
 		final int xid1 = ps.allocateXssId();
 		final int xid2 = ps.allocateXssId();
 		final String tag1 = ps.createXssTag(xid1);
@@ -67,15 +68,14 @@ public class InjectHandler3 implements ICrawlerResponseProcessor {
 		if(req1 != null) {
 			ps.registerXssRequest(req1, xid1);
 			req1.addHeader("Referer", tag1);
-			ps.submitRequest(req1, injectHandler4, 0);
+			ctx.submitRequest(req1, injectHandler4, 0);
 		}
 		
 		final HttpUriRequest req2 = ps.createAlteredRequest(tag2, false);
 		if(req2 != null) {
 			ps.registerXssRequest(req2, xid2);
-			ps.submitRequest(req2, injectHandler4, 1);
+			ctx.submitRequest(req2, injectHandler4, 1);
 		}
-		
 	}
 
 }

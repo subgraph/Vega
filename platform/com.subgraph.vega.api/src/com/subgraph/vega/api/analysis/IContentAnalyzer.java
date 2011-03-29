@@ -7,7 +7,7 @@ import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public interface IContentAnalyzer {
 	IContentAnalyzerResult processResponse(IHttpResponse response);
-	IContentAnalyzerResult processResponse(IHttpResponse response, boolean addToRequestLog);
+	IContentAnalyzerResult processResponse(IHttpResponse response, boolean addToRequestLog, boolean scrapePage);
 	void setResponseProcessingModules(List<IResponseProcessingModule> modules);
 	void setAddLinksToModel(boolean flag);
 	void setDefaultAddToRequestLog(boolean flag);

@@ -3,6 +3,8 @@ package com.subgraph.vega.internal.analysis;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
@@ -22,6 +24,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
+	private final Executor responseProcessingExecutor = Executors.newCachedThreadPool();
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
@@ -34,7 +37,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 
 	@Override
 	public IContentAnalyzerResult processResponse(IHttpResponse response) {
-		return processResponse(response, defaultAddToRequestLog);
+		return processResponse(response, defaultAddToRequestLog, true);
 	}
 
 	@Override
@@ -43,7 +46,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	}
 
 	@Override
-	public IContentAnalyzerResult processResponse(IHttpResponse response, boolean addToRequestLog) {
+	public IContentAnalyzerResult processResponse(IHttpResponse response, boolean addToRequestLog, boolean scrapePage) {
 		final ContentAnalyzerResult result = new ContentAnalyzerResult();
 		if(response == null) {
 			logger.warning("ContentAnalyzer.processResponse() called with null response");
@@ -62,7 +65,8 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
 		result.setSniffedMimeType(mimeDetector.getSniffedMimeType(response));
 		
-		runExtractUrls(result, response, workspace.getWebModel());
+		if(scrapePage)
+			runExtractUrls(result, response, workspace.getWebModel());
 		runResponseProcessingModules(response.getOriginalRequest(), response, workspace);
 		return result;
 	}
@@ -84,8 +88,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
 		if(responseProcessingModules == null)
 			return;
-		for(IResponseProcessingModule m: responseProcessingModules)
-			m.processResponse(request, response, workspace);
+		responseProcessingExecutor.execute(new ResponseProcessingTask(request, response, workspace, responseProcessingModules));
 	}
 
 	@Override
