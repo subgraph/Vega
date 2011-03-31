@@ -88,17 +88,17 @@ public class HttpRequestView extends ViewPart {
 		tableViewer.addFilter(filter);
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 		
-		getSite().getPage().addSelectionListener(new ISelectionListener() {
+		getSite().getPage().addSelectionListener("com.subgraph.vega.views.website", new ISelectionListener() {
 			@Override
-			public void selectionChanged(IWorkbenchPart part,
-					ISelection selection) {
-				if(!(selection instanceof IStructuredSelection))
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				if (!(selection instanceof IStructuredSelection)) {
 					return;
+				}
 				Object o = ((IStructuredSelection)selection).getFirstElement();
-				if(o == null) {
+				if (o == null) {
 					filter.setFilterEntity(null);
 					tableViewer.refresh();
-				} else if(o instanceof IWebEntity) {
+				} else if (o instanceof IWebEntity) {
 					filterByEntity((IWebEntity) o);
 				}				
 			}
