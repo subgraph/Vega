@@ -55,6 +55,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		contentAnalyzer.resetResponseProcessingQueue();
 	}
 	
 	@Override

@@ -3,7 +3,7 @@ package com.subgraph.vega.internal.analysis;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
@@ -25,7 +25,10 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
-	private final Executor responseProcessingExecutor;
+
+	private final Object responseProcessingLock = new Object();
+	private ExecutorService responseProcessingExecutor;
+
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
@@ -34,7 +37,11 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		this.factory = factory;
 		this.addLinksToModel = true;
 		this.defaultAddToRequestLog = true;
-		responseProcessingExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
+		responseProcessingExecutor = createNewExecutor();
+	}
+
+	private ExecutorService createNewExecutor() {
+		return Executors.newFixedThreadPool(1, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				final Thread t = new Thread(r);
@@ -97,11 +104,21 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
 		if(responseProcessingModules == null)
 			return;
-		responseProcessingExecutor.execute(new ResponseProcessingTask(request, response, workspace, responseProcessingModules));
+		synchronized(responseProcessingLock) {
+			responseProcessingExecutor.execute(new ResponseProcessingTask(request, response, workspace, responseProcessingModules));
+		}
 	}
 
 	@Override
 	public void setAddLinksToModel(boolean flag) {
 		addLinksToModel = flag;
+	}
+
+	@Override
+	public void resetResponseProcessingQueue() {
+		synchronized(responseProcessingLock) {
+			responseProcessingExecutor.shutdown();
+			responseProcessingExecutor = createNewExecutor();
+		}
 	}
 }
