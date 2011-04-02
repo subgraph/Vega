@@ -23,7 +23,6 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			IHttpResponse response, Object argument) {
 		final IModuleContext ctx = (IModuleContext) argument;
 		final IPathState ps = ctx.getPathState();
-		ctx.debug(ps + "UnknownProcess callback with idx = "+ ctx.getCurrentIndex());
 		if(ctx.getCurrentIndex() == 0) {
 			processInitialResponse(request, response, ctx, ps);
 		} else {
@@ -45,26 +44,26 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		if((par == null && rcode == 404) || (ps.hasParent404Fingerprint(fp))) {
 			ps.setPageMissing();
 			ps.unlockChildren();
-			ctx.debug(ps + " Starting parametric checks on unknown path because page is missing.");
+			ctx.debug("Starting parametric checks on unknown path because page is missing.");
 			parametricChecks.initialize(ps);
 			return;
 		}
 		
 		if(par != null && !response.getBodyAsString().isEmpty() && rcode == 200 && fp.isSame(par.getUnknownFingerprint())) {
-			ctx.debug(ps +"Unknown path fetch matches parent unknown fp, processing as a file.");
+			ctx.debug("Unknown path fetch matches parent unknown fp, processing as a file.");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 			fetchFileProcessor.processResponse(null, request, response, ctx);
 			return;
 		}
 		
 		if(par != null && rcode >= 300 && rcode < 400 && fp.isSame(par.getUnknownFingerprint()) && fp.isSame(par.getPathFingerprint())) {
-			ctx.debug(ps + "Unknown path fetch matches both parent probes, processing as file.");
+			ctx.debug("Unknown path fetch matches both parent probes, processing as file.");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 			fetchFileProcessor.processResponse(null, request, response, ctx);
 			return;
 		}
 		
-		ctx.debug(ps + " Sending probes to resolve unknown path.");
+		ctx.debug("Sending probes to resolve unknown path.");
 		sendProbeRequests(ps);
 	}
 
@@ -83,15 +82,13 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		ctx.incrementResponseCount();
 		if(ctx.allResponsesReceived())
 			analyzeResponses(ctx, ps);
-		else
-			ctx.debug("Not all received yet");
 	}
 
 	private void analyzeResponses(IModuleContext ctx, IPathState ps) {
 		
 		// http://host.com/foo/bar.php/ vs. http://host.com/foo/bar.php/abc123/ vs http://host.com/foo/bar.php
 		if(ctx.isFingerprintMatch(1, 2) && ctx.isFingerprintMatch(2, ps.getPathFingerprint())) {
-			ctx.debug(ps + "Probes all match for unknown path, processing as file.");
+			ctx.debug("Probes all match for unknown path, processing as file.");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 			callFetchHandler(ctx, ps);
 			return;
@@ -99,7 +96,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		
 		final IHttpResponse res1 = ctx.getSavedResponse(1);
 		if(ctx.isFingerprintMatch(1, ps.getPathFingerprint())) {
-			ctx.debug(ps + "Trailing / probe matches initial path fetch, processing as directory.");
+			ctx.debug("Trailing / probe matches initial path fetch, processing as directory.");
 			assumeDirectory(res1, ctx, ps);
 			return;
 		}
@@ -109,7 +106,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		final int rcode = res1.getResponseCode();
 		if(rcode == 404 && pcode >= 300 && pcode < 400) {
 			if(hasLocationHeaderWithRequestUri(ps, ctx.getSavedRequest(1))) {
-				ctx.debug(ps + "Trailing slash probe matches redirect from initial fetch, processing as directory");
+				ctx.debug("Trailing slash probe matches redirect from initial fetch, processing as directory");
 				ps.setSureDirectory();
 				assumeDirectory(res1, ctx, ps);
 				return;
@@ -118,13 +115,13 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		
 		final IPathState p404 = ps.get404Parent();
 		if( ((p404 == null) && rcode == 404) || p404.has404FingerprintMatching(res1.getPageFingerprint())) {
-			ctx.debug(ps + "Trailing slash probe looks like a 404, processing as a file");
+			ctx.debug("Trailing slash probe looks like a 404, processing as a file");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 		} else if(pcode  < 300 && rcode >= 300 && ps.getResponse().getBodyAsString().length() > 0) {
-			ctx.debug(ps + "Trailing slash probe returned code 3xx - 5xx and initial fetch was a 200, processing as file");
+			ctx.debug("Trailing slash probe returned code 3xx - 5xx and initial fetch was a 200, processing as file");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 		} else {
-			ctx.debug(ps + "No idea what this is, try processing as file");
+			ctx.debug("No idea what this is, try processing as file");
 		}
 		
 		callFetchHandler(ctx, ps);
