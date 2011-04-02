@@ -1,6 +1,8 @@
 package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -15,6 +17,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
 
 public class VegaHttpClient extends DefaultHttpClient {
+	private final Logger logger = Logger.getLogger("request-engine");
 	private final HttpProcessor httpProcessor;
 	private final HttpContext defaultContext;
 	VegaHttpClient(ClientConnectionManager ccm, HttpParams params) {
@@ -25,8 +28,6 @@ public class VegaHttpClient extends DefaultHttpClient {
 	
 	HttpRequest createProcessedRequest(HttpRequest originalRequest, HttpContext originalContext) {
 		final HttpRequest newRequest = new BasicHttpRequest(originalRequest.getRequestLine());
-        
-
 		final HttpContext ctx = new BasicHttpContext(originalContext);
 		final HttpContext execCtx = new DefaultedHttpContext(ctx, defaultContext);
 		for(Header h: originalRequest.getAllHeaders()) 
@@ -35,14 +36,10 @@ public class VegaHttpClient extends DefaultHttpClient {
 		try {
 			httpProcessor.process(newRequest, execCtx);
 		} catch (HttpException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.WARNING, "Unexpected protocol exception building processed request", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.WARNING, "Unexpected IOException building processed request", e);
 		}
 		return newRequest;
-		
 	}
-
 }
