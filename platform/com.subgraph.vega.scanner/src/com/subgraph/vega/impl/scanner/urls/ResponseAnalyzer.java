@@ -28,6 +28,10 @@ public class ResponseAnalyzer {
 		this.uriFilter = uriFilter;
 	}
 	
+	public IContentAnalyzer getContentAnalyzer() {
+		return contentAnalyzer;
+	}
+
 	public void analyzePivot(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		
 	}

@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -157,5 +158,9 @@ public class PathStateManager {
 	
 	public List<String> getFileExtensionList() {
 		return wordlists.getFileExtensions();
+	}
+	
+	public IContentAnalyzer getContentAnalyzer() {
+		return responseAnalyzer.getContentAnalyzer();
 	}
 }

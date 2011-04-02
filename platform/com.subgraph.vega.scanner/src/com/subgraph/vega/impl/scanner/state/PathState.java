@@ -1,11 +1,15 @@
 package com.subgraph.vega.impl.scanner.state;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
+import com.subgraph.vega.api.analysis.MimeType;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -226,6 +230,26 @@ public class PathState implements IPathState {
 		}
 		else
 			this.pathFingerprint = null;
+		
+		if(response.getResponseCode() == 200) {
+			addWebResponseToPath(response);
+		}
+	}
+	
+	private void addWebResponseToPath(IHttpResponse response) {
+		final IContentAnalyzer contentAnalyzer = pathStateManager.getContentAnalyzer();
+		final IContentAnalyzerResult result = contentAnalyzer.processResponse(response, false, false);
+		final URI uri = createRequest().getURI();
+		path.addGetResponse(uri.getQuery(), contentAnalyzerResultToMimeString(result));
+	}
+	
+	private String contentAnalyzerResultToMimeString(IContentAnalyzerResult result) {
+		if(result.getSniffedMimeType() != MimeType.MIME_NONE)
+			return result.getSniffedMimeType().getCanonicalName();
+		else if(result.getDeclaredMimeType() != MimeType.MIME_NONE)
+			return result.getDeclaredMimeType().getCanonicalName();
+		else 
+			return null;
 	}
 	
 	public IHttpResponse getResponse() {
