@@ -65,6 +65,8 @@ public class MimeDetector {
 
 	MimeType getSniffedMimeType(IHttpResponse response) {
 		final String body = response.getBodyAsString();
+		if(body == null)
+			return MimeType.MIME_NONE;
 		final String buffer = (body.length() > 1024) ? (body.substring(0, 1024)) : (body);
 		
 		if(cssDetector.isBodyCSS(response))
