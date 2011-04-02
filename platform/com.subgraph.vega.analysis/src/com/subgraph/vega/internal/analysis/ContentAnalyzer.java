@@ -102,7 +102,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		}
 	}
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
-		if(responseProcessingModules == null)
+		if(responseProcessingModules == null || !response.isMostlyAscii())
 			return;
 		synchronized(responseProcessingLock) {
 			responseProcessingExecutor.execute(new ResponseProcessingTask(request, response, workspace, responseProcessingModules));
