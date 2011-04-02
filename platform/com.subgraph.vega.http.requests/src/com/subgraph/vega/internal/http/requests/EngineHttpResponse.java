@@ -66,7 +66,7 @@ public class EngineHttpResponse implements IHttpResponse {
 				stringExtractFailed = true;
 				return null;
 			} catch (IOException e) {
-				logger.log(Level.WARNING, "IO error extracting response entity: "+ e.getMessage(), e);
+				logger.log(Level.WARNING, "IO error extracting response entity for request "+ originalRequest.getRequestLine().getUri() +" : "+ e.getMessage(), e);
 				stringExtractFailed = true;
 				return null;
 			}
@@ -138,5 +138,11 @@ public class EngineHttpResponse implements IHttpResponse {
 		if(cachedFingerprint == null)
 			cachedFingerprint = PageFingerprint.generateFromCodeAndString(getResponseCode(), getBodyAsString());
 		return cachedFingerprint;
+	}
+
+	@Override
+	public ResponseStatus getResponseStatus() {
+		// XXX
+		return ResponseStatus.RESPONSE_OK;
 	}
 }

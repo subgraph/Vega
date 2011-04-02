@@ -10,7 +10,6 @@ import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.ExecutionContext;
@@ -24,14 +23,16 @@ import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 class RequestTask implements Callable<IHttpResponse> {
 
-	private final HttpClient client;
+	private final VegaHttpClient client;
+	private final RateLimiter rateLimit;
 	private final HttpUriRequest request;
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
 
-	RequestTask(HttpClient client, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	RequestTask(VegaHttpClient client, RateLimiter rateLimit, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.client = client;
+		this.rateLimit = rateLimit;
 		this.request = request;
 		this.context = context;
 		this.config = config;
@@ -45,6 +46,9 @@ class RequestTask implements Callable<IHttpResponse> {
 		if(config.getCookieString() != null && !config.getCookieString().isEmpty())
 			request.setHeader("Cookie",config.getCookieString());
 
+		if(rateLimit != null)
+			rateLimit.maybeDelayRequest();
+		
 		final HttpResponse httpResponse = client.execute(request, context);
 
 		final HttpEntity entity = httpResponse.getEntity();
@@ -54,7 +58,8 @@ class RequestTask implements Callable<IHttpResponse> {
 			httpResponse.setEntity(newEntity);
 		}
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host, request, httpResponse, htmlParser);
+		
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host,  client.createProcessedRequest(request, context), httpResponse, htmlParser);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(request, response, context);
 		

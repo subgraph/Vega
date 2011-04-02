@@ -13,4 +13,6 @@ public interface IHttpRequestEngineConfig {
 	List<IHttpResponseProcessor> getResponseProcessors();
 	void setCookieString(String cookieString);
 	String getCookieString();
+	void setRequestsPerMinute(int rpm);
+	int getRequestsPerMinute();
 }

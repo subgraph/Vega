@@ -8,11 +8,12 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
-
+	private final static int DEFAULT_REQUESTS_PER_MINUTE = 1000;
 	private boolean forceIdentityEncoding = false;
 	private boolean decompressGzipEncoding = true;
 	private boolean undoURLEncoding = false;
 	private String cookieString = null;
+	private int requestsPerMinute = DEFAULT_REQUESTS_PER_MINUTE;
 	
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
 
@@ -68,5 +69,15 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 		synchronized(responseProcessors) {
 			return Collections.unmodifiableList(responseProcessors);
 		}
+	}
+
+	@Override
+	public void setRequestsPerMinute(int rpm) {
+		requestsPerMinute = rpm;		
+	}
+
+	@Override
+	public int getRequestsPerMinute() {
+		return requestsPerMinute;
 	}
 }

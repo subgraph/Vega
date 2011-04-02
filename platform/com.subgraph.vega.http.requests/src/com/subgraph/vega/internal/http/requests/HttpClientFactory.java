@@ -9,7 +9,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
@@ -17,7 +16,6 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -26,11 +24,10 @@ import com.subgraph.vega.internal.http.requests.unencoding.UnencodingThreadSafeC
 
 public class HttpClientFactory {
 
-	static HttpClient createHttpClient() {
+	static VegaHttpClient createHttpClient() {
 		final HttpParams params = createHttpParams();
 		final ClientConnectionManager ccm = createConnectionManager(params);
-		final DefaultHttpClient client = new DefaultHttpClient(ccm, params);
-		
+		final VegaHttpClient client = new VegaHttpClient(ccm, params);
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		return client;
 	}
