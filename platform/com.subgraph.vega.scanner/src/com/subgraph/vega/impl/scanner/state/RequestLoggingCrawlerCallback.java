@@ -19,7 +19,7 @@ public class RequestLoggingCrawlerCallback implements ICrawlerResponseProcessor 
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		requestLog.addRequestResponse(request, response.getRawResponse(), response.getHost());
+		requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 		callback.processResponse(crawler, request, response, argument);
 	}
 

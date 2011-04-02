@@ -192,7 +192,7 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public void error(HttpUriRequest request, IHttpResponse response,
 			String message) {
-		final long requestId = scanState.getRequestLog().addRequestResponse(request, response.getRawResponse(), response.getHost());
+		final long requestId = scanState.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 		logger.warning("Error running module: "+ message + " (request logged with id="+ requestId +")");
 	}
 
