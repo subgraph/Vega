@@ -49,7 +49,9 @@ class RequestTask implements Callable<IHttpResponse> {
 		if(rateLimit != null)
 			rateLimit.maybeDelayRequest();
 		
+		final long start = System.currentTimeMillis();
 		final HttpResponse httpResponse = client.execute(request, context);
+		final long elapsed = System.currentTimeMillis() - start;
 
 		final HttpEntity entity = httpResponse.getEntity();
 
@@ -59,7 +61,7 @@ class RequestTask implements Callable<IHttpResponse> {
 		}
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 		
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host,  client.createProcessedRequest(request, context), httpResponse, htmlParser);
+		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host,  client.createProcessedRequest(request, context), httpResponse, elapsed, htmlParser);
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(response.getOriginalRequest(), response, context);
 		

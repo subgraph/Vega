@@ -18,4 +18,5 @@ public interface IHttpResponse {
 	IHTMLParseResult getParsedHTML();
 	boolean isMostlyAscii();
 	IPageFingerprint getPageFingerprint();
+	long getRequestMilliseconds();
 }

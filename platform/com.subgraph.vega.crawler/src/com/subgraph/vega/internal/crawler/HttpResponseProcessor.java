@@ -61,7 +61,7 @@ public class HttpResponseProcessor implements Runnable {
 			HttpUriRequest req = task.getRequest();
 			activeRequest = req;
 			try {
-				if(task.getResponse() != null) {							
+				if(task.getResponse() != null) {
 					task.getResponseProcessor().processResponse(crawler, req, task.getResponse(), task.getArgument());
 				}
 			} catch (Exception e) {

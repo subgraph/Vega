@@ -22,6 +22,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
 	private final HttpResponse rawResponse;
+	private final long requestTime;
 	private final IHTMLParser htmlParser;
 	
 	private String cachedString;
@@ -32,11 +33,12 @@ public class EngineHttpResponse implements IHttpResponse {
 	private boolean isMostlyAsciiTestDone;
 	private boolean isMostlyAscii;
 
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = originalRequest;
 		this.rawResponse = rawResponse;
+		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
 	}
 
@@ -144,5 +146,10 @@ public class EngineHttpResponse implements IHttpResponse {
 	public ResponseStatus getResponseStatus() {
 		// XXX
 		return ResponseStatus.RESPONSE_OK;
+	}
+
+	@Override
+	public long getRequestMilliseconds() {
+		return requestTime;
 	}
 }
