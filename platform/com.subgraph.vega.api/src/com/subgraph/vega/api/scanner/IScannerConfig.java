@@ -14,7 +14,8 @@ public interface IScannerConfig {
 	void setNtlmUsername(String username);
 	void setNtlmPassword(String password);
 	void setModulesList(List<String> modules);
-	void setExclusions(List<String> exclusions);	
+	void setExclusions(List<String> exclusions);
+	void setLogAllRequests(boolean flag);
 	String getCookieString();
 	String getBasicUsername();
 	String getBasicPassword();
@@ -25,7 +26,5 @@ public interface IScannerConfig {
 	URI getBaseURI();
 	List<String> getModulesList();
 	List<String> getExclusions();
-	
-	
-
+	boolean getLogAllRequests();
 }

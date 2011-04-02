@@ -18,19 +18,20 @@ import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.urls.ResponseAnalyzer;
 
 public class PathStateManager {
 	private final Logger logger = Logger.getLogger("scanner");
+	private final IScannerConfig config;
 	private final IScannerModuleRegistry moduleRegistry;
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
 	private final ResponseAnalyzer responseAnalyzer;
 	private final ICrawlerResponseProcessor directoryFetchCallback = new DirectoryProcessor();
 	private final Wordlists wordlists = new Wordlists();
-	private boolean logAllRequests = true;
 	
 	private final Map<IWebPath, PathState> modelToScanState = new HashMap<IWebPath, PathState>();
 	
@@ -39,7 +40,8 @@ public class PathStateManager {
 
 	private final int scanId;
 
-	public PathStateManager(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer) {
+	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer) {
+		this.config = config;
 		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
@@ -53,7 +55,7 @@ public class PathStateManager {
 	}
 	
 	public boolean requestLoggingEnabled() {
-		return logAllRequests;
+		return config.getLogAllRequests();
 	}
 	
 	public boolean hasSeenPath(IWebPath path) {

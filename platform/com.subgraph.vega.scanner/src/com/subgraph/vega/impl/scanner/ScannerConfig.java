@@ -16,6 +16,7 @@ public class ScannerConfig implements IScannerConfig {
 	private String basicDomain;
 	private String ntlmUsername;
 	private String ntlmPassword;
+	private boolean logAllRequests;
 	
 	@Override
 	public void setBaseURI(URI baseURI) {
@@ -115,6 +116,16 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public String getNtlmPassword() {
 		return ntlmPassword;
+	}
+
+	@Override
+	public void setLogAllRequests(boolean flag) {
+		logAllRequests = flag;
+	}
+
+	@Override
+	public boolean getLogAllRequests() {
+		return logAllRequests;
 	}
 	
 }
