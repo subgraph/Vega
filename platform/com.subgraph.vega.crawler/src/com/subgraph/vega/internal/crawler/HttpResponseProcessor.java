@@ -59,8 +59,9 @@ public class HttpResponseProcessor implements Runnable {
 			
 			try {
 				currentRequest = task.getRequest();
-				
-				task.getResponseProcessor().processResponse(crawler, currentRequest, task.getResponse(), task.getArgument());
+				if(task.getResponse() != null) {							
+					task.getResponseProcessor().processResponse(crawler, currentRequest, task.getResponse(), task.getArgument());
+				}
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "Unexpected exception processing crawler request: "+ currentRequest.getURI(), e);
 			} finally {
