@@ -9,11 +9,11 @@ import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class DirectoryProcessor implements ICrawlerResponseProcessor {
-	private static final String PAGE_DOES_NOT_EXIST = "/nosuchpage123";
-	private final Dir404Processor dir404Processor;
+
+	private final Dir404Tests dir404Tests;
 	
 	public DirectoryProcessor() {
-		this.dir404Processor = new Dir404Processor();
+		this.dir404Tests = new Dir404Tests();
 	}
 	
 	@Override
@@ -29,10 +29,8 @@ public class DirectoryProcessor implements ICrawlerResponseProcessor {
 		// Pivot checks for PIVOT_SERV
 		ctx.analyzePage(request, response);
 		
-		final IModuleContext newCtx = ps.createModuleContext();
 		
-
-		newCtx.submitAlteredRequest(dir404Processor, PAGE_DOES_NOT_EXIST);
+		dir404Tests.initialize(ps);
 		// if parent, secondary_ext_init
 		
 	}

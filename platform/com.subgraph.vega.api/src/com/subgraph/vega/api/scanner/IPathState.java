@@ -12,6 +12,8 @@ public interface IPathState {
 	IPathState getParentState();
 	boolean isParametric();
 	boolean isDone();
+	void setFailed404Detection();
+	boolean hasFailed404Detection();
 	boolean has404Fingerprints();
 	boolean has404FingerprintMatching(IPageFingerprint fp);
 	boolean hasParent404FingerprintMatchingThis();
@@ -33,6 +35,8 @@ public interface IPathState {
 	String createXssTag(int xssId);
 	String createXssTag(String prefix, int xssId);
 	void registerXssRequest(HttpUriRequest request, int xssId);
+	HttpUriRequest getXssRequest(int xssId, int scanId);
+
 	HttpUriRequest createAlteredRequest(String value, boolean append);
 	HttpUriRequest createRequest();
 	
@@ -50,5 +54,10 @@ public interface IPathState {
 	boolean isRootPath();
 	IScannerModuleRegistry getModuleRegistry();
 
+	void setBadParentDirectory();
+	boolean hasBadParentDirectory();
+	
+	boolean isIPSDetected();
+	void setIPSDetected();
 	
 }

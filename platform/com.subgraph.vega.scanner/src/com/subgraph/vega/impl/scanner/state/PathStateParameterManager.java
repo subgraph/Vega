@@ -10,22 +10,28 @@ import java.util.Set;
 
 import org.apache.http.NameValuePair;
 
+import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPathParameters;
+import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 
 public class PathStateParameterManager {
-	
+	private final static ICrawlerResponseProcessor fileFetchProcessor = new FileProcessor();
+	private final PathState pathState;
 	// For each unique set of parameters, we have an indexed list of PathState nodes, one for each parameter
 	private final Map<Set<NameValuePair>, List<PathState>> parametersToPathStates = new HashMap<Set<NameValuePair>, List<PathState>>();
 	
-	PathStateParameterManager(PathStateManager stateManager, IWebPath path) {
+	PathStateParameterManager(PathState ps) {
+		this.pathState = ps;
+		final IWebPath path = ps.getPath();
 		IWebPathParameters parameters = path.getGetParameters();
+		// XXX hmmm?
 		for(List<NameValuePair> plist: parameters.getParameterLists()) {
-			addParameterList(stateManager, path, plist);
+			addParameterList(plist);
 		}
 	}
 	
-	public synchronized List<PathState> addParameterList(PathStateManager stateManager, IWebPath path, List<NameValuePair> plist) {
+	public synchronized List<PathState> addParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		if(parametersToPathStates.containsKey(pset))
 			return parametersToPathStates.get(pset);
@@ -34,11 +40,9 @@ public class PathStateParameterManager {
 		
 		parametersToPathStates.put(pset, pathStates);
 		
-		final PathState parentState = stateManager.getStateForPath(path);
 		for(int i = 0; i < plist.size(); i++)  {
-			PathState st = new PathState(stateManager, parentState, path, plist, i);
+			PathState st = PathState.createParameterPathState(fileFetchProcessor,  pathState, plist, i);
 			pathStates.add(st);
-			parentState.addChildState(st);
 		}
 		return pathStates;
 	}

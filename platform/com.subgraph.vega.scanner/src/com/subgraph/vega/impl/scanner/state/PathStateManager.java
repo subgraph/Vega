@@ -6,48 +6,43 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
-import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.api.model.web.IWebPath.PathType;
+import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
-import com.subgraph.vega.impl.scanner.urls.PageAnalyzer;
-import com.subgraph.vega.impl.scanner.urls.PivotAnalyzer;
+import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
+import com.subgraph.vega.impl.scanner.urls.ResponseAnalyzer;
 
 public class PathStateManager {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final IScannerModuleRegistry moduleRegistry;
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
-	private final PageAnalyzer pageAnalyzer;
-	private final IContentAnalyzer contentAnalyzer;
-	private final PivotAnalyzer pivotAnalyzer;
+	private final ResponseAnalyzer responseAnalyzer;
+	private final ICrawlerResponseProcessor directoryFetchCallback = new DirectoryProcessor();
+	private final Wordlists wordlists = new Wordlists();
 	private boolean logAllRequests = true;
 	
 	private final Map<IWebPath, PathState> modelToScanState = new HashMap<IWebPath, PathState>();
 	
-	private final Map<IWebPath, PathStateParameterManager> pathToParameterScanState = new HashMap<IWebPath, PathStateParameterManager>();
-
 	private int currentXssId = 0;
 	private Map<Integer, HttpUriRequest> xssRequests = new HashMap<Integer, HttpUriRequest>();
 
 	private final int scanId;
 
-	public PathStateManager(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, PageAnalyzer pageAnalyzer, IContentAnalyzer contentAnalyzer, PivotAnalyzer pivotAnalyzer) {
+	public PathStateManager(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer) {
 		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
-		this.pageAnalyzer = pageAnalyzer;
-		this.contentAnalyzer = contentAnalyzer;
-		this.pivotAnalyzer = pivotAnalyzer;
-		
+		this.responseAnalyzer = responseAnalyzer;
 		final Random r = new Random();
 		scanId = r.nextInt(999999) + 1; 
 	}
@@ -65,56 +60,59 @@ public class PathStateManager {
 			return modelToScanState.containsKey(path);
 		}
 	}
+	
+	/* called with modelToScanState lock */
+	private PathState getParentDirectoryState(IWebPath path) {
+		final IWebPath parentPath = path.getParentPath();
+		if(parentPath == null)
+			return null;
+		if(!modelToScanState.containsKey(parentPath)) {
+			if(parentPath.getPathType() != PathType.PATH_DIRECTORY)
+				parentPath.setPathType(PathType.PATH_DIRECTORY);
+			final PathState parentState = createStateForPath(parentPath, directoryFetchCallback);
+			modelToScanState.put(parentPath, parentState);
+			return parentState;
+		}
+		return modelToScanState.get(parentPath);
+		
+		
+	}
+	public PathState createStateForPath(IWebPath path, ICrawlerResponseProcessor fetchCallback) {
+		synchronized(modelToScanState) {
+			if(path == null)
+				throw new NullPointerException();
+			if(modelToScanState.containsKey(path)) 
+				throw new IllegalStateException("Path already exists."+ path);
+			final PathState parent = getParentDirectoryState(path);
+			final PathState st = PathState.createBasicPathState(fetchCallback, this, parent, path);
+			modelToScanState.put(path, st);
+			return st;
+		}			
+	}
+	
+	
 	public PathState getStateForPath(IWebPath path) {
 		if(path == null)
 			return null;
 		synchronized(modelToScanState) {
-			if(modelToScanState.containsKey(path))
-				return modelToScanState.get(path);
-			final PathState parentState = getStateForPath(path.getParentPath());
-			final PathState st = new PathState(this, parentState, path);
-			if(parentState != null) 
-				parentState.addChildState(st);
-			
-			modelToScanState.put(path, st);
-			return st;
+			return modelToScanState.get(path);
 		}
 	}
 	
-	public List<PathState> getStatesForPathAndParameters(IWebPath path, List<NameValuePair> parameters) {
-		return getParameterManagerForPath(path).getStatesForParameterList(parameters);
-	}
-	
-	public List<PathState> createStatesForPathAndParameters(IWebPath path, List<NameValuePair> parameters) {
-		return getParameterManagerForPath(path).addParameterList(this, path, parameters);
-	}
-	
-	public boolean hasParametersForPath(IWebPath path, List<NameValuePair> parameters) {
-		return getParameterManagerForPath(path).hasParameterList(parameters);
-	}
-	
-	private PathStateParameterManager getParameterManagerForPath(IWebPath path) {
-		synchronized (pathToParameterScanState) {
-			if(!pathToParameterScanState.containsKey(path))
-				pathToParameterScanState.put(path, new PathStateParameterManager(this, path));
-			return pathToParameterScanState.get(path);
-		}
-	}
-
 	public IWebCrawler getCrawler() {
 		return crawler;
 	}
 	
-	public void analyzePage(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
-		pageAnalyzer.analyzePage(request, response, pathState);
+	public void analyzePage(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+		responseAnalyzer.analyzePage(ctx, request, response);
 	}
 	
-	public void analyzeContent(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
-		contentAnalyzer.processResponse(response, false, false);
+	public void analyzeContent(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+		responseAnalyzer.analyzeContent(ctx, request, response);
 	}
 	
-	public void analyzePivot(HttpUriRequest request, IHttpResponse response, IPathState pathState) {
-		pivotAnalyzer.analyze(request, response, pathState);
+	public void analyzePivot(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+		responseAnalyzer.analyzePivot(ctx, request, response);
 	}
 	
 	public String createXssTag(int xssId) {
@@ -155,5 +153,9 @@ public class PathStateManager {
 
 	public void debug(String message) {
 		logger.info(message);
+	}
+	
+	public List<String> getFileExtensionList() {
+		return wordlists.getFileExtensions();
 	}
 }

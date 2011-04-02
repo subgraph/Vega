@@ -77,7 +77,6 @@ public class UnknownCheckHandler implements ICrawlerResponseProcessor {
 	
 	private void assumeDir(IWebCrawler crawler, HttpUriRequest request, IHttpResponse response, IModuleContext ctx, IPathState ps) {
 		// XXX no_505_dir check
-		ctx.debug("assuming "+ request.getURI() + " is directory");
 		ps.getPath().setPathType(PathType.PATH_DIRECTORY);
 		if(ps.getResponse() != null) 
 			ps.setUnknownFingerprint(ps.getPathFingerprint());
@@ -90,7 +89,6 @@ public class UnknownCheckHandler implements ICrawlerResponseProcessor {
 		if(ps.getPath().getPathType() == PathType.PATH_DIRECTORY || ps.getPath().getParentPath() == null) {
 			fetchDirProcessor.processResponse(crawler, request, response, ctx);
 		} else {
-			ctx.debug("Assuming "+ request.getURI() +" is file");
 			fetchFileProcessor.processResponse(crawler, request, response, ctx);
 		}
 	}

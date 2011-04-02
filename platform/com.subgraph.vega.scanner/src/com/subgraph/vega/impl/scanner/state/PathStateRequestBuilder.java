@@ -9,7 +9,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.impl.scanner.VegaHttpRequest;
 
 public class PathStateRequestBuilder {
@@ -99,28 +98,50 @@ public class PathStateRequestBuilder {
 		return createGetRequestWithQuery(query);
 	}
 	
-	private URI appendSlashIfNeeded(URI directoryURI) {
-		if(directoryURI.getPath().endsWith("/"))
-			return directoryURI;
-		final String path = directoryURI.getPath() + "/";
+	private URI maybeAddTrailingSlash(URI uri) {
+		if(uri.getPath().endsWith("/"))
+			return uri;
+		final String path = uri.getPath() + "/";
 		try {
-			return new URI(directoryURI.getScheme(), directoryURI.getAuthority(), path, directoryURI.getQuery(), null);
+			return new URI(uri.getScheme(), uri.getAuthority(), path, uri.getQuery(), null);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
-		
 	}
+	
+	private URI maybeRemoveTrailingSlash(URI uri) {
+		if(!uri.getPath().endsWith("/"))
+			return uri;
+		String p = uri.getPath();
+		while(p.length() > 0 && p.endsWith("/"))
+			p = p.substring(0, p.length() - 1);
+		try {
+			return new URI(uri.getScheme(), uri.getAuthority(), p, uri.getQuery(), null);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	private URI getUriForPathType(IWebPath path) {
+		switch(path.getPathType()) {
+		case PATH_DIRECTORY:
+			return maybeAddTrailingSlash(path.getUri());
+		case PATH_PATHINFO:
+			return maybeRemoveTrailingSlash(path.getUri());
+		default:
+			return path.getUri();
+		}
+	}
+
 	public HttpUriRequest createGetRequest() {
 		if(haveParameters()) {
 			final String query = formatDefaultParameters();
 			return createGetRequestWithQuery(query);
 		} else {
-			if(path.getPathType() == PathType.PATH_DIRECTORY)
-				return new HttpGet(appendSlashIfNeeded(path.getUri()));
-			else
-				return new HttpGet(path.getUri());
+			return new HttpGet(getUriForPathType(path));
 		}
 	} 
 	

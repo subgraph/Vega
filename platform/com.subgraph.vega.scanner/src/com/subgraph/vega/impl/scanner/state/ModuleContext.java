@@ -1,5 +1,6 @@
 package com.subgraph.vega.impl.scanner.state;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -46,6 +47,12 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public int incrementResponseCount() {
 		return contextState.incrementResponseCount();
+	}
+	
+
+	@Override
+	public boolean allResponsesReceived() {
+		return contextState.allResponsesReceieved();
 	}
 
 	@Override
@@ -103,6 +110,7 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback, int index) {
+		contextState.incrementSentRequestCount();
 		if(scanState.requestLoggingEnabled())
 			submitRequestWithLogging(request, callback, index);
 		else
@@ -195,18 +203,18 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzePage(this, request, response);
 	}
 
 	@Override
 	public void responseChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, pathState);
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzeContent(this, request, response);
+		scanState.analyzePage(this, request, response);
 	}
 
 	@Override
 	public void contentChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, pathState);
+		scanState.analyzeContent(this, request, response);
 	}
 
 	@Override
@@ -219,9 +227,9 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void pivotChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePivot(request, response, pathState);
-		scanState.analyzeContent(request, response, pathState);
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzePivot(this, request, response);
+		scanState.analyzeContent(this, request, response);
+		scanState.analyzePage(this, request, response);
 	}
 	
 	
@@ -230,13 +238,14 @@ public class ModuleContext implements IModuleContext {
 	}
 
 	public void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response, Object ...properties) {
+		System.out.println("ALERTA: ("+ type + ") ["+ request.getURI() + "] " + message);
 		final IScanAlertModel alertModel = scanState.getScanAlertModel();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
 			alertModel.lock();
 			if(key != null && alertModel.hasAlertKey(key))
 				return;
-			final long requestId = requestLog.addRequestResponse(request, response.getRawResponse(), response.getHost());
+			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 			final IScanAlert alert = alertModel.createAlert(type, key, requestId);
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
@@ -251,5 +260,9 @@ public class ModuleContext implements IModuleContext {
 		} finally {
 			alertModel.unlock();
 		}
+	}
+	
+	public List<String> getFileExtensionList() {
+		return scanState.getFileExtensionList();
 	}
 }

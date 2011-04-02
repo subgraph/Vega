@@ -24,7 +24,6 @@ import com.subgraph.vega.impl.scanner.state.PathStateManager;
 
 public class UriParser {
 	private final IWorkspace workspace;
-	private final PageAnalyzer pageAnalyzer;
 	private final ICrawlerResponseProcessor directoryProcessor;
 	private final ICrawlerResponseProcessor fileProcessor;
 	private final ICrawlerResponseProcessor unknownProcessor;
@@ -32,12 +31,10 @@ public class UriParser {
 	
 	public UriParser(IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
 		this.workspace = workspace;
-		
-		this.pageAnalyzer = new PageAnalyzer(filter, contentAnalyzer, this);
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(moduleRegistry, workspace, crawler, pageAnalyzer, contentAnalyzer, new PivotAnalyzer());
+		this.pathStateManager = new PathStateManager(moduleRegistry, workspace, crawler, new ResponseAnalyzer(contentAnalyzer, this, filter));
 	}
 
 	public void processUri(URI uri) {
@@ -76,8 +73,7 @@ public class UriParser {
 		final IWebPath rootPath = webHost.getRootPath();
 		synchronized(pathStateManager) {
 			if(!pathStateManager.hasSeenPath(rootPath)) {
-				final PathState ps = pathStateManager.getStateForPath(rootPath);
-				ps.submitRequest(directoryProcessor);
+				pathStateManager.createStateForPath(rootPath, directoryProcessor);
 			}
 		}
 	}
@@ -94,30 +90,32 @@ public class UriParser {
 
 	private void processDirectory(IWebPath webPath) {
 		synchronized(pathStateManager) {
-			if(pathStateManager.hasSeenPath(webPath) && webPath.getPathType() == PathType.PATH_DIRECTORY)
+			if(!pathStateManager.hasSeenPath(webPath)) {
+				webPath.setPathType(PathType.PATH_DIRECTORY);
+				pathStateManager.createStateForPath(webPath, directoryProcessor);
 				return;
-			webPath.setPathType(PathType.PATH_DIRECTORY);
-			final PathState ps = pathStateManager.getStateForPath(webPath);
-			maybeSubmit(ps, directoryProcessor);
+			}
+			if(webPath.getPathType() != PathType.PATH_DIRECTORY) {
+				// XXX What to do in this case?  The PathState node may be executing PATH_UNKNOWN checks already
+				System.out.println("Scan state node for path="+ webPath + " already exists but it's not a directory in UriParser.processDirectory()");
+			}
 		}
 	}
 
 	private void processPathWithQuery(IWebPath path, URI uri) {
 		path.setPathType(PathType.PATH_FILE);
 		List<NameValuePair> plist = URLEncodedUtils.parse(uri, "UTF-8");
-		List<PathState> newStates = getNewPathStatesForParameters(path, plist);
-		if(newStates == null)
-			return;
-		for(PathState ps : newStates)  {
-			maybeSubmit(ps, fileProcessor);
-		}
+		synchronized(pathStateManager) {
+			getPathStateForFile(path).maybeAddParameters(plist);
+		}		
 	}
 
-	private List<PathState> getNewPathStatesForParameters(IWebPath path, List<NameValuePair> plist) {
-		synchronized (pathStateManager) {
-			if(pathStateManager.hasParametersForPath(path, plist))
-				return null;
-			return pathStateManager.createStatesForPathAndParameters(path, plist);
+	private PathState getPathStateForFile(IWebPath filePath) {
+		synchronized(pathStateManager) {
+			if(pathStateManager.hasSeenPath(filePath))
+				return pathStateManager.getStateForPath(filePath);
+			else
+				return pathStateManager.createStateForPath(filePath, fileProcessor);
 		}
 	}
 
@@ -125,16 +123,8 @@ public class UriParser {
 		synchronized(pathStateManager) {
 			if(pathStateManager.hasSeenPath(path))
 				return;
-			final PathState ps = pathStateManager.getStateForPath(path);
-			maybeSubmit(ps, unknownProcessor);
+			pathStateManager.createStateForPath(path, unknownProcessor);
 		}
 	}
 
-	private void maybeSubmit(PathState ps, ICrawlerResponseProcessor callback) {
-		final PathState pps = ps.getParentState();
-		if(pps == null || pps.getInitialChecksFinished())
-			ps.submitRequest(callback);
-		else
-			ps.setLocked();
-	}
 }

@@ -19,9 +19,8 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			IHttpResponse response, Object argument) {
 		final IModuleContext ctx = (IModuleContext) argument;
 		final IPathState ps = ctx.getPathState();
-		ctx.debug("UnknownProcessor: "+ request.getMethod() + " "+ request.getURI());
-		
 		ps.setResponse(response);
+		
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "during initial resource fetch");
 			return;
@@ -35,15 +34,12 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		if((par == null && rcode == 404) || (ps.hasParent404Fingerprint(fp))) {
 			ps.setPageMissing();
 			ps.unlockChildren();
-			ctx.debug("starting parametric on unknown "+ request.getURI());
-			ps.unlockChildren();
-			parametricChecks.init(ps);
+			parametricChecks.initialize(ps);
 			return;
 		}
 		
 		if(par != null && !response.getBodyAsString().isEmpty() && rcode == 200 && fp.isSame(par.getUnknownFingerprint())) {
 			ps.getPath().setPathType(PathType.PATH_FILE);
-			ctx.debug("Assuming "+ request.getURI() + " is file without check");
 			fetchFileProcessor.processResponse(crawler, request, response, ctx);
 			return;
 		}
@@ -51,7 +47,6 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		
 		if(par != null && rcode >= 300 && rcode < 400 && fp.isSame(par.getUnknownFingerprint()) && fp.isSame(par.getPathFingerprint())) {
 			ps.getPath().setPathType(PathType.PATH_FILE);
-			ctx.debug("Assuming "+ request.getURI() + " is file without check");
 
 			fetchFileProcessor.processResponse(crawler, request, response, argument);
 			return;

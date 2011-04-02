@@ -16,13 +16,22 @@ public class ModuleContextState {
 	private IHttpResponse[] savedResponses;
 	private int currentCapacity;
 	private int responseCount;
+	private int sentRequestCount;
 	private boolean moduleFailed;
 
+	public synchronized void incrementSentRequestCount() {
+		sentRequestCount += 1;
+	}
+	
 	public synchronized int incrementResponseCount() {
 		responseCount += 1;
 		return responseCount;
 	}
 	
+	public synchronized boolean allResponsesReceieved() {
+		return responseCount == sentRequestCount;
+	}
+
 	private void ensureCapacity(int index) {
 		if(currentCapacity == 0) {
 			currentCapacity = INITIAL_CAPACITY;

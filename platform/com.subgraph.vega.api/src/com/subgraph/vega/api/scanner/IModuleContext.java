@@ -1,5 +1,7 @@
 package com.subgraph.vega.api.scanner;
 
+import java.util.List;
+
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
@@ -10,7 +12,7 @@ public interface IModuleContext {
 	int getCurrentIndex();
 	IPathState getPathState();
 	int incrementResponseCount();
-	
+	boolean allResponsesReceived();
 	void addRequestResponse(HttpUriRequest request, IHttpResponse response);
 	void addRequestResponse(int index, HttpUriRequest request, IHttpResponse response);
 	HttpUriRequest getSavedRequest(int index);
@@ -41,4 +43,6 @@ public interface IModuleContext {
 	void pivotChecks(HttpUriRequest request, IHttpResponse response);
 
 	void analyzePage(HttpUriRequest request, IHttpResponse response);
+	
+	List<String> getFileExtensionList();
 }

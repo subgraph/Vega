@@ -3,20 +3,18 @@ package com.subgraph.vega.impl.scanner.handlers;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
-import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
-public class ParametricCheckHandler implements ICrawlerResponseProcessor {
+public class ParametricCheckHandler extends CrawlerModule {
 	private final static String BOGUS_PARAM = "asdf1234";
 	private final ICrawlerResponseProcessor ognlHandler = new OgnlHandler();
 	private final InjectionChecks injectionChecks = new InjectionChecks();
 	
-	public void init(IPathState ps) {
+	public void initialize(IPathState ps) {
 		final IModuleContext ctx = ps.createModuleContext();
-		ctx.debug("parametric checks on "+ ps.createRequest().getURI());
 		// XXX check URI filter and parameter filter
 		if(!ps.isParametric() || false) {
 			ctx.debug("not parametric??");
@@ -31,9 +29,8 @@ public class ParametricCheckHandler implements ICrawlerResponseProcessor {
 	}
 
 	@Override
-	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
-			IHttpResponse response, Object argument) {
-		final IModuleContext ctx = (IModuleContext) argument;
+	public void runModule(HttpUriRequest request, IHttpResponse response,
+			IModuleContext ctx) {
 		
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "during parameter behavior test");
@@ -43,8 +40,8 @@ public class ParametricCheckHandler implements ICrawlerResponseProcessor {
 		
 		
 		final IPageFingerprint pathFP = ctx.getPathState().getPathFingerprint();
-		if(pathFP != null && pathFP.equals(response.getPageFingerprint())) {
-			ctx.debug("Parameter has no effect");
+		if(pathFP != null && pathFP.isSame(response.getPageFingerprint())) {
+			ctx.debug("Parameter has no effect "+ pathFP + " == "+ response.getPageFingerprint() + " for request "+ request.getURI());
 			ctx.getPathState().setBogusParameter();
 			maybeScheduleNext(ctx);
 			return;
@@ -81,7 +78,8 @@ public class ParametricCheckHandler implements ICrawlerResponseProcessor {
 			ctx.submitAlteredParameterNameRequest(ognlHandler, "[0]['"+pname+"']", 0);
 			ctx.submitAlteredParameterNameRequest(ognlHandler, "[0]['vega']", 1);
 		}
-		injectionChecks.initialize2(ps);	
+		injectionChecks.initialize(ps);
+		
 	}
 
 }
