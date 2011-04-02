@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
@@ -24,7 +25,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
-	private final Executor responseProcessingExecutor = Executors.newCachedThreadPool();
+	private final Executor responseProcessingExecutor;
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
@@ -33,6 +34,14 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		this.factory = factory;
 		this.addLinksToModel = true;
 		this.defaultAddToRequestLog = true;
+		responseProcessingExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				final Thread t = new Thread(r);
+				t.setName("Response Processing Modules");
+				return t;
+			}
+		});
 	}
 
 	@Override
