@@ -23,12 +23,16 @@ public class ModuleContext implements IModuleContext {
 	private final ModuleContextState contextState;
 
 	ModuleContext(PathStateManager scanState,
-			PathStateRequestBuilder requestBuilder, IPathState pathState) {
+			PathStateRequestBuilder requestBuilder, IPathState pathState, int index) {
 		this.scanState = scanState;
 		this.requestBuilder = requestBuilder;
 		this.pathState = pathState;
-		currentIndex = -1;
+		currentIndex = index;
 		contextState = new ModuleContextState();
+	}
+
+	ModuleContext(PathStateManager scanState, PathStateRequestBuilder requestBuilder, IPathState pathState) {
+		this(scanState, requestBuilder, pathState, -1);
 	}
 
 	private ModuleContext(ModuleContext ctx, int index) {

@@ -114,12 +114,13 @@ public class PathState implements IPathState {
 	}
 	
 	private void performInitialFetch() {
+		final IModuleContext ctx = new ModuleContext(pathStateManager, requestBuilder, this, 0);
+		final HttpUriRequest req = createRequest();
+
 		if(response != null) {
-			final IModuleContext ctx = createModuleContext();
-			final HttpUriRequest req = createRequest();
 			initialFetchProcessor.processResponse(pathStateManager.getCrawler(), req, response, ctx);
 		} else {
-			submitRequest(initialFetchProcessor);
+			submitRequest(req, initialFetchProcessor, ctx);
 		}
 	}
 	
@@ -340,6 +341,7 @@ public class PathState implements IPathState {
 	public String toString() {
 		return "STATE: ["+ path.toString() + "]";
 	}
+	
 	
 	@Override
 	public IModuleContext createModuleContext() {
