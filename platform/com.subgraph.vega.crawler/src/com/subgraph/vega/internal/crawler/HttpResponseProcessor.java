@@ -17,6 +17,8 @@ public class HttpResponseProcessor implements Runnable {
 	private final CountDownLatch latch;
 	private final TaskCounter counter;
 	private volatile boolean stop;
+	private final Object requestLock = new Object();
+	private volatile HttpUriRequest activeRequest = null;
 	
 	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter) {
 		this.crawler = crawler;
@@ -42,6 +44,10 @@ public class HttpResponseProcessor implements Runnable {
 	void stop() {
 		stop = true;
 		crawlerResponseQueue.offer(CrawlerTask.createExitTask());
+		synchronized(requestLock) {
+			if(activeRequest != null)
+				activeRequest.abort();
+		}
 	}
 
 	private void runLoop() throws InterruptedException {
@@ -53,7 +59,7 @@ public class HttpResponseProcessor implements Runnable {
 				return;
 			}
 			HttpUriRequest req = task.getRequest();
-			
+			activeRequest = req;
 			try {
 				if(task.getResponse() != null) {							
 					task.getResponseProcessor().processResponse(crawler, req, task.getResponse(), task.getArgument());
@@ -61,6 +67,9 @@ public class HttpResponseProcessor implements Runnable {
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "Unexpected exception processing crawler request: "+ req.getURI(), e);
 			} finally {
+				synchronized (requestLock) {
+					activeRequest = null;
+				}
 				final HttpEntity entity = task.getResponse().getRawResponse().getEntity();
 				if(entity != null)
 					try {
