@@ -19,7 +19,6 @@ public class RequestConsumer implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
-	private volatile HttpUriRequest currentRequest;
 	private volatile boolean stop;
 	
 	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
@@ -43,10 +42,7 @@ public class RequestConsumer implements Runnable {
 	}
 	
 	void stop() {
-		HttpUriRequest r = currentRequest;
 		stop = true;
-		if(r != null)
-			r.abort();
 	}
 	
 	private void runLoop() throws InterruptedException {
@@ -72,7 +68,6 @@ public class RequestConsumer implements Runnable {
 	
 	private IHttpResponse sendRequest(HttpUriRequest request) {		
 		try {
-			currentRequest = request;
 			return requestEngine.sendRequest(request);
 		} catch (InterruptedIOException e) {
 			stop = true;
@@ -81,11 +76,10 @@ public class RequestConsumer implements Runnable {
 			logger.log(Level.WARNING, "Protocol error processing request "+ request.getURI(), e);
 			return null;
 		} catch (IOException e) {
+			System.out.println("hooped: "+ request);
 			logger.log(Level.WARNING, "IO error processing request "+ request.getURI(), e);
 			return null;
-		} finally {
-			currentRequest = null;
-		}
+		} 
 	}
 
 }

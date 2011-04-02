@@ -16,10 +16,9 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 public class WebCrawler implements IWebCrawler {
-	private final static int REQUEST_THREAD_COUNT = 10;
+	private final static int REQUEST_THREAD_COUNT = 5;
 	private final static int RESPONSE_THREAD_COUNT = 3;
-	
-	
+
 	private final IHttpRequestEngine requestEngine;
 
 	private final Executor executor = Executors.newFixedThreadPool(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
