@@ -28,8 +28,8 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         configurer.setShowFastViewBars(true);
         PlatformUI.getPreferenceStore().setValue(
 				IWorkbenchPreferenceConstants.DOCK_PERSPECTIVE_BAR, IWorkbenchPreferenceConstants.TOP_RIGHT);
-		//PlatformUI.getPreferenceStore().setValue(
-		//		IWorkbenchPreferenceConstants.SHOW_MEMORY_MONITOR, true);
+		PlatformUI.getPreferenceStore().setValue(
+				IWorkbenchPreferenceConstants.SHOW_MEMORY_MONITOR, true);
 		PlatformUI.getPreferenceStore().setValue(
 				IWorkbenchPreferenceConstants.PERSPECTIVE_BAR_EXTRAS, "com.subgraph.vega.perspectives.scanner, com.subgraph.vega.perspectives.proxy");
 
