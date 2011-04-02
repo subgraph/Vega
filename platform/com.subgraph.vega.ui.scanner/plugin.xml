@@ -198,5 +198,19 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.subgraph.vega.ui.scanner.preferences.ScannerDebugPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.subgraph.vega.ui.scanner.preferences.ScannerDebugPreferencePage"
+            id="com.subgraph.vega.preferences.scandebug"
+            name="Scanner Debugging">
+      </page>
+   </extension>
 
 </plugin>

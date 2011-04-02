@@ -59,6 +59,8 @@ public class StartNewScanHandler extends AbstractHandler {
 					scannerConfig.setExclusions(exclusions);
 					scannerConfig.setNtlmUsername(ntlmUsername);
 					scannerConfig.setNtlmPassword(ntlmPassword);
+					if(Activator.getDefault().getPreferenceStore().getBoolean("LogAllRequests"))
+						scannerConfig.setLogAllRequests(true);
 					scanner.setScannerConfig(scannerConfig);
 					scanner.startScanner(scannerConfig);
 				}
