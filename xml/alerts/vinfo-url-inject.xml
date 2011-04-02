@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>URL Injection</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>
+
+	<discussion>
+		Discuss issue here.
+	</discussion>
+
+  <impact>
+		Explain impact here.
+  </impact>
+
+  <remediation>
+    Investigate further.
+  </remediation>
+
+</alert>
+
