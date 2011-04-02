@@ -5,10 +5,12 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
@@ -151,5 +153,19 @@ public class EngineHttpResponse implements IHttpResponse {
 	@Override
 	public long getRequestMilliseconds() {
 		return requestTime;
+	}
+
+	@Override
+	public void lockResponseEntity() {
+		final HttpEntity entity = rawResponse.getEntity();
+		if(entity == null)
+			return;
+		try {
+			final HttpEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			rawResponse.setEntity(newEntity);
+			entity.consumeContent();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
+		}		
 	}
 }
