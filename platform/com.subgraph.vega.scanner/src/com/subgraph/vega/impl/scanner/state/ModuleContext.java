@@ -115,17 +115,16 @@ public class ModuleContext implements IModuleContext {
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback, int index) {
 		contextState.incrementSentRequestCount();
-		if(scanState.requestLoggingEnabled())
-			submitRequestWithLogging(request, callback, index);
-		else
-			scanState.getCrawler().submitTask(request, callback, new ModuleContext(this, index));
+		scanState.getCrawler().submitTask(request, getWrappedCallback(callback), new ModuleContext(this, index));
 	}
 	
-	private void submitRequestWithLogging(HttpUriRequest request, ICrawlerResponseProcessor callback, int index) {
-		final RequestLoggingCrawlerCallback wrapper = new RequestLoggingCrawlerCallback(scanState.getRequestLog(), callback);
-		scanState.getCrawler().submitTask(request, wrapper, new ModuleContext(this,index));
+	private ICrawlerResponseProcessor getWrappedCallback(ICrawlerResponseProcessor callback) {
+		if(scanState.requestLoggingEnabled())
+			return CrawlerCallbackWrapper.createLogging(scanState.getRequestLog(), callback);
+		else
+			return CrawlerCallbackWrapper.create(callback);
 	}
-
+	
 	@Override
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback) {
