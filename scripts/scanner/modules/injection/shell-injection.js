@@ -33,7 +33,7 @@ function process(req, res, ctx)
 function checkMatch(ctx, idx)
 {
 	if(ctx.isFingerprintMatch(idx, idx + 1) && !ctx.isFingerprintMatch(idx, idx + 2)) {
-		ctx.publishAlert("shell-inject", "responses to `true` and `false` are different than `uname`", 
+		ctx.publishAlert("vinfo-shell-inject", "responses to `true` and `false` are different than `uname`", 
 			ctx.getSavedRequest(idx), ctx.getSavedResponse(idx));
 		ctx.responseChecks(idx + 2);
 	}

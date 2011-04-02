@@ -12,12 +12,12 @@ function process(req, res, ctx)
 {
 	var loc = headerValue(res, "Location");
 	if(matchesInjectedUrls(loc)) {
-		ctx.publishAlert("url-inject", "Injected URL in Location header", request, response);
+		ctx.publishAlert("vinfo-url-inject", "Injected URL in Location header", request, response);
 
 	}
 	var refresh = headerValue(res, "Refresh");
 	if(testRefresh(refresh)) {
-		ctx.publishAlert("url-inject", "Injected URL in Refresh header", request, response);
+		ctx.publishAlert("vinfo-url-inject", "Injected URL in Refresh header", request, response);
 	}
 	ctx.contentChecks(req, res);
 }

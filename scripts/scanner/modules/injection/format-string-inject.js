@@ -23,7 +23,7 @@ function process(req, res, ctx)
 		return;
 
 	if(!ctx.isFingerprintMatch(0, 1)) {
-		ctx.publishAlert("format-string", "Response to %dn%dn%dn... different than to %nd%nd%nd...",
+		ctx.publishAlert("vinfo-format-string", "Response to %dn%dn%dn... different than to %nd%nd%nd...",
 				ctx.getSavedRequest(1), ctx.getSavedResponse(1));
 		ctx.responseChecks(1);
 	}

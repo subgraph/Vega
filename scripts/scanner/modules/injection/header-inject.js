@@ -11,6 +11,6 @@ function initialize(ctx)
 function process(req, res, ctx)
 {
 	if(res.getRawResponse().containsHeader("Vega-Inject")) {
-		ctx.publishAlert("header-inject", "Injected Vega-Inject header into response", request, response);
+		ctx.publishAlert("vinfo-header-inject", "Injected Vega-Inject header into response", request, response);
 	}
 }
