@@ -30,8 +30,6 @@ public class DirectoryProcessor implements ICrawlerResponseProcessor {
 		
 		if(ps.isRootPath())
 			ctx.pivotChecks(request, response);
-
-		ctx.analyzePage(request, response);
 		
 		dir404Tests.initialize(ps);
 		
