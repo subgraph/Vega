@@ -342,7 +342,6 @@ public class PathState implements IPathState {
 		return "STATE: ["+ path.toString() + "]";
 	}
 	
-	
 	@Override
 	public IModuleContext createModuleContext() {
 		return new ModuleContext(pathStateManager, requestBuilder, this);

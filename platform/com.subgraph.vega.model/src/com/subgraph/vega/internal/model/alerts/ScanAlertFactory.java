@@ -56,8 +56,8 @@ public class ScanAlertFactory {
 			return Severity.INFO;
 		else
 			return Severity.UNKNOWN;
-		
 	}
+
 	private String parseTitle(Element alertElement) {
 		final NodeList nodeList = alertElement.getElementsByTagName("title");
 		if(nodeList.getLength() == 0 || nodeList.item(0).getNodeType() != Node.ELEMENT_NODE)
