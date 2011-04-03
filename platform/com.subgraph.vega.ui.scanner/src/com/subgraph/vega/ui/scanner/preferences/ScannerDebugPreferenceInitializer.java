@@ -11,6 +11,7 @@ public class ScannerDebugPreferenceInitializer extends AbstractPreferenceInitial
 	public ScannerDebugPreferenceInitializer() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault("LogAllRequests", false);
+		store.setDefault("DisplayDebugOutput", false);
 	}
 
 	@Override

@@ -155,7 +155,8 @@ public class PathStateManager {
 	}
 
 	public void debug(String message) {
-		logger.info(message);
+		if(config.getDisplayDebugOutput())
+			logger.info(message);
 	}
 	
 	public List<String> getFileExtensionList() {

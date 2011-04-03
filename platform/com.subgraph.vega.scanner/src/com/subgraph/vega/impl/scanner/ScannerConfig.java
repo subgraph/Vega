@@ -17,6 +17,7 @@ public class ScannerConfig implements IScannerConfig {
 	private String ntlmUsername;
 	private String ntlmPassword;
 	private boolean logAllRequests;
+	private boolean displayDebugOutput;
 	
 	@Override
 	public void setBaseURI(URI baseURI) {
@@ -126,6 +127,16 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public boolean getLogAllRequests() {
 		return logAllRequests;
+	}
+
+	@Override
+	public void setDisplayDebugOutput(boolean flag) {
+		displayDebugOutput = flag;
+	}
+
+	@Override
+	public boolean getDisplayDebugOutput() {
+		return displayDebugOutput;
 	}
 	
 }

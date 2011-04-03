@@ -23,7 +23,9 @@ public class ScannerDebugPreferencePage extends FieldEditorPreferencePage implem
 	@Override
 	protected void createFieldEditors() {
 		BooleanFieldEditor logRequestsField = new BooleanFieldEditor("LogAllRequests", "Log All Scanner Requests", getFieldEditorParent());
-		addField(logRequestsField);		
+		BooleanFieldEditor debugOutputField = new BooleanFieldEditor("DisplayDebugOutput", "Display debug output in console.", getFieldEditorParent());
+		addField(logRequestsField);
+		addField(debugOutputField);
 	}
 
 }

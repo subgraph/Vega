@@ -7,6 +7,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -59,8 +60,9 @@ public class StartNewScanHandler extends AbstractHandler {
 					scannerConfig.setExclusions(exclusions);
 					scannerConfig.setNtlmUsername(ntlmUsername);
 					scannerConfig.setNtlmPassword(ntlmPassword);
-					if(Activator.getDefault().getPreferenceStore().getBoolean("LogAllRequests"))
-						scannerConfig.setLogAllRequests(true);
+					final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
+					scannerConfig.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
+					scannerConfig.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
 					scanner.setScannerConfig(scannerConfig);
 					scanner.startScanner(scannerConfig);
 				}
