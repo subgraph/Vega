@@ -241,7 +241,7 @@ public class ModuleContext implements IModuleContext {
 	}
 
 	public void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response, Object ...properties) {
-		System.out.println("ALERTA: ("+ type + ") ["+ request.getURI() + "] " + message);
+		debug("Publishing Alert: ("+ type + ") ["+ request.getURI() + "] " + message);
 		final IScanAlertModel alertModel = scanState.getScanAlertModel();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
