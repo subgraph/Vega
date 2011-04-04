@@ -131,8 +131,9 @@ public class HttpRequestView extends ViewPart {
 		requestResponseViewer.setDisplayResponse();
 	}
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = {"Host", "Method", "Request", "Status", "Length", };
+		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", };
 		final ColumnLayoutData[] layoutData = {
+				new ColumnPixelData(60, true, true),
 				new ColumnPixelData(120, true, true),
 				new ColumnPixelData(60, true, true),
 				new ColumnWeightData(100, 100, true),
