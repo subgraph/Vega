@@ -84,7 +84,7 @@ public class HttpRequestView extends ViewPart {
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
 		
-		filter = new HttpViewFilter();
+		filter = new HttpViewFilter(tableViewer);
 		tableViewer.addFilter(filter);
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 		

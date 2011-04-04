@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -18,10 +19,12 @@ import com.subgraph.vega.http.conditions.HttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 
 public class HttpViewFilter extends ViewerFilter {
+	private TableViewer tableViewer;
 	private IWebEntity filterEntity;
 	private IHttpConditionSet conditionSet;
 	
-	public HttpViewFilter() {
+	public HttpViewFilter(TableViewer viewer) {
+		tableViewer = viewer;
 		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
 		conditionSet = new HttpConditionSet();
 		conditionSet.unserialize(preferenceStore.getString(com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceConstants.P_FILTER));
@@ -30,6 +33,7 @@ public class HttpViewFilter extends ViewerFilter {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty() == com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceConstants.P_FILTER) {
 					conditionSet.unserialize(event.getNewValue().toString());
+					tableViewer.refresh();
 				}
 			}
 		});
