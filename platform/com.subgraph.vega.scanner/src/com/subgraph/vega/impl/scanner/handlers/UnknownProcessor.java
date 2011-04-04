@@ -29,7 +29,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			processProbeResponses(request, response, ctx, ps);
 		}
 	}
-	
+
 	private void processInitialResponse(HttpUriRequest request, IHttpResponse response, IModuleContext ctx, IPathState ps) {
 		ps.setResponse(response);
 		if(response.isFetchFail()) {
@@ -40,7 +40,6 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		final IPageFingerprint fp = response.getPageFingerprint();
 		final IPathState par = ps.get404Parent();
 		final int rcode = response.getResponseCode();
-
 		if((par == null && rcode == 404) || (ps.hasParent404Fingerprint(fp))) {
 			ps.setPageMissing();
 			ps.unlockChildren();
@@ -48,21 +47,21 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			parametricChecks.initialize(ps);
 			return;
 		}
-		
+
 		if(par != null && !response.getBodyAsString().isEmpty() && rcode == 200 && fp.isSame(par.getUnknownFingerprint())) {
 			ctx.debug("Unknown path fetch matches parent unknown fp, processing as a file.");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 			fetchFileProcessor.processResponse(null, request, response, ctx);
 			return;
 		}
-		
+
 		if(par != null && rcode >= 300 && rcode < 400 && fp.isSame(par.getUnknownFingerprint()) && fp.isSame(par.getPathFingerprint())) {
 			ctx.debug("Unknown path fetch matches both parent probes, processing as file.");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 			fetchFileProcessor.processResponse(null, request, response, ctx);
 			return;
 		}
-		
+
 		ctx.debug("Sending probes to resolve unknown path.");
 		sendProbeRequests(ps);
 	}
@@ -85,7 +84,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 	}
 
 	private void analyzeResponses(IModuleContext ctx, IPathState ps) {
-		
+
 		// http://host.com/foo/bar.php/ vs. http://host.com/foo/bar.php/abc123/ vs http://host.com/foo/bar.php
 		if(ctx.isFingerprintMatch(1, 2) && ctx.isFingerprintMatch(2, ps.getPathFingerprint())) {
 			ctx.debug("Probes all match for unknown path, processing as file.");
@@ -93,18 +92,18 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			callFetchHandler(ctx, ps);
 			return;
 		}
-		
+
 		final IHttpResponse res1 = ctx.getSavedResponse(1);
 		if(ctx.isFingerprintMatch(1, ps.getPathFingerprint())) {
 			ctx.debug("Trailing / probe matches initial path fetch, processing as directory.");
 			assumeDirectory(res1, ctx, ps);
 			return;
 		}
-		
+
 		// pivot code, response code
 		final int pcode = ps.getResponse().getResponseCode();
 		final int rcode = res1.getResponseCode();
-		if(rcode == 404 && pcode >= 300 && pcode < 400) {
+		if(pcode >= 300 && pcode < 400) {
 			if(hasLocationHeaderWithRequestUri(ps, ctx.getSavedRequest(1))) {
 				ctx.debug("Trailing slash probe matches redirect from initial fetch, processing as directory");
 				ps.setSureDirectory();
@@ -112,9 +111,8 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 				return;
 			}
 		}
-		
-		final IPathState p404 = ps.get404Parent();
-		if( ((p404 == null) && rcode == 404) || p404.has404FingerprintMatching(res1.getPageFingerprint())) {
+
+		if(isProbe404(ps, res1)) {
 			ctx.debug("Trailing slash probe looks like a 404, processing as a file");
 			ps.getPath().setPathType(PathType.PATH_FILE);
 		} else if(pcode  < 300 && rcode >= 300 && ps.getResponse().getBodyAsString().length() > 0) {
@@ -123,17 +121,26 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		} else {
 			ctx.debug("No idea what this is, try processing as file");
 		}
-		
 		callFetchHandler(ctx, ps);
 	}
-	
+
+	private boolean isProbe404(IPathState ps, IHttpResponse response) {
+		final IPathState p404 = ps.get404Parent();
+		final int rcode = response.getResponseCode();
+		final IPageFingerprint rfp = response.getPageFingerprint();
+		if(p404 != null)
+			return p404.has404FingerprintMatching(rfp);
+		else
+			return rcode == 404;
+	}
+
 	private boolean hasLocationHeaderWithRequestUri(IPathState ps, HttpUriRequest req) {
 		final String locationValue = getLocationHeader(ps);
 		if(locationValue == null)
 			return false;
 		final String uriString = req.getURI().toString();
 		return locationValue.equalsIgnoreCase(uriString);
-		
+
 	}
 	private String getLocationHeader(IPathState ps) {
 		final HttpResponse rr = ps.getResponse().getRawResponse();
@@ -149,12 +156,12 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		ps.setResponse(response);
 		callFetchHandler(ctx, ps);
 	}
-	
+
 	private void callFetchHandler(IModuleContext ctx, IPathState ps) {
 		final IWebPath path = ps.getPath();
 		final HttpUriRequest req = ps.createRequest();
 		final IHttpResponse res = ps.getResponse();
-		if(path.getPathType() == PathType.PATH_DIRECTORY || path.getParentPath() == null) 
+		if(path.getPathType() == PathType.PATH_DIRECTORY || path.getParentPath() == null)
 			fetchDirProcessor.processResponse(null, req, res, ctx);
 		else
 			fetchFileProcessor.processResponse(null, req, res, ctx);
