@@ -12,17 +12,17 @@ import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class DirIPSCheck extends CrawlerModule {
-	private final static String IPS_TEST =  
-		"?_test1=c:\\windows\\system32\\cmd.exe" +
+	private final static String IPS_TEST =
+		"_test1=c:\\windows\\system32\\cmd.exe" +
 		"&_test2=/etc/passwd" +
 		"&_test3=|/bin/sh" +
 		"&_test4=(SELECT * FROM nonexistent) --" +
 		"&_test5=>/no/such/file" +
 		"&_test6=<script>alert(1)</script>" +
 		"&_test7=javascript:alert(1)";
-	
-	private final static String IPS_SAFE = 
-		 "?_test1=ccddeeeimmnossstwwxy.:\\\\\\" +
+
+	private final static String IPS_SAFE =
+		 "_test1=ccddeeeimmnossstwwxy.:\\\\\\" +
 		  "&_test2=acdepsstw//" +
 		  "&_test3=bhins//" +
 		  "&_test4=CEEFLMORSTeeinnnosttx-*" +
@@ -38,7 +38,7 @@ public class DirIPSCheck extends CrawlerModule {
 		ctx.submitRequest(createRequest(ps, IPS_TEST), this, 0);
 		ctx.submitRequest(createRequest(ps, IPS_SAFE), this, 1);
 	}
-	
+
 	private HttpUriRequest createRequest(IPathState ps, String query) {
 		final URI baseUri = ps.getPath().getUri();
 		try {
@@ -54,24 +54,25 @@ public class DirIPSCheck extends CrawlerModule {
 	@Override
 	public void runModule(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
-		if(ctx.hasModuleFailed()) 
+		if(ctx.hasModuleFailed())
 			return;
-		
+
 		if(ctx.getCurrentIndex() == 1 && response.isFetchFail()) {
 			ctx.error(request, response, "Fetch failed during IPS tests");
 			ctx.setModuleFailed();
 			injection.initialize(ps);
 		}
 		ctx.addRequestResponse(request, response);
+		ctx.incrementResponseCount();
 		if(!ctx.allResponsesReceived())
 			return;
-		
+
 		IPathState p404 = ps.get404Parent();
 		if(p404 == null || !p404.isIPSDetected()) {
 			if(ctx.getSavedResponse(0).getResponseStatus() != IHttpResponse.ResponseStatus.RESPONSE_OK) {
 				ctx.debug("Possible IPS filter detected");
 				ctx.getPathState().setIPSDetected();
-				
+
 			} else if(!ctx.isFingerprintMatch(0, 1)) {
 				ctx.debug("Possible IPS filter detected");
 				ctx.getPathState().setIPSDetected();
@@ -81,7 +82,7 @@ public class DirIPSCheck extends CrawlerModule {
 				ctx.debug("Previously detected IPS filter is no longer active");
 			}
 		}
-		
+
 		injection.initialize(ps);
 	}
 }
