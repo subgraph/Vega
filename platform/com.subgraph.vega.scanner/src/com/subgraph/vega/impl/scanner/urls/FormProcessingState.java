@@ -29,7 +29,7 @@ public class FormProcessingState {
 	}
 
 	boolean isValid() {
-		return (action != null && baseURI != null && getTargetURI() != null);
+		return (getTargetURI() != null);
 	}
 
 	boolean isPostMethod() {
@@ -47,6 +47,8 @@ public class FormProcessingState {
 	private URI createTargetURI() {
 		if(baseURI == null)
 			return null;
+		if(action == null)
+			return baseURI;
 		try {
 			final URI target = baseURI.resolve(action);
 			final String scheme = target.getScheme();
