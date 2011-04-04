@@ -11,11 +11,11 @@ import com.subgraph.vega.api.scanner.IPathState;
 public class PutChecks extends CrawlerModule {
 
 	private final InjectionChecks injectionChecks;
-	
+
 	PutChecks(InjectionChecks injectionChecks) {
 		this.injectionChecks = injectionChecks;
 	}
-	
+
 	@Override
 	public void initialize(IPathState ps) {
 		final IModuleContext ctx = ps.createModuleContext();
@@ -32,11 +32,12 @@ public class PutChecks extends CrawlerModule {
 		} else {
 			final int rc = response.getResponseCode();
 			final IPageFingerprint fp = response.getPageFingerprint();
-			
+
 			if(rc >= 200 && rc < 300 && !ps.matchesPathFingerprint(fp)) {
 				ctx.publishAlert("vinfo-http-put", "HTTP PUT succeeded", request, response);
 			}
 		}
-		injectionChecks.runPageVariabilityCheck(ctx.getPathState());		
+
+		injectionChecks.runPageVariabilityCheck(ctx.getPathState());
 	}
 }
