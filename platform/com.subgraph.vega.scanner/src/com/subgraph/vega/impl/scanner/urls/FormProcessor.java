@@ -24,8 +24,10 @@ public class FormProcessor {
 		final IHTMLParseResult html = response.getParsedHTML();
 		if(html == null)
 			return;
+
 		final HTMLDocument document = html.getDOMDocument();
 		final HTMLCollection forms = document.getForms();
+
 		for(int i = 0; i < forms.getLength(); i++) {
 			Node n = forms.item(i);
 			if(n instanceof Element) {
@@ -35,7 +37,6 @@ public class FormProcessor {
 	}
 
 	private void processFormElement(IModuleContext ctx, HttpUriRequest request, Element form) {
-
 		final FormProcessingState fps = new FormProcessingState(request.getURI(), form.getAttribute("action"), form.getAttribute("method"));
 		if(!fps.isValid())
 			return;
