@@ -128,6 +128,7 @@ public class PathState implements IPathState {
 	@Override
 	public void setDone() {
 		isDone = true;
+		response = null;
 	}
 
 	private void setLocked() {
