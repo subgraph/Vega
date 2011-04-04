@@ -5,12 +5,14 @@ import java.util.Date;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -31,13 +33,26 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	private transient Activator activator;
 	
 	
-	private static HttpRequest copyRequestHeader(HttpRequest request) {
+	private static HttpRequest copyRequest(HttpRequest request) {
 		if(request == null)
 			return null;
+		if(request instanceof HttpEntityEnclosingRequest) 
+			return copyEntityEnclosingRequest((HttpEntityEnclosingRequest) request);
+		
 		final HttpRequest newRequest = new BasicHttpRequest(request.getRequestLine());
 		copyHeaders(request, newRequest);
 		return newRequest;
 	}
+	
+	private static HttpRequest copyEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
+		final HttpEntityEnclosingRequest newRequest = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
+		final HttpEntity entity = request.getEntity();
+		if(entity != null)
+			newRequest.setEntity(createEntityCopy(entity));
+		copyHeaders(request, newRequest);
+		return newRequest;
+	}
+	
 	
 	private static HttpResponse copyResponseHeader(HttpResponse response) {
 		if(response == null)
@@ -49,7 +64,10 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	
 	private static HttpEntity createEntityCopy(HttpEntity entity) {
 		try {
-			return new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			newEntity.setContentEncoding(entity.getContentEncoding());
+			newEntity.setContentType(entity.getContentType());
+			return newEntity;
 		} catch (IOException e) {
 			return null;
 		}
@@ -69,7 +87,8 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 
 	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host) {
 		this.requestId = requestId;
-		this.request = copyRequestHeader(request);
+		this.request = copyRequest(request);
+		
 		this.response = copyResponseHeader(response);
 		if(response.getEntity() != null) {
 			final HttpEntity e = createEntityCopy(response.getEntity());
