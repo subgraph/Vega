@@ -97,7 +97,6 @@ public class HttpRequestView extends ViewPart {
 				Object o = ((IStructuredSelection)selection).getFirstElement();
 				if (o == null) {
 					filter.setFilterEntity(null);
-					tableViewer.refresh();
 				} else if (o instanceof IWebEntity) {
 					filterByEntity((IWebEntity) o);
 				}				
@@ -155,7 +154,6 @@ public class HttpRequestView extends ViewPart {
 	
 	private void filterByEntity(IWebEntity entity) {
 		filter.setFilterEntity(entity);
-		tableViewer.refresh();
 		if(tableViewer.getTable().getItemCount() == 1) {
 			Object ob = tableViewer.getElementAt(0);
 			tableViewer.setSelection(new StructuredSelection(ob), true);

@@ -51,6 +51,7 @@ public class HttpViewFilter extends ViewerFilter {
 	
 	void setFilterEntity(IWebEntity e) {
 		filterEntity = e;
+		tableViewer.refresh();
 	}
 	
 	private boolean selectTransaction(IRequestLogRecord record) {
