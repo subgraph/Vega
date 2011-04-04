@@ -15,6 +15,7 @@ import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
+import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
@@ -38,7 +39,7 @@ public class UriParser {
 		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(contentAnalyzer, this, filter));
 	}
 
-	public void processUri(URI uri) {
+	public IPathState processUri(URI uri) {
 		final HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 		final IWebHost webHost = getWebHost(host);
 		IWebPath path = webHost.getRootPath();
@@ -56,6 +57,7 @@ public class UriParser {
 			}
 			path = childPath;
 		}
+		return pathStateManager.getStateForPath(path);
 	}
 
 	private IWebHost getWebHost(HttpHost host) {

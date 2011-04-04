@@ -21,11 +21,13 @@ public class ResponseAnalyzer {
 	private final IContentAnalyzer contentAnalyzer;
 	private final UriParser uriParser;
 	private final UriFilter uriFilter;
+	private final FormProcessor formProcessor;
 	
 	public ResponseAnalyzer(IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter) {
 		this.contentAnalyzer = contentAnalyzer;
 		this.uriParser = uriParser;
 		this.uriFilter = uriFilter;
+		this.formProcessor = new FormProcessor(uriParser);
 	}
 	
 	public IContentAnalyzer getContentAnalyzer() {
@@ -42,7 +44,7 @@ public class ResponseAnalyzer {
 			if(uriFilter.filter(u))
 				uriParser.processUri(u);
 		}
-		
+		formProcessor.processForms(ctx, req, res);		
 	}
 
 	public void analyzeContent(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
