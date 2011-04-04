@@ -1,5 +1,7 @@
 package com.subgraph.vega.api.scanner;
 
+import java.util.List;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
@@ -30,7 +32,9 @@ public interface IPathState {
 	void setUnknownFingerprint(IPageFingerprint fp);
 	IPageFingerprint getPathFingerprint();
 	IPageFingerprint getUnknownFingerprint();
-	
+	void maybeAddParameters(List<NameValuePair> parameters);
+	void maybeAddPostParameters(List<NameValuePair> parameters);
+
 	int allocateXssId();
 	String createXssTag(int xssId);
 	String createXssTag(String prefix, int xssId);
