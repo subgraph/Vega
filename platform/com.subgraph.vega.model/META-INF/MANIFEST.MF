@@ -24,5 +24,5 @@ Import-Package: com.google.common.base;version="1.6.0",
  org.apache.http.util;version="4.0.0",
  org.w3c.dom.html2
 Service-Component: OSGI-INF/model.xml
-Bundle-ClassPath: lib/db4o-7.12.156.14667-all-java5.jar,
+Bundle-ClassPath: lib/db4o-8.0.184.15484-all-java5.jar,
  .
