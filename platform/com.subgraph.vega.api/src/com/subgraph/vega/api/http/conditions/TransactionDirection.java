@@ -1,13 +1,13 @@
-package com.subgraph.vega.api.http.proxy;
+package com.subgraph.vega.api.http.conditions;
 
-public enum ProxyTransactionDirection {
+public enum TransactionDirection {
 	DIRECTION_REQUEST("request", (1 << 0)),
 	DIRECTION_RESPONSE("response", (1 << 1));
 
 	private final String name;
 	private final int mask;
 
-	private ProxyTransactionDirection(String name, int mask) {
+	private TransactionDirection(String name, int mask) {
 		this.name = name;
 		this.mask = mask;
 	}

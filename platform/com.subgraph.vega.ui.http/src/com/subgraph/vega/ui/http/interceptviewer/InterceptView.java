@@ -21,11 +21,11 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.ViewPart;
 
+import com.subgraph.vega.api.http.conditions.TransactionDirection;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
-import com.subgraph.vega.api.http.proxy.ProxyTransactionDirection;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.httpeditor.RequestRenderer;
@@ -160,7 +160,7 @@ public class InterceptView extends ViewPart {
 
 		final TabItem optionsItem = new TabItem(rootControl, SWT.NONE);
 		optionsItem.setText("Options");
-		OptionsViewer requestOptions = new OptionsViewer(ProxyTransactionDirection.DIRECTION_REQUEST);
+		OptionsViewer requestOptions = new OptionsViewer(TransactionDirection.DIRECTION_REQUEST);
 		optionsItem.setControl(requestOptions.createViewer(rootControl));
 
 		return rootControl;
@@ -286,7 +286,7 @@ public class InterceptView extends ViewPart {
 
 		final TabItem optionsItem = new TabItem(rootControl, SWT.NONE);
 		optionsItem.setText("Options");
-		OptionsViewer requestOptions = new OptionsViewer(ProxyTransactionDirection.DIRECTION_RESPONSE);
+		OptionsViewer requestOptions = new OptionsViewer(TransactionDirection.DIRECTION_RESPONSE);
 		optionsItem.setControl(requestOptions.createViewer(rootControl));
 
 		return rootControl;

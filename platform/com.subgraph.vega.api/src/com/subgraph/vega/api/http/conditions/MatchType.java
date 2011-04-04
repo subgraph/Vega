@@ -1,16 +1,17 @@
-package com.subgraph.vega.api.http.proxy;
+package com.subgraph.vega.api.http.conditions;
 
-public enum HttpInterceptorBreakpointMatchType {
+public enum MatchType {
 	MATCH("matches"),
 	NO_MATCH("does not match");
 
 	private final String name;
 
-	private HttpInterceptorBreakpointMatchType(String name) {
+	private MatchType(String name) {
 		this.name = name;
 	}
 
 	public String getName() {
 		return name;
 	}
+
 }

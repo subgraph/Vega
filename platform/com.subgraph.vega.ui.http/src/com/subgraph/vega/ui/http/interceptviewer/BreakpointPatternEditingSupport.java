@@ -5,7 +5,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 
-import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
+import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
 
 public class BreakpointPatternEditingSupport extends EditingSupport {
 	private final TableViewer viewer;
@@ -27,12 +27,12 @@ public class BreakpointPatternEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		return ((IHttpInterceptorBreakpoint) element).getPattern();
+		return ((IHttpBooleanCondition) element).getPattern();
 	}
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		((IHttpInterceptorBreakpoint) element).setPattern((String) value);
+		((IHttpBooleanCondition) element).setPattern((String) value);
 		viewer.refresh();
 	}
 }
