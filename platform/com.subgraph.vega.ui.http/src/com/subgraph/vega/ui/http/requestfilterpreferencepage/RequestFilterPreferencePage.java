@@ -1,15 +1,15 @@
 package com.subgraph.vega.ui.http.requestfilterpreferencepage;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -20,8 +20,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.subgraph.vega.api.http.conditions.ConditionType;
+import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
 import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
-import com.subgraph.vega.api.http.conditions.MatchType;
 import com.subgraph.vega.http.conditions.HttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 
@@ -110,6 +110,7 @@ public class RequestFilterPreferencePage extends PreferencePage implements IWork
 		button = new Button(rootControl, SWT.PUSH);
 		button.setText("remove");
 		button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		button.addSelectionListener(createSelectionListenerButtonRemove());
 
 		return rootControl;
 	}
@@ -118,6 +119,21 @@ public class RequestFilterPreferencePage extends PreferencePage implements IWork
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openConditionCreateDialog();
+			}
+		};
+	}
+
+	private SelectionListener createSelectionListenerButtonRemove() {
+		return new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					Object element = i.next();
+					if (element instanceof IHttpBooleanCondition) {
+						conditionSet.removeCondition((IHttpBooleanCondition)element);
+					}
+				}
+				treeViewer.refresh();
 			}
 		};
 	}
