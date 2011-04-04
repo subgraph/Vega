@@ -13,17 +13,17 @@ import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
 
 public class ModuleContext implements IModuleContext {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final PathStateManager scanState;
-	private final PathStateRequestBuilder requestBuilder;
+	private final IRequestBuilder requestBuilder;
 	private final IPathState pathState;
 	private final int currentIndex;
 	private final ModuleContextState contextState;
 
-	ModuleContext(PathStateManager scanState,
-			PathStateRequestBuilder requestBuilder, IPathState pathState, int index) {
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState, int index) {
 		this.scanState = scanState;
 		this.requestBuilder = requestBuilder;
 		this.pathState = pathState;
@@ -31,7 +31,7 @@ public class ModuleContext implements IModuleContext {
 		contextState = new ModuleContextState();
 	}
 
-	ModuleContext(PathStateManager scanState, PathStateRequestBuilder requestBuilder, IPathState pathState) {
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState) {
 		this(scanState, requestBuilder, pathState, -1);
 	}
 
@@ -133,7 +133,7 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void submitRequest(ICrawlerResponseProcessor callback, int flag) {
-		final HttpUriRequest req = requestBuilder.createGetRequest();
+		final HttpUriRequest req = requestBuilder.createBasicRequest();
 		if (req != null)
 			submitRequest(req, callback, flag);
 	}
