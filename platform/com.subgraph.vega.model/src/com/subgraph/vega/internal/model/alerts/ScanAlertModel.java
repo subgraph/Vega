@@ -20,24 +20,24 @@ public class ScanAlertModel implements IScanAlertModel {
 	private final ObjectContainer database;
 	private final ScanAlertFactory alertFactory;
 	private final Lock lock = new ReentrantLock();
-	
+
 	public ScanAlertModel(ObjectContainer database, IXmlRepository xmlRepository) {
 		this.database = database;
 		this.eventManager = new EventListenerManager();
 		this.alertFactory = new ScanAlertFactory(xmlRepository);
 	}
-	
+
 	@Override
 	public void addAlertListenerAndPopulate(IEventHandler listener) {
 		for(IScanAlert alert: getAlerts()) {
 			listener.handleEvent(new NewScanAlertEvent(alert));
 		}
-		eventManager.addListener(listener);		
+		eventManager.addListener(listener);
 	}
 
 	@Override
 	public void removeAlertListener(IEventHandler listener) {
-		eventManager.removeListener(listener);		
+		eventManager.removeListener(listener);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class ScanAlertModel implements IScanAlertModel {
 	public IScanAlert createAlert(String type, String key, long requestId) {
 		return alertFactory.createAlert(key, type, requestId);
 	}
-	
+
 	@Override
 	public IScanAlert createAlert(String type) {
 		return alertFactory.createAlert(null, type, -1);
@@ -68,7 +68,7 @@ public class ScanAlertModel implements IScanAlertModel {
 			return results.get(0);
 		}
 	}
-	
+
 	private List<IScanAlert> getAlertListForKey(final String key) {
 		return database.query(new Predicate<IScanAlert>() {
 			private static final long serialVersionUID = 1L;
@@ -78,16 +78,17 @@ public class ScanAlertModel implements IScanAlertModel {
 			}
 		});
 	}
-	
+
 	@Override
 	public void addAlert(IScanAlert alert) {
-		
+
 		if(rejectDuplicateAlert(alert))
 			return;
 		synchronized(database) {
 			database.store(alert);
+			database.commit();
 		}
-		eventManager.fireEvent(new NewScanAlertEvent(alert));		
+		eventManager.fireEvent(new NewScanAlertEvent(alert));
 	}
 
 	@Override
@@ -106,7 +107,7 @@ public class ScanAlertModel implements IScanAlertModel {
 	public void unlock() {
 		lock.unlock();
 	}
-	
+
 	private boolean rejectDuplicateAlert(IScanAlert alert) {
 		if(alert.getResource() == null)
 			return false;
@@ -119,12 +120,12 @@ public class ScanAlertModel implements IScanAlertModel {
 		else
 			return hasAlertKey(alert.getKey());
 	}
-	
+
 	@Override
 	public boolean hasAlertKey(String key) {
 		return getAlertByKey(key) != null;
 	}
-	
+
 	private List<IScanAlert> getAlertListForResource(final String resource) {
 		synchronized(database) {
 		return database.query(new Predicate<IScanAlert>() {

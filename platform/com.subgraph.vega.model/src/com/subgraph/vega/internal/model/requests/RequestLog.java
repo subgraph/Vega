@@ -21,19 +21,20 @@ public class RequestLog implements IRequestLog {
 	private final Logger logger = Logger.getLogger("requests");
 	private final ObjectContainer database;
 	private final RequestLogId requestLogId;
-	
+
 	private final EventListenerManager eventManager = new EventListenerManager();
-	
+
 	public RequestLog(ObjectContainer database) {
 		this.database = database;
 		this.requestLogId = getRequestLogId(database);
 	}
-	
+
 	private RequestLogId getRequestLogId(ObjectContainer database) {
 		List<RequestLogId> result = database.query(RequestLogId.class);
 		if(result.size() == 0) {
 			RequestLogId rli = new RequestLogId();
 			database.store(rli);
+			database.commit();
 			return rli;
 		} else if(result.size() == 1) {
 			return result.get(0);
@@ -41,17 +42,18 @@ public class RequestLog implements IRequestLog {
 			throw new IllegalStateException("Database corrupted, found multiple RequestLogId instances");
 		}
 	}
-	
+
 	@Override
 	public long allocateRequestId() {
 		final long id = requestLogId.allocateId();
 		synchronized(database) {
 			database.store(requestLogId);
+			database.commit();
 			return id;
 		}
 	}
 
-	
+
 	@Override
 	public long addRequest(HttpRequest request, HttpHost host) {
 		final long id = allocateRequestId();
@@ -66,8 +68,9 @@ public class RequestLog implements IRequestLog {
 			if(record.getResponse().getEntity() != null)
 				database.store(record.getResponse().getEntity());
 			database.store(record);
+			database.commit();
 		}
-		eventManager.fireEvent(new AddRequestRecordEvent(record));		
+		eventManager.fireEvent(new AddRequestRecordEvent(record));
 	}
 
 	@Override
@@ -77,6 +80,7 @@ public class RequestLog implements IRequestLog {
 		final RequestLogRecord record = new RequestLogRecord(id, request, response, host);
 		synchronized(database) {
 			database.store(record);
+			database.commit();
 		}
 		eventManager.fireEvent(new AddRequestRecordEvent(record));
 		return id;
@@ -90,7 +94,7 @@ public class RequestLog implements IRequestLog {
 			return;
 		}
 		record.setResponse(response);
-		eventManager.fireEvent(new RequestRecordChangeEvent(record));		
+		eventManager.fireEvent(new RequestRecordChangeEvent(record));
 	}
 
 	@Override
@@ -100,10 +104,10 @@ public class RequestLog implements IRequestLog {
 				private static final long serialVersionUID = 1L;
 				@Override
 				public boolean match(RequestLogRecord record) {
-					return record.getRequestId() == requestId;	
+					return record.getRequestId() == requestId;
 				}
 			});
-		
+
 			if(result.size() == 0)
 				return null;
 			else if(result.size() == 1)
@@ -124,11 +128,11 @@ public class RequestLog implements IRequestLog {
 	public synchronized void addChangeListenerAndPopulate(IEventHandler listener) {
 		for(IRequestLogRecord record: getAllRecords())
 			listener.handleEvent(new AddRequestRecordEvent(record));
-		eventManager.addListener(listener);		
+		eventManager.addListener(listener);
 	}
 
 	@Override
 	public synchronized void removeChangeListener(IEventHandler listener) {
-		eventManager.removeListener(listener);		
+		eventManager.removeListener(listener);
 	}
 }

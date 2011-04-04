@@ -31,16 +31,16 @@ public class Workspace implements IWorkspace {
 	private final IHTMLParser htmlParser;
 	private final IXmlRepository xmlRepository;
 	private final WorkspaceLockStatus lockStatus;
-	
+
 	private IWebModel webModel;
 	private  IRequestLog requestLog;
 	private IScanAlertModel scanAlerts;
-	
+
 	private ObjectContainer database;
 	private boolean opened;
-	
+
 	private WorkspaceStatus workspaceStatus;
-	
+
 	Workspace(IWorkspaceEntry entry, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
 		this.configurationFactory = new DatabaseConfigurationFactory();
 		this.workspaceEntry = entry;
@@ -53,24 +53,25 @@ public class Workspace implements IWorkspace {
 		this.scanAlerts = null;
 		this.lockStatus = new WorkspaceLockStatus(eventManager);
 	}
-	
+
+	@Override
 	public boolean open() {
 		if(opened)
 			throw new IllegalStateException("open() called on workspace which has already been opened.");
-		
+
 		database = openDatabase(getDatabasePath());
 		if(database == null)
 			return false;
 		opened = true;
 		eventManager.fireEvent(new WorkspaceOpenEvent(this));
-		return true;		
+		return true;
 	}
-	
+
 	private String getDatabasePath() {
 		final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
-		return databaseFile.getAbsolutePath();	
+		return databaseFile.getAbsolutePath();
 	}
-	
+
 	private ObjectContainer openDatabase(String databasePath) {
 		try {
 			final ObjectContainer db = configurationFactory.openContainer(databasePath);
@@ -86,21 +87,21 @@ public class Workspace implements IWorkspace {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public IWebModel getWebModel() {
 		if(!opened)
 			throw new IllegalStateException("Must open workspace first");
 		return webModel;
 	}
-	
+
 	@Override
 	public IRequestLog getRequestLog() {
 		if(!opened)
 			throw new IllegalStateException("Must open workspace first");
 		return requestLog;
 	}
-	
+
 	@Override
 	public IScanAlertModel getScanAlertModel() {
 		if(!opened)
@@ -108,14 +109,14 @@ public class Workspace implements IWorkspace {
 		return scanAlerts;
 	}
 
-	
+
 	@Override
 	public void close() {
 		if(!opened)
 			return;
 		if(lockStatus.isLocked())
 			throw new IllegalStateException("Cannot close locked workspace.");
-		
+
 		database.close();
 		opened = false;
 		eventManager.fireEvent(new WorkspaceCloseEvent(this));
@@ -123,17 +124,17 @@ public class Workspace implements IWorkspace {
 
 	@Override
 	public void setProperty(String name, Object value) {
-		getProperties().setProperty(name, value);		
+		getProperties().setProperty(name, value);
 	}
 
 	@Override
 	public void setStringProperty(String name, String value) {
-		getProperties().setStringProperty(name, value);		
+		getProperties().setStringProperty(name, value);
 	}
 
 	@Override
 	public void setIntegerProperty(String name, int value) {
-		getProperties().setIntegerProperty(name, value);		
+		getProperties().setIntegerProperty(name, value);
 	}
 
 	@Override
@@ -155,7 +156,7 @@ public class Workspace implements IWorkspace {
 	public List<String> propertyKeys() {
 		return getProperties().propertyKeys();
 	}
-	
+
 	private IModelProperties getProperties() {
 		if(workspaceStatus != null)
 			return workspaceStatus.getProperties();
@@ -164,6 +165,7 @@ public class Workspace implements IWorkspace {
 			if(result.size() == 0) {
 				workspaceStatus = new WorkspaceStatus();
 				database.store(workspaceStatus);
+				database.commit();
 				return workspaceStatus.getProperties();
 			} else if(result.size() == 1) {
 				workspaceStatus =  result.get(0);
@@ -181,34 +183,34 @@ public class Workspace implements IWorkspace {
 
 	@Override
 	public void consoleWrite(String output) {
-		console.write(output);		
+		console.write(output);
 	}
 
 	@Override
 	public void consoleError(String output) {
-		console.error(output);		
+		console.error(output);
 	}
 
 	@Override
 	public void lock() {
-		lockStatus.lock();		
+		lockStatus.lock();
 	}
 
 	@Override
 	public void unlock() {
-		lockStatus.unlock();		
+		lockStatus.unlock();
 	}
 
 	@Override
 	public void reset() {
 		if(lockStatus.isLocked())
 			throw new IllegalStateException("Cannot reset locked workspace");
-		
+
 		synchronized(database) {
 			database.close();
 			final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
 			if(!databaseFile.delete()) {
-			
+
 			}
 			database = openDatabase(getDatabasePath());
 			if(database != null) {
@@ -216,6 +218,6 @@ public class Workspace implements IWorkspace {
 			} else {
 				eventManager.fireEvent(new WorkspaceCloseEvent(this));
 			}
-		}		
+		}
 	}
 }

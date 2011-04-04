@@ -28,10 +28,10 @@ import com.subgraph.vega.internal.model.web.forms.FormParser;
 
 public class WebModel implements IWebModel {
 	private final EventListenerManager eventManager = new EventListenerManager();
-	
+
 	private final ObjectContainer database;
-	private FormParser formParser;
-	
+	private final FormParser formParser;
+
 	public WebModel(ObjectContainer database) {
 		this.formParser = new FormParser(this);
 		this.database = database;
@@ -46,11 +46,12 @@ public class WebModel implements IWebModel {
 					final WebEntity entity = (WebEntity) ob;
 					entity.setEventManager(eventManager);
 					entity.setDatabase(WebModel.this.database);
-				}				
+				}
 			}
 		});
 	}
-	
+
+	@Override
 	synchronized public Collection<IWebHost> getAllWebHosts() {
 		synchronized(database) {
 			List<IWebHost> hosts =  database.query(IWebHost.class);
@@ -66,7 +67,7 @@ public class WebModel implements IWebModel {
 				@Override
 				public boolean match(IWebHost host) {
 					return host.isScanned() == false;
-				}			
+				}
 			});
 			return hosts;
 		}
@@ -80,7 +81,7 @@ public class WebModel implements IWebModel {
 				@Override
 				public boolean match(IWebPath path) {
 					return path.isScanned() == false;
-				}			
+				}
 			});
 			return paths;
 		}
@@ -102,11 +103,11 @@ public class WebModel implements IWebModel {
 		IWebPath path =  wh.addPath(uriToPath(uri));
 		return path;
 	}
-	
+
 	private HttpHost uriToHost(URI uri) {
 		return new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 	}
-	
+
 	private String uriToPath(URI uri) {
 		return uri.getPath();
 	}
@@ -128,11 +129,11 @@ public class WebModel implements IWebModel {
 			for(WebHost wh: database.query(WebHost.class)) {
 				if(wh.getHttpHost().equals(host))
 					return wh;
-			}		
+			}
 			return null;
 		}
 	}
-	
+
 	@Override
 	synchronized public IWebHost createWebHostFromHttpHost(HttpHost host) {
 		final WebHost wh = getWebHostByHttpHost(host);
@@ -145,6 +146,7 @@ public class WebModel implements IWebModel {
 			database.store(newHost);
 			database.store(newHost.getRootMountPoint());
 			database.store(newHost.getRootPath());
+			database.commit();
 		}
 		//newHost.getRootPath().setDatabase(database);
 		notifyNewEntity(newHost);
@@ -158,14 +160,14 @@ public class WebModel implements IWebModel {
 				listener.handleEvent(new NewWebEntityEvent(wh));
 			}
 			eventManager.addListener(listener);
-		}		
+		}
 	}
 
 	@Override
 	public void removeChangeListener(IEventHandler listener) {
-		eventManager.removeListener(listener);		
+		eventManager.removeListener(listener);
 	}
-	
+
 	private void notifyNewEntity(IWebEntity entity) {
 		eventManager.fireEvent(new NewWebEntityEvent(entity));
 	}

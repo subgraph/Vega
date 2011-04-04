@@ -26,31 +26,31 @@ import com.subgraph.vega.api.model.web.IWebPathParameters;
 import com.subgraph.vega.api.model.web.IWebResponse;
 
 public class WebPath extends WebEntity implements IWebPath {
-	
+
 	static WebPath createRootPath(EventListenerManager eventManager, ObjectContainer database) {
 		return new WebPath(eventManager, database, null, "");
 	}
-	
+
 	private final WebPath parentPath;
 	private final String pathComponent;
 	private final Map<String, WebPath> childPathMap = new ActivatableHashMap<String, WebPath>();
-	
+
 	private IWebMountPoint mountPoint;
 	private final WebPathParameters getParameters = new WebPathParameters();
 	private final WebPathParameters postParameters = new WebPathParameters();
-	
+
 	private final Map<List<NameValuePair>, IWebResponse> getResponses = new ActivatableHashMap<List<NameValuePair>, IWebResponse>();
 	private final Map<List<NameValuePair>, IWebResponse> postResponses = new ActivatableHashMap<List<NameValuePair>, IWebResponse>();
 
 	private PathType pathType;
-		
+
 	private transient URI cachedUri;
 	private transient String cachedFullPath;
-	
+
 	private WebPath(EventListenerManager eventManager, ObjectContainer database, WebPath parentPath, String pathComponent) {
 		this(eventManager, database, parentPath, pathComponent, null);
 	}
-	
+
 	WebPath(EventListenerManager eventManager, ObjectContainer database, WebPath parentPath, String pathComponent, IWebMountPoint mountPoint) {
 		super(eventManager, database);
 		this.parentPath = parentPath;
@@ -58,22 +58,22 @@ public class WebPath extends WebEntity implements IWebPath {
 		this.mountPoint = mountPoint;
 		this.pathType = PathType.PATH_UNKNOWN;
 	}
-	
+
 	@Override
 	public WebPath getParentPath() {
 		return parentPath;
 	}
-	
+
 	@Override
 	public URI getUri() {
 		activate(ActivationPurpose.READ);
 		synchronized(this) {
-			if(cachedUri == null) 
+			if(cachedUri == null)
 				cachedUri = generateURI();
 			return cachedUri;
 		}
 	}
-	
+
 	private URI generateURI() {
 		final URI hostUri = mountPoint.getWebHost().getUri();
 		try {
@@ -85,24 +85,25 @@ public class WebPath extends WebEntity implements IWebPath {
 		}
 	}
 
+	@Override
 	public String getFullPath() {
-		if(cachedFullPath == null) 
+		if(cachedFullPath == null)
 			cachedFullPath = generateFullPath();
 		return cachedFullPath;
 	}
-	
+
 	private String generateFullPath() {
 		activate(ActivationPurpose.READ);
 		if(parentPath == null)
 			return "/";
-		
+
 		final String parentFullPath = parentPath.getFullPath();
 		if(parentFullPath.endsWith("/"))
 			return parentFullPath + pathComponent;
 		else
 			return parentFullPath + "/" + pathComponent;
 	}
-	
+
 	@Override
 	public IWebMountPoint getMountPoint() {
 		activate(ActivationPurpose.READ);
@@ -116,12 +117,12 @@ public class WebPath extends WebEntity implements IWebPath {
 			return new HashSet<IWebPath>(childPathMap.values());
 		}
 	}
-	
+
 	void setMountPoint(IWebMountPoint mountPoint) {
 		activate(ActivationPurpose.READ);
 		this.mountPoint = mountPoint;
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if(this == other) {
@@ -134,12 +135,12 @@ public class WebPath extends WebEntity implements IWebPath {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(this.getMountPoint().getWebHost(), this.getFullPath());
 	}
-	
+
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this).add("host", mountPoint.getWebHost()).add("path", getFullPath()).toString();
@@ -180,7 +181,7 @@ public class WebPath extends WebEntity implements IWebPath {
 		activate(ActivationPurpose.READ);
 		return postParameters;
 	}
-	
+
 	@Override
 	public IWebPath getChildPath(String pathComponent) {
 		activate(ActivationPurpose.READ);
@@ -188,21 +189,22 @@ public class WebPath extends WebEntity implements IWebPath {
 			return childPathMap.get(pathComponent);
 		}
 	}
-	
+
 	@Override
 	public WebPath addChildPath(String pathComponent) {
 		activate(ActivationPurpose.READ);
 		synchronized(childPathMap) {
-			if(childPathMap.containsKey(pathComponent)) 	
+			if(childPathMap.containsKey(pathComponent))
 				return childPathMap.get(pathComponent);
-			
+
 			WebPath newPath = new WebPath(eventManager, database, this, pathComponent, getMountPoint());
 
 			ObjectContainer database = getDatabase();
 			synchronized(database) {
 				database.store(newPath);
+				database.commit();
 			}
-			
+
 			newPath.setDatabase(database);
 			childPathMap.put(pathComponent, newPath);
 			notifyNewEntity(newPath);
@@ -258,7 +260,7 @@ public class WebPath extends WebEntity implements IWebPath {
 			maybeAddWebResponse(getResponses, parseParameters(query), mimeType);
 		}
 	}
-	
+
 	private void maybeAddWebResponse(Map<List<NameValuePair>, IWebResponse> responseMap, List<NameValuePair> parameters, String mimeType) {
 		if(responseMap.containsKey(parameters)) {
 			final IWebResponse wr = responseMap.get(parameters);
@@ -276,6 +278,7 @@ public class WebPath extends WebEntity implements IWebPath {
 		ObjectContainer database = getDatabase();
 		synchronized(database) {
 			database.store(response);
+			database.commit();
 		}
 		response.setDatabase(getDatabase());
 		return response;
