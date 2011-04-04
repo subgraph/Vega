@@ -21,7 +21,7 @@ public class PathStateParameterManager {
 	// For each unique set of parameters, we have an indexed list of PathState nodes, one for each parameter
 	private final Map<Set<NameValuePair>, List<PathState>> parametersToPathStates = new HashMap<Set<NameValuePair>, List<PathState>>();
 	private final Map<Set<NameValuePair>, List<PathState>> parametersToPostPathStates = new HashMap<Set<NameValuePair>, List<PathState>>();
-	
+
 	PathStateParameterManager(PathState ps) {
 		this.pathState = ps;
 		final IWebPath path = ps.getPath();
@@ -31,28 +31,28 @@ public class PathStateParameterManager {
 			addParameterList(plist);
 		}
 	}
-	
+
 	public synchronized List<PathState> addParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		if(parametersToPathStates.containsKey(pset))
 			return parametersToPathStates.get(pset);
-		
+
 		final List<PathState> pathStates = new ArrayList<PathState>(plist.size());
-		
+
 		parametersToPathStates.put(pset, pathStates);
-		
+
 		for(int i = 0; i < plist.size(); i++)  {
 			PathState st = PathState.createParameterPathState(fileFetchProcessor,  pathState, plist, i);
 			pathStates.add(st);
 		}
 		return pathStates;
 	}
-	
+
 	public synchronized boolean hasParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		return parametersToPathStates.containsKey(pset);
 	}
-	
+
 	public synchronized List<PathState> getStatesForParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		final List<PathState> result = parametersToPathStates.get(pset);
@@ -61,12 +61,12 @@ public class PathStateParameterManager {
 		else
 			return result;
 	}
-	
+
 	public synchronized boolean hasPostParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		return parametersToPostPathStates.containsKey(pset);
 	}
-	
+
 	public synchronized List<PathState> getStatesForPostParameterList(List<NameValuePair> plist) {
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		final List<PathState> result = parametersToPostPathStates.get(pset);
@@ -77,11 +77,14 @@ public class PathStateParameterManager {
 	}
 
 	public synchronized List<PathState> addPostParameterList(List<NameValuePair> plist) {
+
 		final Set<NameValuePair> pset = new HashSet<NameValuePair>(plist);
 		if(parametersToPostPathStates.containsKey(pset))
 			return parametersToPostPathStates.get(pset);
-		
+
 		final List<PathState> pathStates = new ArrayList<PathState>();
+		parametersToPostPathStates.put(pset, pathStates);
+
 		for(int i = 0; i < plist.size(); i++) {
 			PathState ps = PathState.createPostParameterPathState(fileFetchProcessor, pathState, plist, i);
 			pathStates.add(ps);
