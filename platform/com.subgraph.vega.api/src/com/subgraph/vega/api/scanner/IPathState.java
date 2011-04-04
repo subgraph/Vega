@@ -13,6 +13,7 @@ import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 public interface IPathState {
 	IPathState getParentState();
 	boolean isParametric();
+	boolean doInjectionChecks();
 	boolean isDone();
 	void setFailed404Detection();
 	boolean hasFailed404Detection();
@@ -43,14 +44,14 @@ public interface IPathState {
 
 	HttpUriRequest createAlteredRequest(String value, boolean append);
 	HttpUriRequest createRequest();
-	
+
 	void setResponse(IHttpResponse response);
 	IHttpResponse getResponse();
 	void unlockChildren();
 	IPathState get404Parent();
 	void setPageMissing();
 	boolean matchesPathFingerprint(IPageFingerprint fp);
-	
+
 	void setBogusParameter();
 	boolean isBogusParameter();
 	void setSureDirectory();
@@ -60,8 +61,8 @@ public interface IPathState {
 
 	void setBadParentDirectory();
 	boolean hasBadParentDirectory();
-	
+
 	boolean isIPSDetected();
 	void setIPSDetected();
-	
+
 }

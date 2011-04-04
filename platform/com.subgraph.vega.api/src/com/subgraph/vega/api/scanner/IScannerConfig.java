@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 public interface IScannerConfig {
-	
+
 	void setBaseURI(URI baseURI);
 	void setCookieString(String cookieString);
 	void setBasicUsername(String username);
@@ -29,4 +29,6 @@ public interface IScannerConfig {
 	List<String> getExclusions();
 	boolean getLogAllRequests();
 	boolean getDisplayDebugOutput();
+	boolean getDirectoryInjectionChecksFlag();
+	boolean getNonParameterFileInjectionChecksFlag();
 }

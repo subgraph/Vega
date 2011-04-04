@@ -18,42 +18,42 @@ public class ScannerConfig implements IScannerConfig {
 	private String ntlmPassword;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
-	
+
 	@Override
 	public void setBaseURI(URI baseURI) {
-		this.baseURI = baseURI;		
+		this.baseURI = baseURI;
 	}
-	
+
 	@Override
 	public void setCookieString(String cookieString) {
 		this.cookieString = cookieString;
 	}
-	
+
 	@Override
 	public void setModulesList(List<String> modules) {
 		modulesList = modules;
 	}
-	
-	@Override 
+
+	@Override
 	public void setExclusions(List<String> exclusionsList) {
 		exclusions = exclusionsList;
 	}
-	
+
 	@Override
 	public void setBasicUsername(String username) {
 		basicUsername = username;
 	}
-	
+
 	@Override
 	public void setBasicPassword(String password) {
 		basicPassword = password;
 	}
-	
+
 	@Override
 	public void setBasicRealm(String realm) {
 		basicRealm = realm;
 	}
-	
+
 	@Override
 	public void setBasicDomain(String domain) {
 		basicDomain = domain;
@@ -63,17 +63,17 @@ public class ScannerConfig implements IScannerConfig {
 	public void setNtlmUsername(String username) {
 		ntlmUsername = username;
 	}
-	
+
 	@Override
 	public void setNtlmPassword(String password) {
 		ntlmPassword = password;
 	}
-	
+
 	@Override
  	public URI getBaseURI() {
 		return baseURI;
 	}
-	
+
 	@Override
 	public String getCookieString() {
 		return cookieString;
@@ -83,37 +83,37 @@ public class ScannerConfig implements IScannerConfig {
 	public List<String> getModulesList() {
 		return modulesList;
 	}
-	
+
 	@Override
 	public List<String> getExclusions() {
 		return exclusions;
 	}
-	
+
 	@Override
 	public String getBasicUsername() {
 		return basicUsername;
 	}
-	
+
 	@Override
 	public String getBasicPassword() {
 		return basicPassword;
 	}
-	
+
 	@Override
 	public String getBasicRealm() {
 		return basicRealm;
 	}
-	
+
 	@Override
 	public String getBasicDomain() {
 		return basicDomain;
 	}
-	
+
 	@Override
 	public String getNtlmUsername() {
 		return ntlmUsername;
 	}
-	
+
 	@Override
 	public String getNtlmPassword() {
 		return ntlmPassword;
@@ -138,6 +138,16 @@ public class ScannerConfig implements IScannerConfig {
 	public boolean getDisplayDebugOutput() {
 		return displayDebugOutput;
 	}
-	
+
+	@Override
+	public boolean getDirectoryInjectionChecksFlag() {
+		return false;
+	}
+
+	@Override
+	public boolean getNonParameterFileInjectionChecksFlag() {
+		return false;
+	}
+
 }
 

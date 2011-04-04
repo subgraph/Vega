@@ -166,4 +166,12 @@ public class PathStateManager {
 	public IContentAnalyzer getContentAnalyzer() {
 		return responseAnalyzer.getContentAnalyzer();
 	}
+
+	public boolean getDirectoryInjectionChecksFlag() {
+		return config.getDirectoryInjectionChecksFlag();
+	}
+
+	public boolean getNonParameterFileInjectionChecksFlag() {
+		return config.getNonParameterFileInjectionChecksFlag();
+	}
 }

@@ -14,6 +14,7 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -437,4 +438,13 @@ public class PathState implements IPathState {
 		ipsDetected = true;
 	}
 
+	@Override
+	public boolean doInjectionChecks() {
+		if(isParametric())
+			return true;
+		else if(path.getPathType() == PathType.PATH_DIRECTORY)
+			return pathStateManager.getDirectoryInjectionChecksFlag();
+		else
+			return pathStateManager.getNonParameterFileInjectionChecksFlag();
+	}
 }
