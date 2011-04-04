@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -32,25 +33,32 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 		}
 		switch(columnIndex) {
 		case 0:
-			return record.getHttpHost().getHostName();
+			return Long.toString(record.getRequestId());
 		case 1:
-			return record.getRequest().getRequestLine().getMethod();
+			return record.getHttpHost().getHostName();
 		case 2:
+			return record.getRequest().getRequestLine().getMethod();
+		case 3:
 			if(uri.getQuery() != null)
 				return uri.getPath() + "?" + uri.getQuery();
 			else
 				return uri.getPath();
-		case 3:
-			return new Integer(record.getResponse().getStatusLine().getStatusCode()).toString();
 		case 4:
-			Header lengthHeader = record.getResponse().getFirstHeader("Content-Length");
-			return (lengthHeader == null)?"":lengthHeader.getValue();
+			return new Integer(record.getResponse().getStatusLine().getStatusCode()).toString();
+		case 5:
+			return getResponseLength(record.getResponse());
 		}
-		
-		
 		return null;
 	}
 	
-	
-
+	public String getResponseLength(HttpResponse response) {
+		final Header lengthHeader = response.getFirstHeader("Content-Length");
+		if(lengthHeader != null)
+			return lengthHeader.getValue();
+		
+		if(response.getEntity() == null)
+			return "";
+		
+		return Long.toString(response.getEntity().getContentLength());
+	}
 }
