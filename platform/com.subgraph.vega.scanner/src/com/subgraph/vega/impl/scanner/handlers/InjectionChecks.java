@@ -27,6 +27,8 @@ public class InjectionChecks {
 	public void runPageVariabilityCheck(IPathState ps) {
 		if(ps.doInjectionChecks())
 			pageVariabilityChecks.initialize(ps);
+		else
+			ps.setDone();
 	}
 
 	public void launchInjectionModules(IPathState ps) {
