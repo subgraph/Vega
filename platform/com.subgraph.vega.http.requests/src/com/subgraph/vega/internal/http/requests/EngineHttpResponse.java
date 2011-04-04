@@ -5,10 +5,12 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
@@ -22,6 +24,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
 	private final HttpResponse rawResponse;
+	private final long requestTime;
 	private final IHTMLParser htmlParser;
 	
 	private String cachedString;
@@ -32,11 +35,12 @@ public class EngineHttpResponse implements IHttpResponse {
 	private boolean isMostlyAsciiTestDone;
 	private boolean isMostlyAscii;
 
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, IHTMLParser htmlParser) {
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = originalRequest;
 		this.rawResponse = rawResponse;
+		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
 	}
 
@@ -66,7 +70,7 @@ public class EngineHttpResponse implements IHttpResponse {
 				stringExtractFailed = true;
 				return null;
 			} catch (IOException e) {
-				logger.log(Level.WARNING, "IO error extracting response entity: "+ e.getMessage(), e);
+				logger.log(Level.WARNING, "IO error extracting response entity for request "+ originalRequest.getRequestLine().getUri() +" : "+ e.getMessage(), e);
 				stringExtractFailed = true;
 				return null;
 			}
@@ -138,5 +142,30 @@ public class EngineHttpResponse implements IHttpResponse {
 		if(cachedFingerprint == null)
 			cachedFingerprint = PageFingerprint.generateFromCodeAndString(getResponseCode(), getBodyAsString());
 		return cachedFingerprint;
+	}
+
+	@Override
+	public ResponseStatus getResponseStatus() {
+		// XXX
+		return ResponseStatus.RESPONSE_OK;
+	}
+
+	@Override
+	public long getRequestMilliseconds() {
+		return requestTime;
+	}
+
+	@Override
+	public void lockResponseEntity() {
+		final HttpEntity entity = rawResponse.getEntity();
+		if(entity == null)
+			return;
+		try {
+			final HttpEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			rawResponse.setEntity(newEntity);
+			entity.consumeContent();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
+		}		
 	}
 }

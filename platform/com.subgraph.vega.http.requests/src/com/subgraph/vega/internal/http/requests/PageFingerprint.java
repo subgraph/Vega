@@ -26,19 +26,20 @@ public class PageFingerprint implements IPageFingerprint {
 				if(inSpace) {
 					inSpace = false;
 					fp.addWordLength(clen);
-					clen++;
+					clen = 0;
 				} else {
 					clen++;
 				}
 			}
 		}
+		fp.addWordLength(clen);
 		return fp;
 	}
 	
 	private final static int FP_SIZE = 10;
-	private final static int FP_MAX_LEN = 30;
-	private final static double FP_T_REL = 5.0d;
-	private final static double FP_T_ABS = 6.0d;
+	private final static int FP_MAX_LEN = 15;
+	private final static int FP_T_REL = 5;
+	private final static int FP_T_ABS = 6;
 	private final static int FP_B_FAIL = 3;
 	
 	
@@ -72,7 +73,7 @@ public class PageFingerprint implements IPageFingerprint {
 		for(int i = 0; i < FP_SIZE; i++) {
 			int diff = fpData[i] - other.getData()[i];
 			int scale = fpData[i] + other.getData()[i];
-			if( (Math.abs(diff) > (1.0d + (scale * FP_T_REL / 100.0))) || (Math.abs(diff) > FP_T_ABS)) {
+			if(!isRelativeMatch(diff, scale) || (Math.abs(diff) > FP_T_ABS)) {
 				bucketFail++;
 				if(bucketFail > FP_B_FAIL)
 					return false;
@@ -80,9 +81,13 @@ public class PageFingerprint implements IPageFingerprint {
 			totalDiff += diff;
 			totalScale += scale;
 		}
-		return Math.abs(totalDiff) < (1.0d + (totalScale * FP_T_REL / 100.0));
+		return isRelativeMatch(totalDiff, totalScale);
 	}
 	
+	private boolean isRelativeMatch(int diff, int scale) {
+		return Math.abs(diff) <= (1 + (scale * FP_T_REL / 100));
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("FP: (code=");

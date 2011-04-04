@@ -16,7 +16,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
-import com.db4o.collections.ActivatableArrayList;
 import com.db4o.collections.ActivatableHashMap;
 import com.google.common.base.Objects;
 import com.subgraph.vega.api.events.EventListenerManager;
@@ -40,9 +39,9 @@ public class WebPath extends WebEntity implements IWebPath {
 	private final WebPathParameters getParameters = new WebPathParameters();
 	private final WebPathParameters postParameters = new WebPathParameters();
 	
-	private final List<IWebResponse> getResponses = new ActivatableArrayList<IWebResponse>();
-	private final List<IWebResponse> postResponses = new ActivatableArrayList<IWebResponse>();
-	
+	private final Map<List<NameValuePair>, IWebResponse> getResponses = new ActivatableHashMap<List<NameValuePair>, IWebResponse>();
+	private final Map<List<NameValuePair>, IWebResponse> postResponses = new ActivatableHashMap<List<NameValuePair>, IWebResponse>();
+
 	private PathType pathType;
 		
 	private transient URI cachedUri;
@@ -221,7 +220,7 @@ public class WebPath extends WebEntity implements IWebPath {
 	public List<IWebResponse> getGetResponses() {
 		activate(ActivationPurpose.READ);
 		synchronized(getResponses) {
-			return Collections.unmodifiableList(new ArrayList<IWebResponse>(getResponses));
+			return Collections.unmodifiableList(new ArrayList<IWebResponse>(getResponses.values()));
 		}
 	}
 
@@ -229,7 +228,7 @@ public class WebPath extends WebEntity implements IWebPath {
 	public List<IWebResponse> getPostResponses() {
 		activate(ActivationPurpose.READ);
 		synchronized(postResponses) {
-			return Collections.unmodifiableList(new ArrayList<IWebResponse>(postResponses));
+			return Collections.unmodifiableList(new ArrayList<IWebResponse>(postResponses.values()));
 		}
 	}
 
@@ -248,10 +247,30 @@ public class WebPath extends WebEntity implements IWebPath {
 	public void addPostResponse(List<NameValuePair> parameters, String mimeType) {
 		activate(ActivationPurpose.READ);
 		synchronized(postResponses) {
-			postResponses.add(createWebResponse(parameters, mimeType));
+			maybeAddWebResponse(postResponses, parameters, mimeType);
+		}
+	}
+
+	@Override
+	public void addGetResponse(String query, String mimeType) {
+		activate(ActivationPurpose.READ);
+		synchronized(getResponses) {
+			maybeAddWebResponse(getResponses, parseParameters(query), mimeType);
 		}
 	}
 	
+	private void maybeAddWebResponse(Map<List<NameValuePair>, IWebResponse> responseMap, List<NameValuePair> parameters, String mimeType) {
+		if(responseMap.containsKey(parameters)) {
+			final IWebResponse wr = responseMap.get(parameters);
+			if(mimeType == null || mimeType.equals(wr.getMimeType()))
+				return;
+		}
+		// Possibly overwrite a map entry with a new entry that has same query but different mime type
+		final IWebResponse newResponse = createWebResponse(parameters, mimeType);
+		responseMap.put(parameters, newResponse);
+		notifyNewEntity(newResponse);
+	}
+
 	private WebResponse createWebResponse(List<NameValuePair> parameters, String mimeType) {
 		WebResponse response = new WebResponse(eventManager, database, this, parameters, mimeType);
 		ObjectContainer database = getDatabase();
@@ -262,14 +281,6 @@ public class WebPath extends WebEntity implements IWebPath {
 		return response;
 	}
 
-	@Override
-	public void addGetResponse(String query, String mimeType) {
-		activate(ActivationPurpose.READ);
-		synchronized(getResponses) {
-			getResponses.add(createWebResponse(parseParameters(query), mimeType));
-		}		
-	}
-	
 	private static List<NameValuePair> parseParameters(String query) {
 		if(query == null || query.isEmpty())
 			return Collections.emptyList();

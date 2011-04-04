@@ -11,7 +11,6 @@ public interface IScannerModuleRegistry {
 	List<IResponseProcessingModule> getResponseProcessingModules(boolean enabledOnly);
 	List<IPerMountPointModule> getPerMountPointModules(boolean enabledOnly);
 	List<IBasicModuleScript> getBasicModules(boolean enabledOnly);
-	List<IScannerModule> getInternalModules(boolean enabledOnly);
 	List<IScannerModule> getAllModules(boolean enabledOnly);
 	void resetAllModuleTimestamps();
 }

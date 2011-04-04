@@ -55,6 +55,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		contentAnalyzer.resetResponseProcessingQueue();
 	}
 	
 	@Override
@@ -96,7 +97,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), contentAnalyzer);
+		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig.getBaseURI()), contentAnalyzer);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

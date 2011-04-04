@@ -9,32 +9,31 @@ import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class DirectoryProcessor implements ICrawlerResponseProcessor {
-	private static final String PAGE_DOES_NOT_EXIST = "/nosuchpage123";
-	private final Dir404Processor dir404Processor;
-	
+
+	private final Dir404Tests dir404Tests;
+	private final SecondaryExtChecks secondaryExt;
+
 	public DirectoryProcessor() {
-		this.dir404Processor = new Dir404Processor();
+		this.dir404Tests = new Dir404Tests();
+		this.secondaryExt = new SecondaryExtChecks();
 	}
-	
+
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
 		final IModuleContext ctx = (IModuleContext) argument;
 		final IPathState ps = ctx.getPathState();
-		
 		ps.getPath().setVisited(true);
 
 		ps.setResponse(response);
-		//System.out.println("DirectoryProcessor: "+ request.getMethod() + " "+ request.getURI());
-		// Pivot checks for PIVOT_SERV
-		ctx.analyzePage(request, response);
-		
-		final IModuleContext newCtx = ps.createModuleContext();
-		
 
-		newCtx.submitAlteredRequest(dir404Processor, PAGE_DOES_NOT_EXIST);
-		// if parent, secondary_ext_init
-		
+		if(ps.isRootPath())
+			ctx.pivotChecks(request, response);
+
+		dir404Tests.initialize(ps);
+
+		if(ps.get404Parent() != null)
+			secondaryExt.initialize(ps);
 	}
 
 }

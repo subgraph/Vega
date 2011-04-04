@@ -1,5 +1,6 @@
 package com.subgraph.vega.impl.scanner.state;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -12,22 +13,26 @@ import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
 
 public class ModuleContext implements IModuleContext {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final PathStateManager scanState;
-	private final PathStateRequestBuilder requestBuilder;
+	private final IRequestBuilder requestBuilder;
 	private final IPathState pathState;
 	private final int currentIndex;
 	private final ModuleContextState contextState;
 
-	ModuleContext(PathStateManager scanState,
-			PathStateRequestBuilder requestBuilder, IPathState pathState) {
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState, int index) {
 		this.scanState = scanState;
 		this.requestBuilder = requestBuilder;
 		this.pathState = pathState;
-		currentIndex = -1;
+		currentIndex = index;
 		contextState = new ModuleContextState();
+	}
+
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState) {
+		this(scanState, requestBuilder, pathState, -1);
 	}
 
 	private ModuleContext(ModuleContext ctx, int index) {
@@ -46,6 +51,12 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public int incrementResponseCount() {
 		return contextState.incrementResponseCount();
+	}
+	
+
+	@Override
+	public boolean allResponsesReceived() {
+		return contextState.allResponsesReceieved();
 	}
 
 	@Override
@@ -103,17 +114,17 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback, int index) {
-		if(scanState.requestLoggingEnabled())
-			submitRequestWithLogging(request, callback, index);
-		else
-			scanState.getCrawler().submitTask(request, callback, new ModuleContext(this, index));
+		contextState.incrementSentRequestCount();
+		scanState.getCrawler().submitTask(request, getWrappedCallback(callback), new ModuleContext(this, index));
 	}
 	
-	private void submitRequestWithLogging(HttpUriRequest request, ICrawlerResponseProcessor callback, int index) {
-		final RequestLoggingCrawlerCallback wrapper = new RequestLoggingCrawlerCallback(scanState.getRequestLog(), callback);
-		scanState.getCrawler().submitTask(request, wrapper, new ModuleContext(this,index));
+	private ICrawlerResponseProcessor getWrappedCallback(ICrawlerResponseProcessor callback) {
+		if(scanState.requestLoggingEnabled())
+			return CrawlerCallbackWrapper.createLogging(scanState.getRequestLog(), callback);
+		else
+			return CrawlerCallbackWrapper.create(callback);
 	}
-
+	
 	@Override
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback) {
@@ -122,7 +133,7 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void submitRequest(ICrawlerResponseProcessor callback, int flag) {
-		final HttpUriRequest req = requestBuilder.createGetRequest();
+		final HttpUriRequest req = requestBuilder.createBasicRequest();
 		if (req != null)
 			submitRequest(req, callback, flag);
 	}
@@ -184,7 +195,7 @@ public class ModuleContext implements IModuleContext {
 	@Override
 	public void error(HttpUriRequest request, IHttpResponse response,
 			String message) {
-		final long requestId = scanState.getRequestLog().addRequestResponse(request, response.getRawResponse(), response.getHost());
+		final long requestId = scanState.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 		logger.warning("Error running module: "+ message + " (request logged with id="+ requestId +")");
 	}
 
@@ -195,18 +206,18 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzePage(this, request, response);
 	}
 
 	@Override
 	public void responseChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, pathState);
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzeContent(this, request, response);
+		scanState.analyzePage(this, request, response);
 	}
 
 	@Override
 	public void contentChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzeContent(request, response, pathState);
+		scanState.analyzeContent(this, request, response);
 	}
 
 	@Override
@@ -219,9 +230,9 @@ public class ModuleContext implements IModuleContext {
 
 	@Override
 	public void pivotChecks(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePivot(request, response, pathState);
-		scanState.analyzeContent(request, response, pathState);
-		scanState.analyzePage(request, response, pathState);
+		scanState.analyzePivot(this, request, response);
+		scanState.analyzeContent(this, request, response);
+		scanState.analyzePage(this, request, response);
 	}
 	
 	
@@ -230,13 +241,14 @@ public class ModuleContext implements IModuleContext {
 	}
 
 	public void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response, Object ...properties) {
+		debug("Publishing Alert: ("+ type + ") ["+ request.getURI() + "] " + message);
 		final IScanAlertModel alertModel = scanState.getScanAlertModel();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
 			alertModel.lock();
 			if(key != null && alertModel.hasAlertKey(key))
 				return;
-			final long requestId = requestLog.addRequestResponse(request, response.getRawResponse(), response.getHost());
+			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
 			final IScanAlert alert = alertModel.createAlert(type, key, requestId);
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
@@ -251,5 +263,9 @@ public class ModuleContext implements IModuleContext {
 		} finally {
 			alertModel.unlock();
 		}
+	}
+	
+	public List<String> getFileExtensionList() {
+		return scanState.getFileExtensionList();
 	}
 }

@@ -62,6 +62,6 @@ function handler(req, res, ctx)
 
 function publishAlert(ctx, msg, idx)
 {
-	ctx.publishAlert("directory-traversal", msg, ctx.getSavedRequest(idx), ctx.getSavedResponse(idx));
+	ctx.publishAlert("vinfo-directory-traversal", msg, ctx.getSavedRequest(idx), ctx.getSavedResponse(idx));
 }
 

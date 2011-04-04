@@ -28,6 +28,10 @@ public class ModuleContextJS {
 		return context.incrementResponseCount();
 	}
 
+	public boolean allResponsesReceived() {
+		return context.allResponsesReceived();
+	}
+
 	public void setModuleFailed() {
 		context.setModuleFailed();
 	}

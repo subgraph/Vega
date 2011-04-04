@@ -19,8 +19,9 @@ public class RequestConsumer implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
-	private volatile HttpUriRequest currentRequest;
 	private volatile boolean stop;
+	private final Object requestLock = new Object();
+	private volatile HttpUriRequest activeRequest = null;
 	
 	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
 		this.requestEngine = requestEngine;
@@ -43,10 +44,11 @@ public class RequestConsumer implements Runnable {
 	}
 	
 	void stop() {
-		HttpUriRequest r = currentRequest;
 		stop = true;
-		if(r != null)
-			r.abort();
+		synchronized (requestLock) {
+			if(activeRequest != null)
+				activeRequest.abort();
+		}
 	}
 	
 	private void runLoop() throws InterruptedException {
@@ -62,7 +64,7 @@ public class RequestConsumer implements Runnable {
 			logger.info("Retrieving: " + task.getRequest().getRequestLine().getUri());			
 			IHttpResponse response = sendRequest(task.getRequest());
 
-			if(response == null) {
+			if(response == null && !stop) {
 				logger.log(Level.WARNING, "No response was received for request to "+ task.getRequest().getURI());
 			}
 			task.setResponse(response);
@@ -72,7 +74,7 @@ public class RequestConsumer implements Runnable {
 	
 	private IHttpResponse sendRequest(HttpUriRequest request) {		
 		try {
-			currentRequest = request;
+			activeRequest = request;
 			return requestEngine.sendRequest(request);
 		} catch (InterruptedIOException e) {
 			stop = true;
@@ -81,10 +83,14 @@ public class RequestConsumer implements Runnable {
 			logger.log(Level.WARNING, "Protocol error processing request "+ request.getURI(), e);
 			return null;
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "IO error processing request "+ request.getURI(), e);
+			if(!e.getMessage().contains("abort")) {
+				logger.log(Level.WARNING, "IO error processing request "+ request.getURI(), e);
+			}
 			return null;
 		} finally {
-			currentRequest = null;
+			synchronized(requestLock) {
+				activeRequest = null;
+			}
 		}
 	}
 

@@ -17,7 +17,8 @@ public class HttpResponseProcessor implements Runnable {
 	private final CountDownLatch latch;
 	private final TaskCounter counter;
 	private volatile boolean stop;
-	private volatile HttpUriRequest currentRequest;
+	private final Object requestLock = new Object();
+	private volatile HttpUriRequest activeRequest = null;
 	
 	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter) {
 		this.crawler = crawler;
@@ -43,9 +44,10 @@ public class HttpResponseProcessor implements Runnable {
 	void stop() {
 		stop = true;
 		crawlerResponseQueue.offer(CrawlerTask.createExitTask());
-		HttpUriRequest r = currentRequest;
-		if(r != null)
-			r.abort();
+		synchronized(requestLock) {
+			if(activeRequest != null)
+				activeRequest.abort();
+		}
 	}
 
 	private void runLoop() throws InterruptedException {
@@ -56,22 +58,25 @@ public class HttpResponseProcessor implements Runnable {
 				crawlerResponseQueue.add(task);
 				return;
 			}
-			
+			HttpUriRequest req = task.getRequest();
+			activeRequest = req;
 			try {
-				currentRequest = task.getRequest();
-				
-				task.getResponseProcessor().processResponse(crawler, currentRequest, task.getResponse(), task.getArgument());
+				if(task.getResponse() != null) {
+					task.getResponseProcessor().processResponse(crawler, req, task.getResponse(), task.getArgument());
+				}
 			} catch (Exception e) {
-				logger.log(Level.WARNING, "Unexpected exception processing crawler request: "+ currentRequest.getURI(), e);
+				logger.log(Level.WARNING, "Unexpected exception processing crawler request: "+ req.getURI(), e);
 			} finally {
+				synchronized (requestLock) {
+					activeRequest = null;
+				}
 				final HttpEntity entity = task.getResponse().getRawResponse().getEntity();
 				if(entity != null)
 					try {
 						entity.consumeContent();
 					} catch (IOException e) {
-						logger.log(Level.WARNING, "I/O exception consuming request entity content for "+ currentRequest.getURI() + " : "+ e.getMessage());
+						logger.log(Level.WARNING, "I/O exception consuming request entity content for "+ req.getURI() + " : "+ e.getMessage());
 					}
-				currentRequest = null;
 			}
 			
 			synchronized(counter) {

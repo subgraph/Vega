@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -19,7 +20,17 @@ public class RequestRenderer {
 	}
 
 	public String renderRequestText(IRequestLogRecord record) {
-		return renderRequestText(record.getRequest());
+		StringBuilder sb = new StringBuilder();
+		sb.append(renderRequestText(record.getRequest()));
+		if(record.getRequest() instanceof HttpEntityEnclosingRequest) {
+			final HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) record.getRequest();
+			final String body = renderEntityIfAscii(request.getEntity());
+			if(body != null) {
+				sb.append("\n");
+				sb.append(body);
+			}
+		}
+		return sb.toString();
 	}
 	
 	public String renderResponseText(HttpResponse response) {

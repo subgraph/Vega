@@ -7,6 +7,8 @@ import org.apache.http.HttpResponse;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 
 public interface IHttpResponse {
+	enum ResponseStatus { RESPONSE_OK };
+	ResponseStatus getResponseStatus();
 	int getResponseCode();
 	boolean isFetchFail();
 	HttpRequest getOriginalRequest();
@@ -16,4 +18,6 @@ public interface IHttpResponse {
 	IHTMLParseResult getParsedHTML();
 	boolean isMostlyAscii();
 	IPageFingerprint getPageFingerprint();
+	void lockResponseEntity();
+	long getRequestMilliseconds();
 }

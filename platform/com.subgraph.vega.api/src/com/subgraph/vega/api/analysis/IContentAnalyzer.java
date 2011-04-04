@@ -11,4 +11,5 @@ public interface IContentAnalyzer {
 	void setResponseProcessingModules(List<IResponseProcessingModule> modules);
 	void setAddLinksToModel(boolean flag);
 	void setDefaultAddToRequestLog(boolean flag);
+	void resetResponseProcessingQueue();
 }

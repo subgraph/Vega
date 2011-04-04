@@ -1,74 +1,101 @@
 package com.subgraph.vega.impl.scanner.state;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
+import com.subgraph.vega.api.analysis.MimeType;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
+import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
-import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
-import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
-import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
+import com.subgraph.vega.impl.scanner.requests.BasicRequestBuilder;
+import com.subgraph.vega.impl.scanner.requests.GetParameterRequestBuilder;
+import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
+import com.subgraph.vega.impl.scanner.requests.PostParameterRequestBuilder;
 
 public class PathState implements IPathState {
-		
-	private final static ICrawlerResponseProcessor fetchFileProcessor = new FileProcessor();
-	private final static ICrawlerResponseProcessor fetchDirProcessor = new DirectoryProcessor();
-	private final static ICrawlerResponseProcessor fetchUnknownProcessor = new UnknownProcessor();
-	
-	private final PathStateManager scanState;
+
+	public static PathState createBasicPathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path) {
+		final IRequestBuilder rb = new BasicRequestBuilder(path);
+		final PathState st = new PathState(fetchProcessor, stateManager, parentState, path, rb);
+		if(parentState != null)
+			parentState.addChildState(st);
+		else {
+			st.setLocked();
+			st.performInitialFetch();
+		}
+		return st;
+	}
+
+	public static PathState createParameterPathState(ICrawlerResponseProcessor fetchProcessor, PathState parentState, List<NameValuePair> parameters, int fuzzIndex) {
+		if(parentState == null)
+			throw new IllegalArgumentException("Parent of parameter path cannot be null");
+		final IRequestBuilder rb = new GetParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
+		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
+		parentState.addChildState(st);
+		return st;
+	}
+
+	public static PathState createPostParameterPathState(ICrawlerResponseProcessor fetchProcessor, PathState parentState, List<NameValuePair> parameters, int fuzzIndex) {
+		if(parentState == null)
+			throw new IllegalArgumentException("Parent of parameter path cannot be null");
+		final IRequestBuilder rb = new PostParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
+		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
+		parentState.addChildState(st);
+		return st;
+	}
+
+	private final PathStateManager pathStateManager;
 	private final IWebPath path;
 	private final PathState parentState;
 	private final List<PathState> childStates = new ArrayList<PathState>();
-	private final PathStateRequestBuilder requestBuilder;
+	private final IRequestBuilder requestBuilder;
 	private final PathState404 state404;
-	private final boolean isParametric;
+	private final ICrawlerResponseProcessor initialFetchProcessor;
+
 	private IHttpResponse response;
 	private IPageFingerprint pathFingerprint;
 	private IPageFingerprint unknownFingerprint;
-	
+
 	private boolean isDone;
-	
+	private boolean hasFailed404;
+	private boolean hasBadParent;
+	private boolean ipsDetected;
+
 	private boolean isSureDirectory;
 	private boolean isPageMissing;
 	private boolean isBogusParameter;
 	private boolean responseVaries;
 	private boolean lockedFlag;
-	private boolean initialChecksFinished;
-	
-	public PathState(PathStateManager state, PathState parentState, IWebPath path, List<NameValuePair> parameters, int index) {
-		this.scanState = state;
+	private PathStateParameterManager parameterManager;
+
+	private PathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path, IRequestBuilder requestBuilder) {
+		this.initialFetchProcessor = fetchProcessor;
+		this.pathStateManager = stateManager;
 		this.path = path;
 		this.parentState = parentState;
-		this.requestBuilder = new PathStateRequestBuilder(path, parameters, index);
+		this.requestBuilder = requestBuilder;
 		this.state404 = new PathState404(this);
-		this.isParametric = true;
-		this.initialChecksFinished = false;
-		
 	}
-	public PathState(PathStateManager state, PathState parentState, IWebPath path) {
-		this.scanState = state;
-		this.path = path;
-		this.parentState = parentState;
-		this.requestBuilder = new PathStateRequestBuilder(path);
-		this.state404 = new PathState404(this);
-		this.isParametric = false;
-		this.initialChecksFinished = false;
-	}
-	
+
+	@Override
 	public PathState getParentState() {
 		return parentState;
 	}
-	
+
+	@Override
 	public IScannerModuleRegistry getModuleRegistry() {
-		return scanState.getModuleRegistry();
+		return pathStateManager.getModuleRegistry();
 	}
 
 	public void addChildState(PathState state) {
@@ -78,66 +105,73 @@ public class PathState implements IPathState {
 					return;
 			}
 			childStates.add(state);
+			if(lockedFlag)
+				state.setLocked();
+			else
+				state.performInitialFetch();
 		}
 	}
-	
-	public boolean isParametric() {
-		return isParametric;
+
+	public PathStateManager getPathStateManager() {
+		return pathStateManager;
 	}
-	
+	@Override
+	public boolean isParametric() {
+		return requestBuilder.isFuzzable();
+	}
+
+	@Override
 	public boolean isDone() {
 		return isDone;
 	}
-	
+
+	@Override
 	public void setDone() {
 		isDone = true;
 	}
-	
-	public boolean getInitialChecksFinished() {
-		return initialChecksFinished;
-	}
-	
-	public void setInitialChecksFinished() {
-		initialChecksFinished = true;
-	}
-	
-	public void setLocked() {
+
+	private void setLocked() {
 		lockedFlag = true;
 	}
-	
-	public void setUnlocked() {
-		lockedFlag = false;
+
+	private void performInitialFetch() {
+		final IModuleContext ctx = new ModuleContext(pathStateManager, requestBuilder, this, 0);
+		final HttpUriRequest req = createRequest();
+
+		if(response != null) {
+			initialFetchProcessor.processResponse(pathStateManager.getCrawler(), req, response, ctx);
+		} else {
+			submitRequest(req, initialFetchProcessor, ctx);
+		}
 	}
-	
-	public boolean isLocked() {
-		return  lockedFlag;
-	}
-	
-	
+
+	@Override
 	public void setBogusParameter() {
 		isBogusParameter = true;
 	}
-	
+
+	@Override
 	public boolean isBogusParameter() {
 		return isBogusParameter;
 	}
-	
+
+	@Override
 	public IWebPath getPath() {
 		return path;
 	}
-	
+
 	@Override
 	public void setUnknownFingerprint(IPageFingerprint fp) {
 		unknownFingerprint = fp;
 	}
-	
+
 	@Override
 	public IPageFingerprint getUnknownFingerprint() {
 		return unknownFingerprint;
 	}
-		
+
 	public void submitRequest(ICrawlerResponseProcessor callback) {
-		final HttpUriRequest req = requestBuilder.createGetRequest();
+		final HttpUriRequest req = requestBuilder.createBasicRequest();
 		final IModuleContext ctx = createModuleContext();
 		submitRequest(req, callback, ctx);
 	}
@@ -146,121 +180,150 @@ public class PathState implements IPathState {
 		final IModuleContext ctx = createModuleContext();
 		submitRequest(request, callback, ctx);
 	}
-	
+
 	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IModuleContext ctx) {
-		scanState.getCrawler().submitTask(request, callback, ctx);
+		pathStateManager.getCrawler().submitTask(request, callback, ctx);
 	}
-	
-	
+
+
+	@Override
 	public HttpUriRequest createRequest() {
-		return requestBuilder.createGetRequest();
+		return requestBuilder.createBasicRequest();
 	}
-	
+
+	@Override
 	public HttpUriRequest createAlteredRequest(String value, boolean append) {
 		return requestBuilder.createAlteredRequest(value, append);
 	}
-	
+
 	public boolean hasMaximum404Fingerprints() {
 		return state404.hasMaximum404Fingerprints();
 	}
-	
+
+	@Override
 	public boolean add404Fingerprint(IPageFingerprint fp) {
 		return state404.add404Fingerprint(fp);
 	}
-	
+
+	@Override
 	public boolean isRootPath() {
 		return path.getParentPath() == null;
 	}
-	
+
+	@Override
 	public boolean has404Fingerprints() {
 		return state404.has404Fingerprints();
 	}
-	
+
+	@Override
 	public IPathState get404Parent() {
 		return state404.get404Parent();
 	}
-	
+
+	@Override
 	public boolean has404FingerprintMatching(IPageFingerprint fp) {
 		return state404.has404FingerprintMatching(fp);
 	}
+	@Override
 	public boolean hasParent404Fingerprint(IPageFingerprint fp) {
 		return state404.hasParent404Fingerprint(fp);
 	}
-	
+
 	public void dump404Fingerprints() {
 		state404.dumpFingerprints();
 	}
+	@Override
 	public boolean hasParent404FingerprintMatchingThis() {
 		return state404.hasParent404Fingerprint(pathFingerprint);
 	}
-	
+
+	@Override
 	public void setSureDirectory() {
 		isSureDirectory = true;
 	}
-	
+
+	@Override
 	public void clear404Fingerprints() {
 		state404.clear404Fingerprints();
 	}
-	
+
 	public void setSkip404() {
 		state404.setSkip404();
 	}
-	
+
 	public boolean getSkip404() {
 		return state404.getSkip404();
 	}
-	
+
+	@Override
 	public boolean isSureDirectory() {
 		return isSureDirectory;
 	}
-	
+
+	@Override
 	public void setResponse(IHttpResponse response) {
 		this.response = response;
 		if(response != null) {
 			this.pathFingerprint = response.getPageFingerprint();
-			debug("Set fp for "+ this + " to "+ pathFingerprint);
 		}
 		else
 			this.pathFingerprint = null;
+
+		if(response.getResponseCode() == 200) {
+			addWebResponseToPath(response);
+		}
 	}
-	
+
+	private void addWebResponseToPath(IHttpResponse response) {
+		final IContentAnalyzer contentAnalyzer = pathStateManager.getContentAnalyzer();
+		final IContentAnalyzerResult result = contentAnalyzer.processResponse(response, false, false);
+		final URI uri = createRequest().getURI();
+		path.addGetResponse(uri.getQuery(), contentAnalyzerResultToMimeString(result));
+	}
+
+	private String contentAnalyzerResultToMimeString(IContentAnalyzerResult result) {
+		if(result.getSniffedMimeType() != MimeType.MIME_NONE)
+			return result.getSniffedMimeType().getCanonicalName();
+		else if(result.getDeclaredMimeType() != MimeType.MIME_NONE)
+			return result.getDeclaredMimeType().getCanonicalName();
+		else
+			return null;
+	}
+
+	@Override
 	public IHttpResponse getResponse() {
 		return response;
 	}
-	
+
 	public boolean isPageMissing() {
 		return isPageMissing;
 	}
-	
+
+	@Override
 	public void setPageMissing() {
 		isPageMissing = true;
 	}
-	
+
+	@Override
 	public void setResponseVaries() {
 		responseVaries = true;
 	}
-	
+
+	@Override
 	public boolean getResponseVaries() {
 		return responseVaries;
 	}
-	
+
 	public void debug(String msg) {
-		scanState.debug("["+path.getUri()+"] "+ msg);
+		pathStateManager.debug("["+path.getUri()+"] "+ msg);
 	}
-	
-	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePage(request, response, this);
-	}
-	
-	public void analyzeContent(HttpUriRequest request, IHttpResponse response) {
-		scanState.analyzePage(request, response, this);
-	}
-	
+
 	@Override
 	public IPageFingerprint getPathFingerprint() {
 		return pathFingerprint;
 	}
-	
+
+	@Override
 	public boolean matchesPathFingerprint(IPageFingerprint fp) {
 		if(pathFingerprint == null) {
 			debug("Whoops no path fingerprint for "+ path.getUri() + " : " + this);
@@ -268,72 +331,120 @@ public class PathState implements IPathState {
 		}
 		return pathFingerprint.isSame(fp);
 	}
-	
+
+	@Override
 	public int allocateXssId() {
-		return scanState.allocateXssId();
+		return pathStateManager.allocateXssId();
 	}
+	@Override
 	public String createXssTag(int xssId) {
-		return scanState.createXssTag(xssId);
+		return pathStateManager.createXssTag(xssId);
 	}
-	
+
+	@Override
 	public String createXssTag(String prefix, int xssId) {
-		return scanState.createXssTag(prefix, xssId);
+		return pathStateManager.createXssTag(prefix, xssId);
 	}
-	
+
+	@Override
 	public void registerXssRequest(HttpUriRequest request, int xssId) {
-		scanState.registerXssRequest(request, xssId);
+		pathStateManager.registerXssRequest(request, xssId);
 	}
-	
+
+	@Override
 	public HttpUriRequest getXssRequest(int xssId, int scanId) {
-		return scanState.getXssRequest(xssId, scanId);
+		return pathStateManager.getXssRequest(xssId, scanId);
 	}
-	
+
+	@Override
 	public NameValuePair getFuzzableParameter() {
 		return requestBuilder.getFuzzableParameter();
 	}
-	
+
+	@Override
+	public void maybeAddParameters(List<NameValuePair> parameters) {
+		final PathStateParameterManager pm = getParameterManager();
+		synchronized(pm) {
+			if(!pm.hasParameterList(parameters))
+				pm.addParameterList(parameters);
+		}
+	}
+
+	@Override
+	public void maybeAddPostParameters(List<NameValuePair> parameters) {
+		final PathStateParameterManager pm = getParameterManager();
+		synchronized(pm) {
+			if(!pm.hasPostParameterList(parameters))
+				pm.addPostParameterList(parameters);
+		}
+	}
+
+	private synchronized PathStateParameterManager getParameterManager() {
+		if(parameterManager == null) {
+			parameterManager = new PathStateParameterManager(this);
+		}
+		return parameterManager;
+	}
+
+	@Override
 	public void unlockChildren() {
-		debug("Unlocking "+ this);
 		synchronized(childStates) {
-			setInitialChecksFinished();
+			if(!lockedFlag)
+				return;
+			lockedFlag = false;
 			for(PathState c: childStates) {
-				if(c.isLocked()) {
-					final IHttpResponse r = c.getResponse();
-					final HttpUriRequest request = c.createRequest();
-					c.setUnlocked();
-					switch(c.getPath().getPathType()) {
-					case PATH_FILE:
-						if(r != null) 
-							fetchFileProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
-						else
-							c.submitRequest(request, fetchFileProcessor);
-						break;
-					case PATH_DIRECTORY:
-						if(r != null) 
-							fetchDirProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
-						else
-							c.submitRequest(request, fetchDirProcessor);
-						break;
-					case PATH_UNKNOWN:
-						
-						if(r != null) 
-							fetchUnknownProcessor.processResponse(scanState.getCrawler(), request, r, createModuleContext());
-						else
-							c.submitRequest(request, fetchUnknownProcessor);
-						break;
-					}
-				}
+				c.performInitialFetch();
 			}
 		}
-		
 	}
-	
+
+	@Override
 	public String toString() {
-		return "STATE: ["+ path.toString() + "]";
+		return "STATE: ["+ requestBuilder + "]";
 	}
-	
+
 	@Override
 	public IModuleContext createModuleContext() {
-		return new ModuleContext(scanState, requestBuilder, this);
+		return new ModuleContext(pathStateManager, requestBuilder, this);
+	}
+
+	@Override
+	public void setFailed404Detection() {
+		hasFailed404 = true;
+	}
+
+	@Override
+	public boolean hasFailed404Detection() {
+		return hasFailed404;
+	}
+
+	@Override
+	public void setBadParentDirectory() {
+		hasBadParent = true;
+	}
+
+	@Override
+	public boolean hasBadParentDirectory() {
+		return hasBadParent;
+	}
+
+	@Override
+	public boolean isIPSDetected() {
+		return ipsDetected;
+	}
+
+	@Override
+	public void setIPSDetected() {
+		ipsDetected = true;
+	}
+
+	@Override
+	public boolean doInjectionChecks() {
+		if(isParametric())
+			return true;
+		else if(path.getPathType() == PathType.PATH_DIRECTORY)
+			return pathStateManager.getDirectoryInjectionChecksFlag();
+		else
+			return pathStateManager.getNonParameterFileInjectionChecksFlag();
 	}
 }

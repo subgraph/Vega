@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 
 public interface IWebPath extends IWebEntity {
-	enum PathType { PATH_UNKNOWN, PATH_DIRECTORY, PATH_FILE };
+	enum PathType { PATH_UNKNOWN, PATH_DIRECTORY, PATH_FILE, PATH_PATHINFO };
 	IWebPath getParentPath();
 	String getPathComponent();
 	String getFullPath();

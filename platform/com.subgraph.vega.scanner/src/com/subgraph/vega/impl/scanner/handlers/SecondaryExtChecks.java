@@ -2,21 +2,20 @@ package com.subgraph.vega.impl.scanner.handlers;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
-import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
-import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
-public class SecondaryExtChecks implements ICrawlerResponseProcessor {
+public class SecondaryExtChecks extends CrawlerModule {
 
-	public void initialize() {
+	@Override
+	public void initialize(IPathState ps) {
+		// TODO Auto-generated method stub
 		
 	}
 	@Override
-	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
-			IHttpResponse response, Object argument) {
-		
-		
+	public void runModule(HttpUriRequest request, IHttpResponse response,
+			IModuleContext ctx) {
 		// TODO Auto-generated method stub
 		
 	}
