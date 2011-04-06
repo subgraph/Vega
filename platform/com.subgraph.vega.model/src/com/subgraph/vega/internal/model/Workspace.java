@@ -2,6 +2,8 @@ package com.subgraph.vega.internal.model;
 
 import java.io.File;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.db4o.ObjectContainer;
 import com.db4o.ext.DatabaseFileLockedException;
@@ -23,7 +25,7 @@ import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.web.WebModel;
 
 public class Workspace implements IWorkspace {
-
+	private static final int BACKGROUND_COMMIT_INTERVAL = 10000;
 	private final IWorkspaceEntry workspaceEntry;
 	private final EventListenerManager eventManager;
 	private final DatabaseConfigurationFactory configurationFactory;
@@ -39,6 +41,9 @@ public class Workspace implements IWorkspace {
 	private ObjectContainer database;
 	private boolean opened;
 
+	private final Timer backgroundCommitTimer;
+	private TimerTask backgroundCommitTask;
+
 	private WorkspaceStatus workspaceStatus;
 
 	Workspace(IWorkspaceEntry entry, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
@@ -52,6 +57,7 @@ public class Workspace implements IWorkspace {
 		this.requestLog = null;
 		this.scanAlerts = null;
 		this.lockStatus = new WorkspaceLockStatus(eventManager);
+		this.backgroundCommitTimer = new Timer();
 	}
 
 	@Override
@@ -64,6 +70,8 @@ public class Workspace implements IWorkspace {
 			return false;
 		opened = true;
 		eventManager.fireEvent(new WorkspaceOpenEvent(this));
+		backgroundCommitTask = createBackgroundCommitTask(database);
+		backgroundCommitTimer.scheduleAtFixedRate(backgroundCommitTask, 0, BACKGROUND_COMMIT_INTERVAL);
 		return true;
 	}
 
@@ -109,14 +117,13 @@ public class Workspace implements IWorkspace {
 		return scanAlerts;
 	}
 
-
 	@Override
 	public void close() {
 		if(!opened)
 			return;
 		if(lockStatus.isLocked())
 			throw new IllegalStateException("Cannot close locked workspace.");
-
+		backgroundCommitTask.cancel();
 		database.close();
 		opened = false;
 		eventManager.fireEvent(new WorkspaceCloseEvent(this));
@@ -160,12 +167,11 @@ public class Workspace implements IWorkspace {
 	private IModelProperties getProperties() {
 		if(workspaceStatus != null)
 			return workspaceStatus.getProperties();
-		synchronized(database) {
+		synchronized(this) {
 			List<WorkspaceStatus> result = database.query(WorkspaceStatus.class);
 			if(result.size() == 0) {
 				workspaceStatus = new WorkspaceStatus();
 				database.store(workspaceStatus);
-				database.commit();
 				return workspaceStatus.getProperties();
 			} else if(result.size() == 1) {
 				workspaceStatus =  result.get(0);
@@ -206,7 +212,8 @@ public class Workspace implements IWorkspace {
 		if(lockStatus.isLocked())
 			throw new IllegalStateException("Cannot reset locked workspace");
 
-		synchronized(database) {
+		backgroundCommitTask.cancel();
+		synchronized(this) {
 			database.close();
 			final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
 			if(!databaseFile.delete()) {
@@ -215,9 +222,20 @@ public class Workspace implements IWorkspace {
 			database = openDatabase(getDatabasePath());
 			if(database != null) {
 				eventManager.fireEvent(new WorkspaceResetEvent(this));
+				backgroundCommitTask = createBackgroundCommitTask(database);
+				backgroundCommitTimer.scheduleAtFixedRate(backgroundCommitTask, 0, BACKGROUND_COMMIT_INTERVAL);
 			} else {
 				eventManager.fireEvent(new WorkspaceCloseEvent(this));
 			}
 		}
+	}
+
+	private TimerTask createBackgroundCommitTask(final ObjectContainer db) {
+		return new TimerTask() {
+			@Override
+			public void run() {
+				db.commit();
+			}
+		};
 	}
 }
