@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.urls;
+package com.subgraph.vega.impl.scanner.forms;
 
 import java.util.ArrayList;
 import java.util.List;

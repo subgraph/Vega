@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.urls;
+package com.subgraph.vega.impl.scanner.forms;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -9,9 +9,13 @@ import java.util.logging.Logger;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.subgraph.vega.api.scanner.IFormCredential;
+
 public class FormProcessingState {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final static FormHints formHints = new FormHints();
+
+	private final List<IFormCredential> credentials;
 	private final URI baseURI;
 	private final String action;
 	private final String method;
@@ -22,10 +26,11 @@ public class FormProcessingState {
 	private boolean passwordFlag;
 	private boolean fileFieldFlag;
 
-	FormProcessingState(URI baseURI, String action, String method) {
+	FormProcessingState(URI baseURI, String action, String method, List<IFormCredential> credentials) {
 		this.baseURI = baseURI;
 		this.action = action;
 		this.method = method;
+		this.credentials = credentials;
 	}
 
 	boolean isValid() {
@@ -61,6 +66,7 @@ public class FormProcessingState {
 			return null;
 		}
 	}
+
 	void add(String name, String value) {
 		parameters.add(new BasicNameValuePair(name, (value == null) ? ("") : (value)));
 	}
@@ -68,6 +74,7 @@ public class FormProcessingState {
 	void addGuessedValue(String name) {
 		add(name, guessFormValue(name));
 	}
+
 	void setPasswordFieldFlag() {
 		passwordFlag = true;
 	}
@@ -84,7 +91,22 @@ public class FormProcessingState {
 		return fileFieldFlag;
 	}
 
+	private boolean isPossiblePasswordField(String name) {
+		final String n = name.toLowerCase();
+		return (n.contains("pass") || n.contains("pwd"));
+	}
+
+	private boolean isPossibleLoginField(String name) {
+		final String n = name.toLowerCase();
+		return (n.contains("name") || n.contains("user") || n.contains("log"));
+	}
 	private String guessFormValue(String name) {
+		/*
+		if(config.getNtlmPassword() != null && isPossiblePasswordField(name))
+			return config.getNtlmPassword();
+		if(config.getNtlmUsername() != null && isPossibleLoginField(name))
+			return config.getNtlmUsername();
+			*/
 		return formHints.lookupHint(name);
 	}
 

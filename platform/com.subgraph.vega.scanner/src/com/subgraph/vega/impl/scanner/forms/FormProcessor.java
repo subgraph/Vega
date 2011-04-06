@@ -1,4 +1,4 @@
-package com.subgraph.vega.impl.scanner.urls;
+package com.subgraph.vega.impl.scanner.forms;
 
 import org.apache.http.client.methods.HttpUriRequest;
 import org.w3c.dom.Element;
@@ -11,12 +11,16 @@ import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.impl.scanner.urls.UriParser;
 
 public class FormProcessor {
 
+	private final IScannerConfig config;
 	private final UriParser uriParser;
 
-	FormProcessor(UriParser uriParser) {
+	public FormProcessor(IScannerConfig config, UriParser uriParser) {
+		this.config = config;
 		this.uriParser = uriParser;
 	}
 
@@ -37,7 +41,7 @@ public class FormProcessor {
 	}
 
 	private void processFormElement(IModuleContext ctx, HttpUriRequest request, Element form) {
-		final FormProcessingState fps = new FormProcessingState(request.getURI(), form.getAttribute("action"), form.getAttribute("method"));
+		final FormProcessingState fps = new FormProcessingState(request.getURI(), form.getAttribute("action"), form.getAttribute("method"), config.getFormCredentials());
 		if(!fps.isValid())
 			return;
 
