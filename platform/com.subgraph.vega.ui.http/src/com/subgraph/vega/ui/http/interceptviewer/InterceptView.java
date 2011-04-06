@@ -244,6 +244,7 @@ public class InterceptView extends ViewPart {
 			requestButtonForward.setEnabled(false);
 			requestButtonDrop.setEnabled(false);
 			requestViewer.clearContent();
+			requestViewer.setEditable(false);
 			requestTransactionCurr = null;
 		}
 	}
@@ -254,6 +255,7 @@ public class InterceptView extends ViewPart {
 			requestButtonForward.setEnabled(false);
 			requestButtonDrop.setEnabled(false);
 			requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
+			requestViewer.setEditable(false);
 			requestTransactionCurr = transactionCurr;			
 		}
 	}
@@ -272,7 +274,8 @@ public class InterceptView extends ViewPart {
 			requestLabelStatus.setText("Request pending to " + getTransactionHostPart(transactionCurr));
 			requestButtonForward.setEnabled(true);
 			requestButtonDrop.setEnabled(true);
-			requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));			
+			requestViewer.setContent(requestRenderer.renderRequestText(transactionCurr.getRequest()));
+			requestViewer.setEditable(true);
 			requestTransactionCurr = transactionCurr;			
 		}
 	}
@@ -321,6 +324,7 @@ public class InterceptView extends ViewPart {
 		responseViewerGroup.setLayout(new FillLayout());
 		responseViewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 2, 1));
 		responseViewer = new HttpRequestViewer(responseViewerGroup);
+		responseViewer.setEditable(false);
 
 		return rootControl;
 	}
@@ -383,6 +387,7 @@ public class InterceptView extends ViewPart {
 			responseButtonForward.setEnabled(false);
 			responseButtonDrop.setEnabled(false);
 			responseViewer.clearContent();
+			responseViewer.setEditable(false);
 			responseTransactionCurr = null;
 		}
 	}
@@ -393,6 +398,7 @@ public class InterceptView extends ViewPart {
 			responseButtonForward.setEnabled(true);
 			responseButtonForward.setEnabled(true);
 			responseViewer.setContent(requestRenderer.renderResponseText(transactionCurr.getResponse().getRawResponse()));
+			responseViewer.setEditable(true);
 			responseTransactionCurr = transactionCurr;
 			if (requestTransactionCurr != transactionCurr) {
 				setRequestSent();

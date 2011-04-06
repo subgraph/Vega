@@ -98,11 +98,13 @@ public class RequestResponseViewer {
 		final TabItem requestItem = new TabItem(tabFolder, SWT.NONE);
 		requestItem.setText("Request");
 		requestViewer = new HttpRequestViewer(tabFolder);
+		requestViewer.setEditable(false);
 		requestItem.setControl(requestViewer.getControl());
 		
 		final TabItem responseItem = new TabItem(tabFolder, SWT.NONE);
 		responseItem.setText("Response");
 		responseViewer = new HttpRequestViewer(tabFolder);
+		responseViewer.setEditable(false);
 		responseItem.setControl(responseViewer.getControl());
 		parentComposite.layout();
 		if(currentRecord != null)
@@ -146,7 +148,9 @@ public class RequestResponseViewer {
 		recreateRootComposite();
 		sashForm = new SashForm(rootComposite, mode);
 		requestViewer = new HttpRequestViewer(sashForm);
+		requestViewer.setEditable(false);
 		responseViewer = new HttpRequestViewer(sashForm);
+		responseViewer.setEditable(false);
 		sashForm.setWeights(new int[] {50, 50});
 		parentComposite.layout();
 		processCurrentTransaction();

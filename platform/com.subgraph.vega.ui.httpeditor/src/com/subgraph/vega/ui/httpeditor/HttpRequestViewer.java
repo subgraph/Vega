@@ -92,6 +92,10 @@ public class HttpRequestViewer implements IImageSource {
 		return viewer.getAnnotationModel();
 	}
 	
+	public void setEditable(boolean editable) {
+		viewer.setEditable(editable);
+	}
+
 	public void clearContent() {
 		setContent("");
 	}
