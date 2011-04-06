@@ -19,7 +19,7 @@ public class HttpResponseProcessor implements Runnable {
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
-	
+
 	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter) {
 		this.crawler = crawler;
 		this.crawlerRequestQueue = requestQueue;
@@ -40,7 +40,7 @@ public class HttpResponseProcessor implements Runnable {
 			}
 		}
 	}
-	
+
 	void stop() {
 		stop = true;
 		crawlerResponseQueue.offer(CrawlerTask.createExitTask());
@@ -51,8 +51,8 @@ public class HttpResponseProcessor implements Runnable {
 	}
 
 	private void runLoop() throws InterruptedException {
-		while(!stop) {	
-			CrawlerTask task = (CrawlerTask)crawlerResponseQueue.take();
+		while(!stop) {
+			CrawlerTask task = crawlerResponseQueue.take();
 			if(task.isExitTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
 				crawlerResponseQueue.add(task);
@@ -78,7 +78,7 @@ public class HttpResponseProcessor implements Runnable {
 						logger.log(Level.WARNING, "I/O exception consuming request entity content for "+ req.getURI() + " : "+ e.getMessage());
 					}
 			}
-			
+
 			synchronized(counter) {
 				counter.addCompletedTask();
 				crawler.updateProgress();
