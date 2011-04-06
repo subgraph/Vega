@@ -40,4 +40,6 @@ public interface IModel {
 	 * @return <code>true</code> if the workspace specified by the <code>index</code> argument could be successfully opened, <code>false</code> otherwise.
 	 */
 	boolean openWorkspaceByIndex(int index);
+	
+	IWorkspace getCurrentWorkspace();
 }

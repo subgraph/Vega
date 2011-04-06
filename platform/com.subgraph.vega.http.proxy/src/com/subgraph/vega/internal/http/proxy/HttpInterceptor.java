@@ -2,22 +2,29 @@ package com.subgraph.vega.internal.http.proxy;
 
 import java.util.ArrayList;
 
-import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
-import com.subgraph.vega.api.http.conditions.TransactionDirection;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorLevel;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
-import com.subgraph.vega.http.conditions.HttpConditionSet;
+import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
+
 import com.subgraph.vega.internal.http.proxy.ProxyTransaction;
 
 public class HttpInterceptor implements IHttpInterceptor {
 	private IHttpInterceptorEventHandler eventHandler;
 	private HttpInterceptorLevel interceptorLevelRequest = HttpInterceptorLevel.DISABLED;
 	private HttpInterceptorLevel interceptorLevelResponse = HttpInterceptorLevel.DISABLED;
-	private final HttpConditionSet breakpointSetRequest = new HttpConditionSet(); 
-	private final HttpConditionSet breakpointSetResponse = new HttpConditionSet(); 
+	private final IHttpConditionSet breakpointSetRequest; 
+	private final IHttpConditionSet breakpointSetResponse; 
 	private final ArrayList<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>(); /**< Queue of intercepted transactions pending processing */
+
+	
+	HttpInterceptor(IHttpConditionManager conditionManager) {
+		breakpointSetRequest = conditionManager.createConditionSet();
+		breakpointSetResponse = conditionManager.createConditionSet();
+	}
 
 	private boolean intercept(ProxyTransaction transaction) {
 		if (transaction.hasResponse() == false) {
@@ -37,7 +44,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 				}
 			}
 		}
-		return breakpointSetRequest.test(transaction.getRequest(), transaction.getResponse().getRawResponse());
+		return breakpointSetRequest.matches(transaction.getRequest(), transaction.getResponse().getRawResponse());
 	}
 
 	/**

@@ -1,11 +1,6 @@
 package com.subgraph.vega.ui.http.requestfilterpreferencepage;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,22 +8,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.http.conditions.ConditionType;
-import com.subgraph.vega.api.http.conditions.MatchType;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
+import com.subgraph.vega.ui.http.conditions.ConditionInput;
 
 public class ConditionCreateDialog extends TitleAreaDialog {
-	private Composite parentComposite;
-	private ComboViewer comboViewerConditionTypes;
-	ConditionType conditionTypeSelected;
-	private ComboViewer comboViewerMatchTypes;
-	Enum<?> comparisonTypeSelected;
-	private Text textPattern;
-	String textPatternSelected;
 
-	public ConditionCreateDialog(Shell parent) {
+	private final ConditionInput conditionInput;
+	private Composite parentComposite;
+	private IHttpCondition newCondition;
+	
+	String comparisonTypeSelected;
+
+	public ConditionCreateDialog(Shell parent, IHttpConditionManager conditionManager) {
 		super(parent);
+		conditionInput = new ConditionInput(conditionManager);
 	}
 
 	@Override
@@ -47,9 +42,7 @@ public class ConditionCreateDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void okPressed() {
-		conditionTypeSelected = (ConditionType) ((IStructuredSelection) comboViewerConditionTypes.getSelection()).getFirstElement();
-		comparisonTypeSelected = (Enum<?>) ((IStructuredSelection) comboViewerMatchTypes.getSelection()).getFirstElement();
-		textPatternSelected = textPattern.getText();
+		newCondition = conditionInput.createConditionFromData();
 		super.okPressed();
 	}
 	
@@ -60,50 +53,20 @@ public class ConditionCreateDialog extends TitleAreaDialog {
 		Label label = new Label(rootControl, SWT.NONE);
 		label.setText("Condition type:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		comboViewerConditionTypes = new ComboViewer(rootControl, SWT.READ_ONLY);
-		comboViewerConditionTypes.setContentProvider(new ArrayContentProvider());
-		comboViewerConditionTypes.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				return ((ConditionType) element).getName();
-			}
-		});
-		final ConditionType[] typesList = ConditionType.values();
-		comboViewerConditionTypes.setInput(ConditionType.values());
-		comboViewerConditionTypes.setSelection(new StructuredSelection(typesList[0]));
-
+		conditionInput.createConditionTypeCombo(rootControl);
 		label = new Label(rootControl, SWT.NONE);
 		label.setText("Match type:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		comboViewerMatchTypes = new ComboViewer(rootControl, SWT.READ_ONLY);
-		comboViewerMatchTypes.setContentProvider(new ArrayContentProvider());
-		comboViewerMatchTypes.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				return ((MatchType) element).getName();
-			}
-		});
-		MatchType[] matchTypesList = MatchType.values();
-		comboViewerMatchTypes.setInput(matchTypesList);
-		comboViewerMatchTypes.setSelection(new StructuredSelection(matchTypesList[0]));
+		conditionInput.createConditionMatchCombo(rootControl);
 
 		label = new Label(rootControl, SWT.NONE);
-		label.setText("Pattern:");
-		textPattern = new Text(rootControl, SWT.BORDER);
-		textPattern.setMessage("regular expression");
-		textPattern.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+		label.setText("Input:");
+		conditionInput.createInputPanel(rootControl);
+		
 		return rootControl;
 	}
 	
-	public ConditionType getSelectionConditionType() {
-		return conditionTypeSelected;
+	public IHttpCondition getNewCondition() {
+		return newCondition;
 	}
-	
-	public Enum<?> getSelectionComparisonType() {
-		return comparisonTypeSelected;
-	}
-
-	public String getTextPattern() {
-		return textPatternSelected;
-	}
-
 }

@@ -2,23 +2,25 @@ package com.subgraph.vega.ui.http.requestfilterpreferencepage;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
-import com.subgraph.vega.api.http.conditions.ConditionType;
-import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionType;
+import com.subgraph.vega.api.model.conditions.IHttpRangeCondition;
+import com.subgraph.vega.api.model.conditions.IHttpRegexCondition;
 
 public class ConditionTreeLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof ConditionType) {
-			return ((ConditionType)element).getName();
+		if (element instanceof IHttpConditionType) {
+			return ((IHttpConditionType)element).getName();
+		} else if(element instanceof IHttpRegexCondition) {
+			final IHttpRegexCondition condition = (IHttpRegexCondition) element;
+			return condition.getType().getName() + ":"+ condition.getPattern();
+		} else if (element instanceof IHttpRangeCondition) {
+			final IHttpRangeCondition condition = (IHttpRangeCondition) element;
+			return condition.getType().getName() + ":" + condition.getRangeLow() + "-"+ condition.getRangeHigh();
+		} else {
+			return null;
 		}
-
-		IHttpBooleanCondition condition = (IHttpBooleanCondition) element;
-		final StringBuilder builder = new StringBuilder();
-		builder.append(condition.getComparisonType().name());
-		builder.append(":");
-		builder.append(condition.getPattern());
-		return builder.toString();
 	}
 
 }

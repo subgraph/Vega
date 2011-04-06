@@ -1,9 +1,5 @@
 package com.subgraph.vega.ui.http.interceptviewer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -32,16 +28,17 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.http.conditions.ConditionType;
-import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
-import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
-import com.subgraph.vega.api.http.conditions.MatchType;
-import com.subgraph.vega.api.http.conditions.TransactionDirection;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorLevel;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
+import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.model.conditions.IHttpRangeCondition;
+import com.subgraph.vega.api.model.conditions.IHttpRegexCondition;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.conditions.ConditionInput;
 
 public class OptionsViewer {
 	private static final Image IMAGE_CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
@@ -50,12 +47,11 @@ public class OptionsViewer {
 	private Composite parentComposite;
 	private ComboViewer comboViewerInterceptorLevel;
 	private TableViewer tableViewerBreakpoints;
-	private ComboViewer comboViewerBreakpointTypes;
-	private ComboViewer comboViewerBreakpointMatchTypes;
-	private Text patternBreakpointText;
+	private ConditionInput conditionInput;
 	private IHttpInterceptor interceptor;
 
-	public OptionsViewer(TransactionDirection direction) {
+	public OptionsViewer(IHttpConditionManager conditionManager, TransactionDirection direction) {
+		this.conditionInput = new ConditionInput(conditionManager);
 		this.direction = direction;
 	}
 
@@ -168,7 +164,7 @@ public class OptionsViewer {
 
 				@Override
 				public Image getImage(Object element) {
-					if (((IHttpBooleanCondition) element).getIsEnabled()) {
+					if(((IHttpCondition) element).isEnabled()) {
 						return IMAGE_CHECKED;
 					} else {
 						return IMAGE_UNCHECKED;
@@ -178,19 +174,28 @@ public class OptionsViewer {
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((IHttpBooleanCondition) element).getType().getName();
+					return ((IHttpCondition) element).getType().getName();
 				}
 			},
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((MatchType)((IHttpBooleanCondition)element).getComparisonType()).getName();
+					IHttpCondition condition = (IHttpCondition) element;
+					return condition.getMatchOption().getName();
 				}
 			},		
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((IHttpBooleanCondition) element).getPattern();
+					IHttpCondition condition = (IHttpCondition) element;
+					if(condition instanceof IHttpRegexCondition)
+						return ((IHttpRegexCondition) condition).getPattern();
+					else if(condition instanceof IHttpRangeCondition) {
+						IHttpRangeCondition range = (IHttpRangeCondition) condition;
+						return range.getRangeLow() + "-" + range.getRangeHigh();
+					} else {
+						return null;
+					}
 				}
 			},
 		};
@@ -224,56 +229,22 @@ public class OptionsViewer {
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerBreakpoints.getSelection();
 				IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
-				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					conditionSet.removeCondition((IHttpBooleanCondition) i.next());
+				for(Object ob: selection.toList()) {
+					if(ob instanceof IHttpCondition) 
+						conditionSet.removeCondition((IHttpCondition) ob);			
 				}
 				tableViewerBreakpoints.refresh();
 			}
 		};
 	}
 
-	private List<ConditionType> getBreakpointTypesList() {
-		final List<ConditionType> typesList = new ArrayList<ConditionType>();
-		for (ConditionType t: ConditionType.values()) {
-			if ((t.getMask() & direction.getMask()) != 0) {
-				typesList.add(t);
-			}
-		}
-		return typesList;
-	}
-
+	
 	private Composite createCreatorBreakpoints(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(new GridLayout(3, false));
-
-		comboViewerBreakpointTypes = new ComboViewer(rootControl, SWT.READ_ONLY);
-		comboViewerBreakpointTypes.setContentProvider(new ArrayContentProvider());
-		comboViewerBreakpointTypes.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				return ((ConditionType) element).getName();
-			}
-		});
-		final List<ConditionType> typesList = getBreakpointTypesList();
-		comboViewerBreakpointTypes.setInput(typesList);
-		if (typesList.size() != 0) {
-			comboViewerBreakpointTypes.setSelection(new StructuredSelection(typesList.get(0)));
-		}
-
-		comboViewerBreakpointMatchTypes = new ComboViewer(rootControl, SWT.READ_ONLY);
-		comboViewerBreakpointMatchTypes.setContentProvider(new ArrayContentProvider());
-		comboViewerBreakpointMatchTypes.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				return ((MatchType) element).getName();
-			}
-		});
-		MatchType[] matchTypesList = MatchType.values();
-		comboViewerBreakpointMatchTypes.setInput(matchTypesList);
-		comboViewerBreakpointMatchTypes.setSelection(new StructuredSelection(matchTypesList[0]));
-
-		patternBreakpointText = new Text(rootControl, SWT.BORDER);
-		patternBreakpointText.setMessage("regular expression");
-		patternBreakpointText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+		conditionInput.createConditionTypeCombo(rootControl);
+		conditionInput.createConditionMatchCombo(rootControl);
+		conditionInput.createInputPanel(rootControl);
 		return rootControl;
 	}
 
@@ -288,23 +259,19 @@ public class OptionsViewer {
 
 		return rootControl;
 	}
-
+	
+	
 	private SelectionListener createSelectionListenerButtonCreateBreakpoint() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				ConditionType breakpointType = (ConditionType) ((IStructuredSelection) comboViewerBreakpointTypes.getSelection()).getFirstElement();
-				MatchType matchType = (MatchType) ((IStructuredSelection) comboViewerBreakpointMatchTypes.getSelection()).getFirstElement();
-				String pattern = patternBreakpointText.getText();
-				if (breakpointType != null && matchType != null && pattern != null) {
-					IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
-					conditionSet.createCondition(breakpointType, matchType, pattern, true);
-					tableViewerBreakpoints.refresh();
-					comboViewerBreakpointTypes.setSelection(new StructuredSelection(comboViewerBreakpointTypes.getElementAt(0)));
-					comboViewerBreakpointMatchTypes.setSelection(new StructuredSelection(comboViewerBreakpointMatchTypes.getElementAt(0)));
-					patternBreakpointText.setText("");
-				}
+				final IHttpCondition breakpoint = conditionInput.createConditionFromData();
+				if(breakpoint == null)
+					return;
+				IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
+				conditionSet.appendCondition(breakpoint);
+				conditionInput.reset();
+				tableViewerBreakpoints.refresh();
 			}
 		};
 	}
-
 }

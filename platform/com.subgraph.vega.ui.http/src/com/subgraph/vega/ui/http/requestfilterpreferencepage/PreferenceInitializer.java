@@ -8,8 +8,8 @@ import com.subgraph.vega.ui.http.Activator;
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	public void initializeDefaultPreferences() {
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		store.setDefault(PreferenceConstants.P_FILTER, "");
+		//IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		//store.setDefault(PreferenceConstants.P_FILTER, "");
 	}
 
 }

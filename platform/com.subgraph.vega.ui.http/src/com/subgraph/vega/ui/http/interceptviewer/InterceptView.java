@@ -21,11 +21,19 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.http.conditions.TransactionDirection;
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
+import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.httpeditor.RequestRenderer;
@@ -34,6 +42,7 @@ public class InterceptView extends ViewPart {
 	private static final Image IMAGE_FORWARD = Activator.getImageDescriptor("icons/start_16x16.png").createImage();
 	private static final Image IMAGE_DROP = Activator.getImageDescriptor("icons/stop_16x16.png").createImage();
 	private IHttpInterceptor interceptor;
+	private IHttpConditionManager conditionManager;
 	private IHttpInterceptorEventHandler interceptorEventHandler;
 	private IProxyTransactionEventHandler transactionEventHandler;
 	private IProxyTransaction transactionCurr; /**< Current intercepted transaction. */
@@ -69,6 +78,25 @@ public class InterceptView extends ViewPart {
 
 		interceptor = Activator.getDefault().getProxyService().getInterceptor();
 		interceptor.setEventHandler(interceptorEventHandler);
+		
+		IModel model = Activator.getDefault().getModel();
+		if(model != null) {
+			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+				@Override
+				public void handleEvent(IEvent event) {
+					if(event instanceof WorkspaceOpenEvent)
+						handleWorkspaceOpen((WorkspaceOpenEvent) event);
+					else if(event instanceof WorkspaceCloseEvent)
+						handleWorkspaceClose((WorkspaceCloseEvent) event);
+					else if(event instanceof WorkspaceResetEvent)
+						handleWorkspaceReset((WorkspaceResetEvent) event);
+				}
+			});
+			if(currentWorkspace != null)
+				conditionManager = currentWorkspace.getHttpConditionMananger();
+		}
+			
+		
 	}
 
 	@Override
@@ -80,6 +108,18 @@ public class InterceptView extends ViewPart {
 		setResponseInactive();
 		form.setWeights(new int[] { 50, 50, });
 		form.pack();
+	}
+
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		conditionManager = event.getWorkspace().getHttpConditionMananger();
+	}
+
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		conditionManager = null;
+	}
+
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		conditionManager = event.getWorkspace().getHttpConditionMananger();
 	}
 
 	@Override
@@ -160,7 +200,7 @@ public class InterceptView extends ViewPart {
 
 		final TabItem optionsItem = new TabItem(rootControl, SWT.NONE);
 		optionsItem.setText("Options");
-		OptionsViewer requestOptions = new OptionsViewer(TransactionDirection.DIRECTION_REQUEST);
+		OptionsViewer requestOptions = new OptionsViewer(conditionManager, TransactionDirection.DIRECTION_REQUEST);
 		optionsItem.setControl(requestOptions.createViewer(rootControl));
 
 		return rootControl;
@@ -286,7 +326,7 @@ public class InterceptView extends ViewPart {
 
 		final TabItem optionsItem = new TabItem(rootControl, SWT.NONE);
 		optionsItem.setText("Options");
-		OptionsViewer requestOptions = new OptionsViewer(TransactionDirection.DIRECTION_RESPONSE);
+		OptionsViewer requestOptions = new OptionsViewer(conditionManager, TransactionDirection.DIRECTION_RESPONSE);
 		optionsItem.setControl(requestOptions.createViewer(rootControl));
 
 		return rootControl;

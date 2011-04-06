@@ -1,7 +1,5 @@
 package com.subgraph.vega.ui.http.requestfilterpreferencepage;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -19,17 +17,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.subgraph.vega.api.http.conditions.ConditionType;
-import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
-import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
-import com.subgraph.vega.http.conditions.HttpConditionSet;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 
 public class RequestFilterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	private Composite parentComposite;
 	private TreeViewer treeViewer;
+	private IHttpConditionManager conditionManager;
 	private IHttpConditionSet conditionSet;
-
+	
 	public RequestFilterPreferencePage() {
 	}
 
@@ -57,22 +56,31 @@ public class RequestFilterPreferencePage extends PreferencePage implements IWork
 
 		createTreeField(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		conditionSet = new HttpConditionSet();
-		conditionSet.unserialize(Activator.getDefault().getPreferenceStore().getString(PreferenceConstants.P_FILTER));
+		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
+		if(workspace != null) {
+			conditionManager = workspace.getHttpConditionMananger();
+			conditionSet = conditionManager.createConditionSet();
+
+		} else {
+			conditionManager = null;
+			conditionSet = null;
+		}
 		treeViewer.setInput(conditionSet);
+		
+	
 
 		return parentComposite;
 	}
 
 	@Override
 	public boolean performCancel() {
-		conditionSet.unserialize(Activator.getDefault().getPreferenceStore().getString(PreferenceConstants.P_FILTER));
 		return true;
 	}
 	
 	@Override
 	public boolean performOk() {
-		Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.P_FILTER, conditionSet.serialize());
+		if(conditionManager != null && conditionSet != null)
+			conditionManager.saveConditionSet("filter", conditionSet);
 		return true;
 	}
 
@@ -127,23 +135,27 @@ public class RequestFilterPreferencePage extends PreferencePage implements IWork
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
-				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					Object element = i.next();
-					if (element instanceof IHttpBooleanCondition) {
-						conditionSet.removeCondition((IHttpBooleanCondition)element);
-					}
+				for(Object element: selection.toList()) {
+					if(element instanceof IHttpCondition) 
+						conditionSet.removeCondition((IHttpCondition) element);					
 				}
+
 				treeViewer.refresh();
 			}
 		};
 	}
 
 	private void openConditionCreateDialog() {
-		ConditionCreateDialog dialog = new ConditionCreateDialog(this.getShell());
+		if(conditionSet == null || conditionManager == null)
+			return;
+		ConditionCreateDialog dialog = new ConditionCreateDialog(this.getShell(), conditionManager);
 		dialog.setBlockOnOpen(true);
 		if (dialog.open() == ConditionCreateDialog.OK) {
-			conditionSet.createCondition(dialog.getSelectionConditionType(), dialog.getSelectionComparisonType(), dialog.getTextPattern(), true);
-			treeViewer.refresh();
+			final IHttpCondition condition = dialog.getNewCondition();
+			if(condition != null) {
+				conditionSet.appendCondition(condition);
+				treeViewer.refresh();
+			}
 		}
 	}
 }

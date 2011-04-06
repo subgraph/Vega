@@ -30,7 +30,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IScannerModuleRegistry moduleRepository;
 	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
-	private final HttpInterceptor interceptor = new HttpInterceptor();
+	private HttpInterceptor interceptor;
 
 	public HttpProxyService() {
 		eventHandler = new IHttpInterceptProxyEventHandler() {
@@ -51,10 +51,14 @@ public class HttpProxyService implements IHttpProxyService {
 					handleWorkspaceClose((WorkspaceCloseEvent) event);				
 			}
 		});
+		if(currentWorkspace != null) {
+			interceptor = new HttpInterceptor(currentWorkspace.getHttpConditionMananger());
+		}
 	}
 	
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
 		this.currentWorkspace = event.getWorkspace();
+		interceptor = new HttpInterceptor(currentWorkspace.getHttpConditionMananger());
 	}
 
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {

@@ -107,5 +107,10 @@ public class Model implements IModel {
 		if(currentWorkspace != null)
 			currentWorkspace.reset();		
 	}
+
+	@Override
+	public IWorkspace getCurrentWorkspace() {
+		return currentWorkspace;
+	}
 }
 

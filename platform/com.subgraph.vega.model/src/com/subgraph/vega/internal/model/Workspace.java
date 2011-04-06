@@ -17,10 +17,12 @@ import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertModel;
+import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.web.WebModel;
 
@@ -37,6 +39,7 @@ public class Workspace implements IWorkspace {
 	private IWebModel webModel;
 	private  IRequestLog requestLog;
 	private IScanAlertModel scanAlerts;
+	private IHttpConditionManager conditionManager;
 
 	private ObjectContainer database;
 	private boolean opened;
@@ -56,6 +59,7 @@ public class Workspace implements IWorkspace {
 		this.webModel = null;
 		this.requestLog = null;
 		this.scanAlerts = null;
+		this.conditionManager = null;
 		this.lockStatus = new WorkspaceLockStatus(eventManager);
 		this.backgroundCommitTimer = new Timer();
 	}
@@ -86,6 +90,7 @@ public class Workspace implements IWorkspace {
 			webModel = new WebModel(db);
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertModel(db, xmlRepository);
+			conditionManager = new HttpConditionManager(db);
 			return db;
 		} catch (DatabaseFileLockedException e) {
 			e.printStackTrace();
@@ -115,6 +120,11 @@ public class Workspace implements IWorkspace {
 		if(!opened)
 			throw new IllegalStateException("Must open workspace first");
 		return scanAlerts;
+	}
+
+	@Override
+	public IHttpConditionManager getHttpConditionMananger() {
+		return conditionManager;
 	}
 
 	@Override

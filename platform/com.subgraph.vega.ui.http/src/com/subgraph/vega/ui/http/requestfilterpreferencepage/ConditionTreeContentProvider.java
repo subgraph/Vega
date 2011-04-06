@@ -1,20 +1,22 @@
 package com.subgraph.vega.ui.http.requestfilterpreferencepage;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import com.subgraph.vega.api.http.conditions.ConditionType;
-import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
-import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.model.conditions.IHttpConditionType;
+
+
 
 public class ConditionTreeContentProvider implements ITreeContentProvider {
 	private IHttpConditionSet conditionSet;
-	private Map<ConditionType, ArrayList<IHttpBooleanCondition>> conditionTypeMap = new EnumMap<ConditionType, ArrayList<IHttpBooleanCondition>>(ConditionType.class); 
+	private Map<IHttpConditionType, List<IHttpCondition>> conditionTypeMap = new HashMap<IHttpConditionType, List<IHttpCondition>>(); 
 
 	@Override
 	public void dispose() {
@@ -29,24 +31,23 @@ public class ConditionTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		conditionTypeMap.clear();
-		for (IHttpBooleanCondition c: conditionSet.getConditions()) {
-			ArrayList<IHttpBooleanCondition> list = conditionTypeMap.get(c.getType());
-			if (list == null) {
-				list = new ArrayList<IHttpBooleanCondition>();
+		for(IHttpCondition c: conditionSet.getAllConditions()) {
+			List<IHttpCondition> list = conditionTypeMap.get(c.getType());
+			if(list == null) {
+				list = new ArrayList<IHttpCondition>();
 				conditionTypeMap.put(c.getType(), list);
 			}
 			list.add(c);
 		}
-
-		Set<ConditionType> keys = conditionTypeMap.keySet();
-		return keys.toArray(new ConditionType[keys.size()]);
+		return conditionTypeMap.keySet().toArray(new IHttpConditionType[0]);
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof ConditionType) {
-			ArrayList<IHttpBooleanCondition> list = conditionTypeMap.get((ConditionType)parentElement);
-			return list.toArray(new IHttpBooleanCondition[list.size()]);
+		if(parentElement instanceof IHttpConditionType) {
+			final List<IHttpCondition> conditions = conditionTypeMap.get(parentElement);
+			if(conditions != null)
+				return conditions.toArray(new IHttpCondition[0]);
 		}
 		return null; 
 	}
@@ -58,7 +59,7 @@ public class ConditionTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof ConditionType) {
+		if (element instanceof IHttpConditionType) {
 			return true;
 		}
 		return false;
