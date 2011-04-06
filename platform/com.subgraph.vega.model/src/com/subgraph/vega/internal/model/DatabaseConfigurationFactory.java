@@ -6,6 +6,8 @@ import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.diagnostic.DiagnosticToConsole;
 import com.db4o.reflect.jdk.JdkReflector;
 import com.db4o.ta.TransparentPersistenceSupport;
+import com.subgraph.vega.internal.model.alerts.ScanAlert;
+import com.subgraph.vega.internal.model.requests.RequestLogRecord;
 
 public class DatabaseConfigurationFactory {
 	final private static boolean DIAGNOSTICS_ENABLED = false;
@@ -16,22 +18,26 @@ public class DatabaseConfigurationFactory {
 		EmbeddedConfiguration configuration = Db4oEmbedded.newConfiguration();
 		configuration.common().reflectWith(new JdkReflector(this.getClass().getClassLoader()));
 		configuration.common().add(new TransparentPersistenceSupport());
+		configuration.common().objectClass(RequestLogRecord.class).objectField("requestId").indexed(true);
+		configuration.common().objectClass(ScanAlert.class).objectField("key").indexed(true);
+		configuration.common().objectClass(ScanAlert.class).objectField("resource").indexed(true);
 		if(DIAGNOSTICS_ENABLED) {
 			configuration.common().diagnostic().addListener(new DiagnosticToConsole());
 		}
 		if(DEBUG_OUTPUT_ENABLED) {
 			configuration.common().messageLevel(DEBUG_OUTPUT_LEVEL);
 		}
-		
+
 		return configuration;
-		
+
 	}
-	
+
+
 	public ObjectContainer openContainer(String path) {
 		EmbeddedConfiguration config = createDefaultConfiguration();
 		return Db4oEmbedded.openFile(config, path);
 	}
-	
+
 	public ObjectContainer openContainer(EmbeddedConfiguration config, String path) {
 		return Db4oEmbedded.openFile(config, path);
 	}
