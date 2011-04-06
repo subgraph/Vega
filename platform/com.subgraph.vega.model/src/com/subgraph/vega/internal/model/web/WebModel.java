@@ -53,45 +53,35 @@ public class WebModel implements IWebModel {
 
 	@Override
 	synchronized public Collection<IWebHost> getAllWebHosts() {
-		synchronized(database) {
-			List<IWebHost> hosts =  database.query(IWebHost.class);
-			return hosts;
-		}
+			return database.query(IWebHost.class);
 	}
 
 	@Override
 	public Collection<IWebHost> getUnscannedHosts() {
-		synchronized(database) {
-			final List<IWebHost> hosts =  database.query(new Predicate<IWebHost>() {
+		return database.query(new Predicate<IWebHost>() {
 				private static final long serialVersionUID = 1L;
 				@Override
 				public boolean match(IWebHost host) {
 					return host.isScanned() == false;
 				}
 			});
-			return hosts;
-		}
 	}
 
 	@Override
 	public Collection<IWebPath> getUnscannedPaths() {
-		synchronized(database) {
-			final List<IWebPath> paths = database.query(new Predicate<IWebPath>() {
-				private static final long serialVersionUID = 1L;
-				@Override
-				public boolean match(IWebPath path) {
-					return path.isScanned() == false;
-				}
-			});
-			return paths;
-		}
+		final List<IWebPath> paths = database.query(new Predicate<IWebPath>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IWebPath path) {
+				return path.isScanned() == false;
+			}
+		});
+		return paths;
 	}
 
 	@Override
 	public Collection<IWebPath> getAllPaths() {
-		synchronized(database) {
-			return database.query(IWebPath.class);
-		}
+		return database.query(IWebPath.class);
 	}
 
 	@Override
@@ -125,13 +115,11 @@ public class WebModel implements IWebModel {
 
 	@Override
 	synchronized public WebHost getWebHostByHttpHost(HttpHost host) {
-		synchronized(database) {
-			for(WebHost wh: database.query(WebHost.class)) {
-				if(wh.getHttpHost().equals(host))
-					return wh;
-			}
-			return null;
+		for(WebHost wh: database.query(WebHost.class)) {
+			if(wh.getHttpHost().equals(host))
+				return wh;
 		}
+		return null;
 	}
 
 	@Override
@@ -142,13 +130,10 @@ public class WebModel implements IWebModel {
 		final WebHost newHost = WebHost.createWebHost(eventManager, database, host);
 		newHost.setDatabase(database);
 		newHost.getRootPath().setDatabase(database);
-		synchronized(database) {
-			database.store(newHost);
-			database.store(newHost.getRootMountPoint());
-			database.store(newHost.getRootPath());
-			database.commit();
-		}
-		//newHost.getRootPath().setDatabase(database);
+		database.store(newHost);
+		database.store(newHost.getRootMountPoint());
+		database.store(newHost.getRootPath());
+
 		notifyNewEntity(newHost);
 		return newHost;
 	}

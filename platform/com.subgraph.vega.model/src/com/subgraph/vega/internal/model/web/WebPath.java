@@ -200,10 +200,7 @@ public class WebPath extends WebEntity implements IWebPath {
 			WebPath newPath = new WebPath(eventManager, database, this, pathComponent, getMountPoint());
 
 			ObjectContainer database = getDatabase();
-			synchronized(database) {
-				database.store(newPath);
-				database.commit();
-			}
+			database.store(newPath);
 
 			newPath.setDatabase(database);
 			childPathMap.put(pathComponent, newPath);
@@ -276,11 +273,8 @@ public class WebPath extends WebEntity implements IWebPath {
 	private WebResponse createWebResponse(List<NameValuePair> parameters, String mimeType) {
 		WebResponse response = new WebResponse(eventManager, database, this, parameters, mimeType);
 		ObjectContainer database = getDatabase();
-		synchronized(database) {
-			database.store(response);
-			database.commit();
-		}
-		response.setDatabase(getDatabase());
+		response.setDatabase(database);
+		database.store(response);
 		return response;
 	}
 

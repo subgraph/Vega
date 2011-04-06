@@ -59,8 +59,8 @@ public class ScanAlertModel implements IScanAlertModel {
 	public IScanAlert getAlertByKey(final String key) {
 		if(key == null)
 			return null;
-		synchronized(database) {
-			final List<IScanAlert> results = getAlertListForKey(key);
+		synchronized(this) {
+			final List<ScanAlert> results = getAlertListForKey(key);
 			if(results.size() == 0)
 				return null;
 			if(results.size() > 1)
@@ -69,11 +69,11 @@ public class ScanAlertModel implements IScanAlertModel {
 		}
 	}
 
-	private List<IScanAlert> getAlertListForKey(final String key) {
-		return database.query(new Predicate<IScanAlert>() {
+	private List<ScanAlert> getAlertListForKey(final String key) {
+		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
 			@Override
-			public boolean match(IScanAlert alert) {
+			public boolean match(ScanAlert alert) {
 				return key.equals(alert.getKey());
 			}
 		});
@@ -81,21 +81,15 @@ public class ScanAlertModel implements IScanAlertModel {
 
 	@Override
 	public void addAlert(IScanAlert alert) {
-
 		if(rejectDuplicateAlert(alert))
 			return;
-		synchronized(database) {
-			database.store(alert);
-			database.commit();
-		}
+		database.store(alert);
 		eventManager.fireEvent(new NewScanAlertEvent(alert));
 	}
 
 	@Override
 	public List<IScanAlert> getAlerts() {
-		synchronized(database) {
-			return database.query(IScanAlert.class);
-		}
+		return database.query(IScanAlert.class);
 	}
 
 	@Override
@@ -111,7 +105,7 @@ public class ScanAlertModel implements IScanAlertModel {
 	private boolean rejectDuplicateAlert(IScanAlert alert) {
 		if(alert.getResource() == null)
 			return false;
-		for(IScanAlert a: getAlertListForResource(alert.getResource())) {
+		for(ScanAlert a: getAlertListForResource(alert.getResource())) {
 			if(a.equals(alert))
 				return true;
 		}
@@ -126,16 +120,14 @@ public class ScanAlertModel implements IScanAlertModel {
 		return getAlertByKey(key) != null;
 	}
 
-	private List<IScanAlert> getAlertListForResource(final String resource) {
-		synchronized(database) {
-		return database.query(new Predicate<IScanAlert>() {
+	private List<ScanAlert> getAlertListForResource(final String resource) {
+		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public boolean match(IScanAlert alert) {
+			public boolean match(ScanAlert alert) {
 				return resource.equals(alert.getResource());
 			}
 		});
-		}
 	}
 }
