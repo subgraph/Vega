@@ -183,9 +183,15 @@ public class PathState implements IPathState {
 	}
 
 	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IModuleContext ctx) {
-		pathStateManager.getCrawler().submitTask(request, callback, ctx);
+		pathStateManager.getCrawler().submitTask(request, getWrappedCallback(callback), ctx);
 	}
 
+	private ICrawlerResponseProcessor getWrappedCallback(ICrawlerResponseProcessor callback) {
+		if(pathStateManager.requestLoggingEnabled())
+			return CrawlerCallbackWrapper.createLogging(pathStateManager.getRequestLog(), callback);
+		else
+			return CrawlerCallbackWrapper.create(callback);
+	}
 
 	@Override
 	public HttpUriRequest createRequest() {
