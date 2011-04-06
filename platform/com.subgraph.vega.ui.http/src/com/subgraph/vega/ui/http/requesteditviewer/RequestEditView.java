@@ -109,9 +109,9 @@ public class RequestEditView extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		if (tableViewerHeaders != null) {
-			tableViewerHeaders.getControl().setFocus();
-		}		
+		if (parentComposite != null) {
+			parentComposite.setFocus();
+		}
 	}
 
 	public void setRequest(IRequestLogRecord record) throws URISyntaxException {

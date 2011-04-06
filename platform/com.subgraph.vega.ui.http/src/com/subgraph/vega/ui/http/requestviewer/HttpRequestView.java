@@ -81,22 +81,23 @@ public class HttpRequestView extends ViewPart {
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
 /*
-		filter = new HttpViewFilter();
+
+		filter = new HttpViewFilter(tableViewer);
 		tableViewer.addFilter(filter);
 		*/
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
-/*
-		getSite().getPage().addSelectionListener(new ISelectionListener() {
+
+		/*
+		getSite().getPage().addSelectionListener("com.subgraph.vega.views.website", new ISelectionListener() {
 			@Override
-			public void selectionChanged(IWorkbenchPart part,
-					ISelection selection) {
-				if(!(selection instanceof IStructuredSelection))
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				if (!(selection instanceof IStructuredSelection)) {
 					return;
+				}
 				Object o = ((IStructuredSelection)selection).getFirstElement();
-				if(o == null) {
+				if (o == null) {
 					filter.setFilterEntity(null);
-					tableViewer.refresh();
-				} else if(o instanceof IWebEntity) {
+				} else if (o instanceof IWebEntity) {
 					filterByEntity((IWebEntity) o);
 				}
 			}
@@ -154,7 +155,6 @@ public class HttpRequestView extends ViewPart {
 
 	private void filterByEntity(IWebEntity entity) {
 		filter.setFilterEntity(entity);
-		tableViewer.refresh();
 		if(tableViewer.getTable().getItemCount() == 1) {
 			Object ob = tableViewer.getElementAt(0);
 			tableViewer.setSelection(new StructuredSelection(ob), true);

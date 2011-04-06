@@ -1,14 +1,13 @@
 package com.subgraph.vega.api.http.proxy;
 
+import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.http.conditions.TransactionDirection;
+
 public interface IHttpInterceptor {
 	void setEventHandler(IHttpInterceptorEventHandler eventHandler);
-	void setInterceptLevel(ProxyTransactionDirection direction, HttpInterceptorLevel level);
-	HttpInterceptorLevel getInterceptLevel(ProxyTransactionDirection direction);
-	IHttpInterceptorBreakpoint createBreakpoint(ProxyTransactionDirection direction, HttpInterceptorBreakpointType breakpointType, HttpInterceptorBreakpointMatchType matchType, String pattern, boolean isEnabled);
-	void removeBreakpoint(ProxyTransactionDirection direction, IHttpInterceptorBreakpoint breakpoint);
-	int getBreakpontIdxOf(ProxyTransactionDirection direction, IHttpInterceptorBreakpoint breakpoint);
-	int getBreakpointCnt(ProxyTransactionDirection direction);
-	IHttpInterceptorBreakpoint[] getBreakpoints(ProxyTransactionDirection direction);
+	void setInterceptLevel(TransactionDirection direction, HttpInterceptorLevel level);
+	HttpInterceptorLevel getInterceptLevel(TransactionDirection direction);
+	IHttpConditionSet getBreakpointSet(TransactionDirection direction);
 	int transactionQueueSize();
 	IProxyTransaction transactionQueuePop();
 }

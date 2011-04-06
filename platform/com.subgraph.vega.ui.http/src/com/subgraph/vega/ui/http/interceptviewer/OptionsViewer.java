@@ -34,18 +34,19 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
-import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointType;
+import com.subgraph.vega.api.http.conditions.ConditionType;
+import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
+import com.subgraph.vega.api.http.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.http.conditions.MatchType;
+import com.subgraph.vega.api.http.conditions.TransactionDirection;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorLevel;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
-import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
-import com.subgraph.vega.api.http.proxy.ProxyTransactionDirection;
 import com.subgraph.vega.ui.http.Activator;
 
 public class OptionsViewer {
 	private static final Image IMAGE_CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
 	private static final Image IMAGE_UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
-	private final ProxyTransactionDirection direction;
+	private final TransactionDirection direction;
 	private Composite parentComposite;
 	private ComboViewer comboViewerInterceptorLevel;
 	private TableViewer tableViewerBreakpoints;
@@ -54,7 +55,7 @@ public class OptionsViewer {
 	private Text patternBreakpointText;
 	private IHttpInterceptor interceptor;
 
-	public OptionsViewer(ProxyTransactionDirection direction) {
+	public OptionsViewer(TransactionDirection direction) {
 		this.direction = direction;
 	}
 
@@ -70,7 +71,7 @@ public class OptionsViewer {
 		return parentComposite;
 	}
 	
-	public ProxyTransactionDirection getDirection() {
+	public TransactionDirection getDirection() {
 		return direction;
 	}
 
@@ -167,7 +168,7 @@ public class OptionsViewer {
 
 				@Override
 				public Image getImage(Object element) {
-					if (((IHttpInterceptorBreakpoint) element).getIsEnabled()) {
+					if (((IHttpBooleanCondition) element).getIsEnabled()) {
 						return IMAGE_CHECKED;
 					} else {
 						return IMAGE_UNCHECKED;
@@ -177,19 +178,19 @@ public class OptionsViewer {
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((IHttpInterceptorBreakpoint) element).getType().getName();
+					return ((IHttpBooleanCondition) element).getType().getName();
 				}
 			},
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((IHttpInterceptorBreakpoint) element).getMatchType().getName();
+					return ((MatchType)((IHttpBooleanCondition)element).getComparisonType()).getName();
 				}
 			},		
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					return ((IHttpInterceptorBreakpoint) element).getPattern();
+					return ((IHttpBooleanCondition) element).getPattern();
 				}
 			},
 		};
@@ -222,17 +223,18 @@ public class OptionsViewer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerBreakpoints.getSelection();
+				IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					interceptor.removeBreakpoint(direction, (IHttpInterceptorBreakpoint) i.next());
+					conditionSet.removeCondition((IHttpBooleanCondition) i.next());
 				}
 				tableViewerBreakpoints.refresh();
 			}
 		};
 	}
 
-	private List<HttpInterceptorBreakpointType> getBreakpointTypesList() {
-		final List<HttpInterceptorBreakpointType> typesList = new ArrayList<HttpInterceptorBreakpointType>();
-		for (HttpInterceptorBreakpointType t: HttpInterceptorBreakpointType.values()) {
+	private List<ConditionType> getBreakpointTypesList() {
+		final List<ConditionType> typesList = new ArrayList<ConditionType>();
+		for (ConditionType t: ConditionType.values()) {
 			if ((t.getMask() & direction.getMask()) != 0) {
 				typesList.add(t);
 			}
@@ -248,10 +250,10 @@ public class OptionsViewer {
 		comboViewerBreakpointTypes.setContentProvider(new ArrayContentProvider());
 		comboViewerBreakpointTypes.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((HttpInterceptorBreakpointType) element).getName();
+				return ((ConditionType) element).getName();
 			}
 		});
-		final List<HttpInterceptorBreakpointType> typesList = getBreakpointTypesList();
+		final List<ConditionType> typesList = getBreakpointTypesList();
 		comboViewerBreakpointTypes.setInput(typesList);
 		if (typesList.size() != 0) {
 			comboViewerBreakpointTypes.setSelection(new StructuredSelection(typesList.get(0)));
@@ -261,10 +263,10 @@ public class OptionsViewer {
 		comboViewerBreakpointMatchTypes.setContentProvider(new ArrayContentProvider());
 		comboViewerBreakpointMatchTypes.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((HttpInterceptorBreakpointMatchType) element).getName();
+				return ((MatchType) element).getName();
 			}
 		});
-		HttpInterceptorBreakpointMatchType[] matchTypesList = HttpInterceptorBreakpointMatchType.values();
+		MatchType[] matchTypesList = MatchType.values();
 		comboViewerBreakpointMatchTypes.setInput(matchTypesList);
 		comboViewerBreakpointMatchTypes.setSelection(new StructuredSelection(matchTypesList[0]));
 
@@ -290,11 +292,12 @@ public class OptionsViewer {
 	private SelectionListener createSelectionListenerButtonCreateBreakpoint() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				HttpInterceptorBreakpointType breakpointType = (HttpInterceptorBreakpointType) ((IStructuredSelection) comboViewerBreakpointTypes.getSelection()).getFirstElement();
-				HttpInterceptorBreakpointMatchType matchType = (HttpInterceptorBreakpointMatchType) ((IStructuredSelection) comboViewerBreakpointMatchTypes.getSelection()).getFirstElement();
+				ConditionType breakpointType = (ConditionType) ((IStructuredSelection) comboViewerBreakpointTypes.getSelection()).getFirstElement();
+				MatchType matchType = (MatchType) ((IStructuredSelection) comboViewerBreakpointMatchTypes.getSelection()).getFirstElement();
 				String pattern = patternBreakpointText.getText();
 				if (breakpointType != null && matchType != null && pattern != null) {
-					interceptor.createBreakpoint(direction, breakpointType, matchType, pattern, true);
+					IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
+					conditionSet.createCondition(breakpointType, matchType, pattern, true);
 					tableViewerBreakpoints.refresh();
 					comboViewerBreakpointTypes.setSelection(new StructuredSelection(comboViewerBreakpointTypes.getElementAt(0)));
 					comboViewerBreakpointMatchTypes.setSelection(new StructuredSelection(comboViewerBreakpointMatchTypes.getElementAt(0)));

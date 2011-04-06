@@ -8,8 +8,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 
-import com.subgraph.vega.api.http.proxy.HttpInterceptorBreakpointMatchType;
-import com.subgraph.vega.api.http.proxy.IHttpInterceptorBreakpoint;
+import com.subgraph.vega.api.http.conditions.IHttpBooleanCondition;
+import com.subgraph.vega.api.http.conditions.MatchType;
 
 public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 	private final TableViewer viewer;
@@ -25,10 +25,10 @@ public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 		editor.setContenProvider(new ArrayContentProvider());
 		editor.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((HttpInterceptorBreakpointMatchType) element).getName();
+				return ((MatchType) element).getName();
 			}
 		});
-		editor.setInput(HttpInterceptorBreakpointMatchType.values());
+		editor.setInput(MatchType.values());
 		return editor;
 	}
 
@@ -39,13 +39,13 @@ public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		return ((IHttpInterceptorBreakpoint) element).getMatchType();
+		return ((IHttpBooleanCondition) element).getComparisonType();
 
 	}
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		((IHttpInterceptorBreakpoint) element).setMatchType((HttpInterceptorBreakpointMatchType) value);
+		((IHttpBooleanCondition) element).setComparisonType((MatchType) value);
 		viewer.refresh();
 	}
 
