@@ -13,31 +13,34 @@ import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpViewContentProvider implements IStructuredContentProvider {
-	
+
 	private IRequestLog requestLog;
 	private Viewer viewer;
 	private final IEventHandler requestLogListener;
 	private final List<IRequestLogRecord> requestRecords = new ArrayList<IRequestLogRecord>();
-	
+
 	public HttpViewContentProvider() {
 		requestLogListener = createRequestLogListener();
 	}
-	
+
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return requestRecords.toArray();
 	}
-	
+
+	@Override
 	public void dispose() {
-		
+
 	}
-	
+
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if(newInput == null)
 			setNullModel();
-		else if(newInput instanceof IRequestLog) 
+		else if(newInput instanceof IRequestLog)
 			setNewRequestLogAndViewer((IRequestLog) newInput, viewer);
 	}
-	
+
 	private void setNullModel() {
 		requestRecords.clear();
 		requestLog = null;
@@ -48,11 +51,11 @@ public class HttpViewContentProvider implements IStructuredContentProvider {
 				requestLog.removeChangeListener(requestLogListener);
 			requestLog = newRequestLog;
 			requestRecords.clear();
-			requestLog.addChangeListenerAndPopulate(requestLogListener);
+			//requestLog.addChangeListenerAndPopulate(requestLogListener);
 			this.viewer = newViewer;
 		}
 	}
-	
+
 	private IEventHandler createRequestLogListener() {
 		return new IEventHandler() {
 			@Override
@@ -63,14 +66,14 @@ public class HttpViewContentProvider implements IStructuredContentProvider {
 			}
 		};
 	}
-	
+
 	private void handleAddRequestRecord(AddRequestRecordEvent event) {
 		synchronized(requestRecords) {
 			requestRecords.add(event.getRecord());
 			refreshViewer();
 		}
 	}
-	
+
 	private void refreshViewer() {
 		if(viewer != null) {
 			synchronized(viewer) {
@@ -78,12 +81,12 @@ public class HttpViewContentProvider implements IStructuredContentProvider {
 					@Override
 					public void run() {
 						if(!viewer.getControl().isDisposed())
-							viewer.refresh();						
+							viewer.refresh();
 					}
 				});
 			}
 		}
 	}
-	
+
 
 }

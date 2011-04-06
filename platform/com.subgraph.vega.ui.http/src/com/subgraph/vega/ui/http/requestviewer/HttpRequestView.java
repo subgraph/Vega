@@ -5,7 +5,6 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -19,11 +18,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
@@ -34,6 +30,7 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
+import com.subgraph.vega.ui.http.Activator;
 
 public class HttpRequestView extends ViewPart {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
@@ -51,10 +48,10 @@ public class HttpRequestView extends ViewPart {
 		final Composite comp = new Composite(form, SWT.NONE);
 		final TableColumnLayout tcl = new TableColumnLayout();
 		comp.setLayout(tcl);
-		
-		tableViewer = new TableViewer(comp);
+
+		tableViewer = new TableViewer(comp, SWT.VIRTUAL);
 		createColumns(tableViewer, tcl);
-		tableViewer.setContentProvider(new HttpViewContentProvider());
+		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		MenuManager menuManager = new MenuManager();
 		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
@@ -62,7 +59,7 @@ public class HttpRequestView extends ViewPart {
 		getSite().registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
 		getSite().setSelectionProvider(tableViewer);
 
-		IModel model = Activator.getDefault().getModel();		
+		IModel model = Activator.getDefault().getModel();
 		if(model != null) {
 			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 				@Override
@@ -83,11 +80,12 @@ public class HttpRequestView extends ViewPart {
 		requestResponseViewer = new RequestResponseViewer(form);
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
-		
+/*
 		filter = new HttpViewFilter();
 		tableViewer.addFilter(filter);
+		*/
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
-		
+/*
 		getSite().getPage().addSelectionListener(new ISelectionListener() {
 			@Override
 			public void selectionChanged(IWorkbenchPart part,
@@ -100,19 +98,20 @@ public class HttpRequestView extends ViewPart {
 					tableViewer.refresh();
 				} else if(o instanceof IWebEntity) {
 					filterByEntity((IWebEntity) o);
-				}				
+				}
 			}
 		});
+		*/
 	}
-	
+
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
 		tableViewer.setInput(event.getWorkspace().getRequestLog());
 	}
-	
+
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
 		tableViewer.setInput(null);
 	}
-	
+
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
 		tableViewer.setInput(null);
 		tableViewer.setInput(event.getWorkspace().getRequestLog());
@@ -120,13 +119,13 @@ public class HttpRequestView extends ViewPart {
 
 	public void  focusOnRecord(long requestId) {
 		final Object inputObj = tableViewer.getInput();
-		if(!(inputObj instanceof IRequestLog)) 
+		if(!(inputObj instanceof IRequestLog))
 			return;
 		final IRequestLog requestLog = (IRequestLog) inputObj;
 		final IRequestLogRecord record = requestLog.lookupRecord(requestId);
 		if(record == null)
 			return;
-		
+
 		tableViewer.setSelection(new StructuredSelection(record), true);
 		requestResponseViewer.setDisplayResponse();
 	}
@@ -140,19 +139,19 @@ public class HttpRequestView extends ViewPart {
 				new ColumnPixelData(50, true, true),
 				new ColumnPixelData(80, true, true)
 		};
-		
+
 		for(int i = 0; i < titles.length; i++) {
 			final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
 			final TableColumn c = column.getColumn();
-			layout.setColumnData(c, layoutData[i]);			
+			layout.setColumnData(c, layoutData[i]);
 			c.setText(titles[i]);
 			c.setMoveable(true);
-		}	
+		}
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 	}
-	
+
 	private void filterByEntity(IWebEntity entity) {
 		filter.setFilterEntity(entity);
 		tableViewer.refresh();
@@ -161,7 +160,7 @@ public class HttpRequestView extends ViewPart {
 			tableViewer.setSelection(new StructuredSelection(ob), true);
 		}
 	}
-	
+
 	private ISelectionChangedListener createSelectionChangedListener() {
 		return new ISelectionChangedListener() {
 			@Override
@@ -169,12 +168,12 @@ public class HttpRequestView extends ViewPart {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 				if(selection.getFirstElement() instanceof IRequestLogRecord)
 					requestResponseViewer.setCurrentRecord((IRequestLogRecord) selection.getFirstElement());
-				else 
-					requestResponseViewer.setCurrentRecord(null);				
+				else
+					requestResponseViewer.setCurrentRecord(null);
 			}
 		};
 	}
-	
+
 	@Override
 	public void setFocus() {
 		tableViewer.getControl().setFocus();
