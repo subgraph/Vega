@@ -30,13 +30,13 @@ public class UriParser {
 	private final ICrawlerResponseProcessor fileProcessor;
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
-	
+
 	public UriParser(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
 		this.workspace = workspace;
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(contentAnalyzer, this, filter));
+		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter));
 	}
 
 	public IPathState processUri(URI uri) {
@@ -110,7 +110,7 @@ public class UriParser {
 		List<NameValuePair> plist = URLEncodedUtils.parse(uri, "UTF-8");
 		synchronized(pathStateManager) {
 			getPathStateForFile(path).maybeAddParameters(plist);
-		}		
+		}
 	}
 
 	private PathState getPathStateForFile(IWebPath filePath) {

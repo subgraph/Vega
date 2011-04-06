@@ -15,43 +15,45 @@ import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.impl.scanner.forms.FormProcessor;
 
 public class ResponseAnalyzer {
-	
+
 	private final IContentAnalyzer contentAnalyzer;
 	private final UriParser uriParser;
 	private final UriFilter uriFilter;
 	private final FormProcessor formProcessor;
-	
-	public ResponseAnalyzer(IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter) {
+
+	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter) {
 		this.contentAnalyzer = contentAnalyzer;
 		this.uriParser = uriParser;
 		this.uriFilter = uriFilter;
-		this.formProcessor = new FormProcessor(uriParser);
+		this.formProcessor = new FormProcessor(config, uriParser);
 	}
-	
+
 	public IContentAnalyzer getContentAnalyzer() {
 		return contentAnalyzer;
 	}
 
 	public void analyzePivot(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
-		
+
 	}
 	public void analyzePage(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
-		
+
 		final IContentAnalyzerResult result = contentAnalyzer.processResponse(res, false, true);
 		for(URI u: result.getDiscoveredURIs()) {
 			if(uriFilter.filter(u))
 				uriParser.processUri(u);
 		}
-		formProcessor.processForms(ctx, req, res);		
+		formProcessor.processForms(ctx, req, res);
 	}
 
 	public void analyzeContent(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		analyzeHtml(ctx, req, res);
 		contentAnalyzer.processResponse(res, false, false);
 	}
-	
+
 	private void analyzeHtml(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		IHTMLParseResult html = res.getParsedHTML();
 		if(html == null)
@@ -65,7 +67,7 @@ public class ResponseAnalyzer {
 			}
 		}
 	}
-	
+
 	private void analyzeHtmlElement(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, Element elem) {
 		boolean remoteScript = false;
 		NamedNodeMap attributes = elem.getAttributes();
@@ -78,41 +80,41 @@ public class ResponseAnalyzer {
 				if(match(tag, "script") && match(n, "src"))
 					remoteScript = true;
 				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && match(tag, "input")))) {
-					if(v.startsWith("vega://")) 
+					if(v.startsWith("vega://"))
 						ctx.publishAlert("vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
-					
+
 					if(v.startsWith("http://vega.invalid/") || v.startsWith("//vega.invalid/")) {
-						if(match(tag, "script", "link")) 
+						if(match(tag, "script", "link"))
 							ctx.publishAlert("vinfo-url-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
-						else if(match(tag, "a")) 
+						else if(match(tag, "a"))
 							ctx.publishAlert("vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
 						else
 							ctx.publishAlert("vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res);
 					}
-					
+
 				}
-				
+
 				if((v != null) && (n.startsWith("on") || n.equals("style"))) {
 					checkJavascriptXSS(ctx, req, res, v);
 				}
-				
-				if(n.contains("vvv")) 
-					possibleXssAlert(ctx, req, res, n, n.indexOf("vvv"), "xss-inject", "Injected XSS tag into HTML attribute value");	
-				
+
+				if(n.contains("vvv"))
+					possibleXssAlert(ctx, req, res, n, n.indexOf("vvv"), "xss-inject", "Injected XSS tag into HTML attribute value");
+
 			}
 		}
-		
-		if(tag.startsWith("vvv")) 
+
+		if(tag.startsWith("vvv"))
 			possibleXssAlert(ctx, req, res, tag, 0, "vinfo-xss-inject", "Injected XSS tag into HTML tag name");
 
-		
+
 		if(tag.equals("style") || (tag.equals("script") && !remoteScript)) {
 			String content  = elem.getTextContent();
 			if(content != null)
 				checkJavascriptXSS(ctx, req, res, content);
-		}		
+		}
 	}
-	
+
 	private void possibleXssAlert(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text, int offset, String type, String message) {
 		final int[] xids = extractXssTag(text, offset);
 		if(xids == null)
@@ -123,7 +125,7 @@ public class ResponseAnalyzer {
 		else
 			ctx.publishAlert(type, message + " (from previous scan)", req, res);
 	}
-	
+
 	private boolean match(String s, String ...options) {
 		if(s == null)
 			return false;
@@ -133,7 +135,7 @@ public class ResponseAnalyzer {
 		return false;
 	}
 
-	
+
 	private int[] extractXssTag(String text, int offset) {
 		//    3     9
 		// vvv000000v000000
@@ -141,7 +143,7 @@ public class ResponseAnalyzer {
 			return null;
 		if(text.charAt(offset + 9) != 'v')
 			return null;
-		
+
 		final int[] res = new int[2];
 		res[0] = extractXssId(text, offset + 3);
 		res[1] = extractXssId(text, offset + 10);
@@ -149,9 +151,9 @@ public class ResponseAnalyzer {
 			return null;
 		else
 			return res;
-		
+
 	}
-	
+
 	private int extractXssId(String text, int offset) {
 		if(text.length() < (offset + 6))
 			return -1;
@@ -162,7 +164,7 @@ public class ResponseAnalyzer {
 			return -1;
 		}
 	}
-	
+
 	private void checkJavascriptXSS(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text) {
 		if(text == null)
 			return;
@@ -194,7 +196,7 @@ public class ResponseAnalyzer {
 			idx += 1;
 		}
 	}
-	
+
 	private boolean matchStartsWith(String str, int offset, String ...options) {
 		for(int i = 0; i < options.length; i++) {
 			if(str.startsWith(options[i], offset))
@@ -202,7 +204,7 @@ public class ResponseAnalyzer {
 		}
 		return false;
 	}
-	
+
 	private int maybeSkipJavascriptComment(String text, int idx) {
 		final int max = text.length();
 		final int savedIdx = idx;
@@ -233,6 +235,6 @@ public class ResponseAnalyzer {
 				return end + 2;
 		}
 		return savedIdx;
-		
+
 	}
 }

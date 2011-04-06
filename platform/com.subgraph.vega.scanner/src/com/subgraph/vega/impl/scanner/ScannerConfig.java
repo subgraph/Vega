@@ -1,9 +1,12 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.subgraph.vega.api.scanner.IFormCredential;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
 	private URI baseURI;
@@ -18,6 +21,7 @@ public class ScannerConfig implements IScannerConfig {
 	private String ntlmPassword;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
+	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
 	@Override
 	public void setBaseURI(URI baseURI) {
@@ -147,6 +151,17 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public boolean getNonParameterFileInjectionChecksFlag() {
 		return false;
+	}
+
+	public IFormCredential createFormCredential(String username, String password) {
+		final IFormCredential credential = new FormCredential(username, password);
+		formCredentials.add(credential);
+		return credential;
+	}
+
+	@Override
+	public List<IFormCredential> getFormCredentials() {
+		return formCredentials;
 	}
 
 }

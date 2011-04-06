@@ -27,6 +27,8 @@ public interface IScannerConfig {
 	URI getBaseURI();
 	List<String> getModulesList();
 	List<String> getExclusions();
+	IFormCredential createFormCredential(String username, String password) ;
+	List<IFormCredential> getFormCredentials();
 	boolean getLogAllRequests();
 	boolean getDisplayDebugOutput();
 	boolean getDirectoryInjectionChecksFlag();
