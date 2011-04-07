@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 
@@ -131,6 +132,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		records = queryRecords();
 		currentCount = records.size();
 		lastUpdateCount = -1;
+		resetTable();
 	}
 
 	private List<IRequestLogRecord> queryRecords() {
@@ -146,10 +148,26 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		filterCondition = conditionSet;
 		requestLog.removeUpdateListener(callback);
 		requestLog.addUpdateListener(callback, conditionSet);
-		reloadRecords();
-		tableViewer.refresh();
+		reloadRecords();		
 	}
 	
+	private void resetTable() {
+		final Display display = tableViewer.getControl().getDisplay();
+		if(display == null)
+			return;
+		display.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if(tableViewer.getTable().isDisposed())
+					return;
+				tableViewer.getTable().setSelection(0);
+				tableViewer.getTable().showSelection();
+				tableViewer.setItemCount(currentCount);
+				tableViewer.refresh(true);
+			}
+		});
+	}
+
 	private TimerTask createTimerTask(final Display display) {
 		return new TimerTask() {
 			@Override
