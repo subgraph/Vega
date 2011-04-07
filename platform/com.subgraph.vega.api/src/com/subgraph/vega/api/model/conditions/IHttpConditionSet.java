@@ -9,6 +9,7 @@ public interface IHttpConditionSet {
 	boolean matches(HttpRequest request, HttpResponse response);
 	void appendCondition(IHttpCondition condition);
 	void removeCondition(IHttpCondition condition);
+	void clearConditions();
 	List<IHttpCondition> getAllConditions();
 	IHttpConditionManager getConditionManager();
 }

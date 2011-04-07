@@ -47,6 +47,7 @@ public abstract class AbstractRegexCondition extends AbstractCondition implement
 	}
 	
 	protected void constrainQuery(Query query) {
+		activate(ActivationPurpose.READ);
 		if(isSimplePattern) {
 			query.constrain(patternString).contains();
 		} else {
@@ -55,6 +56,7 @@ public abstract class AbstractRegexCondition extends AbstractCondition implement
 	}
 
 	protected Pattern getRegexPattern() {
+		activate(ActivationPurpose.READ);
 		synchronized(this) {
 			if(patternRegex == null)
 				patternRegex = Pattern.compile(patternString);
@@ -68,6 +70,7 @@ public abstract class AbstractRegexCondition extends AbstractCondition implement
 	}
 	
 	public IHttpCondition createCopy() {
+		activate(ActivationPurpose.READ);
 		final IHttpRegexCondition c = (IHttpRegexCondition) getType().createConditionInstance();
 		c.setEnabled(isEnabled());
 		c.setInverted(isInverted());

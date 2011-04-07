@@ -13,29 +13,35 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		
 	@Override
 	public boolean isEnabled() {
+		activate(ActivationPurpose.READ);
 		return isEnabled;
 	}
 
 	@Override
 	public void setEnabled(boolean state) {
+		activate(ActivationPurpose.WRITE);
 		isEnabled = state;
 	}
 
 	@Override
 	public boolean isInverted() {
+		activate(ActivationPurpose.READ);
 		return isInverted;
 	}
 
 	@Override
 	public void setInverted(boolean flag) {
+		activate(ActivationPurpose.WRITE);
 		isInverted = flag;
 	}
 
 	protected boolean maybeInvert(boolean value) {
+		activate(ActivationPurpose.READ);
 		return isInverted ^ value;
 	}
 	
 	public MatchOption getMatchOption() {
+		activate(ActivationPurpose.READ);
 		return (isInverted) ? (MatchOption.DOESNT_MATCH) : (MatchOption.DOES_MATCH);
 	}
 

@@ -31,15 +31,18 @@ public abstract class AbstractRangeCondition extends AbstractCondition implement
 	}
 	
 	protected boolean matchesRange(int value) {
+		activate(ActivationPurpose.READ);
 		return value >= rangeLow && value < rangeHigh;
 	}
 
 	protected void constrainQuery(Query query) {
+		activate(ActivationPurpose.READ);
 		query.constrain(rangeLow).greater().equal()
 		.and(query.constrain(rangeHigh).smaller());
 	}
 
 	public IHttpCondition createCopy() {
+		activate(ActivationPurpose.READ);
 		final IHttpRangeCondition c = (IHttpRangeCondition) getType().createConditionInstance();
 		c.setEnabled(isEnabled());
 		c.setInverted(isInverted());

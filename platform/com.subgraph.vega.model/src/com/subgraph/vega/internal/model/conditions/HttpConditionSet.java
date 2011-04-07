@@ -41,6 +41,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	private boolean matchesAllConditions(HttpRequest request, HttpResponse response) {
+		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
 			for(IHttpCondition c: conditionList) {
 				if(c.isEnabled() && !c.matches(request, response))
@@ -52,6 +53,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	
 	@SuppressWarnings("unused")
 	private boolean matchesAnyCondition(HttpRequest request, HttpResponse response) {
+		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
 			for(IHttpCondition c: conditionList)
 				if(c.isEnabled() && c.matches(request, response))
@@ -70,6 +72,12 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	public void removeCondition(IHttpCondition condition) {
 		activate(ActivationPurpose.READ);
 		conditionList.remove(condition);
+	}
+
+	@Override
+	public void clearConditions() {
+		activate(ActivationPurpose.READ);
+		conditionList.clear();
 	}
 
 	@Override

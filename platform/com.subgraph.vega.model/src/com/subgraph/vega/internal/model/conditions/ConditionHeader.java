@@ -5,6 +5,7 @@ import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.activation.ActivationPurpose;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
@@ -61,6 +62,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 	
 	@Override
 	public boolean matches(HttpRequest request) {
+		activate(ActivationPurpose.READ);
 		if(matchRequestHeader)
 			return maybeInvert(hasMatchingHeader(request));
 		else
@@ -69,6 +71,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 
 	@Override
 	public boolean matches(HttpResponse response) {
+		activate(ActivationPurpose.READ);
 		if(!matchRequestHeader)
 			return maybeInvert(hasMatchingHeader(response));
 		else
@@ -88,6 +91,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 	
 	@Override
 	public boolean matches(HttpRequest request, HttpResponse response) {
+		activate(ActivationPurpose.READ);
 		if(matchRequestHeader)
 			return maybeInvert(hasMatchingHeader(request));
 		else
@@ -96,6 +100,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 
 	@Override
 	public IHttpConditionType getType() {
+		activate(ActivationPurpose.READ);
 		if(matchRequestHeader)
 			return getRequestConditionType();
 		else
@@ -104,6 +109,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 
 	@Override
 	public void filterRequestLogQuery(Query query) {
+		activate(ActivationPurpose.READ);
 		if(matchRequestHeader) 
 			constrainQuery(query.descend("requestHeaders"));
 		else
