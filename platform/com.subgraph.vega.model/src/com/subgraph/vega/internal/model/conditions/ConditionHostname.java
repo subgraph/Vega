@@ -66,7 +66,6 @@ public class ConditionHostname extends AbstractRegexCondition {
 
 	@Override
 	public void filterRequestLogQuery(Query query) {
-		// XXX must account for regex
-		query.descend("host").descend("hostname").constrain(getPattern()).contains();		
+		constrainQuery(query.descend("hostname"));		
 	}
 }

@@ -107,7 +107,6 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 			@Override
 			public void handleEvent(IEvent event) {
 				if(event instanceof ConditionSetChanged) {
-					System.out.println("Condition set changed");
 					final IHttpConditionSet conditionSet = ((ConditionSetChanged) event).getConditionSet();
 					setConditionFilter(conditionSet);
 				}				
@@ -118,7 +117,6 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	@Override
 	public void updateElement(int index) {
 		if(index >= records.size()) {
-			System.out.println("Reloading query because index ("+ index + ") is greater than current record set size of ("+ records.size() + ")");
 			records = queryRecords();
 		}
 		

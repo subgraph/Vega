@@ -19,6 +19,12 @@ public class DatabaseConfigurationFactory {
 		configuration.common().reflectWith(new JdkReflector(this.getClass().getClassLoader()));
 		configuration.common().add(new TransparentPersistenceSupport());
 		configuration.common().objectClass(RequestLogRecord.class).objectField("requestId").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("hostname").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("requestMethod").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("requestHeaders").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("responseCode").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("responseLength").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("responseHeaders").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("key").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("resource").indexed(true);
 		if(DIAGNOSTICS_ENABLED) {

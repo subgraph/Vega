@@ -104,7 +104,9 @@ public class ConditionHeader extends AbstractRegexCondition {
 
 	@Override
 	public void filterRequestLogQuery(Query query) {
-		// TODO Auto-generated method stub
-		
+		if(matchRequestHeader) 
+			constrainQuery(query.descend("requestHeaders"));
+		else
+			constrainQuery(query.descend("responseHeaders"));		
 	}
 }

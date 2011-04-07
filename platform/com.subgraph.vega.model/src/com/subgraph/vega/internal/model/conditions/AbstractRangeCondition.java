@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.model.conditions;
 
 import com.db4o.activation.ActivationPurpose;
+import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpRangeCondition;
 
@@ -8,7 +9,7 @@ public abstract class AbstractRangeCondition extends AbstractCondition implement
 
 	private int rangeLow;
 	private int rangeHigh;
-
+	
 	public void setRangeLow(int low) {
 		activate(ActivationPurpose.WRITE);
 		rangeLow = low;
@@ -32,7 +33,12 @@ public abstract class AbstractRangeCondition extends AbstractCondition implement
 	protected boolean matchesRange(int value) {
 		return value >= rangeLow && value < rangeHigh;
 	}
-	
+
+	protected void constrainQuery(Query query) {
+		query.constrain(rangeLow).greater().equal()
+		.and(query.constrain(rangeHigh).smaller());
+	}
+
 	public IHttpCondition createCopy() {
 		final IHttpRangeCondition c = (IHttpRangeCondition) getType().createConditionInstance();
 		c.setEnabled(isEnabled());

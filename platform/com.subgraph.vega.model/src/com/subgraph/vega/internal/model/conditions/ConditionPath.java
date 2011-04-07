@@ -8,11 +8,12 @@ import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
 
-public class ConditionRequestMethod extends AbstractRegexCondition {
+public class ConditionPath extends AbstractRegexCondition {
+
 	static private transient IHttpConditionType conditionType;
 	
 	static IHttpConditionType getConditionType() {
-		synchronized(ConditionRequestMethod.class) {
+		synchronized(ConditionPath.class) {
 			if(conditionType == null)
 				conditionType = createType();
 			return conditionType;
@@ -20,20 +21,22 @@ public class ConditionRequestMethod extends AbstractRegexCondition {
 	}
 	
 	private static IHttpConditionType createType() {
-		return new ConditionType("request method", HttpConditionStyle.CONDITION_REGEX) {
+		return new ConditionType("request path", HttpConditionStyle.CONDITION_REGEX) {
 			@Override
 			public IHttpCondition createConditionInstance() {
-				return new ConditionRequestMethod();
-			}
+				return new ConditionPath();
+			}			
 		};
 	}
 
 	@Override
+	public IHttpConditionType getType() {
+		return getConditionType();
+	}
+
+	@Override
 	public boolean matches(HttpRequest request) {
-		if(request == null)
-			return false;
-		final String method = request.getRequestLine().getMethod();
-		return maybeInvert(matchesPattern(method));
+		return maybeInvert(matchesPattern(request.getRequestLine().getUri()));
 	}
 
 	@Override
@@ -47,12 +50,8 @@ public class ConditionRequestMethod extends AbstractRegexCondition {
 	}
 
 	@Override
-	public IHttpConditionType getType() {
-		return getConditionType();
+	public void filterRequestLogQuery(Query query) {
+		constrainQuery(query.descend("requestPath"));		
 	}
 
-	@Override
-	public void filterRequestLogQuery(Query query) {
-		constrainQuery(query.descend("requestMethod"));
-	}	
 }

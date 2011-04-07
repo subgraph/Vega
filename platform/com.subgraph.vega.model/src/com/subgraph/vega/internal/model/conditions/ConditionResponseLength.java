@@ -66,7 +66,6 @@ public class ConditionResponseLength extends AbstractRangeCondition {
 
 	@Override
 	public void filterRequestLogQuery(Query query) {
-		// TODO Auto-generated method stub
-		
+		constrainQuery(query.descend("responseLength"));		
 	}
 }
