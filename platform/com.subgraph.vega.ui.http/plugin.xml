@@ -65,6 +65,10 @@
             class="com.subgraph.vega.ui.http.commands.OpenRequestViewFilter"
             commandId="com.subgraph.vega.commands.openRequestFilter">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ResetRequestFilter"
+            commandId="com.subgraph.vega.commands.resetRequestFilter">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -108,6 +112,10 @@
       <command
             id="com.subgraph.vega.commands.openRequestFilter"
             name="Open Request View Filters">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.resetRequestFilter"
+            name="Reset Request View Filter">
       </command>
    </extension>
    <extension
@@ -181,10 +189,22 @@
          <command
                commandId="com.subgraph.vega.commands.openRequestFilter"
                icon="icons/filter.gif"
+               id="openfilter"
                label="Open Request Filter"
                style="push">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.http?before=openfilter">
+         <command
+               commandId="com.subgraph.vega.commands.resetRequestFilter"
+               icon="icons/reset_filter.png"
+               label="Reset Request Filter"
+               style="push">
+         </command>
+      </menuContribution>
+    
    </extension>
    <extension
          point="org.eclipse.ui.services">
