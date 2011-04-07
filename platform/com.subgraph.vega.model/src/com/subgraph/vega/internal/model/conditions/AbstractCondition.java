@@ -2,14 +2,15 @@ package com.subgraph.vega.internal.model.conditions;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
+import com.db4o.query.Query;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 
 public abstract class AbstractCondition implements IHttpCondition, Activatable {
-	
+		
 	private boolean isInverted;
 	private boolean isEnabled;
-	
+		
 	@Override
 	public boolean isEnabled() {
 		return isEnabled;
@@ -38,6 +39,8 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		return (isInverted) ? (MatchOption.DOESNT_MATCH) : (MatchOption.DOES_MATCH);
 	}
 
+	public abstract void filterRequestLogQuery(Query query);
+		
 	private transient Activator activator;
 
 	@Override

@@ -1,7 +1,7 @@
-package com.subgraph.vega.ui.http.requestfilterpreferencepage;
+package com.subgraph.vega.ui.http.requestfilters;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +12,9 @@ import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 
-
-
 public class ConditionTreeContentProvider implements ITreeContentProvider {
 	private IHttpConditionSet conditionSet;
-	private Map<IHttpConditionType, List<IHttpCondition>> conditionTypeMap = new HashMap<IHttpConditionType, List<IHttpCondition>>(); 
+	private Map<IHttpConditionType, List<IHttpCondition>> conditionTypeMap = new IdentityHashMap<IHttpConditionType, List<IHttpCondition>>(); 
 
 	@Override
 	public void dispose() {
@@ -54,6 +52,8 @@ public class ConditionTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
+		if(element instanceof IHttpCondition) 
+			return ((IHttpCondition) element).getType();
 		return null;
 	}
 

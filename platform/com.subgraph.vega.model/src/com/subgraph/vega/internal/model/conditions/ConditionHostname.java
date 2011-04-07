@@ -6,13 +6,23 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
 
 public class ConditionHostname extends AbstractRegexCondition {
+	static private transient IHttpConditionType conditionType;
+	
+	static IHttpConditionType getConditionType() {
+		synchronized(ConditionHostname.class) {
+			if(conditionType == null)
+				conditionType = createType();
+			return conditionType;
+		}
+	}
 
-	static IHttpConditionType createType() {
+	private static IHttpConditionType createType() {
 		return new ConditionType("hostname", HttpConditionStyle.CONDITION_REGEX) {
 			@Override
 			public IHttpCondition createConditionInstance() {
@@ -51,6 +61,12 @@ public class ConditionHostname extends AbstractRegexCondition {
 
 	@Override
 	public IHttpConditionType getType() {
-		return createType();
+		return getConditionType();
+	}
+
+	@Override
+	public void filterRequestLogQuery(Query query) {
+		// XXX must account for regex
+		query.descend("host").descend("hostname").constrain(getPattern()).contains();		
 	}
 }

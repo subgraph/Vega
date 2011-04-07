@@ -61,6 +61,10 @@
             class="com.subgraph.vega.ui.http.commands.SendRequest"
             commandId="com.subgraph.vega.commands.sendRequest">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.OpenRequestViewFilter"
+            commandId="com.subgraph.vega.commands.openRequestFilter">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -100,6 +104,10 @@
             description="Send the HTTP Request"
             id="com.subgraph.vega.commands.sendRequest"
             name="Send Request">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.openRequestFilter"
+            name="Open Request View Filters">
       </command>
    </extension>
    <extension
@@ -167,6 +175,16 @@
                style="push">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.http">
+         <command
+               commandId="com.subgraph.vega.commands.openRequestFilter"
+               icon="icons/filter.gif"
+               label="Open Request Filter"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -185,19 +203,11 @@
             id="com.subgraph.vega.ui.http.preferencepage"
             name="Proxy">
       </page>
-      <page
-            category="com.subgraph.vega.ui.http.preferencepage"
-            class="com.subgraph.vega.ui.http.requestfilterpreferencepage.RequestFilterPreferencePage" id="com.subgraph.vega.ui.http.requestfilterpreferencepage"
-            name="Request Filter">
-      </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="com.subgraph.vega.ui.http.preferencepage.HTTPPreferenceInitializer">
-      </initializer>
-      <initializer
-            class="com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceInitializer">
       </initializer>
    </extension>
    <extension

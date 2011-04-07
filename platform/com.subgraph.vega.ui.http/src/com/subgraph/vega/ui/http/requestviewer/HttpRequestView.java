@@ -73,7 +73,7 @@ public class HttpRequestView extends ViewPart {
 				}
 			});
 			if(currentWorkspace != null)
-				tableViewer.setInput(currentWorkspace.getRequestLog());
+				tableViewer.setInput(currentWorkspace);
 
 		}
 
@@ -106,7 +106,7 @@ public class HttpRequestView extends ViewPart {
 	}
 
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		tableViewer.setInput(event.getWorkspace().getRequestLog());
+		tableViewer.setInput(event.getWorkspace());
 	}
 
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
@@ -115,7 +115,7 @@ public class HttpRequestView extends ViewPart {
 
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
 		tableViewer.setInput(null);
-		tableViewer.setInput(event.getWorkspace().getRequestLog());
+		tableViewer.setInput(event.getWorkspace());
 	}
 
 	public void  focusOnRecord(long requestId) {

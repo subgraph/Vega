@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.model.requests;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -16,13 +17,11 @@ import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
 import com.db4o.query.Predicate;
-import com.subgraph.vega.api.events.EventListenerManager;
-import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
-import com.subgraph.vega.api.model.requests.IRequestLogFilter;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
-import com.subgraph.vega.api.model.requests.RequestRecordChangeEvent;
+import com.subgraph.vega.internal.model.conditions.HttpConditionSet;
 
 
 public class RequestLog implements IRequestLog {
@@ -30,7 +29,6 @@ public class RequestLog implements IRequestLog {
 	private final ObjectContainer database;
 	private final RequestLogId requestLogId;
 	private final HttpMessageCloner cloner;
-	private final EventListenerManager eventManager = new EventListenerManager();
 	private final List<RequestLogListener> listenerList = new ArrayList<RequestLogListener>();
 	private final Object lock = new Object();
 
@@ -127,7 +125,6 @@ public class RequestLog implements IRequestLog {
 		final HttpResponse newResponse = cloner.copyResponse(response);
 		database.store(response);
 		record.setResponse(newResponse);
-		eventManager.fireEvent(new RequestRecordChangeEvent(record));
 	}
 
 	@Override
@@ -150,28 +147,19 @@ public class RequestLog implements IRequestLog {
 		}
 	}
 
-	@Override
-	public synchronized void addChangeListener(IEventHandler listener) {
-		eventManager.addListener(listener);
-	}
-
-	@Override
-	public synchronized void removeChangeListener(IEventHandler listener) {
-		eventManager.removeListener(listener);
-	}
-
+	
 	@Override
 	public List<IRequestLogRecord> getAllRecords() {
 		return database.query(IRequestLogRecord.class);
 	}
 
-	@Override
-	public List<IRequestLogRecord> getAllRecordsByFilter(IRequestLogFilter filter) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<IRequestLogRecord> getRecordsByConditionSet(IHttpConditionSet conditionFilter) {
+		if(conditionFilter instanceof HttpConditionSet) {
+			return ((HttpConditionSet)conditionFilter).filterRequestLog(database);
+		} else {
+			return Collections.emptyList();
+		}
 	}
-
-
 
 	@Override
 	public void addUpdateListener(IRequestLogUpdateListener callback) {
@@ -181,9 +169,9 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
-	public void addUpdateListener(IRequestLogUpdateListener callback, IRequestLogFilter filter) {
+	public void addUpdateListener(IRequestLogUpdateListener callback, IHttpConditionSet conditionFilter) {
 		synchronized(lock) {
-			listenerList.add(new RequestLogListener(callback, filter, getAllRecordsByFilter(filter).size()));
+			listenerList.add(new RequestLogListener(callback, conditionFilter, getRecordsByConditionSet(conditionFilter).size()));
 		}
 	}
 

@@ -6,13 +6,16 @@ import java.util.List;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableArrayList;
+import com.db4o.query.Query;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
@@ -77,11 +80,26 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	@Override
 	public IHttpConditionManager getConditionManager() {
+		activate(ActivationPurpose.READ);
 		return conditionManager;
 	}
 
 	void setConditionManager(IHttpConditionManager conditionManager) {
+		activate(ActivationPurpose.WRITE);
 		this.conditionManager = conditionManager;
+	}
+	
+	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
+		activate(ActivationPurpose.READ);
+		if(conditionList.isEmpty())
+			return db.query(IRequestLogRecord.class);
+		
+		final Query query = db.query();
+		query.constrain(IRequestLogRecord.class);
+		for(IHttpCondition c: conditionList) {
+			((AbstractCondition) c).filterRequestLogQuery(query);
+		}
+		return query.execute();		
 	}
 
 	private transient Activator activator;

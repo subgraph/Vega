@@ -3,13 +3,23 @@ package com.subgraph.vega.internal.model.conditions;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
 
 public class ConditionResponseStatusCode extends AbstractRangeCondition {
+	static private transient IHttpConditionType conditionType;
+	
+	static IHttpConditionType getConditionType() {
+		synchronized(ConditionResponseStatusCode.class) {
+			if(conditionType == null)
+				conditionType = createType();
+			return conditionType;
+		}
+	}
 
-	static IHttpConditionType createType() {
+	private static IHttpConditionType createType() {
 		return new ConditionType("status code", HttpConditionStyle.CONDITION_RANGE) {			
 			@Override
 			public IHttpCondition createConditionInstance() {
@@ -37,6 +47,12 @@ public class ConditionResponseStatusCode extends AbstractRangeCondition {
 
 	@Override
 	public IHttpConditionType getType() {
-		return createType();
+		return getConditionType();
+	}
+
+	@Override
+	public void filterRequestLogQuery(Query query) {
+		// TODO Auto-generated method stub
+		
 	}
 }

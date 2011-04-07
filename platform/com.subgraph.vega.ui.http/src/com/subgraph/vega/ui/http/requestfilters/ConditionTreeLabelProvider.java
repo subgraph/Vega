@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.http.requestfilterpreferencepage;
+package com.subgraph.vega.ui.http.requestfilters;
 
 import org.eclipse.jface.viewers.LabelProvider;
 

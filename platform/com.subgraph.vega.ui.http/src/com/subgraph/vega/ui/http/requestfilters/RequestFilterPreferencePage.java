@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.http.requestfilterpreferencepage;
+package com.subgraph.vega.ui.http.requestfilters;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -66,9 +66,7 @@ public class RequestFilterPreferencePage extends PreferencePage implements IWork
 			conditionSet = null;
 		}
 		treeViewer.setInput(conditionSet);
-		
 	
-
 		return parentComposite;
 	}
 

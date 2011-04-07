@@ -1,7 +1,9 @@
 package com.subgraph.vega.internal.model.conditions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.db4o.ObjectContainer;
 import com.db4o.events.CancellableObjectEventArgs;
@@ -9,6 +11,9 @@ import com.db4o.events.Event4;
 import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.conditions.ConditionSetChanged;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
@@ -17,7 +22,8 @@ public class HttpConditionManager implements IHttpConditionManager {
 
 	private final ObjectContainer database;
 	private final List<IHttpConditionType> conditionTypes;
-	
+	private final Map<String, EventListenerManager> eventListenerMap = new HashMap<String, EventListenerManager>();
+
 	public HttpConditionManager(ObjectContainer database) {
 		this.database = database;
 		this.conditionTypes = createConditionTypes();
@@ -36,12 +42,12 @@ public class HttpConditionManager implements IHttpConditionManager {
 
 	private List<IHttpConditionType> createConditionTypes() {
 		final List<IHttpConditionType> types = new ArrayList<IHttpConditionType>();
-		types.add(ConditionHostname.createType());
-		types.add(ConditionRequestMethod.createType());
-		types.add(ConditionHeader.createRequestType());
-		types.add(ConditionHeader.createResponseType());
-		types.add(ConditionResponseLength.createType());
-		types.add(ConditionResponseStatusCode.createType());
+		types.add(ConditionHostname.getConditionType());
+		types.add(ConditionRequestMethod.getConditionType());
+		types.add(ConditionHeader.getRequestConditionType());
+		types.add(ConditionHeader.getResponseConditionType());
+		types.add(ConditionResponseLength.getConditionType());
+		types.add(ConditionResponseStatusCode.getConditionType());
 		return types;
 	}
 	
@@ -52,13 +58,13 @@ public class HttpConditionManager implements IHttpConditionManager {
 	
 	@Override
 	public IHttpConditionSet getConditionSetCopy(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return getConditionSetMap().getConditionSetCopy(name);
 	}
 
 	@Override
 	public void saveConditionSet(String name, IHttpConditionSet conditionSet) {
 		getConditionSetMap().saveConditionSet(name, conditionSet);
+		notifyNamedConditionSetChanged(name, conditionSet);
 	}
 
 	@Override
@@ -82,5 +88,33 @@ public class HttpConditionManager implements IHttpConditionManager {
 	@Override
 	public List<IHttpConditionType> getConditionTypes() {
 		return new ArrayList<IHttpConditionType>(conditionTypes);
+	}
+
+	private void notifyNamedConditionSetChanged(String name, IHttpConditionSet conditionSet) {
+		synchronized(eventListenerMap) {
+			if(eventListenerMap.containsKey(name))
+				eventListenerMap.get(name).fireEvent(new ConditionSetChanged(conditionSet));
+		}
+	}
+
+	@Override
+	public void addConditionSetListenerByName(String name, IEventHandler listener) {
+		getEventListenerManagerByName(name).addListener(listener);
+	}
+	
+	private EventListenerManager getEventListenerManagerByName(String name) {
+		synchronized (eventListenerMap) {
+			if(!eventListenerMap.containsKey(name))
+				eventListenerMap.put(name, new EventListenerManager());
+			return eventListenerMap.get(name);
+		}
+	}
+	
+	@Override
+	public void removeConditionSetListener(IEventHandler listener) {
+		synchronized(eventListenerMap) {
+			for(EventListenerManager elm: eventListenerMap.values()) 
+				elm.removeListener(listener);
+		}
 	}
 }

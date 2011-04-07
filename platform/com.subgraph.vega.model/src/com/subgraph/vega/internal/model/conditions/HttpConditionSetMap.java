@@ -46,6 +46,7 @@ public class HttpConditionSetMap implements Activatable {
 			conditionSetMap.put(name, conditionSet);
 		}
 	}
+
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if(activator != null) {

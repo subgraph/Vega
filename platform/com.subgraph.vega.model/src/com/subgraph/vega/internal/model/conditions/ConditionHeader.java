@@ -5,21 +5,45 @@ import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
 
 public class ConditionHeader extends AbstractRegexCondition {
+	static private transient IHttpConditionType requestConditionType;
+	static private transient IHttpConditionType responseConditionType;
+	
+	static IHttpConditionType getRequestConditionType() {
+		synchronized (ConditionHeader.class) {
+			if(requestConditionType == null) 
+				createTypes();
+			return requestConditionType;
+		}
+	}
+	
+	static IHttpConditionType getResponseConditionType() {
+		synchronized(ConditionHeader.class) {
+			if(responseConditionType == null)
+				createTypes();
+			return responseConditionType;
+		}
+	}
 
-	static IHttpConditionType createRequestType() {
-		return new ConditionType("request header", HttpConditionStyle.CONDITION_REGEX) {			
+	private static void createTypes() {
+		requestConditionType = createType("request header", true);
+		responseConditionType = createType("response header", false);
+	}
+	
+	private static IHttpConditionType createType(String label, final boolean flag) {
+		return new ConditionType(label, HttpConditionStyle.CONDITION_REGEX) {			
 			@Override
 			public IHttpCondition createConditionInstance() {
-				return new ConditionHeader(true);
+				return new ConditionHeader(flag);
 			}
 		};
 	}
-	
+
 	static IHttpConditionType createResponseType() {
 		return new ConditionType("response header", HttpConditionStyle.CONDITION_REGEX) {			
 			@Override
@@ -73,8 +97,14 @@ public class ConditionHeader extends AbstractRegexCondition {
 	@Override
 	public IHttpConditionType getType() {
 		if(matchRequestHeader)
-			return createRequestType();
+			return getRequestConditionType();
 		else
-			return createResponseType();
+			return getResponseConditionType();
+	}
+
+	@Override
+	public void filterRequestLogQuery(Query query) {
+		// TODO Auto-generated method stub
+		
 	}
 }
