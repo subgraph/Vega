@@ -10,7 +10,7 @@ import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
-import com.subgraph.vega.internal.model.conditions.match.IntegerMatchActionSet;
+import com.subgraph.vega.internal.model.conditions.match.StringMatchActionSet;
 
 public class ConditionHeader extends AbstractCondition {
 	static private transient IHttpConditionType requestConditionType;
@@ -38,7 +38,7 @@ public class ConditionHeader extends AbstractCondition {
 	}
 	
 	private static IHttpConditionType createType(String label, final boolean flag) {
-		return new ConditionType(label, new IntegerMatchActionSet()) {			
+		return new ConditionType(label, new StringMatchActionSet()) {			
 			@Override
 			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
 				return new ConditionHeader(flag, matchAction);
