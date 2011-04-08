@@ -29,7 +29,7 @@ public class ResponseAnalyzer {
 		this.contentAnalyzer = contentAnalyzer;
 		this.uriParser = uriParser;
 		this.uriFilter = uriFilter;
-		this.formProcessor = new FormProcessor(config, uriParser);
+		this.formProcessor = new FormProcessor(config, uriFilter, uriParser);
 	}
 
 	public IContentAnalyzer getContentAnalyzer() {
