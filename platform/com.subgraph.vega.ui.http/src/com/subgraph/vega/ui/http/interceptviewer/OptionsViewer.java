@@ -35,8 +35,6 @@ import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
-import com.subgraph.vega.api.model.conditions.IHttpRangeCondition;
-import com.subgraph.vega.api.model.conditions.IHttpRegexCondition;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.conditions.ConditionInput;
 
@@ -181,21 +179,14 @@ public class OptionsViewer {
 				@Override
 				public String getText(Object element) {
 					IHttpCondition condition = (IHttpCondition) element;
-					return condition.getMatchOption().getName();
+					return condition.getMatchAction().getLabel();
 				}
 			},		
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
 					IHttpCondition condition = (IHttpCondition) element;
-					if(condition instanceof IHttpRegexCondition)
-						return ((IHttpRegexCondition) condition).getPattern();
-					else if(condition instanceof IHttpRangeCondition) {
-						IHttpRangeCondition range = (IHttpRangeCondition) condition;
-						return range.getRangeLow() + "-" + range.getRangeHigh();
-					} else {
-						return null;
-					}
+					return condition.getMatchAction().getArgumentAsString();
 				}
 			},
 		};

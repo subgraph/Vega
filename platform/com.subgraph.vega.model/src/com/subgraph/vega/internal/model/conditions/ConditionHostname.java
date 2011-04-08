@@ -9,9 +9,10 @@ import org.apache.http.HttpResponse;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.StringMatchActionSet;
 
-public class ConditionHostname extends AbstractRegexCondition {
+public class ConditionHostname extends AbstractCondition {
 	static private transient IHttpConditionType conditionType;
 	
 	static IHttpConditionType getConditionType() {
@@ -23,20 +24,25 @@ public class ConditionHostname extends AbstractRegexCondition {
 	}
 
 	private static IHttpConditionType createType() {
-		return new ConditionType("hostname", HttpConditionStyle.CONDITION_REGEX) {
+		return new ConditionType("hostname",  new StringMatchActionSet()) {
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionHostname();
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionHostname(matchAction);
 			}
 		};
 	}
 
+	private ConditionHostname(IHttpConditionMatchAction matchAction) {
+		super(matchAction);
+	}
+	
 	@Override
 	public boolean matches(HttpRequest request) {
+		
 		final URI uri = getRequestUri(request);
 		if(uri == null)
 			return false;
-		return maybeInvert(matchesPattern(uri.getHost()));
+		return matchesString(uri.getHost());
 	}
 	
 	private URI getRequestUri(HttpRequest request) {

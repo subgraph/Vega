@@ -6,9 +6,10 @@ import org.apache.http.HttpResponse;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.StringMatchActionSet;
 
-public class ConditionPath extends AbstractRegexCondition {
+public class ConditionPath extends AbstractCondition {
 
 	static private transient IHttpConditionType conditionType;
 	
@@ -21,12 +22,16 @@ public class ConditionPath extends AbstractRegexCondition {
 	}
 	
 	private static IHttpConditionType createType() {
-		return new ConditionType("request path", HttpConditionStyle.CONDITION_REGEX) {
+		return new ConditionType("request path", new StringMatchActionSet()) {
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionPath();
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionPath(matchAction);
 			}			
 		};
+	}
+
+	private ConditionPath(IHttpConditionMatchAction matchAction) {
+		super(matchAction);
 	}
 
 	@Override
@@ -36,7 +41,7 @@ public class ConditionPath extends AbstractRegexCondition {
 
 	@Override
 	public boolean matches(HttpRequest request) {
-		return maybeInvert(matchesPattern(request.getRequestLine().getUri()));
+		return matchesString(request.getRequestLine().getUri());
 	}
 
 	@Override

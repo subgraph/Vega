@@ -5,12 +5,27 @@ import com.db4o.activation.Activator;
 import com.db4o.query.Query;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionIntegerMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionRangeMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionStringMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.IHttpConditionMatchActionEx;
 
 public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		
-	private boolean isInverted;
+	protected final IHttpConditionMatchActionEx matchAction;
 	private boolean isEnabled;
 		
+	protected AbstractCondition(IHttpConditionMatchAction matchAction) {
+		this.matchAction = (IHttpConditionMatchActionEx) matchAction;
+	}
+
+	@Override
+	public IHttpConditionMatchAction getMatchAction() {
+		activate(ActivationPurpose.READ);
+		return matchAction;
+	}
+
 	@Override
 	public boolean isEnabled() {
 		activate(ActivationPurpose.READ);
@@ -23,28 +38,39 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		isEnabled = state;
 	}
 
-	@Override
-	public boolean isInverted() {
+	public IHttpCondition createCopy() {
 		activate(ActivationPurpose.READ);
-		return isInverted;
+		return getType().createConditionInstance(matchAction.createCopy());
 	}
 
-	@Override
-	public void setInverted(boolean flag) {
-		activate(ActivationPurpose.WRITE);
-		isInverted = flag;
-	}
-
-	protected boolean maybeInvert(boolean value) {
+	protected boolean matchesString(String value) {
 		activate(ActivationPurpose.READ);
-		return isInverted ^ value;
+		if(matchAction instanceof IHttpConditionStringMatchAction) {
+			return ((IHttpConditionStringMatchAction) matchAction).matchesValue(value);
+		}
+		throw new IllegalStateException("Expecting an IHttpConditionStringMatchingAction, got"+ matchAction);
 	}
 	
-	public MatchOption getMatchOption() {
+	protected boolean matchesInteger(int value) {
 		activate(ActivationPurpose.READ);
-		return (isInverted) ? (MatchOption.DOESNT_MATCH) : (MatchOption.DOES_MATCH);
+		if(matchAction instanceof IHttpConditionIntegerMatchAction) {
+			return ((IHttpConditionIntegerMatchAction) matchAction).matchesValue(value);
+		} else if(matchAction instanceof IHttpConditionRangeMatchAction) {
+			return ((IHttpConditionRangeMatchAction) matchAction).matchesValue(value);
+		} 
+		throw new IllegalStateException("Expecting an IHttpConditonIntegerMatchAction or IHttpConditionRangeMatchAction, got"+ matchAction);
+	}
+	
+	protected void constrainQuery(Query query) {
+		activate(ActivationPurpose.READ);
+		matchAction.constrainQuery(query);
 	}
 
+	public String getValueString() {
+		activate(ActivationPurpose.READ);
+		return matchAction.toString();
+	}
+	
 	public abstract void filterRequestLogQuery(Query query);
 		
 	private transient Activator activator;

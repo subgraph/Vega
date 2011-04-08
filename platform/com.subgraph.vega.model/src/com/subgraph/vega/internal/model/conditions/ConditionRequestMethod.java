@@ -6,9 +6,11 @@ import org.apache.http.HttpResponse;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.StringMatchActionSet;
 
-public class ConditionRequestMethod extends AbstractRegexCondition {
+public class ConditionRequestMethod extends AbstractCondition {
+
 	static private transient IHttpConditionType conditionType;
 	
 	static IHttpConditionType getConditionType() {
@@ -20,12 +22,16 @@ public class ConditionRequestMethod extends AbstractRegexCondition {
 	}
 	
 	private static IHttpConditionType createType() {
-		return new ConditionType("request method", HttpConditionStyle.CONDITION_REGEX) {
+		return new ConditionType("request method", new StringMatchActionSet()) {
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionRequestMethod();
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionRequestMethod(matchAction);
 			}
 		};
+	}
+
+	protected ConditionRequestMethod(IHttpConditionMatchAction matchAction) {
+		super(matchAction);
 	}
 
 	@Override
@@ -33,7 +39,7 @@ public class ConditionRequestMethod extends AbstractRegexCondition {
 		if(request == null)
 			return false;
 		final String method = request.getRequestLine().getMethod();
-		return maybeInvert(matchesPattern(method));
+		return matchesString(method);
 	}
 
 	@Override

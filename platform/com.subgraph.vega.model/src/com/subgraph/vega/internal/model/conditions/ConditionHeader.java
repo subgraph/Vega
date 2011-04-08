@@ -9,9 +9,10 @@ import com.db4o.activation.ActivationPurpose;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.IntegerMatchActionSet;
 
-public class ConditionHeader extends AbstractRegexCondition {
+public class ConditionHeader extends AbstractCondition {
 	static private transient IHttpConditionType requestConditionType;
 	static private transient IHttpConditionType responseConditionType;
 	
@@ -37,26 +38,18 @@ public class ConditionHeader extends AbstractRegexCondition {
 	}
 	
 	private static IHttpConditionType createType(String label, final boolean flag) {
-		return new ConditionType(label, HttpConditionStyle.CONDITION_REGEX) {			
+		return new ConditionType(label, new IntegerMatchActionSet()) {			
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionHeader(flag);
-			}
-		};
-	}
-
-	static IHttpConditionType createResponseType() {
-		return new ConditionType("response header", HttpConditionStyle.CONDITION_REGEX) {			
-			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionHeader(false);
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionHeader(flag, matchAction);
 			}
 		};
 	}
 
 	private final boolean matchRequestHeader;
 	
-	ConditionHeader(boolean matchRequestHeader) {
+	ConditionHeader(boolean matchRequestHeader, IHttpConditionMatchAction matchAction) {
+		super(matchAction);
 		this.matchRequestHeader = matchRequestHeader;
 	}
 	
@@ -64,7 +57,7 @@ public class ConditionHeader extends AbstractRegexCondition {
 	public boolean matches(HttpRequest request) {
 		activate(ActivationPurpose.READ);
 		if(matchRequestHeader)
-			return maybeInvert(hasMatchingHeader(request));
+			return matchesString(headersToString(request));
 		else
 			return false;
 	}
@@ -73,29 +66,30 @@ public class ConditionHeader extends AbstractRegexCondition {
 	public boolean matches(HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		if(!matchRequestHeader)
-			return maybeInvert(hasMatchingHeader(response));
+			return matchesString(headersToString(response));
 		else
 			return false;
 	}
 
-	private boolean hasMatchingHeader(HttpMessage message) {
-		if(message == null)
-			return false;
-		
+	
+	private String headersToString(HttpMessage message) {
+		final StringBuilder sb = new StringBuilder();
 		for(Header h: message.getAllHeaders()) {
-			if(matchesPattern(h.toString()))
-				return true;
+			sb.append(h.getName());
+			sb.append(": ");
+			sb.append(h.getValue());
+			sb.append("\r\n");
 		}
-		return false;
+		return sb.toString();
 	}
 	
 	@Override
 	public boolean matches(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		if(matchRequestHeader)
-			return maybeInvert(hasMatchingHeader(request));
+			return matchesString(headersToString(request));
 		else
-			return maybeInvert(hasMatchingHeader(response));
+			return matchesString(headersToString(response));
 	}
 
 	@Override

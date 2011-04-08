@@ -7,9 +7,12 @@ import org.apache.http.HttpResponse;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.IntegerMatchActionSet;
 
-public class ConditionResponseLength extends AbstractRangeCondition {
+public class ConditionResponseLength extends AbstractCondition {
+	
+
 	private static transient IHttpConditionType conditionType;
 	
 	static IHttpConditionType getConditionType() {
@@ -21,12 +24,16 @@ public class ConditionResponseLength extends AbstractRangeCondition {
 	}
 
 	private static IHttpConditionType createType() {
-		return new ConditionType("response length", HttpConditionStyle.CONDITION_RANGE) {
+		return new ConditionType("response length", new IntegerMatchActionSet()) {
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionResponseLength();
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionResponseLength(matchAction);
 			}
 		};
+	}
+
+	private ConditionResponseLength(IHttpConditionMatchAction matchAction) {
+		super(matchAction);
 	}
 
 	@Override
@@ -37,7 +44,7 @@ public class ConditionResponseLength extends AbstractRangeCondition {
 	@Override
 	public boolean matches(HttpResponse response) {
 		final int length = (int) getLengthFromResponse(response);
-		return maybeInvert(matchesRange(length));
+		return matchesInteger(length);
 	}
 
 	private long getLengthFromResponse(HttpResponse response) {

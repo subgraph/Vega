@@ -1,42 +1,41 @@
 package com.subgraph.vega.internal.model.conditions;
 
-import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import java.util.List;
+
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.IMatchActionSet;
 
 public abstract class ConditionType implements IHttpConditionType {
 
 	private final String name;
-	private final HttpConditionStyle style;
+	private final IMatchActionSet matchActionSet;
 	
-	ConditionType(String name, HttpConditionStyle style) {
+	ConditionType(String name, IMatchActionSet matchActionSet) {
 		this.name = name;
-		this.style = style;
+		this.matchActionSet = matchActionSet;
 	}
 	
 	@Override
 	public String getName() {
 		return name;
 	}
-
-	@Override
-	public HttpConditionStyle getStyle() {
-		return style;
-	}
 	
-	public abstract IHttpCondition createConditionInstance();
+	public List<IHttpConditionMatchAction> getMatchActions() {
+		return matchActionSet.createMatchActions();
+	}
 	
 	public boolean equals(Object other) {
 		if(this == other)
 			return true;
 		if(other instanceof ConditionType) {
 			ConditionType that = (ConditionType) other;
-			return this.name.equals(that.name) && this.style.equals(that.style);
+			return this.name.equals(that.name);
 		}
 		return false;
 	}
 	
 	public int HashCode() {
-		return 17 * (37 + name.hashCode()) + style.hashCode();
+		return name.hashCode();
 	}
-
 }

@@ -1,8 +1,11 @@
 package com.subgraph.vega.api.model.conditions;
 
+import java.util.List;
+
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+
 public interface IHttpConditionType {
-	enum HttpConditionStyle { CONDITION_REGEX, CONDITION_RANGE };
 	String getName();
-	HttpConditionStyle getStyle();
-	IHttpCondition createConditionInstance();
+	IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction);
+	List<IHttpConditionMatchAction> getMatchActions();
 }

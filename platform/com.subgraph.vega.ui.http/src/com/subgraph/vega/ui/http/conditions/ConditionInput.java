@@ -1,228 +1,107 @@
 package com.subgraph.vega.ui.http.conditions;
 
-import java.util.List;
-
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpRangeCondition;
-import com.subgraph.vega.api.model.conditions.IHttpRegexCondition;
-import com.subgraph.vega.api.model.conditions.IHttpCondition.MatchOption;;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionIntegerMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionRangeMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionStringMatchAction;
 
 public class ConditionInput {
 	private final IHttpConditionManager conditionManager;
 	
-	private ComboViewer conditionTypeViewer;
-	private ComboViewer conditionMatchViewer;
-	private StackLayout inputStackLayout;
-	private Composite inputRootPanel;
-	private Composite patternInputPanel;
-	private Composite rangeInputPanel;
-	private Text patternText;
-	private Text rangeLowText;
-	private Text rangeHighText;
+	private ConditionTypeComboViewer conditionTypeViewer;
+	private MatchActionComboViewer matchActionViewer;
+	private MatchActionArgumentPanel matchActionArguments;
 	
 	public ConditionInput(IHttpConditionManager conditionManager) {
 		this.conditionManager = conditionManager;
 	}
 	
 	public ComboViewer createConditionTypeCombo(Composite parent) {
-		if(conditionTypeViewer != null) 
-			throw new IllegalStateException("Condition type combo already created.");
-		conditionTypeViewer = new ComboViewer(parent, SWT.READ_ONLY);
-		conditionTypeViewer.setContentProvider(new ArrayContentProvider());
-		conditionTypeViewer.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if(element instanceof IHttpConditionType) 
-					return ((IHttpConditionType) element).getName();
-				else
-					return null;
-			}
-		});
-		
-		final List<IHttpConditionType> types = conditionManager.getConditionTypes();
-		conditionTypeViewer.setInput(types);
-		if(types.size() != 0)
-			conditionTypeViewer.setSelection(new StructuredSelection(types.get(0)));
-		conditionTypeViewer.addSelectionChangedListener(createConditionTypeSelectionListener());
+		conditionTypeViewer = new ConditionTypeComboViewer(parent, conditionManager.getConditionTypes());
+		if(matchActionViewer != null)
+			conditionTypeViewer.setMatchTypeViewer(matchActionViewer);
 		return conditionTypeViewer;
 	}
 	
+	public ComboViewer createConditionMatchCombo(Composite parent) {
+		matchActionViewer = new MatchActionComboViewer(parent);
+		if(conditionTypeViewer != null)
+			conditionTypeViewer.setMatchTypeViewer(matchActionViewer);
+		if(matchActionArguments != null)
+			matchActionViewer.setMatchActionArgumentPanel(matchActionArguments);
+		return matchActionViewer;
+	}
+	
+	public Composite createInputPanel(Composite parent) {
+		matchActionArguments = new MatchActionArgumentPanel(parent);
+		if(matchActionViewer != null)
+			matchActionViewer.setMatchActionArgumentPanel(matchActionArguments);
+		return matchActionArguments;
+	}
+	
 	public void reset() {
-		patternText.setText("");
-		rangeLowText.setText("");
-		rangeHighText.setText("");
-		conditionTypeViewer.setSelection(new StructuredSelection(conditionTypeViewer.getElementAt(0)));
-		conditionMatchViewer.setSelection(new StructuredSelection(conditionMatchViewer.getElementAt(0)));
+		conditionTypeViewer.reset();
+		matchActionViewer.reset();
 	}
 
 	public IHttpCondition createConditionFromData() {
-		final IHttpConditionType type = getSelectedConditionType();
-		if(type == null)
+		final IHttpConditionMatchAction matchAction = matchActionViewer.getSelectedMatchAction();
+		final IHttpConditionType conditionType = conditionTypeViewer.getSelectedConditionType();
+		if(matchAction == null || conditionType == null)
 			return null;
-		final IHttpCondition condition = createConditionFromType(type);
-		if(condition == null)
-			return null;
-		condition.setInverted(getSelectedMatchOption().getInverted());
-		return condition;
-	}
-	
-	private IHttpCondition createConditionFromType(IHttpConditionType type) {
-		switch(type.getStyle()) {
-		case CONDITION_REGEX:
-			return createRegexCondition(type);
-		case CONDITION_RANGE:
-			return createRangeCondition(type);
+		
+		switch(matchAction.getArgumentType()) {
+		case ARGUMENT_STRING:
+			return createStringCondition(conditionType, matchAction, matchActionArguments.getStringText());
+		case ARGUMENT_REGEX:
+			return createStringCondition(conditionType, matchAction, matchActionArguments.getRegexText());
+		case ARGUMENT_INTEGER:
+			return createIntegerCondition(conditionType, matchAction, matchActionArguments.getIntegerText());
+		case ARGUMENT_RANGE:
+			return createRangeCondition(conditionType, matchAction, matchActionArguments.getRangeLowText(), matchActionArguments.getRangeHighText());
 		}
 		return null;
 	}
 	
-	private IHttpCondition createRegexCondition(IHttpConditionType type) {
-		final String pattern = patternText.getText();
-		if(pattern.isEmpty())
-			return null;
-		final IHttpRegexCondition condition = (IHttpRegexCondition) type.createConditionInstance();
-		condition.setPattern(pattern);
-		return condition;
+	
+	private IHttpCondition createStringCondition(IHttpConditionType type, IHttpConditionMatchAction matchAction, String value) {
+		if(!value.isEmpty() && (matchAction instanceof IHttpConditionStringMatchAction)) {
+			((IHttpConditionStringMatchAction) matchAction).setString(value);
+			return type.createConditionInstance(matchAction);
+		}
+		return null;
 	}
 	
-	private IHttpCondition createRangeCondition(IHttpConditionType type) {
-		final String startRange = rangeLowText.getText();
-		final String endRange = rangeHighText.getText();
-		if(startRange.isEmpty() || endRange.isEmpty())
+	private IHttpCondition createIntegerCondition(IHttpConditionType type, IHttpConditionMatchAction matchAction, String integerString) {
+		if(integerString.isEmpty() || !(matchAction instanceof IHttpConditionIntegerMatchAction))
 			return null;
 		try {
-			final int start = Integer.parseInt(startRange);
-			final int end = Integer.parseInt(endRange);
-			if(start < 0 || end < 0 || start > end)
-				return null;
-			final IHttpRangeCondition condition = (IHttpRangeCondition) type.createConditionInstance();
-			condition.setRangeLow(start);
-			condition.setRangeHigh(end);
-			return condition;
+			final int value = Integer.parseInt(integerString);
+			((IHttpConditionIntegerMatchAction) matchAction).setInteger(value);
+			return type.createConditionInstance(matchAction);
 		} catch (NumberFormatException e) {
 			return null;
 		}
-		
-	}
-	private IHttpConditionType getSelectedConditionType() {
-		final IStructuredSelection selection = (IStructuredSelection) conditionTypeViewer.getSelection();
-		if(selection.isEmpty())
-			return null;
-		return (IHttpConditionType) selection.getFirstElement();
-	}
-	
-	private MatchOption getSelectedMatchOption() {
-		final IStructuredSelection selection = (IStructuredSelection) conditionMatchViewer.getSelection();
-		if(selection.isEmpty())
-			return null;
-		return (MatchOption) selection.getFirstElement();
-	}
-	
-	private ISelectionChangedListener createConditionTypeSelectionListener() {
-		return new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				displayPanelForSelection(event.getSelection());
-			}
-		};
-	}
-	
-	private void displayPanelForSelection(ISelection selection) {
-		if(selection instanceof IStructuredSelection) {
-			final IStructuredSelection ss = (IStructuredSelection) selection;
-			if(!(ss.getFirstElement() instanceof IHttpConditionType))
-				return;
-			final IHttpConditionType type = (IHttpConditionType) ss.getFirstElement();
-			switch(type.getStyle()) {
-			case CONDITION_REGEX:
-				displayPatternInput();
-				break;
-			case CONDITION_RANGE:
-				displayRangeInput();
-				break;
-			}
-		}
 	}
 
-	private void displayPatternInput() {
-		if(inputStackLayout != null) {
-			inputStackLayout.topControl = patternInputPanel;
-			inputRootPanel.layout();
+	private IHttpCondition createRangeCondition(IHttpConditionType type, IHttpConditionMatchAction matchAction, String rangeLowText, String rangeHighText) {
+		if(rangeLowText.isEmpty() || rangeHighText.isEmpty() || !(matchAction instanceof IHttpConditionRangeMatchAction))
+			return null;
+		try {
+			final int low = Integer.parseInt(rangeLowText);
+			final int high = Integer.parseInt(rangeHighText);
+			if(low < 0 || high < 0 || low > high)
+				return null;
+			((IHttpConditionRangeMatchAction) matchAction).setRange(low, high);
+			return type.createConditionInstance(matchAction);
+		} catch (NumberFormatException e) {
+			return null;
 		}
-	}
-	
-	private void displayRangeInput() {
-		if(inputStackLayout != null) {
-			inputStackLayout.topControl = rangeInputPanel;
-			inputRootPanel.layout();
-		}
-	}
-
-	public ComboViewer createConditionMatchCombo(Composite parent) {
-		if(conditionMatchViewer != null)
-			throw new IllegalStateException("Condition match combo already created");
-		conditionMatchViewer = new ComboViewer(parent, SWT.READ_ONLY);
-		conditionMatchViewer.setContentProvider(new ArrayContentProvider());
-		conditionMatchViewer.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				return ((MatchOption) element).getName();
-			}
-		});
-		final MatchOption[] options = MatchOption.values();
-		conditionMatchViewer.setInput(options);
-		conditionMatchViewer.setSelection(new StructuredSelection(options[0]));
-		return conditionMatchViewer;
-	}
-	
-	public Composite createInputPanel(Composite parent) {
-		inputRootPanel = new Composite(parent, SWT.NONE);
-		inputStackLayout = new StackLayout();
-		inputRootPanel.setLayout(inputStackLayout);
-		createPatternInputPanel(inputRootPanel);
-		createRangeInputPanel(inputRootPanel);
-		if(conditionTypeViewer != null)
-			displayPanelForSelection(conditionTypeViewer.getSelection());
-		return inputRootPanel;
-	}
-	
-	private void createPatternInputPanel(Composite stackPanel) {
-		patternInputPanel = new Composite(stackPanel, SWT.NONE);
-		patternInputPanel.setLayout(new GridLayout(1, false));
-		patternText = new Text(patternInputPanel, SWT.BORDER | SWT.SINGLE);
-		patternText.setMessage("regular expression");
-		patternText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	}
-	
-	private void createRangeInputPanel(Composite stackPanel) {
-		rangeInputPanel = new Composite(stackPanel, SWT.NONE);
-		rangeInputPanel.setLayout(new GridLayout(3, false));
-		rangeLowText = new Text(rangeInputPanel, SWT.BORDER | SWT.SINGLE);
-		rangeLowText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		rangeLowText.setMessage("from");
-		final Label sep = new Label(rangeInputPanel, SWT.NONE);
-		sep.setText(" - ");
-		sep.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		rangeHighText = new Text(rangeInputPanel, SWT.BORDER | SWT.SINGLE);
-		rangeHighText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		rangeHighText.setMessage("to");
 	}
 }

@@ -9,7 +9,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
-import com.subgraph.vega.api.model.conditions.IHttpCondition.MatchOption;
+import com.subgraph.vega.api.model.conditions.IHttpConditionType;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 
 public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 	private final TableViewer viewer;
@@ -25,10 +26,11 @@ public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 		editor.setContenProvider(new ArrayContentProvider());
 		editor.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((IHttpCondition.MatchOption)element).name();
+				return ((IHttpConditionMatchAction) element).getLabel();
 			}
 		});
-		editor.setInput(IHttpCondition.MatchOption.values());
+		final IHttpCondition condition = (IHttpCondition) element;
+		editor.setInput(condition.getType().getMatchActions());
 		return editor;
 	}
 
@@ -45,8 +47,8 @@ public class BreakpointMatchTypeEditingSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		IHttpCondition condition = (IHttpCondition) element;
-		IHttpCondition.MatchOption matchOp = (MatchOption) value;
-		condition.setInverted(matchOp.getInverted());
+		//IHttpCondition.MatchOption matchOp = (MatchOption) value;
+		//condition.setInverted(matchOp.getInverted());
 		viewer.refresh();
 	}
 

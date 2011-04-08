@@ -6,9 +6,12 @@ import org.apache.http.HttpResponse;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
-import com.subgraph.vega.api.model.conditions.IHttpConditionType.HttpConditionStyle;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.internal.model.conditions.match.IntegerMatchActionSet;
 
-public class ConditionResponseStatusCode extends AbstractRangeCondition {
+public class ConditionResponseStatusCode extends AbstractCondition {
+	
+
 	static private transient IHttpConditionType conditionType;
 	
 	static IHttpConditionType getConditionType() {
@@ -20,12 +23,16 @@ public class ConditionResponseStatusCode extends AbstractRangeCondition {
 	}
 
 	private static IHttpConditionType createType() {
-		return new ConditionType("status code", HttpConditionStyle.CONDITION_RANGE) {			
+		return new ConditionType("response status code", new IntegerMatchActionSet()) {			
 			@Override
-			public IHttpCondition createConditionInstance() {
-				return new ConditionResponseStatusCode();
+			public IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction) {
+				return new ConditionResponseStatusCode(matchAction);
 			}
 		};
+	}
+	
+	private ConditionResponseStatusCode(IHttpConditionMatchAction matchAction) {
+		super(matchAction);
 	}
 
 	@Override
@@ -37,7 +44,7 @@ public class ConditionResponseStatusCode extends AbstractRangeCondition {
 	public boolean matches(HttpResponse response) {
 		if(response == null)
 			return false;
-		return maybeInvert(matchesRange(response.getStatusLine().getStatusCode()));
+		return matchesInteger(response.getStatusLine().getStatusCode());
 	}
 
 	@Override

@@ -54,6 +54,7 @@ public class ConditionCreateDialog extends TitleAreaDialog {
 		label.setText("Condition type:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		conditionInput.createConditionTypeCombo(rootControl);
+		
 		label = new Label(rootControl, SWT.NONE);
 		label.setText("Match type:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
