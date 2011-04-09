@@ -49,7 +49,7 @@ public class HttpRequestView extends ViewPart {
 		final TableColumnLayout tcl = new TableColumnLayout();
 		comp.setLayout(tcl);
 
-		tableViewer = new TableViewer(comp, SWT.VIRTUAL);
+		tableViewer = new TableViewer(comp, SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
