@@ -15,7 +15,6 @@ import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.http.conditions.HttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 
 public class HttpViewFilter extends ViewerFilter {
@@ -26,15 +25,17 @@ public class HttpViewFilter extends ViewerFilter {
 	public HttpViewFilter(TableViewer viewer) {
 		tableViewer = viewer;
 		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
-		conditionSet = new HttpConditionSet();
-		conditionSet.unserialize(preferenceStore.getString(com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceConstants.P_FILTER));
+		//conditionSet = new HttpConditionSet();
+		//conditionSet.unserialize(preferenceStore.getString(com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceConstants.P_FILTER));
 		preferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
+				/*
 				if (event.getProperty() == com.subgraph.vega.ui.http.requestfilterpreferencepage.PreferenceConstants.P_FILTER) {
 					conditionSet.unserialize(event.getNewValue().toString());
 					tableViewer.refresh();
 				}
+				*/
 			}
 		});
 

@@ -20,13 +20,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.events.IEvent;
-import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.model.IModel;
-import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.WorkspaceCloseEvent;
-import com.subgraph.vega.api.model.WorkspaceOpenEvent;
-import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
@@ -49,7 +42,7 @@ public class HttpRequestView extends ViewPart {
 		final TableColumnLayout tcl = new TableColumnLayout();
 		comp.setLayout(tcl);
 
-		tableViewer = new TableViewer(comp, SWT.VIRTUAL);
+		tableViewer = new TableViewer(comp, SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
@@ -59,64 +52,16 @@ public class HttpRequestView extends ViewPart {
 		getSite().registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
 		getSite().setSelectionProvider(tableViewer);
 
-		IModel model = Activator.getDefault().getModel();
-		if(model != null) {
-			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
-				@Override
-				public void handleEvent(IEvent event) {
-					if(event instanceof WorkspaceOpenEvent)
-						handleWorkspaceOpen((WorkspaceOpenEvent) event);
-					else if(event instanceof WorkspaceCloseEvent)
-						handleWorkspaceClose((WorkspaceCloseEvent) event);
-					else if(event instanceof WorkspaceResetEvent)
-						handleWorkspaceReset((WorkspaceResetEvent) event);
-				}
-			});
-			if(currentWorkspace != null)
-				tableViewer.setInput(currentWorkspace.getRequestLog());
-
-		}
+		tableViewer.setInput(Activator.getDefault().getModel());
 
 		requestResponseViewer = new RequestResponseViewer(form);
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
-/*
 
-		filter = new HttpViewFilter(tableViewer);
-		tableViewer.addFilter(filter);
-		*/
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
-
-		/*
-		getSite().getPage().addSelectionListener("com.subgraph.vega.views.website", new ISelectionListener() {
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				if (!(selection instanceof IStructuredSelection)) {
-					return;
-				}
-				Object o = ((IStructuredSelection)selection).getFirstElement();
-				if (o == null) {
-					filter.setFilterEntity(null);
-				} else if (o instanceof IWebEntity) {
-					filterByEntity((IWebEntity) o);
-				}
-			}
-		});
-		*/
 	}
 
-	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		tableViewer.setInput(event.getWorkspace().getRequestLog());
-	}
 
-	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
-		tableViewer.setInput(null);
-	}
-
-	private void handleWorkspaceReset(WorkspaceResetEvent event) {
-		tableViewer.setInput(null);
-		tableViewer.setInput(event.getWorkspace().getRequestLog());
-	}
 
 	public void  focusOnRecord(long requestId) {
 		final Object inputObj = tableViewer.getInput();

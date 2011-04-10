@@ -1,19 +1,19 @@
 package com.subgraph.vega.internal.model.requests;
 
-import com.subgraph.vega.api.model.requests.IRequestLogFilter;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
 import com.subgraph.vega.api.model.requests.RequestLogUpdateEvent;
 
 public class RequestLogListener {
 	private final IRequestLogUpdateListener listenerCallback;
-	private final IRequestLogFilter filter;
+	private final IHttpConditionSet filterCondition;
 
 	private int count;
 
-	RequestLogListener(IRequestLogUpdateListener callback, IRequestLogFilter filter, int currentCount) {
+	RequestLogListener(IRequestLogUpdateListener callback, IHttpConditionSet filter, int currentCount) {
 		this.listenerCallback = callback;
-		this.filter = filter;
+		this.filterCondition = filter;
 		this.count = currentCount;
 	}
 
@@ -21,8 +21,8 @@ public class RequestLogListener {
 		return listenerCallback;
 	}
 
-	IRequestLogFilter getFilter() {
-		return filter;
+	IHttpConditionSet getFilter() {
+		return filterCondition;
 	}
 
 	void filterRecord(IRequestLogRecord record) {
@@ -32,10 +32,9 @@ public class RequestLogListener {
 	}
 
 	private boolean matchesRecord(IRequestLogRecord record) {
-		if(filter != null)
-			return filter.match(record);
+		if(filterCondition != null)
+			return filterCondition.matches(record.getRequest(), record.getResponse());
 		else
 			return true;
 	}
-
 }

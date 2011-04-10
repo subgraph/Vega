@@ -9,6 +9,7 @@ import com.db4o.ObjectContainer;
 import com.db4o.ext.DatabaseFileLockedException;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.NamedEventListenerManager;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.IModelProperties;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -17,16 +18,19 @@ import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertModel;
+import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.web.WebModel;
 
 public class Workspace implements IWorkspace {
 	private static final int BACKGROUND_COMMIT_INTERVAL = 10000;
 	private final IWorkspaceEntry workspaceEntry;
+	private final NamedEventListenerManager conditionChangeManager;
 	private final EventListenerManager eventManager;
 	private final DatabaseConfigurationFactory configurationFactory;
 	private final IConsole console;
@@ -37,6 +41,7 @@ public class Workspace implements IWorkspace {
 	private IWebModel webModel;
 	private  IRequestLog requestLog;
 	private IScanAlertModel scanAlerts;
+	private HttpConditionManager conditionManager;
 
 	private ObjectContainer database;
 	private boolean opened;
@@ -46,9 +51,10 @@ public class Workspace implements IWorkspace {
 
 	private WorkspaceStatus workspaceStatus;
 
-	Workspace(IWorkspaceEntry entry, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
+	Workspace(IWorkspaceEntry entry, NamedEventListenerManager conditionChangeManager, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
 		this.configurationFactory = new DatabaseConfigurationFactory();
 		this.workspaceEntry = entry;
+		this.conditionChangeManager = conditionChangeManager;
 		this.eventManager = eventManager;
 		this.console = console;
 		this.htmlParser = htmlParser;
@@ -56,6 +62,7 @@ public class Workspace implements IWorkspace {
 		this.webModel = null;
 		this.requestLog = null;
 		this.scanAlerts = null;
+		this.conditionManager = null;
 		this.lockStatus = new WorkspaceLockStatus(eventManager);
 		this.backgroundCommitTimer = new Timer();
 	}
@@ -86,6 +93,7 @@ public class Workspace implements IWorkspace {
 			webModel = new WebModel(db);
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertModel(db, xmlRepository);
+			conditionManager = new HttpConditionManager(db, conditionChangeManager);
 			return db;
 		} catch (DatabaseFileLockedException e) {
 			e.printStackTrace();
@@ -118,12 +126,18 @@ public class Workspace implements IWorkspace {
 	}
 
 	@Override
+	public IHttpConditionManager getHttpConditionMananger() {
+		return conditionManager;
+	}
+
+	@Override
 	public void close() {
 		if(!opened)
 			return;
 		if(lockStatus.isLocked())
 			throw new IllegalStateException("Cannot close locked workspace.");
 		backgroundCommitTask.cancel();
+		conditionManager.notifyClosed();
 		database.close();
 		opened = false;
 		eventManager.fireEvent(new WorkspaceCloseEvent(this));
@@ -214,6 +228,7 @@ public class Workspace implements IWorkspace {
 
 		backgroundCommitTask.cancel();
 		synchronized(this) {
+			conditionManager.notifyClosed();
 			database.close();
 			final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
 			if(!databaseFile.delete()) {

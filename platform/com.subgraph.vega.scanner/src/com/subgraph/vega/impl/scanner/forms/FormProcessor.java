@@ -12,15 +12,18 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
 public class FormProcessor {
 
 	private final IScannerConfig config;
+	private final UriFilter uriFilter;
 	private final UriParser uriParser;
 
-	public FormProcessor(IScannerConfig config, UriParser uriParser) {
+	public FormProcessor(IScannerConfig config, UriFilter uriFilter, UriParser uriParser) {
 		this.config = config;
+		this.uriFilter = uriFilter;
 		this.uriParser = uriParser;
 	}
 
@@ -62,6 +65,9 @@ public class FormProcessor {
 	}
 
 	private void submitNewForm(FormProcessingState formData) {
+		if(!uriFilter.isAllowed(formData.getTargetURI()))
+			return;
+			
 		final IPathState ps = uriParser.processUri(formData.getTargetURI());
 		if(formData.isPostMethod())
 			ps.maybeAddPostParameters(formData.getParameters());

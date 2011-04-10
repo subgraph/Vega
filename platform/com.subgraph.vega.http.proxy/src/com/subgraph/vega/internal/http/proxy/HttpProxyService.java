@@ -4,8 +4,6 @@ import java.util.logging.Logger;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
-import com.subgraph.vega.api.events.IEvent;
-import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
@@ -14,8 +12,6 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.WorkspaceCloseEvent;
-import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class HttpProxyService implements IHttpProxyService {
@@ -30,7 +26,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IScannerModuleRegistry moduleRepository;
 	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
-	private final HttpInterceptor interceptor = new HttpInterceptor();
+	private HttpInterceptor interceptor;
 
 	public HttpProxyService() {
 		eventHandler = new IHttpInterceptProxyEventHandler() {
@@ -42,27 +38,12 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 	
 	public void activate() {
-		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
-			@Override
-			public void handleEvent(IEvent event) {
-				if(event instanceof WorkspaceOpenEvent) 
-					handleWorkspaceOpen((WorkspaceOpenEvent) event);
-				else if(event instanceof WorkspaceCloseEvent) 
-					handleWorkspaceClose((WorkspaceCloseEvent) event);				
-			}
-		});
-	}
-	
-	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		this.currentWorkspace = event.getWorkspace();
-	}
-
-	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
-		this.currentWorkspace = null;
+		interceptor = new HttpInterceptor(model);
 	}
 
 	@Override
 	public void start(int proxyPort) {
+		currentWorkspace = model.getCurrentWorkspace();
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();

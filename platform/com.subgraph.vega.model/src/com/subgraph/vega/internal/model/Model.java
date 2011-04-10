@@ -6,16 +6,19 @@ import java.util.logging.Logger;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.events.NamedEventListenerManager;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.IWorkspaceEntry;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.xml.IXmlRepository;
 
 public class Model implements IModel {
 	private final Logger logger = Logger.getLogger("model");
 	private final EventListenerManager workspaceEventManager = new EventListenerManager();
+	private final NamedEventListenerManager conditionSetChangeEventManager = new NamedEventListenerManager();
 	private IWorkspace currentWorkspace;
 	
 	private IConsole console;
@@ -93,7 +96,7 @@ public class Model implements IModel {
 	}
 	
 	private boolean openWorkspaceEntry(IWorkspaceEntry entry) {
-		IWorkspace workspace = new Workspace(entry, workspaceEventManager, console, htmlParser, xmlRepository);
+		IWorkspace workspace = new Workspace(entry, conditionSetChangeEventManager, workspaceEventManager, console, htmlParser, xmlRepository);
 		if(!workspace.open()) {
 			logger.warning("Failed to open workspace at path "+ entry.getPath());
 			return false;
@@ -106,6 +109,25 @@ public class Model implements IModel {
 	public void resetCurrentWorkspace() {
 		if(currentWorkspace != null)
 			currentWorkspace.reset();		
+	}
+
+	@Override
+	public IWorkspace getCurrentWorkspace() {
+		return currentWorkspace;
+	}
+
+	@Override
+	public IHttpConditionSet addConditionSetTracker(String name, IEventHandler handler) {
+		conditionSetChangeEventManager.addListener(name, handler);
+		if(currentWorkspace != null) {
+			return currentWorkspace.getHttpConditionMananger().getConditionSet(name);
+		}
+		return null;
+	}
+
+	@Override
+	public void removeConditionSetTracker(String name, IEventHandler handler) {
+		conditionSetChangeEventManager.removeListener(name, handler);		
 	}
 }
 
