@@ -158,8 +158,12 @@ public class TransactionManager {
 	synchronized void dropRequest() {
 		currentTransaction.setEventHandler(null);
 		currentTransaction.doDrop();
-		popTransaction();
-		
+		currentTransaction = interceptor.transactionQueuePop();
+		if(currentTransaction != null) {
+			setRequestPending();
+		} else {
+			setRequestInactive();
+		}
 	}
 	synchronized void dropResponse() {
 		currentTransaction.doDrop();
