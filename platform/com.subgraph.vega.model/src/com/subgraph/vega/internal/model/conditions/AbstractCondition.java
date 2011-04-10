@@ -18,6 +18,7 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		
 	protected AbstractCondition(IHttpConditionMatchAction matchAction) {
 		this.matchAction = (IHttpConditionMatchActionEx) matchAction;
+		this.isEnabled = true;
 	}
 
 	@Override
