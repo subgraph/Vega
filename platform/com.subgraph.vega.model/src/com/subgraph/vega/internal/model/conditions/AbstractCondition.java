@@ -13,7 +13,7 @@ import com.subgraph.vega.internal.model.conditions.match.IHttpConditionMatchActi
 
 public abstract class AbstractCondition implements IHttpCondition, Activatable {
 		
-	protected final IHttpConditionMatchActionEx matchAction;
+	protected IHttpConditionMatchActionEx matchAction;
 	private boolean isEnabled;
 		
 	protected AbstractCondition(IHttpConditionMatchAction matchAction) {
@@ -24,6 +24,13 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 	public IHttpConditionMatchAction getMatchAction() {
 		activate(ActivationPurpose.READ);
 		return matchAction;
+	}
+	
+	@Override
+	public void setMatchAction(IHttpConditionMatchAction matchAction) {
+		activate(ActivationPurpose.WRITE);
+		if(matchAction instanceof IHttpConditionMatchActionEx)
+			this.matchAction = (IHttpConditionMatchActionEx) matchAction;
 	}
 
 	@Override

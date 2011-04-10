@@ -12,7 +12,7 @@
       </view>
       <view
             allowMultiple="false"
-            class="com.subgraph.vega.ui.http.interceptviewer.InterceptView"
+            class="com.subgraph.vega.ui.http.intercept.InterceptView"
             icon="icons/intercept.png"
             id="com.subgraph.vega.views.intercept"
             name="Intercept"

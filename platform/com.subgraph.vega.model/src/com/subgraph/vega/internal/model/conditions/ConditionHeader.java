@@ -73,6 +73,8 @@ public class ConditionHeader extends AbstractCondition {
 
 	
 	private String headersToString(HttpMessage message) {
+		if(message == null)
+			return "";
 		final StringBuilder sb = new StringBuilder();
 		for(Header h: message.getAllHeaders()) {
 			sb.append(h.getName());

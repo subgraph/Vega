@@ -3,6 +3,7 @@ package com.subgraph.vega.api.model;
 import java.util.List;
 
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 
 
 public interface IModel {
@@ -42,4 +43,15 @@ public interface IModel {
 	boolean openWorkspaceByIndex(int index);
 	
 	IWorkspace getCurrentWorkspace();
+
+	/**
+	 * Tracks condition set changes across changing workspaces
+	 * 
+	 * @param name Name of condition set
+	 * @param handler Callback which processes ConditionSetChanged messages
+	 * @return The current named condition set if a workspace is currently open, null otherwise.
+	 */
+	IHttpConditionSet addConditionSetTracker(String name, IEventHandler handler);
+	
+	void removeConditionSetTracker(String name, IEventHandler handler);
 }

@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.http.interceptviewer;
+package com.subgraph.vega.ui.http.intercept.config;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;

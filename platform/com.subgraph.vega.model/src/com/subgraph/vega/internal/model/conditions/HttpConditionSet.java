@@ -19,19 +19,27 @@ import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
+	private final String name;
 	private final List<IHttpCondition> conditionList = new ActivatableArrayList<IHttpCondition>();
-	private transient IHttpConditionManager conditionManager;
+	private transient HttpConditionManager conditionManager;
 	
-	HttpConditionSet(IHttpConditionManager conditionManager) {
-		this(conditionManager, null);
+	HttpConditionSet(String name, HttpConditionManager conditionManager) {
+		this(name, conditionManager, null);
 	}
 	
-	HttpConditionSet(IHttpConditionManager conditionManager, IHttpConditionSet copyMe) {
+	HttpConditionSet(String name, HttpConditionManager conditionManager, IHttpConditionSet copyMe) {
+		this.name = name;
 		this.conditionManager = conditionManager;
 		if(copyMe != null) {
 			for(IHttpCondition c: copyMe.getAllConditions()) 
 				conditionList.add(c.createCopy());
 		}
+	}
+
+	@Override
+	public String getName() {
+		activate(ActivationPurpose.READ);
+		return name;
 	}
 
 	@Override
@@ -66,18 +74,21 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	public void appendCondition(IHttpCondition condition) {
 		activate(ActivationPurpose.READ);
 		conditionList.add(condition);
+		conditionManager.notifyConditionSetChanged(this);
 	}
 
 	@Override
 	public void removeCondition(IHttpCondition condition) {
 		activate(ActivationPurpose.READ);
 		conditionList.remove(condition);
+		conditionManager.notifyConditionSetChanged(this);
 	}
 
 	@Override
 	public void clearConditions() {
 		activate(ActivationPurpose.READ);
 		conditionList.clear();
+		conditionManager.notifyConditionSetChanged(this);
 	}
 
 	@Override
@@ -92,7 +103,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		return conditionManager;
 	}
 
-	void setConditionManager(IHttpConditionManager conditionManager) {
+	void setConditionManager(HttpConditionManager conditionManager) {
 		activate(ActivationPurpose.WRITE);
 		this.conditionManager = conditionManager;
 	}

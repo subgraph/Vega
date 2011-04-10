@@ -1,9 +1,7 @@
 package com.subgraph.vega.internal.model.conditions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.db4o.ObjectContainer;
 import com.db4o.events.CancellableObjectEventArgs;
@@ -11,8 +9,7 @@ import com.db4o.events.Event4;
 import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
-import com.subgraph.vega.api.events.EventListenerManager;
-import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.events.NamedEventListenerManager;
 import com.subgraph.vega.api.model.conditions.ConditionSetChanged;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
@@ -22,11 +19,12 @@ public class HttpConditionManager implements IHttpConditionManager {
 
 	private final ObjectContainer database;
 	private final List<IHttpConditionType> conditionTypes;
-	private final Map<String, EventListenerManager> eventListenerMap = new HashMap<String, EventListenerManager>();
+	private final NamedEventListenerManager conditionSetChangedManager;
 
-	public HttpConditionManager(ObjectContainer database) {
+	public HttpConditionManager(ObjectContainer database, NamedEventListenerManager conditionSetChangedManager) {
 		this.database = database;
 		this.conditionTypes = createConditionTypes();
+		this.conditionSetChangedManager = conditionSetChangedManager;
 		final EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
 		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
 			@Override
@@ -38,6 +36,7 @@ public class HttpConditionManager implements IHttpConditionManager {
 					((HttpConditionSetMap)ob).setConditionManager(HttpConditionManager.this);
 			}
 		});
+		notifyAllChanged();
 	}
 
 	private List<IHttpConditionType> createConditionTypes() {
@@ -52,6 +51,25 @@ public class HttpConditionManager implements IHttpConditionManager {
 		return types;
 	}
 	
+	public void notifyClosed() {
+		synchronized(conditionSetChangedManager) {
+			conditionSetChangedManager.fireAllKeys(new ConditionSetChanged(null));
+		}
+	}
+	
+	private void notifyAllChanged() {
+		synchronized(conditionSetChangedManager) {
+			for(String conditionSetName: conditionSetChangedManager.getAllKeys()) {
+				IHttpConditionSet conditionSet = getConditionSet(conditionSetName);
+				conditionSetChangedManager.fireEvent(conditionSetName, new ConditionSetChanged(conditionSet));
+			}
+		}
+	}
+
+	void notifyConditionSetChanged(IHttpConditionSet conditionSet) {
+		conditionSetChangedManager.fireEvent(conditionSet.getName(), new ConditionSetChanged(conditionSet));
+	}
+
 	@Override
 	public IHttpConditionSet getConditionSet(String name) {
 		return getConditionSetMap().getConditionSet(name);
@@ -64,13 +82,10 @@ public class HttpConditionManager implements IHttpConditionManager {
 
 	@Override
 	public void saveConditionSet(String name, IHttpConditionSet conditionSet) {
-		getConditionSetMap().saveConditionSet(name, conditionSet);
-		notifyNamedConditionSetChanged(name, conditionSet);
-	}
-
-	@Override
-	public IHttpConditionSet createConditionSet() {
-		return new HttpConditionSet(this);
+		synchronized(conditionSetChangedManager) {
+			getConditionSetMap().saveConditionSet(name, conditionSet);
+			conditionSetChangedManager.fireEvent(name, new ConditionSetChanged(conditionSet));
+		}
 	}
 
 	private HttpConditionSetMap getConditionSetMap() {
@@ -89,33 +104,5 @@ public class HttpConditionManager implements IHttpConditionManager {
 	@Override
 	public List<IHttpConditionType> getConditionTypes() {
 		return new ArrayList<IHttpConditionType>(conditionTypes);
-	}
-
-	private void notifyNamedConditionSetChanged(String name, IHttpConditionSet conditionSet) {
-		synchronized(eventListenerMap) {
-			if(eventListenerMap.containsKey(name))
-				eventListenerMap.get(name).fireEvent(new ConditionSetChanged(conditionSet));
-		}
-	}
-
-	@Override
-	public void addConditionSetListenerByName(String name, IEventHandler listener) {
-		getEventListenerManagerByName(name).addListener(listener);
-	}
-	
-	private EventListenerManager getEventListenerManagerByName(String name) {
-		synchronized (eventListenerMap) {
-			if(!eventListenerMap.containsKey(name))
-				eventListenerMap.put(name, new EventListenerManager());
-			return eventListenerMap.get(name);
-		}
-	}
-	
-	@Override
-	public void removeConditionSetListener(IEventHandler listener) {
-		synchronized(eventListenerMap) {
-			for(EventListenerManager elm: eventListenerMap.values()) 
-				elm.removeListener(listener);
-		}
 	}
 }

@@ -8,6 +8,7 @@ import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 public interface IHttpCondition {
 	IHttpConditionType getType();
 	IHttpConditionMatchAction getMatchAction();
+	void setMatchAction(IHttpConditionMatchAction matchAction);
 	IHttpCondition createCopy();
 	String getValueString();
 	boolean matches(HttpRequest request);

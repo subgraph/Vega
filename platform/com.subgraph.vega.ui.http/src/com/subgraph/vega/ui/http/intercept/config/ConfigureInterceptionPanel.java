@@ -1,5 +1,8 @@
-package com.subgraph.vega.ui.http.interceptviewer;
+package com.subgraph.vega.ui.http.intercept.config;
 
+import org.eclipse.jface.dialogs.PopupDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -20,57 +23,155 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.proxy.HttpInterceptorLevel;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.conditions.ConditionSetChanged;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.conditions.ConditionInput;
 
-public class OptionsViewer {
+public class ConfigureInterceptionPanel extends PopupDialog {
 	private static final Image IMAGE_CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();
 	private static final Image IMAGE_UNCHECKED = Activator.getImageDescriptor("icons/unchecked.png").createImage();
+	private static final GridDataFactory LAYOUTDATA_GRAB_BOTH = GridDataFactory
+	.fillDefaults().grab(true, true);
+	private static final GridLayoutFactory POPUP_LAYOUT_FACTORY = GridLayoutFactory
+	.fillDefaults().margins(POPUP_MARGINWIDTH, POPUP_MARGINHEIGHT)
+	.spacing(POPUP_HORIZONTALSPACING, POPUP_VERTICALSPACING);
+	private final IModel model;
 	private final TransactionDirection direction;
-	private Composite parentComposite;
+	private final IEventHandler conditionSetEventHandler;
+
+	private Point p;
+	private Control dialogArea;
 	private ComboViewer comboViewerInterceptorLevel;
 	private TableViewer tableViewerBreakpoints;
 	private ConditionInput conditionInput;
 	private IHttpInterceptor interceptor;
-
-	public OptionsViewer(IHttpConditionManager conditionManager, TransactionDirection direction) {
+	private IHttpConditionSet conditionSet;
+	
+	public ConfigureInterceptionPanel(Shell parent, Point point, IModel model, TransactionDirection direction) {
+		super(parent, PopupDialog.INFOPOPUP_SHELLSTYLE | SWT.ON_TOP, true, false, false, false, false, "Interceptor Options", "Press 'ESC' to close");
+		this.model = model;
+		final IWorkspace workspace = model.getCurrentWorkspace();
+		final IHttpConditionManager conditionManager = (workspace == null) ? (null) : (workspace.getHttpConditionMananger());
 		this.conditionInput = new ConditionInput(conditionManager);
 		this.direction = direction;
+		this.conditionSetEventHandler = createConditionSetEventHandler();
+		this.conditionSet = model.addConditionSetTracker(getConditionSetName(), conditionSetEventHandler);
+		p = point;
+		create();
 	}
 
-	public Composite createViewer(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new GridLayout(1, true));
-		createInterceptorOptions(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		createBreakpointsEditor(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		interceptor = Activator.getDefault().getProxyService().getInterceptor();
-		comboViewerInterceptorLevel.setSelection(new StructuredSelection(interceptor.getInterceptLevel(direction)));
-		tableViewerBreakpoints.setInput(interceptor);
-
-		return parentComposite;
+	private IEventHandler createConditionSetEventHandler() {
+		return new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof ConditionSetChanged) 
+					onConditionSetChanged((ConditionSetChanged) event);
+			}			
+		};
 	}
 	
-	public TransactionDirection getDirection() {
-		return direction;
+	protected void handleShellCloseEvent() {
+		model.removeConditionSetTracker(getConditionSetName(), conditionSetEventHandler);
+		super.handleShellCloseEvent();
 	}
 
-	public Composite getViewer() {
-		return parentComposite;
+	protected Control getFocusControl() {
+		return dialogArea;
+	}
+
+	private String getConditionSetName() {
+		switch(direction) {
+		case DIRECTION_REQUEST:
+			return IHttpConditionManager.CONDITION_SET_BREAKPOINTS_REQUEST;
+		case DIRECTION_RESPONSE:
+			return IHttpConditionManager.CONDITION_SET_BREAKPOINTS_RESPONSE;
+		}
+		return null;
+	}
+
+	private void setConditionSetInput() {
+		if(tableViewerBreakpoints == null || tableViewerBreakpoints.getContentProvider() == null)
+			return;
+		if(conditionSet == null)
+			tableViewerBreakpoints.setInput(null);
+		else
+			tableViewerBreakpoints.setInput(conditionSet.getAllConditions());
+	}
+	private void onConditionSetChanged(ConditionSetChanged event) {
+		conditionSet = event.getConditionSet();
+		setConditionSetInput();
+	}
+
+	protected Point getInitialLocation(Point initialSize) {
+		return new Point(p.x - initialSize.x, p.y);
+	}
+
+	protected Control createContents(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE);
+		POPUP_LAYOUT_FACTORY.applyTo(composite);
+		LAYOUTDATA_GRAB_BOTH.applyTo(composite);
+		if(hasTitleArea()) {
+			createTitleMenuArea(composite);
+			createHorizontalSeparator(composite);
+		}
+		dialogArea = createDialogArea(composite);
+		if(dialogArea.getLayoutData() == null)
+			LAYOUTDATA_GRAB_BOTH.applyTo(composite);
+		
+		if(hasInfoArea()) {
+			createHorizontalSeparator(composite);
+			createInfoTextArea(composite);
+		}
+		return composite;
+		
+	}
+
+	private Control createHorizontalSeparator(Composite parent) {
+		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL
+				| SWT.LINE_DOT);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true,
+				false).applyTo(separator);
+		return separator;
+	}
+	protected Control createDialogArea(Composite parent) {
+		
+		parent.setLayout(new GridLayout(1, true));
+		createInterceptorOptions(parent).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		createBreakpointsEditor(parent).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		interceptor = Activator.getDefault().getProxyService().getInterceptor();
+		comboViewerInterceptorLevel.setSelection(new StructuredSelection(interceptor.getInterceptLevel(direction)));
+		setConditionSetInput();
+		return parent;
+	}
+
+	void dispose() {
+		model.removeConditionSetTracker(getConditionSetName(), conditionSetEventHandler);
+	}
+
+	public TransactionDirection getDirection() {
+		return direction;
 	}
 
 	private Composite createInterceptorOptions(Composite parent) {
@@ -130,7 +231,7 @@ public class OptionsViewer {
 
 		tableViewerBreakpoints = new TableViewer(rootControl, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createTableBreakpointsColumns(tableViewerBreakpoints, tcl);
-		tableViewerBreakpoints.setContentProvider(new BreakpointsTableContentProvider(direction));
+		tableViewerBreakpoints.setContentProvider(new ArrayContentProvider());
 		final Table table = tableViewerBreakpoints.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -219,12 +320,11 @@ public class OptionsViewer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerBreakpoints.getSelection();
-				IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
 				for(Object ob: selection.toList()) {
-					if(ob instanceof IHttpCondition) 
+					if((ob instanceof IHttpCondition) && (conditionSet != null)) 
 						conditionSet.removeCondition((IHttpCondition) ob);			
 				}
-				tableViewerBreakpoints.refresh();
+				tableViewerBreakpoints.refresh(true);
 			}
 		};
 	}
@@ -258,11 +358,12 @@ public class OptionsViewer {
 				final IHttpCondition breakpoint = conditionInput.createConditionFromData();
 				if(breakpoint == null)
 					return;
-				IHttpConditionSet conditionSet = interceptor.getBreakpointSet(direction);
-				conditionSet.appendCondition(breakpoint);
+				if(conditionSet != null)
+					conditionSet.appendCondition(breakpoint);
 				conditionInput.reset();
-				tableViewerBreakpoints.refresh();
+				tableViewerBreakpoints.refresh(true);
 			}
 		};
 	}
+
 }

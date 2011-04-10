@@ -1,11 +1,11 @@
-package com.subgraph.vega.ui.http.interceptviewer;
+package com.subgraph.vega.ui.http.intercept.config;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 
-import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
 
 public class BreakpointPatternEditingSupport extends EditingSupport {
 	private final TableViewer viewer;
@@ -27,14 +27,16 @@ public class BreakpointPatternEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		return ((IHttpConditionMatchAction) element).getArgumentAsString();
+		final IHttpCondition condition = (IHttpCondition) element;
+		return condition.getMatchAction().getArgumentAsString();
 	}
 
 	@Override
 	protected void setValue(Object element, Object value) {
 		if(!(value instanceof String))
 			return;
-		((IHttpConditionMatchAction) element).setArgumentFromString((String) value);
-		viewer.refresh();
+		final IHttpCondition condition = (IHttpCondition) element;
+		condition.getMatchAction().setArgumentFromString((String) value);
+		viewer.refresh(true);
 	}
 }

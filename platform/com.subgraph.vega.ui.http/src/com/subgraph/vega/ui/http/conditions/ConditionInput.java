@@ -1,5 +1,8 @@
 package com.subgraph.vega.ui.http.conditions;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.widgets.Composite;
 
@@ -23,12 +26,18 @@ public class ConditionInput {
 	}
 	
 	public ComboViewer createConditionTypeCombo(Composite parent) {
-		conditionTypeViewer = new ConditionTypeComboViewer(parent, conditionManager.getConditionTypes());
+		conditionTypeViewer = new ConditionTypeComboViewer(parent, getConditionTypes(conditionManager));
 		if(matchActionViewer != null)
 			conditionTypeViewer.setMatchTypeViewer(matchActionViewer);
 		return conditionTypeViewer;
 	}
 	
+	private List<IHttpConditionType> getConditionTypes(IHttpConditionManager manager) {
+		if(manager == null)
+			return Collections.emptyList();
+		else
+			return manager.getConditionTypes();
+	}
 	public ComboViewer createConditionMatchCombo(Composite parent) {
 		matchActionViewer = new MatchActionComboViewer(parent);
 		if(conditionTypeViewer != null)

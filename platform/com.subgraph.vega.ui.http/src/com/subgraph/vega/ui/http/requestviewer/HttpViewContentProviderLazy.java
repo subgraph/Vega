@@ -1,19 +1,24 @@
 package com.subgraph.vega.ui.http.requestviewer;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.conditions.ConditionSetChanged;
+import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
@@ -23,7 +28,7 @@ import com.subgraph.vega.api.model.requests.RequestLogUpdateEvent;
 public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private static final int UPDATE_INTERVAL = 500;
 
-	private IWorkspace workspace;
+	private IWorkspace currentWorkspace;
 	private TableViewer tableViewer;
 	private List<IRequestLogRecord> records;
 	private final IRequestLogUpdateListener callback;
@@ -56,8 +61,8 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		}
 		tableViewer = (TableViewer) viewer;
 
-		if(newInput instanceof IWorkspace) 
-			setNewInput((IWorkspace) newInput);
+		if(newInput instanceof IModel) 
+			setNewInput((IModel) newInput);
 		else
 			setNullInput();
 	}
@@ -65,29 +70,23 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private void setNullInput() {
 		currentCount = lastUpdateCount = 0;
 		tableViewer.setItemCount(0);
-		if(workspace != null) {
-			workspace.getRequestLog().removeUpdateListener(callback);
-			workspace.getHttpConditionMananger().removeConditionSetListener(conditionSetListener);
-		}
-
-		workspace = null;
+		currentWorkspace = null;
 		updateTask = null;
 		filterCondition = null;
 	}
 	
-	private void setNewInput(IWorkspace newWorkspace) {
-		if(newWorkspace == null) {
+	private void setNewInput(IModel model) {
+		if(model == null) {
 			setNullInput();
 			return;
 		}
 		
-		if(workspace != null)
-			workspace.getRequestLog().removeUpdateListener(callback);
-			
-		workspace = newWorkspace;
-		filterCondition = workspace.getHttpConditionMananger().getConditionSet("filter");
-		workspace.getHttpConditionMananger().addConditionSetListenerByName("filter", conditionSetListener);
-		workspace.getRequestLog().addUpdateListener(callback, filterCondition);
+		filterCondition = model.addConditionSetTracker(IHttpConditionManager.CONDITION_SET_FILTER, conditionSetListener);
+		
+		currentWorkspace = model.addWorkspaceListener(createWorkspaceListener());
+		if(currentWorkspace != null) 
+			currentWorkspace.getRequestLog().addUpdateListener(callback, filterCondition);
+		
 		reloadRecords();
 		updateTask = createTimerTask(tableViewer.getControl().getDisplay());
 		updateTimer.scheduleAtFixedRate(updateTask, 0, UPDATE_INTERVAL);
@@ -114,6 +113,37 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 			}
 		};
 	}
+	
+	private IEventHandler createWorkspaceListener() {
+		return new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent)
+					onWorkspaceOpen((WorkspaceOpenEvent) event);
+				else if(event instanceof WorkspaceResetEvent)
+					onWorkspaceReset((WorkspaceResetEvent) event);
+				else if(event instanceof WorkspaceCloseEvent)
+					onWorkspaceClose((WorkspaceCloseEvent) event);
+				reloadRecords();
+			}			
+		};
+	}
+	
+	private void onWorkspaceOpen(WorkspaceOpenEvent event) {
+		currentWorkspace.getRequestLog().removeUpdateListener(callback);
+		currentWorkspace = event.getWorkspace();
+		currentWorkspace.getRequestLog().addUpdateListener(callback, filterCondition);
+	}
+	
+	private void onWorkspaceReset(WorkspaceResetEvent event) {
+		currentWorkspace.getRequestLog().removeUpdateListener(callback);
+		currentWorkspace = event.getWorkspace();
+		currentWorkspace.getRequestLog().addUpdateListener(callback, filterCondition);
+	}
+	
+	private void onWorkspaceClose(WorkspaceCloseEvent event) {
+		currentWorkspace.getRequestLog().removeUpdateListener(callback);
+	}
 
 	@Override
 	public void updateElement(int index) {
@@ -136,7 +166,9 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	}
 
 	private List<IRequestLogRecord> queryRecords() {
-		final IRequestLog requestLog = workspace.getRequestLog();
+		if(currentWorkspace == null)
+			return Collections.emptyList();
+		final IRequestLog requestLog = currentWorkspace.getRequestLog();
 		if(filterCondition == null)
 			return requestLog.getAllRecords();
 		else
@@ -144,7 +176,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	}
 
 	public void setConditionFilter(IHttpConditionSet conditionSet) {
-		final IRequestLog requestLog = workspace.getRequestLog();
+		final IRequestLog requestLog = currentWorkspace.getRequestLog();
 		filterCondition = conditionSet;
 		requestLog.removeUpdateListener(callback);
 		requestLog.addUpdateListener(callback, conditionSet);

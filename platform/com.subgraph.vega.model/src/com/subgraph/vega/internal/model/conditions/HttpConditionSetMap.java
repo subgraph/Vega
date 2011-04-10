@@ -6,7 +6,6 @@ import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableHashMap;
 import com.db4o.ta.Activatable;
-import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 
 public class HttpConditionSetMap implements Activatable {
@@ -14,13 +13,13 @@ public class HttpConditionSetMap implements Activatable {
 	private final Map<String, IHttpConditionSet> conditionSetMap = new ActivatableHashMap<String, IHttpConditionSet>();
 	
 	private transient Activator activator;
-	private transient IHttpConditionManager conditionManager;
+	private transient HttpConditionManager conditionManager;
 	
 	public HttpConditionSetMap(HttpConditionManager conditionManager) {
 		this.conditionManager = conditionManager;
 	}
 	
-	void setConditionManager(IHttpConditionManager conditionManager) {
+	void setConditionManager(HttpConditionManager conditionManager) {
 		this.conditionManager = conditionManager;
 	}
 
@@ -28,7 +27,7 @@ public class HttpConditionSetMap implements Activatable {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionSetMap) {
 			if(!conditionSetMap.containsKey(name))
-				conditionSetMap.put(name, new HttpConditionSet(conditionManager));
+				conditionSetMap.put(name, new HttpConditionSet(name, conditionManager));
 			return conditionSetMap.get(name);
 		}
 	}
@@ -36,7 +35,7 @@ public class HttpConditionSetMap implements Activatable {
 	IHttpConditionSet getConditionSetCopy(String name) {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionSetMap) {
-			return new HttpConditionSet(conditionManager, conditionSetMap.get(name));
+			return new HttpConditionSet(name, conditionManager, conditionSetMap.get(name));
 		}
 	}
 
