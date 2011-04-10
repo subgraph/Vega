@@ -53,8 +53,6 @@ public class ConnectionTask implements Runnable {
 
 	private void processRequestContext(HttpContext context) throws IOException {
 		final ProxyTransaction transaction = (ProxyTransaction) context.getAttribute(HttpProxy.PROXY_HTTP_TRANSACTION);
-
-		// REVISIT: verify request, response, host are != null?
 		proxy.completeRequest(transaction);
 	}
 }

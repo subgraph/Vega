@@ -46,6 +46,8 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 		final ProxyTransaction transaction = new ProxyTransaction(context);
+		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
+
 		try {
 			if (handleRequest(transaction, request) == false) {
 				response.setStatusCode(503);
@@ -69,7 +71,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 				return;
 			}
 
-			context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
 
 			HttpResponse httpResponse = copyResponse(r.getRawResponse());
 			removeHopByHopHeaders(httpResponse);
