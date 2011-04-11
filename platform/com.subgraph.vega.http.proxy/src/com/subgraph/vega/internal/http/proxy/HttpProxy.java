@@ -63,7 +63,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 		registry.register("*", new ProxyRequestHandler(this, requestEngine));
 
-		httpService = new HttpService(inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
+		httpService = new VegaHttpService(requestEngine, inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
 		httpService.setParams(params);
 		httpService.setHandlerResolver(registry);
 	}
@@ -97,7 +97,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		while(!Thread.interrupted()) {
 			Socket s = serverSocket.accept();
 			logger.fine("Connection accepted from "+ s.getRemoteSocketAddress());
-			DefaultHttpServerConnection c = new DefaultHttpServerConnection();
+			DefaultHttpServerConnection c = new VegaHttpServerConnection();
 			c.bind(s, params);
 			executor.execute(new ConnectionTask(httpService, c, HttpProxy.this));
 		}
