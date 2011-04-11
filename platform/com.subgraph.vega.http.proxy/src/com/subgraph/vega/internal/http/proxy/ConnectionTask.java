@@ -9,16 +9,15 @@ import org.apache.http.HttpException;
 import org.apache.http.impl.SocketHttpServerConnection;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpService;
 
 public class ConnectionTask implements Runnable {
 	private final Logger logger = Logger.getLogger("proxy");
 
-	private final HttpService httpService;
+	private final VegaHttpService httpService;
 	private final SocketHttpServerConnection connection;
 	private final HttpProxy proxy;
 
-	ConnectionTask(HttpService httpService, SocketHttpServerConnection connection, HttpProxy proxy) {
+	ConnectionTask(VegaHttpService httpService, SocketHttpServerConnection connection, HttpProxy proxy) {
 		this.httpService = httpService;
 		this.connection = connection;
 		this.proxy = proxy;

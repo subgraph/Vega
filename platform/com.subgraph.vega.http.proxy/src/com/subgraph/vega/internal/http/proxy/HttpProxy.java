@@ -18,14 +18,12 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.HttpService;
 import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.internal.http.proxy.HttpInterceptor;
 
 public class HttpProxy implements IHttpInterceptProxy {
 	static final String PROXY_CONTEXT_REQUEST = "proxy.request";
@@ -42,7 +40,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private final int listenPort;
 	private ServerSocket serverSocket;
 	private HttpParams params;
-	private HttpService httpService;
+	private VegaHttpService httpService;
 	private ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
 	private Thread proxyThread;
 	
