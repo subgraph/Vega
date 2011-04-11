@@ -5,6 +5,7 @@ import java.net.URI;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public interface IProxyTransaction {
@@ -16,6 +17,7 @@ public interface IProxyTransaction {
 		String getName() { return name; }
 	};
 
+	IHttpRequestEngine getRequestEngine();
 	void setEventHandler(IProxyTransactionEventHandler eventHandler);
 	HttpHost getHttpHost();
 	URI getUri();

@@ -45,7 +45,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-		final ProxyTransaction transaction = new ProxyTransaction(context);
+		final ProxyTransaction transaction = new ProxyTransaction(requestEngine, context);
 		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
 
 		try {
