@@ -6,7 +6,7 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
-import com.subgraph.vega.ui.httpeditor.RequestRenderer;
+import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class TransactionManager {
 	private IHttpInterceptor interceptor;

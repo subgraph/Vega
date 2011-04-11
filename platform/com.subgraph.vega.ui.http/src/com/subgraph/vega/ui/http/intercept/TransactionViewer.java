@@ -21,7 +21,7 @@ import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionPanel;
-import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
+import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
 
 public class TransactionViewer extends Composite {
 	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/filter.gif").createImage();
