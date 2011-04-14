@@ -46,7 +46,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-		final ProxyTransaction transaction = new ProxyTransaction(context);
+		final ProxyTransaction transaction = new ProxyTransaction(requestEngine, context);
 		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
 
 		try {
@@ -64,6 +64,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 				transaction.signalComplete();
 				return;
 			}
+
 			transaction.setHttpHost((HttpHost) ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
 
 			if (handleResponse(transaction, r) == false) {
@@ -122,8 +123,9 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 	private HttpEntity copyEntity(HttpEntity entity) {
 		try {
-			if(entity == null)
+			if(entity == null) {
 				return null;
+			}
 			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
 			newEntity.setContentEncoding(entity.getContentEncoding());
 			newEntity.setContentType(entity.getContentType());

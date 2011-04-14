@@ -11,9 +11,11 @@ import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyTransaction implements IProxyTransaction {
+	private final IHttpRequestEngine requestEngine;
 	private final HttpContext context;
 	private IProxyTransactionEventHandler eventHandler;
 	private HttpRequest request;
@@ -26,8 +28,13 @@ public class ProxyTransaction implements IProxyTransaction {
     private Lock lock = new ReentrantLock();
     private Condition cv = lock.newCondition();
 
-	ProxyTransaction(HttpContext context) {
+	ProxyTransaction(IHttpRequestEngine requestEngine, HttpContext context) {
+		this.requestEngine = requestEngine;
 		this.context = context;
+	}
+
+	public IHttpRequestEngine getRequestEngine() {
+		return requestEngine;
 	}
 
 	public HttpContext getContext() {

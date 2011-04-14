@@ -49,8 +49,8 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.httpeditor.HttpRequestViewer;
-import com.subgraph.vega.ui.httpeditor.RequestRenderer;
+import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
+import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class RequestEditView extends ViewPart {
 	public final static String VIEW_ID = "com.subgraph.vega.views.requestEdit";

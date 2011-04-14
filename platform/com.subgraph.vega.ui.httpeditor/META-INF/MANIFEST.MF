@@ -18,5 +18,5 @@ Import-Package: com.subgraph.vega.api.model,
  org.eclipse.jface.text.rules,
  org.eclipse.jface.text.source
 Require-Bundle: org.eclipse.ui;bundle-version="3.6.0"
-Export-Package: com.subgraph.vega.ui.httpeditor,
- com.subgraph.vega.ui.httpeditor.hover
+Export-Package: com.subgraph.vega.ui.httpeditor.text.hover,
+ com.subgraph.vega.ui.text.httpeditor

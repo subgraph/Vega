@@ -6,7 +6,7 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
-import com.subgraph.vega.ui.httpeditor.RequestRenderer;
+import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class TransactionManager {
 	private IHttpInterceptor interceptor;
@@ -37,7 +37,6 @@ public class TransactionManager {
 				handleTransactionComplete();
 			}
 		};
-
 		
 		interceptor.setEventHandler(interceptorEventHandler);	
 		this.interceptor = interceptor;
@@ -65,7 +64,6 @@ public class TransactionManager {
 		}
 	}
 
-	
 	private void handleTransactionResponse(final IProxyTransaction transaction) {
 		synchronized(this) {
 			if(currentTransaction == null || currentTransaction == transaction) {
@@ -108,15 +106,14 @@ public class TransactionManager {
 			return;
 		}
 		
-		if(!currentTransaction.hasRequest()) {
-				setRequestPending();
-				setResponseInactive();
+		if(!currentTransaction.hasResponse()) {
+			setRequestPending();
+			setResponseInactive();
 		} else {
-				setResponsePending();
+			setResponsePending();
 		}
 	}
-	
-	
+
 	private synchronized void setRequestPending() {
 		final String message = "Request pending to "+ getTransactionHostPart(currentTransaction);
 		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
@@ -147,9 +144,9 @@ public class TransactionManager {
 	synchronized void forwardRequest() {
 		currentTransaction.setEventHandler(transactionEventHandler);
 		currentTransaction.doForward();
-		setRequestSent();
-		
+		setRequestSent();	
 	}
+
 	synchronized void forwardResponse() {
 		currentTransaction.doForward();
 		popTransaction();
@@ -165,6 +162,7 @@ public class TransactionManager {
 			setRequestInactive();
 		}
 	}
+
 	synchronized void dropResponse() {
 		currentTransaction.doDrop();
 		popTransaction();
@@ -174,6 +172,7 @@ public class TransactionManager {
 		responseViewer.setStatus("No response pending", false);
 		currentRequestTransaction = null;
 	}
+
 	private synchronized void setResponsePending() {
 		final String content = requestRenderer.renderResponseText(currentTransaction.getResponse().getRawResponse());
 		responseViewer.setStatus("Reponse pending", true, content);
