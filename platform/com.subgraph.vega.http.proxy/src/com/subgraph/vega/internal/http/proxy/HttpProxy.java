@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
@@ -24,14 +23,13 @@ import org.apache.http.protocol.ResponseContent;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
 public class HttpProxy implements IHttpInterceptProxy {
 	static final String PROXY_CONTEXT_REQUEST = "proxy.request";
 	static final String PROXY_CONTEXT_RESPONSE = "proxy.response";
 	static final String PROXY_HTTP_HOST = "proxy.host";
 	static final String PROXY_HTTP_TRANSACTION = "proxy.transaction";
-
-	private static final int NTHREADS = 10;
 
 	private final Logger logger = Logger.getLogger("proxy");
 
@@ -41,10 +39,10 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private ServerSocket serverSocket;
 	private HttpParams params;
 	private VegaHttpService httpService;
-	private ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
+	private ExecutorService executor = Executors.newCachedThreadPool();
 	private Thread proxyThread;
 	
-	public HttpProxy(int listenPort, HttpInterceptor interceptor, IHttpRequestEngine requestEngine) {
+	public HttpProxy(int listenPort, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
 		this.interceptor = interceptor;
 		this.listenPort = listenPort;
@@ -61,7 +59,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 		registry.register("*", new ProxyRequestHandler(this, requestEngine));
 
-		httpService = new VegaHttpService(requestEngine, inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
+		httpService = new VegaHttpService(inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(), sslContextRepository);
 		httpService.setParams(params);
 		httpService.setHandlerResolver(registry);
 	}
@@ -95,7 +93,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		while(!Thread.interrupted()) {
 			Socket s = serverSocket.accept();
 			logger.fine("Connection accepted from "+ s.getRemoteSocketAddress());
-			DefaultHttpServerConnection c = new VegaHttpServerConnection();
+			VegaHttpServerConnection c = new VegaHttpServerConnection(params);
 			c.bind(s, params);
 			executor.execute(new ConnectionTask(httpService, c, HttpProxy.this));
 		}

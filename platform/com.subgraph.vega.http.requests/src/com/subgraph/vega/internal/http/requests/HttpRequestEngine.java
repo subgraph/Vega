@@ -44,11 +44,11 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		try {
 			return future.get();
 		} catch (InterruptedException e) {
-			logger.info("Request "+ request +" was interrupted before completion");
+			logger.info("Request "+ request.getURI() +" was interrupted before completion");
 		} catch (ExecutionException e) {
 			if(e.getCause() instanceof IOException) 
 				throw ((IOException)e.getCause());
-			logger.log(Level.WARNING, "Unexpected exception processing request "+ request +" : "+ e.getCause().getMessage(), e.getCause());
+			logger.log(Level.WARNING, "Unexpected exception processing request "+ request.getURI() +" : "+ e.getCause().getMessage(), e.getCause());
 		}
 		return null;
 	}

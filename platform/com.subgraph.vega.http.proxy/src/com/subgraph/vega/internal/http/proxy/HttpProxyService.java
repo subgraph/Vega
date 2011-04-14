@@ -1,5 +1,6 @@
 package com.subgraph.vega.internal.http.proxy;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
@@ -12,7 +13,10 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.internal.http.proxy.ssl.ProxySSLInitializationException;
+import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
 public class HttpProxyService implements IHttpProxyService {
 
@@ -26,7 +30,10 @@ public class HttpProxyService implements IHttpProxyService {
 	private IScannerModuleRegistry moduleRepository;
 	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
+	private IPathFinder pathFinder;
+
 	private HttpInterceptor interceptor;
+	private SSLContextRepository sslContextRepository;
 
 	public HttpProxyService() {
 		eventHandler = new IHttpInterceptProxyEventHandler() {
@@ -36,9 +43,15 @@ public class HttpProxyService implements IHttpProxyService {
 			}
 		};
 	}
-	
+
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
+		try {
+			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
+		} catch (ProxySSLInitializationException e) {
+			sslContextRepository = null;
+			logger.warning("Failed to initialize SSL support in proxy.  SSL interception will be disabled. ("+ e.getMessage() + ")");
+		}
 	}
 
 	@Override
@@ -52,7 +65,7 @@ public class HttpProxyService implements IHttpProxyService {
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
-		proxy = new HttpProxy(proxyPort, interceptor, requestEngine);
+		proxy = new HttpProxy(proxyPort, interceptor, requestEngine, sslContextRepository);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
 	}
@@ -60,7 +73,11 @@ public class HttpProxyService implements IHttpProxyService {
 	private void processTransaction(IProxyTransaction transaction) {
 		if(transaction.getResponse() == null || contentAnalyzer == null)
 			return;
-		contentAnalyzer.processResponse(transaction.getResponse());
+		try {
+			contentAnalyzer.processResponse(transaction.getResponse());
+		} catch (RuntimeException e) {
+			logger.log(Level.WARNING, "Exception processing transaction response: "+ e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -108,5 +125,13 @@ public class HttpProxyService implements IHttpProxyService {
 	
 	protected void unsetModuleRepository(IScannerModuleRegistry moduleRepository) {
 		this.moduleRepository = null;
+	}
+
+	protected void setPathFinder(IPathFinder pathFinder) {
+		this.pathFinder = pathFinder;
+	}
+
+	protected void unsetPathFinder(IPathFinder pathFinder) {
+		this.pathFinder = null;
 	}
 }
