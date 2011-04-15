@@ -9,7 +9,9 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.ExecutionContext;
@@ -23,14 +25,14 @@ import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 class RequestTask implements Callable<IHttpResponse> {
 
-	private final VegaHttpClient client;
+	private final HttpClient client;
 	private final RateLimiter rateLimit;
 	private final HttpUriRequest request;
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
 
-	RequestTask(VegaHttpClient client, RateLimiter rateLimit, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	RequestTask(HttpClient client, RateLimiter rateLimit, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.client = client;
 		this.rateLimit = rateLimit;
 		this.request = request;
@@ -60,8 +62,16 @@ class RequestTask implements Callable<IHttpResponse> {
 			httpResponse.setEntity(newEntity);
 		}
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+		final HttpRequest sentRequest = (HttpRequest) context.getAttribute(HttpRequestEngine.VEGA_SENT_REQUEST);
 		
-		final IHttpResponse response = new EngineHttpResponse(request.getURI(), host,  client.createProcessedRequest(request, context), httpResponse, elapsed, htmlParser);
+		final IHttpResponse response = new EngineHttpResponse(
+				request.getURI(), host,  
+				(sentRequest == null) ? (request) : (sentRequest),
+				httpResponse, 
+				elapsed, 
+				htmlParser
+		);
+
 		for(IHttpResponseProcessor p: config.getResponseProcessors())
 			p.processResponse(response.getOriginalRequest(), response, context);
 		

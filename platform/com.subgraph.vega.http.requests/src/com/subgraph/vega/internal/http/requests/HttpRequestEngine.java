@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -21,14 +22,17 @@ import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 
 public class HttpRequestEngine implements IHttpRequestEngine {
+	/** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
+	public final static String VEGA_SENT_REQUEST = "vega.sent-request";
+	
 	private final Logger logger = Logger.getLogger("request-engine");
 	private final ExecutorService executor;
-	private final VegaHttpClient client;
+	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
 	private final RateLimiter rateLimit;
 
-	HttpRequestEngine(ExecutorService executor, VegaHttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.executor = executor;
 		this.client = client;
 		this.config = config;
