@@ -1,5 +1,8 @@
 package com.subgraph.vega.ui.http.intercept;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -64,7 +67,6 @@ public class TransactionViewer extends Composite {
 		layout.verticalSpacing = 0;
 		layout.horizontalSpacing = 2;
 		return layout;
-		
 	}
 	
 	private Label createStatusLabel() {
@@ -101,7 +103,15 @@ public class TransactionViewer extends Composite {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if(direction == TransactionDirection.DIRECTION_REQUEST)
-					manager.forwardRequest();
+					try {
+						manager.forwardRequest();
+					} catch (URISyntaxException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (UnsupportedEncodingException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
 				else
 					manager.forwardResponse();
 			}
@@ -119,8 +129,7 @@ public class TransactionViewer extends Composite {
 			}
 		};
 	}
-	
-	
+
 	private void doConfigure() {
 		int x = configureButton.getBounds().x;
 		int y = configureButton.getBounds().y + configureButton.getBounds().height;
@@ -152,4 +161,9 @@ public class TransactionViewer extends Composite {
 		else
 			httpRequestViewer.setContent(httpContent);
 	}
+
+	public String getContent() {
+		return httpRequestViewer.getContent();
+	}
+
 }

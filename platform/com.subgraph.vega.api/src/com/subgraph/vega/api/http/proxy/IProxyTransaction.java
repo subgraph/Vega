@@ -1,9 +1,7 @@
 package com.subgraph.vega.api.http.proxy;
 
-import java.net.URI;
-
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -17,15 +15,58 @@ public interface IProxyTransaction {
 		String getName() { return name; }
 	};
 
+	/**
+	 * @return Request engine associated with the transaction.
+	 */
 	IHttpRequestEngine getRequestEngine();
+
+	/**
+	 * Set an event handler to receive a notification when the transaction completes.
+	 *  
+	 * @param eventHandler Proxy event handler, or null to unset.
+	 */
 	void setEventHandler(IProxyTransactionEventHandler eventHandler);
-	HttpHost getHttpHost();
-	URI getUri();
+
+	/**
+	 * @return Boolean indicating whether this transaction has a HTTP request received by the proxy.
+	 */
 	boolean hasRequest();
+
+	/**
+	 * @return HTTP request received by the proxy. Immutable.
+	 */
 	HttpRequest getRequest();
+
+	/**
+	 * Set the request to be sent by the proxy, overriding the intercepted request. If none is set when the pending
+	 * request is forwarded, the intercepted request is sent as is.
+	 *
+	 * @param request HttpUriRequest to be sent by the proxy. 
+	 */
+	void setUriRequest(HttpUriRequest request);
+
+	/**
+	 * @return HttpUriRequest, or null if none is set.
+	 */
+	HttpUriRequest getUriRequest();
+	
+	/**
+	 * @return Boolean indicating whether this transaction has a HTTP response received by the proxy.
+	 */
 	boolean hasResponse();
+
+	/**
+	 * @return HTTP response received by the proxy.
+	 */
 	IHttpResponse getResponse();
+
+	/**
+	 * Forward the pending request or response. 
+	 */
 	void doForward();
+
+	/**
+	 * Drop the pending request or response.
+	 */
 	void doDrop();
-	void signalComplete();
 }

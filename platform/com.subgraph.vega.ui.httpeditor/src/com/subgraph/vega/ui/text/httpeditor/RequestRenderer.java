@@ -16,15 +16,12 @@ import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 public class RequestRenderer {
 
 	public String renderRequestText(HttpRequest request) {
-		return renderHeaders(renderRequestStartLine(request), request.getAllHeaders());
-	}
-
-	public String renderRequestText(IRequestLogRecord record) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(renderRequestText(record.getRequest()));
-		if(record.getRequest() instanceof HttpEntityEnclosingRequest) {
-			final HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) record.getRequest();
-			final String body = renderEntityIfAscii(request.getEntity());
+		sb.append(renderRequestStartLine(request));
+		sb.append(renderHeaders(request.getAllHeaders()));
+		if (request instanceof HttpEntityEnclosingRequest) {
+			final HttpEntityEnclosingRequest requestEntity = (HttpEntityEnclosingRequest) request;
+			final String body = renderEntityIfAscii(requestEntity.getEntity());
 			if(body != null) {
 				sb.append("\n");
 				sb.append(body);
@@ -32,10 +29,15 @@ public class RequestRenderer {
 		}
 		return sb.toString();
 	}
-	
+
+	public String renderRequestText(IRequestLogRecord record) {
+		return renderRequestText(record.getRequest());
+	}
+
 	public String renderResponseText(HttpResponse response) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(renderHeaders(renderResponseStartLine(response), response.getAllHeaders()));
+		sb.append(renderResponseStartLine(response));
+		sb.append(renderHeaders(response.getAllHeaders()));
 		final String body = renderEntityIfAscii(response.getEntity());
 		if(body != null) {
 			sb.append("\n");
@@ -56,9 +58,8 @@ public class RequestRenderer {
 		return response.getStatusLine().toString() + '\n';
 	}
 	
-	private String renderHeaders(String startLine, Header[] headers) {
+	private String renderHeaders(Header[] headers) {
 		StringBuilder buffer = new StringBuilder();
-		buffer.append(startLine);
 		for(Header h: headers)
 			buffer.append(h.getName() +": "+ h.getValue() +"\n");
 		return buffer.toString();

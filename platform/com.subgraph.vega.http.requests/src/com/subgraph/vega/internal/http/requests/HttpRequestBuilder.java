@@ -5,27 +5,28 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
+import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
+import com.subgraph.vega.api.http.requests.IHttpRawRequest;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
+import com.subgraph.vega.http.requests.custom.HttpRawRequest;
+import com.subgraph.vega.http.requests.custom.RawRequestLine;
 
 public class HttpRequestBuilder implements IHttpRequestBuilder {
+	private String rawRequestLine;
 	private String host = "";
 	private int hostPort = 80;
 	private String method = "";
 	private String path = "";
-	private String protocolVersion = "";
+	private ProtocolVersion protocolVersion = null;;
+	private HttpEntity entity;
 	private final ArrayList<HttpHeaderBuilder> headerList = new ArrayList<HttpHeaderBuilder>();
 
 	public HttpRequestBuilder() {
@@ -38,7 +39,15 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 
 	@Override
 	public void setFromRequest(HttpRequest request) throws URISyntaxException {
-		RequestLine requestLine = request.getRequestLine();
+		setFromRequestLine(request.getRequestLine());
+		headerList.clear();
+		for (Header h: request.getAllHeaders()) {
+			headerList.add(new HttpHeaderBuilder(h));
+		}
+	}
+
+	@Override
+	public void setFromRequestLine(RequestLine requestLine) throws URISyntaxException {
 		method = requestLine.getMethod();
 		final URI requestUri = new URI(requestLine.getUri());
 		host = requestUri.getHost();
@@ -47,10 +56,32 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 			hostPort = 80;
 		}
 		path = requestUri.getPath();
-		protocolVersion = requestLine.getProtocolVersion().toString();
-		headerList.clear();
-		for (Header h: request.getAllHeaders()) {
-			headerList.add(new HttpHeaderBuilder(h));
+		if (requestUri.getQuery() != null) {
+			path += "?" + requestUri.getQuery();
+		}
+		if (requestUri.getFragment() != null) {
+			path += "#" + requestUri.getFragment();
+		}
+		protocolVersion = requestLine.getProtocolVersion();
+		if (requestLine instanceof RawRequestLine) {
+			rawRequestLine = ((RawRequestLine)requestLine).toString();
+		}
+	}
+
+	@Override
+	public void setFromUri(URI uri) {
+		if (uri.getHost() != null) {
+			host = uri.getHost();
+		}
+		if (uri.getPort() != -1) {
+			hostPort = uri.getPort();
+		}
+		path = uri.getPath();
+		if (uri.getQuery() != null) {
+			path += "?" + uri.getQuery();
+		}
+		if (uri.getFragment() != null) {
+			path += "#" + uri.getFragment();
 		}
 	}
 
@@ -75,6 +106,16 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 
 	@Override
+	public void setRawRequestLine(String line) {
+		this.rawRequestLine = line;
+	}
+
+	@Override
+	public String getRawRequestLine() {
+		return rawRequestLine;
+	}
+	
+	@Override
 	public void setMethod(String method) {
 		this.method = method;
 	}
@@ -95,8 +136,26 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 
 	@Override
+	public void setProtocolVersion(ProtocolVersion protocolVersion) {
+		this.protocolVersion = protocolVersion; 
+	}
+
+	@Override
+	public ProtocolVersion getProtocolVersion() {
+		return protocolVersion;
+	}
+
+	@Override
 	public String getRequestLine() {
-		return method + " " + path + " " + protocolVersion;
+		if (rawRequestLine != null) {
+			return rawRequestLine;
+		} else {
+			String requestLine = method + " " + path;
+			if (protocolVersion != null) {
+				requestLine += " " + protocolVersion.toString();
+			}
+			return requestLine;
+		}
 	}
 
 	@Override
@@ -140,40 +199,35 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 
 	@Override
+	public void setEntity(HttpEntity entity) {
+		this.entity = entity;
+	}
+
+	@Override
+	public HttpEntity getEntity() {
+		return entity;
+	}
+
+	@Override
 	public HttpUriRequest buildRequest() throws URISyntaxException {
 		final URI requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + path);
-		final HttpUriRequest uriRequest =  methodStringToUriRequest(method, requestUri);
+		IHttpRawRequest request;
 
-		if (uriRequest == null) {
-			return null;
+		if (entity != null) {
+			HttpEntityEnclosingRawRequest entityRequest = new HttpEntityEnclosingRawRequest(rawRequestLine, method, requestUri);
+			entityRequest.setEntity(entity);
+			request = entityRequest;
+		} else {
+			request = new HttpRawRequest(rawRequestLine, method, requestUri);
 		}
 
+		// XXX add support for setting params, including protocol version 
 		//uriRequest.setParams(request.getParams());
 
 		for (HttpHeaderBuilder h: headerList) {
-			uriRequest.addHeader(h.buildHeader());
+			request.addHeader(h.buildHeader());
 		}
-		return uriRequest;
-	}
-
-	private HttpUriRequest methodStringToUriRequest(String methodString, URI uri) {
-		final String m = methodString.toUpperCase();
-		if(m.equals("GET"))
-			return new HttpGet(uri);
-		else if(m.equals("POST"))
-			return new HttpPost(uri);
-		else if(m.equals("HEAD"))
-			return new HttpHead(uri);
-		else if(m.equals("PUT"))
-			return new HttpPut(uri);
-		else if(m.equals("DELETE"))
-			return new HttpDelete(uri);
-		else if(m.equals("OPTIONS"))
-			return new HttpOptions(uri);
-		else if(m.equals("TRACE"))
-			return new HttpTrace(uri);
-		else 
-			throw new IllegalArgumentException("Illegal HTTP method name "+ methodString);
+		return request;
 	}
 
 }

@@ -1,11 +1,17 @@
 package com.subgraph.vega.ui.http.intercept;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.http.HttpRequest;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
+import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class TransactionManager {
@@ -115,7 +121,7 @@ public class TransactionManager {
 	}
 
 	private synchronized void setRequestPending() {
-		final String message = "Request pending to "+ getTransactionHostPart(currentTransaction);
+		final String message = "Request pending to "+ getRequestHostPart(currentTransaction.getRequest());
 		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
 		requestViewer.setStatus(message, true, content);
 		currentRequestTransaction = currentTransaction;
@@ -127,13 +133,18 @@ public class TransactionManager {
 	}
 
 	private synchronized void setRequestSent() {
-		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
+		final String content = requestRenderer.renderRequestText(currentTransaction.getUriRequest());
 		requestViewer.setStatus("Request sent, awaiting response", false, content);
 		currentRequestTransaction = currentTransaction;
 	}
 	
-	private String getTransactionHostPart(IProxyTransaction transaction) {
-		final URI uri = currentTransaction.getUri();
+	private String getRequestHostPart(HttpRequest request) {
+		URI uri;
+		try {
+			uri = new URI(request.getRequestLine().getUri());
+		} catch (URISyntaxException e) {
+			return new String("unknown host - error parsing URI");
+		}
 		String httpHost = uri.getScheme() + "://" + uri.getHost();
 		if (uri.getPort() != -1) {
 			httpHost += ":" + uri.getPort();
@@ -141,10 +152,15 @@ public class TransactionManager {
 		return httpHost;
 	}
 
-	synchronized void forwardRequest() {
-		currentTransaction.setEventHandler(transactionEventHandler);
-		currentTransaction.doForward();
-		setRequestSent();	
+	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
+		final HttpRequestParser parser = new HttpRequestParser(currentTransaction.getRequestEngine());
+		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent());
+		if (request != null) {
+			currentTransaction.setUriRequest(request);
+			currentTransaction.setEventHandler(transactionEventHandler);
+			currentTransaction.doForward();
+			setRequestSent();	
+		}
 	}
 
 	synchronized void forwardResponse() {

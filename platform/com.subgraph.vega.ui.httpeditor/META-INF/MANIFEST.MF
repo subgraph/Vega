@@ -5,12 +5,17 @@ Bundle-SymbolicName: com.subgraph.vega.ui.httpeditor
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.subgraph.vega.api.model,
+Import-Package: com.subgraph.vega.api.http.requests,
+ com.subgraph.vega.api.model,
  com.subgraph.vega.api.model.requests,
  com.subgraph.vega.ui.hexeditor,
  org.apache.commons.codec;version="1.4.0",
  org.apache.commons.codec.binary;version="1.4.0",
  org.apache.http;version="4.0.0",
+ org.apache.http.client.methods,
+ org.apache.http.entity;version="4.0.0",
+ org.apache.http.message;version="4.0.0",
+ org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0",
  org.eclipse.jface.text,
  org.eclipse.jface.text.presentation,
@@ -18,5 +23,6 @@ Import-Package: com.subgraph.vega.api.model,
  org.eclipse.jface.text.rules,
  org.eclipse.jface.text.source
 Require-Bundle: org.eclipse.ui;bundle-version="3.6.0"
-Export-Package: com.subgraph.vega.ui.httpeditor.text.hover,
+Export-Package: com.subgraph.vega.ui.httpeditor.parser,
+ com.subgraph.vega.ui.httpeditor.text.hover,
  com.subgraph.vega.ui.text.httpeditor
