@@ -113,6 +113,8 @@ public class HttpRequestParser extends ParserBase {
 					bufCursor.updatePos(idxPos);
 					return;
 				}
+			} else {
+				break;
 			}
 		}
 	}

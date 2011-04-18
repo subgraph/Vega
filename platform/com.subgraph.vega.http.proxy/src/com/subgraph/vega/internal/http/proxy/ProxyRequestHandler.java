@@ -1,8 +1,6 @@
 package com.subgraph.vega.internal.http.proxy;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -10,13 +8,14 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.RequestLine;
+import org.apache.http.HttpServerConnection;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -24,8 +23,6 @@ import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
-import com.subgraph.vega.http.requests.custom.HttpRawRequest;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
@@ -36,10 +33,12 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 	private final HttpProxy httpProxy;
 	private final IHttpRequestEngine requestEngine;
+	private final UriRequestCreator uriRequestCreator;
 
 	ProxyRequestHandler(HttpProxy httpProxy, IHttpRequestEngine requestEngine) {
 		this.httpProxy = httpProxy;
 		this.requestEngine = requestEngine;
+		this.uriRequestCreator = new UriRequestCreator(false);
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 				return;
 			}
 
-			HttpUriRequest uriRequest = getUriRequest(transaction);
+			HttpUriRequest uriRequest = getUriRequest(transaction, context);
 			BasicHttpContext ctx = new BasicHttpContext();
 			IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
 			if(r == null) {
@@ -82,6 +81,41 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		}
 	}
 
+	private boolean isSslConnection(HttpContext context) throws HttpException {
+		final HttpServerConnection conn = (HttpServerConnection) context.getAttribute(ExecutionContext.HTTP_CONNECTION);
+		if(!(conn instanceof VegaHttpServerConnection))
+			throw new HttpException("HttpServerConnection is not expected type "+ conn);
+		return ((VegaHttpServerConnection) conn).isSslConnection();
+	}
+
+//	private HttpRequest copyRequest(HttpRequest request) {
+//		if(request instanceof HttpEntityEnclosingRequest)
+//			return copyEntityEnclosingRequest((HttpEntityEnclosingRequest) request);
+//		else
+//			return copyBasicRequest(request);
+//	}
+//
+//	private HttpRequest copyEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
+//		final HttpEntity e = copyEntity(request.getEntity());
+//		final BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
+//		r.setEntity(e);
+//		copyHeaders(request, r);
+//		return r;
+//	}
+//
+//	private HttpRequest copyBasicRequest(HttpRequest request) {
+//		if(request == null)
+//			return null;
+//		final HttpRequest r = new BasicHttpRequest(request.getRequestLine());
+//		copyHeaders(request, r);
+//		return r;
+//	}
+//
+//	private static void copyHeaders(HttpMessage from, HttpMessage to) {
+//		for(Header h: from.getAllHeaders())
+//			to.addHeader(new BasicHeader(h.getName(), h.getValue()));
+//	}
+
 	private HttpEntity copyEntity(HttpEntity entity) {
 		try {
 			if(entity == null) {
@@ -97,36 +131,35 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	}
 
 	private HttpRequest copyRequest(HttpRequest request) {
+		final HttpRequest cp;
 		if (request instanceof HttpEntityEnclosingRequest) {
-			BasicHttpEntityEnclosingRequest cp = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
-			cp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
-			cp.setHeaders(request.getAllHeaders());
-			cp.setParams(request.getParams());
-			return cp;
+			BasicHttpEntityEnclosingRequest cpEntityRequest = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
+			cpEntityRequest.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
+			cp = cpEntityRequest;
 		} else {
-			BasicHttpRequest cp = new BasicHttpRequest(request.getRequestLine());
-			cp.setHeaders(request.getAllHeaders());
-			cp.setParams(request.getParams());
-			return cp;
+			cp = new BasicHttpRequest(request.getRequestLine());
 		}
+		cp.setHeaders(request.getAllHeaders());
+		cp.setParams(request.getParams());
+		return cp;
 	}
 
-	private HttpUriRequest copyToUriRequest(HttpRequest request) {
-		final RequestLine requestLine = request.getRequestLine(); 
-		final URI requestUri = stringToURI(requestLine.getUri());
-		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRawRequest cp = new HttpEntityEnclosingRawRequest(null, requestLine.getMethod(), requestUri);
-			cp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
-			cp.setHeaders(request.getAllHeaders());
-			cp.setParams(request.getParams());
-			return cp;
-		} else {
-			HttpRawRequest cp = new HttpRawRequest(null, requestLine.getMethod(), requestUri);
-			cp.setHeaders(request.getAllHeaders());
-			cp.setParams(request.getParams());
-			return cp;
-		}
-	}
+//	private HttpUriRequest copyToUriRequest(HttpRequest request) {
+//		final RequestLine requestLine = request.getRequestLine(); 
+//		final URI requestUri = stringToURI(requestLine.getUri());
+//		if (request instanceof HttpEntityEnclosingRequest) {
+//			HttpEntityEnclosingRawRequest cp = new HttpEntityEnclosingRawRequest(null, requestLine.getMethod(), requestUri);
+//			cp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
+//			cp.setHeaders(request.getAllHeaders());
+//			cp.setParams(request.getParams());
+//			return cp;
+//		} else {
+//			HttpRawRequest cp = new HttpRawRequest(null, requestLine.getMethod(), requestUri);
+//			cp.setHeaders(request.getAllHeaders());
+//			cp.setParams(request.getParams());
+//			return cp;
+//		}
+//	}
 
 	private HttpResponse copyResponse(HttpResponse originalResponse) {
 		HttpResponse r = new BasicHttpResponse(originalResponse.getStatusLine());
@@ -141,17 +174,10 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		}
 	}
 
-	private URI stringToURI(String uriString) {
-		try {
-			return new URI(uriString);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Could not parse URI string "+ uriString, e);
-		}
-	}
-
 	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request) throws InterruptedException {
 		removeHopByHopHeaders(request);
 		transaction.setRequest(copyRequest(request));
+
 		if (httpProxy.handleTransaction(transaction) == true) {
 			return transaction.getForward();
 		} else {
@@ -159,10 +185,11 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		}
 	}
 
-	private HttpUriRequest getUriRequest(ProxyTransaction transaction) {
+	private HttpUriRequest getUriRequest(ProxyTransaction transaction, HttpContext context) throws HttpException {
 		HttpUriRequest uriRequest = transaction.getUriRequest();
 		if (uriRequest == null) {
-			uriRequest = copyToUriRequest(transaction.getRequest());
+			final boolean isSSL = isSslConnection(context);
+			uriRequest = uriRequestCreator.createUriRequest(transaction.getRequest(), isSSL);
 			transaction.setUriRequest(uriRequest);
 		}
 		return uriRequest;

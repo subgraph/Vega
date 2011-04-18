@@ -13,17 +13,19 @@ public class PathFinder implements IPathFinder {
 	private final Properties configProperties = new Properties();
 	
 	@Override
-	public File getWorkspaceDirectory() {
+	public File getVegaDirectory() {
 		final File homeDirectory = new File(System.getProperty("user.home"));
-		final File vegaDirectory = new File(homeDirectory, ".vega");
-		return new File(vegaDirectory, "workspaces");
+		return new File(homeDirectory, ".vega");
+	}
+
+	@Override
+	public File getWorkspaceDirectory() {
+		return new File(getVegaDirectory(), "workspaces");
 	}
 	
 	@Override
 	public File getConfigFilePath() {
-		final File homeDirectory = new File(System.getProperty("user.home"));
-		final File vegaDirectory = new File(homeDirectory, ".vega");
-		return new File(vegaDirectory, "config");
+		return new File(getVegaDirectory(), "config");
 	}
 	
 	@Override

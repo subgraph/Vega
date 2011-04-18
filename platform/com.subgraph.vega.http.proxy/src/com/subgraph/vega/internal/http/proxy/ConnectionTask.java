@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
-import org.apache.http.impl.SocketHttpServerConnection;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
@@ -14,10 +13,10 @@ public class ConnectionTask implements Runnable {
 	private final Logger logger = Logger.getLogger("proxy");
 
 	private final VegaHttpService httpService;
-	private final SocketHttpServerConnection connection;
+	private final VegaHttpServerConnection connection;
 	private final HttpProxy proxy;
 
-	ConnectionTask(VegaHttpService httpService, SocketHttpServerConnection connection, HttpProxy proxy) {
+	ConnectionTask(VegaHttpService httpService, VegaHttpServerConnection connection, HttpProxy proxy) {
 		this.httpService = httpService;
 		this.connection = connection;
 		this.proxy = proxy;
@@ -52,6 +51,8 @@ public class ConnectionTask implements Runnable {
 
 	private void processRequestContext(HttpContext context) throws IOException {
 		final ProxyTransaction transaction = (ProxyTransaction) context.getAttribute(HttpProxy.PROXY_HTTP_TRANSACTION);
-		proxy.completeRequest(transaction);
+		if(transaction != null) {
+			proxy.completeRequest(transaction);
+		}
 	}
 }
