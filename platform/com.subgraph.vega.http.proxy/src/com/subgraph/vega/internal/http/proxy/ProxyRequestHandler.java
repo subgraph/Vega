@@ -88,34 +88,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		return ((VegaHttpServerConnection) conn).isSslConnection();
 	}
 
-//	private HttpRequest copyRequest(HttpRequest request) {
-//		if(request instanceof HttpEntityEnclosingRequest)
-//			return copyEntityEnclosingRequest((HttpEntityEnclosingRequest) request);
-//		else
-//			return copyBasicRequest(request);
-//	}
-//
-//	private HttpRequest copyEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
-//		final HttpEntity e = copyEntity(request.getEntity());
-//		final BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
-//		r.setEntity(e);
-//		copyHeaders(request, r);
-//		return r;
-//	}
-//
-//	private HttpRequest copyBasicRequest(HttpRequest request) {
-//		if(request == null)
-//			return null;
-//		final HttpRequest r = new BasicHttpRequest(request.getRequestLine());
-//		copyHeaders(request, r);
-//		return r;
-//	}
-//
-//	private static void copyHeaders(HttpMessage from, HttpMessage to) {
-//		for(Header h: from.getAllHeaders())
-//			to.addHeader(new BasicHeader(h.getName(), h.getValue()));
-//	}
-
 	private HttpEntity copyEntity(HttpEntity entity) {
 		try {
 			if(entity == null) {
@@ -143,23 +115,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		cp.setParams(request.getParams());
 		return cp;
 	}
-
-//	private HttpUriRequest copyToUriRequest(HttpRequest request) {
-//		final RequestLine requestLine = request.getRequestLine(); 
-//		final URI requestUri = stringToURI(requestLine.getUri());
-//		if (request instanceof HttpEntityEnclosingRequest) {
-//			HttpEntityEnclosingRawRequest cp = new HttpEntityEnclosingRawRequest(null, requestLine.getMethod(), requestUri);
-//			cp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
-//			cp.setHeaders(request.getAllHeaders());
-//			cp.setParams(request.getParams());
-//			return cp;
-//		} else {
-//			HttpRawRequest cp = new HttpRawRequest(null, requestLine.getMethod(), requestUri);
-//			cp.setHeaders(request.getAllHeaders());
-//			cp.setParams(request.getParams());
-//			return cp;
-//		}
-//	}
 
 	private HttpResponse copyResponse(HttpResponse originalResponse) {
 		HttpResponse r = new BasicHttpResponse(originalResponse.getStatusLine());

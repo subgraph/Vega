@@ -45,12 +45,6 @@ public class UriRequestCreator {
 		return uriRequest;
 	}
 
-//	private void maybeSetEntity(HttpRequest request, HttpUriRequest uriRequest) {
-//		if(request instanceof HttpEntityEnclosingRequest && uriRequest instanceof HttpEntityEnclosingRequest) {
-//			((HttpEntityEnclosingRequest) uriRequest).setEntity( ((HttpEntityEnclosingRequest) request).getEntity());
-//		}
-//	}
-
 	public URI getUriForRequest(HttpRequest request, boolean isSSL) throws HttpException {
 		final String scheme = (isSSL) ? HTTPS_SCHEME : HTTP_SCHEME;
 		final String hostname = getHostname(request);
@@ -66,26 +60,6 @@ public class UriRequestCreator {
 			throw new HttpException("Cannot create URI from request because URI format is incorrect.", e);
 		}
 	}
-
-//	private HttpUriRequest methodStringToUriRequest(String methodString, URI uri) {
-//		final String m = methodString.toUpperCase();
-//		if(m.equals("GET"))
-//			return new HttpGet(uri);
-//		else if(m.equals("POST"))
-//			return new HttpPost(uri);
-//		else if(m.equals("HEAD"))
-//			return new HttpHead(uri);
-//		else if(m.equals("PUT"))
-//			return new HttpPut(uri);
-//		else if(m.equals("DELETE"))
-//			return new HttpDelete(uri);
-//		else if(m.equals("OPTIONS"))
-//			return new HttpOptions(uri);
-//		else if(m.equals("TRACE"))
-//			return new HttpTrace(uri);
-//		else 
-//			throw new IllegalArgumentException("Illegal HTTP method name "+ methodString);
-//	}
 
 	private String getHostname(HttpRequest request) {
 		final String headerHostname = requestHostHeaderValue(request);
