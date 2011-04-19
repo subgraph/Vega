@@ -101,12 +101,15 @@ public abstract class ParserBase {
 	protected String nextWord(final CharArrayBuffer lnBuf, final ParserCursor lnCursor) {
 		skipSpHt(lnBuf, lnCursor);
 		int idxPos = lnCursor.getPos();
-        int blank = lnBuf.indexOf(' ', idxPos, lnCursor.getUpperBound());
-        if (blank < 0) {
-        	return null;
+        int idxLineEnd = lnBuf.indexOf(' ', idxPos, lnCursor.getUpperBound());
+        if (idxLineEnd < 0) {
+        	if (idxPos == lnCursor.getUpperBound()) {
+        		return null;
+        	}
+        	idxLineEnd = lnCursor.getUpperBound();
         }
-		lnCursor.updatePos(blank);
-		return lnBuf.substringTrimmed(idxPos, blank);		
+		lnCursor.updatePos(idxLineEnd);
+		return lnBuf.substringTrimmed(idxPos, idxLineEnd);		
 	}
 	
 	/**
