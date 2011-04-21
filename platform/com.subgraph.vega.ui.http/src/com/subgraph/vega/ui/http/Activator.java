@@ -1,15 +1,20 @@
 package com.subgraph.vega.ui.http;
 
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
+import com.subgraph.vega.ui.http.preferencepage.PreferenceConstants;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -44,6 +49,7 @@ public class Activator extends AbstractUIPlugin {
 		
 		proxyServiceTracker = new ServiceTracker(context, IHttpProxyService.class.getName(), null);
 		proxyServiceTracker.open();
+		setProxyTransactionManipulator();
 		
 		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
 		httpRequestEngineFactoryServiceTracker.open();
@@ -101,4 +107,31 @@ public class Activator extends AbstractUIPlugin {
 	public void setStatusLineProxyStopped() {
 		statusLineContribution.setProxyStopped();
 	}
+
+	private void setProxyTransactionManipulator() {
+		final IHttpProxyTransactionManipulator manipulator = getProxyService().getTransactionManipulator();
+		final IPreferenceStore preferenceStore = getDefault().getPreferenceStore();
+		manipulator.setUserAgent(preferenceStore.getString(PreferenceConstants.P_USER_AGENT));
+		manipulator.setUserAgentOverride(preferenceStore.getBoolean(PreferenceConstants.P_USER_AGENT_OVERRIDE));
+		manipulator.setBrowserCacheDisable(preferenceStore.getBoolean(PreferenceConstants.P_DISABLE_BROWSER_CACHE));
+		manipulator.setProxyCacheDisable(preferenceStore.getBoolean(PreferenceConstants.P_DISABLE_PROXY_CACHE));
+		
+		preferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				final IHttpProxyTransactionManipulator manipulator = getProxyService().getTransactionManipulator();
+				final String property = event.getProperty();
+				if (property == PreferenceConstants.P_USER_AGENT) {
+					manipulator.setUserAgent(preferenceStore.getString(PreferenceConstants.P_USER_AGENT));
+				} else if (property == PreferenceConstants.P_USER_AGENT_OVERRIDE) {
+					manipulator.setUserAgentOverride(preferenceStore.getBoolean(PreferenceConstants.P_USER_AGENT_OVERRIDE));
+				} else if (property == PreferenceConstants.P_DISABLE_BROWSER_CACHE) {
+					manipulator.setBrowserCacheDisable(preferenceStore.getBoolean(PreferenceConstants.P_DISABLE_BROWSER_CACHE));
+				} else if (property == PreferenceConstants.P_DISABLE_PROXY_CACHE) {
+					manipulator.setProxyCacheDisable(preferenceStore.getBoolean(PreferenceConstants.P_DISABLE_PROXY_CACHE));
+				}
+			}
+		});
+	}
+
 }

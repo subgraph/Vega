@@ -33,6 +33,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 
 	private final Logger logger = Logger.getLogger("proxy");
 
+	private final ProxyTransactionManipulator transactionManipulator;
 	private final HttpInterceptor interceptor;
 	private final List<IHttpInterceptProxyEventHandler> eventHandlers;
 	private final int listenPort;
@@ -42,8 +43,9 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private ExecutorService executor = Executors.newCachedThreadPool();
 	private Thread proxyThread;
 	
-	public HttpProxy(int listenPort, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
+	public HttpProxy(int listenPort, ProxyTransactionManipulator transactionManipulator, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
+		this.transactionManipulator = transactionManipulator;
 		this.interceptor = interceptor;
 		this.listenPort = listenPort;
 		this.params = new BasicHttpParams();
@@ -119,6 +121,12 @@ public class HttpProxy implements IHttpInterceptProxy {
 	}
 
 	public boolean handleTransaction(ProxyTransaction transaction) throws InterruptedException {
+		if (transaction.hasResponse() == false) {
+			transactionManipulator.process(transaction.getRequest());
+		} else {
+			transactionManipulator.process(transaction.getResponse().getRawResponse());
+		}
+
 		boolean rv = interceptor.handleTransaction(transaction);
 		if (rv == true) {
 			transaction.await();
