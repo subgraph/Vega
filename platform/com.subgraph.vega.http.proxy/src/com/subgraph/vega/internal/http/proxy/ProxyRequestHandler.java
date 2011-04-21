@@ -26,9 +26,18 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
+	/**
+	 * Hop-by-hop headers to be removed by this proxy as per RFC2616 section 13.5.1.
+	 */
 	private final static String[] HOP_BY_HOP_HEADERS = {
-		HTTP.CONTENT_LEN, HTTP.TRANSFER_ENCODING, HTTP.CONN_DIRECTIVE, 
-		"Keep-Alive", "Proxy-Authenticate", "TE", "Trailers", "Upgrade"
+		HTTP.CONN_DIRECTIVE, // "Connection"
+		HTTP.CONN_KEEP_ALIVE, // "Keep-Alive"
+		"Proxy-Authenticate",
+		"Proxy-Authorization",
+		"TE",
+		"Trailers",
+		HTTP.TRANSFER_ENCODING, // "Transfer-Encoding"
+		"Upgrade",
 	};
 
 	private final HttpProxy httpProxy;
@@ -69,7 +78,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			}
 
 			HttpResponse httpResponse = copyResponse(r.getRawResponse());
-			removeHopByHopHeaders(httpResponse);
+			removeHeaders(httpResponse);
 			response.setStatusLine(httpResponse.getStatusLine());
 			response.setHeaders(httpResponse.getAllHeaders());
 			response.setEntity(httpResponse.getEntity());
@@ -123,14 +132,15 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		return r;
 	}
 
-	private void removeHopByHopHeaders(HttpMessage message) {
+	private void removeHeaders(HttpMessage message) {
 		for(String hdr: HOP_BY_HOP_HEADERS) { 
 			message.removeHeaders(hdr);
 		}
+		message.removeHeaders(HTTP.CONTENT_LEN); 
 	}
 
 	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request) throws InterruptedException {
-		removeHopByHopHeaders(request);
+		removeHeaders(request);
 		transaction.setRequest(copyRequest(request));
 
 		if (httpProxy.handleTransaction(transaction) == true) {
