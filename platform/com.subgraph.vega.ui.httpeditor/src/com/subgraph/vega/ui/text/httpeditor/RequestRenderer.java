@@ -50,6 +50,10 @@ public class RequestRenderer {
 		return renderResponseText(record.getResponse());
 	}
 	
+	public String renderEntity(HttpEntity entity) {
+		return renderEntityIfAscii(entity);
+	}
+	
 	private String renderRequestStartLine(HttpRequest request) {
 		return request.getRequestLine().toString() + '\n';
 	}

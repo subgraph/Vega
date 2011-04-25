@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
@@ -45,6 +46,10 @@ public interface IHttpRequestBuilder {
 	 * @param uri URI
 	 */
 	public void setFromUri(URI uri);
+	public void setFromHttpHost(HttpHost host);
+	
+	public void setScheme(String scheme);
+	public String getScheme();
 
 	public void setHost(String host);
 	public String getHost();

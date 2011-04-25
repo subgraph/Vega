@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
@@ -20,14 +22,18 @@ import com.subgraph.vega.http.requests.custom.HttpRawRequest;
 import com.subgraph.vega.http.requests.custom.RawRequestLine;
 
 public class HttpRequestBuilder implements IHttpRequestBuilder {
-	private String rawRequestLine;
+	private String scheme = "http";
 	private String host = "";
 	private int hostPort = 80;
+
+	private String rawRequestLine;
 	private String method = "";
 	private String path = "";
-	private ProtocolVersion protocolVersion = null;;
-	private HttpEntity entity;
+	private ProtocolVersion protocolVersion = null;
+
 	private final ArrayList<HttpHeaderBuilder> headerList = new ArrayList<HttpHeaderBuilder>();
+
+	private HttpEntity entity;
 
 	public HttpRequestBuilder() {
 	}
@@ -35,6 +41,7 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	@Override
 	public void setFromRequest(IRequestLogRecord request) throws URISyntaxException {
 		setFromRequest(request.getRequest());
+		setFromHttpHost(request.getHttpHost());
 	}
 
 	@Override
@@ -44,17 +51,35 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 		for (Header h: request.getAllHeaders()) {
 			headerList.add(new HttpHeaderBuilder(h));
 		}
+
+		if (request instanceof HttpEntityEnclosingRequest) {
+			entity = ((HttpEntityEnclosingRequest) request).getEntity();
+		} else {
+			entity = null;
+		}
 	}
 
 	@Override
 	public void setFromRequestLine(RequestLine requestLine) throws URISyntaxException {
 		method = requestLine.getMethod();
+
 		final URI requestUri = new URI(requestLine.getUri());
+
+		scheme = requestUri.getScheme();
+		if (scheme == null) {
+			scheme = "http";
+		}
+
 		host = requestUri.getHost();
 		hostPort = requestUri.getPort();
 		if (hostPort == -1) {
-			hostPort = 80;
+			if (scheme == "https") {
+				hostPort = 443;
+			} else {
+				hostPort = 80;
+			}
 		}
+
 		path = requestUri.getPath();
 		if (requestUri.getQuery() != null) {
 			path += "?" + requestUri.getQuery();
@@ -62,7 +87,9 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 		if (requestUri.getFragment() != null) {
 			path += "#" + requestUri.getFragment();
 		}
+
 		protocolVersion = requestLine.getProtocolVersion();
+
 		if (requestLine instanceof RawRequestLine) {
 			rawRequestLine = ((RawRequestLine)requestLine).toString();
 		}
@@ -70,12 +97,25 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 
 	@Override
 	public void setFromUri(URI uri) {
+
+		if (uri.getScheme() != null) {
+			scheme = uri.getScheme();
+		}
+
 		if (uri.getHost() != null) {
 			host = uri.getHost();
+			if (uri.getPort() != -1) {
+				hostPort = uri.getPort();
+			} else {
+				if (scheme == "https") {
+					hostPort = 443;
+				} else {
+					hostPort = 80;
+				}
+			}
 		}
-		if (uri.getPort() != -1) {
-			hostPort = uri.getPort();
-		}
+
+		
 		path = uri.getPath();
 		if (uri.getQuery() != null) {
 			path += "?" + uri.getQuery();
@@ -83,6 +123,30 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 		if (uri.getFragment() != null) {
 			path += "#" + uri.getFragment();
 		}
+	}
+
+	@Override
+	public void setFromHttpHost(HttpHost host) {
+		scheme = host.getSchemeName();
+		this.host = host.getHostName();
+		hostPort = host.getPort();
+		if (hostPort == -1) {
+			if (scheme != null && scheme == "https") {
+				hostPort = 443;
+			} else {
+				hostPort = 80;
+			}
+		}
+	}
+	
+	@Override
+	public void setScheme(String scheme) {
+		this.scheme = scheme;
+	}
+
+	@Override
+	public String getScheme() {
+		return scheme;
 	}
 
 	@Override

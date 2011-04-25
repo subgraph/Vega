@@ -1,19 +1,25 @@
 package com.subgraph.vega.ui.http.requesteditviewer;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.BasicHttpContext;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -36,27 +42,30 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.events.IEvent;
-import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.WorkspaceCloseEvent;
-import com.subgraph.vega.api.model.WorkspaceOpenEvent;
-import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class RequestEditView extends ViewPart {
+	private String requestSchemes[] = {
+		"http",
+		"https",
+	};
+
 	public final static String VIEW_ID = "com.subgraph.vega.views.requestEdit";
 	private IHttpRequestEngine requestEngine;
 	private IHttpRequestBuilder requestBuilder;
+	private IContentAnalyzer contentAnalyzer;
 	private SashForm parentComposite;
+	private ComboViewer requestScheme;
 	private Text requestHost;
 	private Text requestPort;
 	private Text requestLine;
@@ -66,45 +75,24 @@ public class RequestEditView extends ViewPart {
 	private Button buttonMoveUp;
 	private Button buttonMoveDown;
 	private final RequestRenderer requestRenderer = new RequestRenderer();
+	private HttpRequestViewer requestBodyViewer;
 	private HttpRequestViewer responseViewer;
-	private IWorkspace currentWorkspace;
 
 	@Override
 	public void createPartControl(Composite parent) {
 		parentComposite = new SashForm(parent, SWT.VERTICAL);
+
 		createRequestEditor(parentComposite);
 		createResponseViewer(parentComposite);
-		parentComposite.setWeights(new int[] {40, 60});
+		
+		parentComposite.setWeights(new int[] {50, 50});
 		parentComposite.pack();
 
-		// REVISIT
-		currentWorkspace = Activator.getDefault().getModel().addWorkspaceListener(new IEventHandler() {
-			@Override
-			public void handleEvent(IEvent event) {
-				if(event instanceof WorkspaceOpenEvent) {
-					handleWorkspaceOpen((WorkspaceOpenEvent) event);
-				} else if(event instanceof WorkspaceCloseEvent) {
-					handleWorkspaceClose((WorkspaceCloseEvent) event);
-				} else if(event instanceof WorkspaceResetEvent) {
-					handleWorkspaceReset((WorkspaceResetEvent) event);
-				}
-			}
-		});
-	}
-
-	// REVISIT
-	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		this.currentWorkspace = event.getWorkspace();
-	}
-	
-	// REVISIT
-	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
-		this.currentWorkspace = null;
-	}
-	
-	// REVISIT
-	private void handleWorkspaceReset(WorkspaceResetEvent event) {
-		this.currentWorkspace = event.getWorkspace();
+		IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
+		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer();
+//		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
+		contentAnalyzer.setDefaultAddToRequestLog(true);
+		contentAnalyzer.setAddLinksToModel(true);
 	}
 
 	@Override
@@ -123,11 +111,17 @@ public class RequestEditView extends ViewPart {
 
 			requestBuilder = requestEngine.createRequestBuilder();
 			requestBuilder.setFromRequest(record);
+			requestScheme.setSelection(new StructuredSelection(requestBuilder.getScheme()));
 			requestHost.setText(requestBuilder.getHost());
 			requestPort.setText(Integer.toString(requestBuilder.getHostPort()));
 			requestLine.setText(requestBuilder.getRequestLine());
+			
+			if (requestBuilder.getEntity() != null) {
+				requestBodyViewer.setContent(requestRenderer.renderEntity(requestBuilder.getEntity()));
+			}
 		} else {
 			requestBuilder = null;
+			requestScheme.setSelection(new StructuredSelection(requestSchemes[0]));
 			requestHost.setText("");
 			requestPort.setText("");
 			requestLine.setText("");
@@ -144,6 +138,9 @@ public class RequestEditView extends ViewPart {
 	}
 	
 	public void sendRequest() {
+		final String scheme = (String)((IStructuredSelection)requestScheme.getSelection()).getFirstElement();
+		requestBuilder.setScheme(scheme);
+		
 		final String host = requestHost.getText().trim();
 		if (host.length() == 0) {
 			displayError("Invalid host");
@@ -161,15 +158,40 @@ public class RequestEditView extends ViewPart {
 			displayError("Invalid port");
 			return;
 		}
+		requestBuilder.setHostPort(hostPort);
 
 		String[] requestLineWords = requestLine.getText().split(" +");
-		if (requestLineWords.length < 2) {
+		if (requestLineWords.length > 0) {
+			requestBuilder.setMethod(requestLineWords[0]);
+			if (requestLineWords.length > 1) {
+				requestBuilder.setPath(requestLineWords[1]);
+				if (requestLineWords.length > 2) {
+					// REVISIT parse protocol version
+				}
+			} else {
+				requestBuilder.setPath("/");
+				// REVISIT: http/0.9?
+			}
+		} else {
 			displayError("Invalid request line");
 			return;
 		}
-		requestBuilder.setMethod(requestLineWords[0]);
-		requestBuilder.setPath(requestLineWords[1]);
+		requestBuilder.setRawRequestLine(requestLine.getText());
 
+		final String body = requestBodyViewer.getContent();
+		if (body.length() != 0) {
+			StringEntity entity;
+			try {
+				entity = new StringEntity(body);
+			} catch (UnsupportedEncodingException e) {
+				displayError(e.getMessage());
+				return;
+			}
+			requestBuilder.setEntity(entity);
+		} else {
+			requestBuilder.setEntity(null);
+		}
+		
 		HttpUriRequest uriRequest;
 		try {
 			uriRequest = requestBuilder.buildRequest();
@@ -181,23 +203,25 @@ public class RequestEditView extends ViewPart {
 		BasicHttpContext ctx = new BasicHttpContext();
 		IHttpResponse response;
 		try {
-			 response = requestEngine.sendRequest(uriRequest, ctx);
+			response = requestEngine.sendRequest(uriRequest, ctx);
 			responseViewer.setContent(requestRenderer.renderResponseText(response.getRawResponse()));
 		} catch (Exception e) {
 			displayError(e.getMessage());
 			return;
 		}
 
-		// REVISIT
-		currentWorkspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
+		contentAnalyzer.processResponse(response);
 	}
 
 	private Composite createRequestEditor(Composite parent) {
-		final Group rootControl = new Group(parent, SWT.NONE);
+		final Group rootControl = new Group(parent, SWT.V_SCROLL);
 		rootControl.setText("Request");
 		rootControl.setLayout(new GridLayout(1, true));
+
 		createRequestFieldsEditor(rootControl).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createHeaderEditor(rootControl).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createBodyEditor(rootControl).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
 		return rootControl;
 	}
 	
@@ -217,7 +241,7 @@ public class RequestEditView extends ViewPart {
 	}
 
 	private Composite createRequestFieldsAddress(Composite parent) {
-		final GridLayout controlLayout = new GridLayout(2, false);
+		final GridLayout controlLayout = new GridLayout(3, false);
 		controlLayout.marginWidth = 0;
 		controlLayout.marginHeight = 0;
 		controlLayout.marginLeft = 0;
@@ -227,10 +251,28 @@ public class RequestEditView extends ViewPart {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(controlLayout);
 
+		final Composite schemeControl = new Composite(rootControl, SWT.NONE);
+		schemeControl.setLayout(controlLayout);
+		schemeControl.setLayout(new GridLayout(2, false));
+		schemeControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		Label label = new Label(schemeControl, SWT.NONE);
+		label.setText("Scheme:");
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		requestScheme = new ComboViewer(schemeControl, SWT.READ_ONLY);
+		requestScheme.setContentProvider(new ArrayContentProvider());
+		requestScheme.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return (String)element;
+			}
+		});
+		requestScheme.setInput(requestSchemes);
+		requestScheme.setSelection(new StructuredSelection(requestSchemes[0]));
+		requestScheme.addSelectionChangedListener(createSelectionChangedListenerRequestScheme());
+
 		final Composite hostControl = new Composite(rootControl, SWT.NONE);
 		hostControl.setLayout(controlLayout);
 		hostControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		Label label = new Label(hostControl, SWT.NONE);
+		label = new Label(hostControl, SWT.NONE);
 		label.setText("Host:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		requestHost = new Text(hostControl, SWT.BORDER | SWT.SINGLE);
@@ -261,7 +303,20 @@ public class RequestEditView extends ViewPart {
 
 		return rootControl;
 	}
-	
+
+	private ISelectionChangedListener createSelectionChangedListenerRequestScheme() {
+		return new ISelectionChangedListener() {
+			public void selectionChanged(final SelectionChangedEvent e) {
+				final String scheme = (String)((IStructuredSelection)requestScheme.getSelection()).getFirstElement();
+				if (scheme == "https") {
+					requestPort.setText("443");
+				} else {
+					requestPort.setText("80");
+				}
+			}
+		};
+	}
+
 	private Composite createHeaderEditor(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(new GridLayout(2, false));
@@ -428,6 +483,15 @@ public class RequestEditView extends ViewPart {
 				tableViewerHeaders.refresh();
 			}
 		};
+	}
+	
+	private Composite createBodyEditor(Composite parent) {
+		final Composite rootControl = new Composite(parent, SWT.NONE);
+		rootControl.setLayout(new FillLayout());
+
+		requestBodyViewer = new HttpRequestViewer(rootControl);
+
+		return rootControl;
 	}
 
 	private Composite createResponseViewer(Composite parent) {
