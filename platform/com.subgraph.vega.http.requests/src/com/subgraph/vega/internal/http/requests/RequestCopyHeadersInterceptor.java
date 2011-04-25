@@ -34,7 +34,7 @@ public class RequestCopyHeadersInterceptor implements HttpRequestInterceptor {
 
 	private HttpRequest copyEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
 		final BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
-		r.setEntity(r.getEntity());
+		r.setEntity(request.getEntity());
 		copyHeaders(request, r);
 		return r;
 	}
