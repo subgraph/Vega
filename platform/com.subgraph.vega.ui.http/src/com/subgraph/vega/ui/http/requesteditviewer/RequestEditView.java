@@ -50,6 +50,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
@@ -88,9 +89,10 @@ public class RequestEditView extends ViewPart {
 		parentComposite.setWeights(new int[] {50, 50});
 		parentComposite.pack();
 
-		IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
+		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
+		final IScannerModuleRegistry moduleRepository = Activator.getDefault().getScannerModuleRegistry();
 		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer();
-//		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
+		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 	}
@@ -130,9 +132,13 @@ public class RequestEditView extends ViewPart {
 		tableViewerHeaders.setInput(requestBuilder);
 	}
 
-	public void displayError(final String text) {
+	public void displayError(String text) {
 		MessageBox messageDialog = new MessageBox(parentComposite.getShell(), SWT.ICON_WARNING | SWT.OK);
 		messageDialog.setText("Error");
+		if (text == null) {
+			// REVISIT this should always be set
+			text = "An error occurred";
+		}
 		messageDialog.setMessage(text);
 		messageDialog.open();
 	}
@@ -206,7 +212,11 @@ public class RequestEditView extends ViewPart {
 			response = requestEngine.sendRequest(uriRequest, ctx);
 			responseViewer.setContent(requestRenderer.renderResponseText(response.getRawResponse()));
 		} catch (Exception e) {
-			displayError(e.getMessage());
+			if (e.getMessage() != null) {
+				displayError(e.getMessage());
+			} else {
+				displayError(e.getCause().getMessage());
+			}
 			return;
 		}
 
