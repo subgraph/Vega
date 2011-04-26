@@ -154,7 +154,7 @@ public class TransactionManager {
 
 	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
 		final HttpRequestParser parser = new HttpRequestParser(currentTransaction.getRequestEngine());
-		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent());
+		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent(), currentTransaction.getRequest().getParams().copy());
 		if (request != null) {
 			currentTransaction.setUriRequest(request);
 			currentTransaction.setEventHandler(transactionEventHandler);

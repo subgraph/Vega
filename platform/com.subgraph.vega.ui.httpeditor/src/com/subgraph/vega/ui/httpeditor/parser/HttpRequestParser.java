@@ -12,6 +12,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.CharArrayBuffer;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
@@ -28,14 +29,15 @@ public class HttpRequestParser extends ParserBase {
 	}
 
 	/**
-	 * Parse a manually-entered request to build a HttpUriRequest.
+	 * Parse a manually-entered HTTP request to build a HttpUriRequest.
 	 * 
-	 * @param content
-	 * @return HttpUriRequest, or null if the 
+	 * @param content Manually-entered HTTP request.
+	 * @param params Request parameters, or null.
+	 * @return HttpUriRequest, or null if the given HTTP request was empty. 
 	 * @throws URISyntaxException
 	 * @throws UnsupportedEncodingException
 	 */
-	public HttpUriRequest parseRequest(final String content) throws URISyntaxException, UnsupportedEncodingException {
+	public HttpUriRequest parseRequest(final String content, HttpParams params) throws URISyntaxException, UnsupportedEncodingException {
 		final CharArrayBuffer buf = new CharArrayBuffer(0);
 		buf.append(content);
 		final ParserCursor bufCursor = new ParserCursor(0, buf.length()); 
@@ -50,6 +52,10 @@ public class HttpRequestParser extends ParserBase {
 			builder.setEntity(entity);
 		}
 
+		if (params != null) {
+			builder.setParams(params);
+		}
+		
 		return builder.buildRequest();
 	}
 	

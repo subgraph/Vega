@@ -9,10 +9,19 @@ import org.apache.http.HttpRequest;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpParams;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public interface IHttpRequestBuilder {
+	/**
+	 * Set request parameters. A copy of the parameters is not made.
+	 *
+	 * @param params Request parameters.
+	 */
+	public void setParams(HttpParams params);
+	public HttpParams getParams();
+	
 	/**
 	 * Set request fields from a HttpRequest provided by IRequestLogRecord. Any previously set fields are unset.
 	 *

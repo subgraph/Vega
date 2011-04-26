@@ -12,6 +12,9 @@ import org.apache.http.HttpRequest;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRawRequest;
@@ -22,6 +25,8 @@ import com.subgraph.vega.http.requests.custom.HttpRawRequest;
 import com.subgraph.vega.http.requests.custom.RawRequestLine;
 
 public class HttpRequestBuilder implements IHttpRequestBuilder {
+	private HttpParams params;
+	
 	private String scheme = "http";
 	private String host = "";
 	private int hostPort = 80;
@@ -39,6 +44,16 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 	
 	@Override
+	public void setParams(HttpParams params) {
+		this.params = params;
+	}
+
+	@Override
+	public HttpParams getParams() {
+		return params;
+	}
+
+	@Override
 	public void setFromRequest(IRequestLogRecord request) throws URISyntaxException {
 		setFromRequest(request.getRequest());
 		setFromHttpHost(request.getHttpHost());
@@ -46,6 +61,8 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 
 	@Override
 	public void setFromRequest(HttpRequest request) throws URISyntaxException {
+		params = request.getParams().copy();
+
 		setFromRequestLine(request.getRequestLine());
 		headerList.clear();
 		for (Header h: request.getAllHeaders()) {
@@ -128,10 +145,14 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	@Override
 	public void setFromHttpHost(HttpHost host) {
 		scheme = host.getSchemeName();
+		if (scheme == null) {
+			scheme = "http";
+		}
+
 		this.host = host.getHostName();
 		hostPort = host.getPort();
 		if (hostPort == -1) {
-			if (scheme != null && scheme == "https") {
+			if (scheme == "https") {
 				hostPort = 443;
 			} else {
 				hostPort = 80;
@@ -285,9 +306,14 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 			request = new HttpRawRequest(rawRequestLine, method, requestUri);
 		}
 
-		// XXX add support for setting params, including protocol version 
-		//uriRequest.setParams(request.getParams());
-
+		if (params == null) {
+			params = new BasicHttpParams();
+		}
+		request.setParams(params);
+		if (protocolVersion != null) {
+			HttpProtocolParams.setVersion(request.getParams(), protocolVersion);
+		}
+		
 		for (HttpHeaderBuilder h: headerList) {
 			request.addHeader(h.buildHeader());
 		}
