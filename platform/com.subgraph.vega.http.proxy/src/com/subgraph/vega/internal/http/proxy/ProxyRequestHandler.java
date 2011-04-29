@@ -58,35 +58,37 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		try {
 			if (handleRequest(transaction, request) == false) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(false);
 				return;
 			}
 
 			HttpUriRequest uriRequest = getUriRequest(transaction, context);
 			BasicHttpContext ctx = new BasicHttpContext();
+			transaction.signalForward();
 			IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
 			if(r == null) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(false);
 				return;
 			}
 
 			if (handleResponse(transaction, r) == false) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(true);
 				return;
 			}
-
+			
 			HttpResponse httpResponse = copyResponse(r.getRawResponse());
 			removeHeaders(httpResponse);
 			response.setStatusLine(httpResponse.getStatusLine());
 			response.setHeaders(httpResponse.getAllHeaders());
 			response.setEntity(httpResponse.getEntity());
+			transaction.signalForward();
 		} catch (InterruptedException e) {
 			response.setStatusCode(503);
 			e.printStackTrace();
 		} finally {
-			transaction.signalComplete();
+			transaction.signalComplete(false);
 		}
 	}
 

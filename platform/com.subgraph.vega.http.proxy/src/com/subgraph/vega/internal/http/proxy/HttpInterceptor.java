@@ -19,15 +19,14 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.internal.http.proxy.ProxyTransaction;
 
 public class HttpInterceptor implements IHttpInterceptor {
+	private final Object interceptorLock = new Object(); /**< Lock for contents of object. */
 	private IHttpInterceptorEventHandler eventHandler;
 	private HttpInterceptorLevel interceptorLevelRequest = HttpInterceptorLevel.DISABLED;
-	private HttpInterceptorLevel interceptorLevelResponse = HttpInterceptorLevel.DISABLED;
-	private final Object breakpointSetLock = new Object();
+	private HttpInterceptorLevel interceptorLevelResponse = HttpInterceptorLevel.DISABLED; 
 	private IHttpConditionSet breakpointSetRequest; 
 	private IHttpConditionSet breakpointSetResponse; 
 	private final ArrayList<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>(); /**< Queue of intercepted transactions pending processing */
 
-	
 	HttpInterceptor(IModel model) {
 		breakpointSetRequest = createConditionSet(model, true);
 		breakpointSetResponse = createConditionSet(model, false);
@@ -49,11 +48,16 @@ public class HttpInterceptor implements IHttpInterceptor {
 	}
 
 	private void onConditionSetChanged(ConditionSetChanged event, boolean isRequestSet) {
-		synchronized(breakpointSetLock) {
-			if(isRequestSet)
+		synchronized(interceptorLock) {
+			final TransactionDirection direction;
+			if(isRequestSet) {
 				breakpointSetRequest = event.getConditionSet();
-			else
+				direction = TransactionDirection.DIRECTION_REQUEST;
+			} else {
 				breakpointSetResponse = event.getConditionSet();
+				direction = TransactionDirection.DIRECTION_RESPONSE;
+			}
+			releaseOnChange(direction);
 		}
 	}
 
@@ -78,7 +82,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 
 	private boolean interceptOnBreakpointSet(IHttpConditionSet breakpointSet, ProxyTransaction transaction) {
 		final HttpResponse response = (transaction.hasResponse()) ? (transaction.getResponse().getRawResponse()) : (null);
-		synchronized(breakpointSetLock) {
+		synchronized(interceptorLock) {
 			return (breakpointSet == null) ? (false) : (breakpointSet.matches(transaction.getRequest(), response));
 		}
 	}
@@ -87,57 +91,110 @@ public class HttpInterceptor implements IHttpInterceptor {
 	 * @return True if the transaction was intercepted and added to the queue for processing, false if it can immediately
 	 * be handled.
 	 */
-	public synchronized boolean handleTransaction(ProxyTransaction transaction) {
-		if (eventHandler != null && intercept(transaction) != false) {
-			transaction.setPending(this);
-			transactionQueue.add(transaction);
-			eventHandler.notifyQueue(transaction);
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public synchronized void setEventHandler(IHttpInterceptorEventHandler eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-
-	@Override
-	public synchronized void setInterceptLevel(TransactionDirection direction, HttpInterceptorLevel level) {
-		if (direction == TransactionDirection.DIRECTION_REQUEST) {
-			interceptorLevelRequest = level;
-		} else {
-			interceptorLevelResponse = level;
+	public boolean handleTransaction(ProxyTransaction transaction) {
+		synchronized(interceptorLock) {
+			if (eventHandler != null && intercept(transaction) != false) {
+				transaction.setPending(this);
+				transactionQueue.add(transaction);
+				eventHandler.notifyQueue(transaction);
+				return true;
+			}
+			return false;
 		}
 	}
 
 	@Override
-	public synchronized HttpInterceptorLevel getInterceptLevel( TransactionDirection direction) {
-		if (direction == TransactionDirection.DIRECTION_REQUEST) {
-			return interceptorLevelRequest;
-		} else {
-			return interceptorLevelResponse;
+	public void setEventHandler(IHttpInterceptorEventHandler eventHandler) {
+		synchronized(interceptorLock) {
+			this.eventHandler = eventHandler;
 		}
 	}
 
 	@Override
-	public synchronized int transactionQueueSize() {
-		return transactionQueue.size();
+	public void setInterceptLevel(TransactionDirection direction, HttpInterceptorLevel level) {
+		synchronized(interceptorLock) {
+			if (direction == TransactionDirection.DIRECTION_REQUEST) {
+				interceptorLevelRequest = level;
+			} else {
+				interceptorLevelResponse = level;
+			}
+			releaseOnChange(direction);
+		}
 	}
 
 	@Override
-	public synchronized IProxyTransaction transactionQueuePop() {
-		if (transactionQueue.size() == 0) {
-			return null;
+	public HttpInterceptorLevel getInterceptLevel( TransactionDirection direction) {
+		synchronized(interceptorLock) {
+			if (direction == TransactionDirection.DIRECTION_REQUEST) {
+				return interceptorLevelRequest;
+			} else {
+				return interceptorLevelResponse;
+			}
 		}
-
-		ProxyTransaction transaction = transactionQueue.remove(0);
-		transaction.setUnqueued();
-		return transaction;
 	}
 
-	public synchronized void notifyHandled(ProxyTransaction transaction) {
-		transactionQueue.remove(transactionQueue.indexOf(transaction));
+	@Override
+	public int transactionQueueSize() {
+		synchronized(interceptorLock) {
+			return transactionQueue.size();
+		}
 	}
 
+	@Override
+	public IProxyTransaction transactionQueueGet(int idx) {
+		synchronized(interceptorLock) {
+			if (transactionQueue.size() <= idx) {
+				return null;
+			}
+			return transactionQueue.get(idx);
+		}
+	}
+
+	/**
+	 * Notification that a proxy transaction queued by this interceptor was handled. The transaction is removed from the
+	 * transaction queue. 
+	 * 
+	 * @param transaction Transaction
+	 */
+	public void notifyHandled(ProxyTransaction transaction) {
+		synchronized(interceptorLock) {
+			transactionQueue.remove(transactionQueue.indexOf(transaction));
+		}
+	}
+
+	private IHttpConditionSet getBreakpointSet(TransactionDirection direction) {
+		synchronized(interceptorLock) {
+			if (direction == TransactionDirection.DIRECTION_REQUEST) {
+				return breakpointSetRequest;
+			} else {
+				return breakpointSetResponse;
+			}
+		}
+	}
+
+	private void releaseOnChange(TransactionDirection direction) {
+		final HttpInterceptorLevel level = getInterceptLevel(direction);
+		if (level != HttpInterceptorLevel.ENABLED_ALL) {
+			if (level != HttpInterceptorLevel.DISABLED) {
+				final IHttpConditionSet breakpointSet = getBreakpointSet(direction);
+				for (int idx = 0; idx < transactionQueue.size(); idx++) {
+					ProxyTransaction transaction = transactionQueue.get(idx);
+					if (transaction.hasResponse() == (direction == TransactionDirection.DIRECTION_RESPONSE)) {
+						if (interceptOnBreakpointSet(breakpointSet, transaction) == false) {
+							transaction.doForward();
+							idx--;
+						}
+					}
+				}
+			} else {
+				for (int idx = 0; idx < transactionQueue.size(); idx++) {
+					ProxyTransaction transaction = transactionQueue.get(idx);
+					if (transaction.hasResponse() == (direction == TransactionDirection.DIRECTION_RESPONSE)) {
+						transaction.doForward();
+						idx--;
+					}
+				}
+			}
+		}
+	}
 }

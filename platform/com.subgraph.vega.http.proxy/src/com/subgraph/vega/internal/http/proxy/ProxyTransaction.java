@@ -71,12 +71,6 @@ public class ProxyTransaction implements IProxyTransaction {
 		return doForward;
 	}
 
-	public synchronized void signalComplete() {
-		if (eventHandler != null) {
-			eventHandler.notifyComplete();
-		}		
-	}
-
 	@Override
 	public synchronized void setEventHandler(IProxyTransactionEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
@@ -151,4 +145,25 @@ public class ProxyTransaction implements IProxyTransaction {
 			lock.unlock();
 		}
 	}
+
+	/**
+	 * Signal that the pending transaction is about to be forwarded.
+	 */
+	public synchronized void signalForward() {
+		if (eventHandler != null) {
+			eventHandler.notifyForward();
+		}
+	}
+
+	/**
+	 * Signal that the transaction is complete.
+	 * 
+	 * @param dropped Boolean indicating whether the transaction was dropped.
+	 */
+	public synchronized void signalComplete(boolean dropped) {
+		if (eventHandler != null) {
+			eventHandler.notifyComplete(dropped);
+		}		
+	}
+	
 }

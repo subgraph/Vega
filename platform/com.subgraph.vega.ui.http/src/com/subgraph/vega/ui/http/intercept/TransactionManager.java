@@ -39,7 +39,12 @@ public class TransactionManager {
 		};
 		transactionEventHandler = new IProxyTransactionEventHandler() {
 			@Override
-			public void notifyComplete() {
+			public void notifyForward() {
+				handleTransactionForward();
+			}
+
+			@Override
+			public void notifyComplete(boolean dropped) {
 				handleTransactionComplete();
 			}
 		};
@@ -59,12 +64,13 @@ public class TransactionManager {
 	void setInactive() {
 		setRequestInactive();
 		setResponseInactive();
-	}
-
+	}	
+	
 	private void handleTransactionRequest(final IProxyTransaction transaction) {
 		synchronized(this) {
 			if(currentTransaction == null) {
 				currentTransaction = transaction;
+				currentTransaction.setEventHandler(transactionEventHandler);
 				setRequestPending();
 			}
 		}
@@ -72,10 +78,20 @@ public class TransactionManager {
 
 	private void handleTransactionResponse(final IProxyTransaction transaction) {
 		synchronized(this) {
-			if(currentTransaction == null || currentTransaction == transaction) {
+			if (currentTransaction == null || currentTransaction == transaction) {
 				currentTransaction = transaction;
-				currentTransaction.setEventHandler(null);
 				setResponsePending();
+			}
+		}
+	}
+
+	private void handleTransactionForward() {
+		synchronized(this) {
+			if (currentTransaction.hasResponse()) {
+				currentTransaction.setEventHandler(null);
+				getNextTransaction();
+			} else {
+				setRequestSent();
 			}
 		}
 	}
@@ -83,43 +99,29 @@ public class TransactionManager {
 	private void handleTransactionComplete() {
 		synchronized(this) {
 			currentTransaction.setEventHandler(null);
-			currentTransaction = interceptor.transactionQueuePop();
-			setTransactionComplete();
+			getNextTransaction();
 		}
 	}
 	
-	private void setTransactionComplete() {
-		synchronized(this) {
-			if(currentTransaction != null) {
-				if(!currentTransaction.hasResponse()) {
-					setRequestPending();
-					setResponseInactive();
-				} else {
-					setResponsePending();
-				}
-			} else {
-				setRequestInactive();
+	/**
+	 * Must be invoked in a synchronized block.
+	 */
+	private void getNextTransaction() {
+		currentTransaction = interceptor.transactionQueueGet(0);
+		if(currentTransaction != null) {
+			currentTransaction.setEventHandler(transactionEventHandler);
+			if(!currentTransaction.hasResponse()) {
+				setRequestPending();
 				setResponseInactive();
+			} else {
+				setResponsePending();
 			}
-		}
-	}
-
-	private void popTransaction() {
-		currentTransaction = interceptor.transactionQueuePop();
-		if(currentTransaction == null) {
-			setRequestInactive();
-			setResponseInactive();
+		} else {
+			setInactive();
 			return;
 		}
-		
-		if(!currentTransaction.hasResponse()) {
-			setRequestPending();
-			setResponseInactive();
-		} else {
-			setResponsePending();
-		}
 	}
-
+	
 	private synchronized void setRequestPending() {
 		final String message = "Request pending to "+ getRequestHostPart(currentTransaction.getRequest());
 		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
@@ -159,29 +161,19 @@ public class TransactionManager {
 			currentTransaction.setUriRequest(request);
 			currentTransaction.setEventHandler(transactionEventHandler);
 			currentTransaction.doForward();
-			setRequestSent();	
 		}
 	}
 
 	synchronized void forwardResponse() {
 		currentTransaction.doForward();
-		popTransaction();
 	}
 	
 	synchronized void dropRequest() {
-		currentTransaction.setEventHandler(null);
 		currentTransaction.doDrop();
-		currentTransaction = interceptor.transactionQueuePop();
-		if(currentTransaction != null) {
-			setRequestPending();
-		} else {
-			setRequestInactive();
-		}
 	}
 
 	synchronized void dropResponse() {
 		currentTransaction.doDrop();
-		popTransaction();
 	}
 
 	private synchronized void setResponseInactive() {
@@ -192,7 +184,9 @@ public class TransactionManager {
 	private synchronized void setResponsePending() {
 		final String content = requestRenderer.renderResponseText(currentTransaction.getResponse().getRawResponse());
 		responseViewer.setStatus("Reponse pending", true, content);
-		if(currentRequestTransaction != currentTransaction) 
+		if(currentRequestTransaction != currentTransaction) {
 			setRequestSent();
+		}
 	}
+
 }
