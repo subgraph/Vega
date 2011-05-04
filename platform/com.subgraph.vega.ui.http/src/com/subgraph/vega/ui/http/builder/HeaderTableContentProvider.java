@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.http.requesteditviewer;
+package com.subgraph.vega.ui.http.builder;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;

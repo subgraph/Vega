@@ -44,6 +44,20 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 	
 	@Override
+	public void clear() {
+		params = null;
+		scheme = "http";
+		host = "";
+		hostPort = 80;
+		rawRequestLine = null;
+		method = "";
+		path = "";
+		protocolVersion = null;
+		headerList.clear();
+		entity = null;
+	}
+
+	@Override
 	public void setParams(HttpParams params) {
 		this.params = params;
 	}
@@ -256,13 +270,18 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 	}
 
 	@Override
+	public void clearHeaders() {
+		headerList.clear();
+	}
+	
+	@Override
 	public void swapHeader(int idx1, int idx2) {
 		if (idx1 < headerList.size() && idx2 < headerList.size() && idx1 != idx2) {
 			HttpHeaderBuilder tmp = headerList.set(idx1, headerList.get(idx2));
 			headerList.set(idx2, tmp);
 		}
 	}
-
+	
 	@Override
 	public int getHeaderIdxOf(IHttpHeaderBuilder header) {
 		return headerList.indexOf(header);
@@ -295,6 +314,10 @@ public class HttpRequestBuilder implements IHttpRequestBuilder {
 
 	@Override
 	public HttpUriRequest buildRequest() throws URISyntaxException {
+		if (host == null || host.length() == 0) {
+			throw new IllegalArgumentException("Invalid host");
+		}
+		
 		final URI requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + path);
 		IHttpRawRequest request;
 

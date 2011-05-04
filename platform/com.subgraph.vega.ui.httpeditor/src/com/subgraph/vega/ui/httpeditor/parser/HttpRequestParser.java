@@ -24,6 +24,10 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 public class HttpRequestParser extends ParserBase {
 	final private IHttpRequestBuilder builder;
 
+	public HttpRequestParser(final IHttpRequestBuilder builder) {
+		this.builder = builder;
+	}
+	
 	public HttpRequestParser(IHttpRequestEngine requestEngine) {
 		builder = requestEngine.createRequestBuilder();
 	}

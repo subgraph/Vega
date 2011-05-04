@@ -14,6 +14,8 @@ import org.apache.http.params.HttpParams;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public interface IHttpRequestBuilder {
+	public void clear();
+
 	/**
 	 * Set request parameters. A copy of the parameters is not made.
 	 *
@@ -75,12 +77,13 @@ public interface IHttpRequestBuilder {
 
 	public IHttpHeaderBuilder addHeader(String name, String value);
 	public void removeHeader(IHttpHeaderBuilder header);
+	public void clearHeaders();
 	public void swapHeader(int idx1, int idx2);
 	public int getHeaderIdxOf(IHttpHeaderBuilder next);
 	public int getHeaderCnt();
 	public IHttpHeaderBuilder getHeader(int idx);
 	public IHttpHeaderBuilder[] getHeaders();
-
+	
 	public void setEntity(HttpEntity entity);
 	public HttpEntity getEntity();
 	

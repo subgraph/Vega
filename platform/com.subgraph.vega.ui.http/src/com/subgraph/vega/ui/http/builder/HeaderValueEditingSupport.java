@@ -1,4 +1,4 @@
-package com.subgraph.vega.ui.http.requesteditviewer;
+package com.subgraph.vega.ui.http.builder;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -7,10 +7,10 @@ import org.eclipse.jface.viewers.TextCellEditor;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
 
-public class HeaderNameEditingSupport extends EditingSupport {
+public class HeaderValueEditingSupport extends EditingSupport {
 	private final TableViewer viewer;
 	
-	public HeaderNameEditingSupport(TableViewer viewer) {
+	public HeaderValueEditingSupport(TableViewer viewer) {
 		super(viewer);
 		this.viewer = viewer;
 	}
@@ -27,12 +27,12 @@ public class HeaderNameEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		return ((IHttpHeaderBuilder) element).getName();
+		return ((IHttpHeaderBuilder) element).getValue();
 	}
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		((IHttpHeaderBuilder) element).setName((String) value);
+		((IHttpHeaderBuilder) element).setValue((String) value);
 		viewer.refresh();
 	}
 
