@@ -33,7 +33,7 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 	
 	@Override
 	public Composite createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
+		parentComposite = new Composite(parent, SWT.BORDER);
 		parentComposite.setLayout(new FillLayout());
 
 		requestViewer = new HttpRequestViewer(parentComposite);
