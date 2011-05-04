@@ -8,6 +8,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -48,7 +50,6 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		parentComposite.setLayout(controlLayout);
 
 		final Composite schemeControl = new Composite(parentComposite, SWT.NONE);
-		schemeControl.setLayout(controlLayout);
 		schemeControl.setLayout(new GridLayout(2, false));
 		schemeControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		Label label = new Label(schemeControl, SWT.NONE);
@@ -66,7 +67,7 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		requestScheme.addSelectionChangedListener(createSelectionChangedListenerRequestScheme());
 
 		final Composite hostControl = new Composite(parentComposite, SWT.NONE);
-		hostControl.setLayout(controlLayout);
+		hostControl.setLayout(new GridLayout(2, false));
 		hostControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		label = new Label(hostControl, SWT.NONE);
 		label.setText("Host:");
@@ -75,14 +76,16 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		requestHost.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		final Composite portControl = new Composite(parentComposite, SWT.NONE);
-		portControl.setLayout(controlLayout);
 		portControl.setLayout(new GridLayout(2, false));
 		portControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		label = new Label(portControl, SWT.NONE);
 		label.setText("Port:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		requestPort = new Text(portControl, SWT.BORDER | SWT.SINGLE);
-		requestPort.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		final FontMetrics requestPortFm = new GC(requestPort).getFontMetrics();
+		GridData requestPortGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		requestPortGd.widthHint = requestPortFm.getAverageCharWidth() * 7;
+		requestPort.setLayoutData(requestPortGd);
 		requestPort.addListener(SWT.Verify, new Listener() {
 	      public void handleEvent(Event e) {
 	          String string = e.text;
@@ -96,7 +99,7 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 	          }
 	      }
 		});
-
+		
 		refresh();
 
 		return parentComposite;
