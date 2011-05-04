@@ -81,7 +81,9 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 	@Override
 	public void processContents() {
 		try {
+			// REVISIT: the parser should be clearing these 
 			requestBuilder.clearHeaders();
+			requestBuilder.setEntity(null);
 			requestParser.parseRequest(requestViewer.getContent(), null);
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
