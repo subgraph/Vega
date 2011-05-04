@@ -39,9 +39,14 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 	private Button buttonRemove;
 	private Button buttonMoveUp;
 	private Button buttonMoveDown;
-
-	public RequestHeaderEditor(final IHttpRequestBuilder requestBuilder) {
+	private int heightInRows;
+	
+	/**
+	 * @param heightInRows Height of header table in text rows, or 0 to fill available space. 
+	 */
+	public RequestHeaderEditor(final IHttpRequestBuilder requestBuilder, int heightInRows) {
 		this.requestBuilder = requestBuilder;
+		this.heightInRows = heightInRows;
 	}
 
 	@Override
@@ -49,8 +54,13 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 		parentComposite = new Composite(parent, SWT.NONE);
 		parentComposite.setLayout(new GridLayout(2, false));
 
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		final Composite compTable = createHeaderTable(parentComposite, gd, 9);
+		GridData gd;
+		if (heightInRows != 0) {
+			gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		} else {
+			gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		}
+		final Composite compTable = createHeaderTable(parentComposite, gd, heightInRows);
 		compTable.setLayoutData(gd);
 		final Composite compTableButtons = createHeaderTableButtons(parentComposite);
 		compTableButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -87,7 +97,9 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 		final Table table = tableViewerHeaders.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		gd.heightHint = table.getItemHeight() * heightInRows;
+		if (heightInRows != 0) {
+			gd.heightHint = table.getItemHeight() * heightInRows;
+		}
 
 		return rootControl;
 	}

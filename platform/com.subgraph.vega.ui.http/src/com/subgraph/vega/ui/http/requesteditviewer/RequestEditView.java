@@ -148,7 +148,7 @@ public class RequestEditView extends ViewPart {
 
 		requestHeaderTabItem = new TabItem(requestTabFolder, SWT.NONE);
 		requestHeaderTabItem.setText("Headers");
-		requestHeaderEditor = new RequestHeaderEditor(requestBuilder);
+		requestHeaderEditor = new RequestHeaderEditor(requestBuilder, 0);
 		requestHeaderEditor.createPartControl(requestTabFolder);
 		requestHeaderTabItem.setControl(requestHeaderEditor.getControl());
 		requestHeaderTabItem.setData(requestHeaderEditor);
