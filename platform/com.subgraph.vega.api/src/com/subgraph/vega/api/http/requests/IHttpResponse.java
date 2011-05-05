@@ -12,6 +12,7 @@ public interface IHttpResponse {
 	int getResponseCode();
 	boolean isFetchFail();
 	HttpRequest getOriginalRequest();
+	void setRawResponse(HttpResponse response); // temporary, probably. used in interceptor.
 	HttpResponse getRawResponse();
 	HttpHost getHost();
 	String getBodyAsString();

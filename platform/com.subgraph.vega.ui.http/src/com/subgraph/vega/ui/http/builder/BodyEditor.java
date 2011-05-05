@@ -8,21 +8,21 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 /**
- * Manages visual components to edit the entity body of a HTTP request message.
+ * Manages visual components to edit the entity body of a HTTP message.
  */
-public class RequestBodyEditor implements IHttpBuilderPart {
-	private IHttpRequestBuilder requestBuilder;
+public class BodyEditor implements IHttpBuilderPart {
+	private IHttpMessageBuilder messageBuilder;
 	private Composite parentComposite;
 	private HttpRequestViewer requestBodyViewer;
 	private final RequestRenderer requestRenderer = new RequestRenderer();	
 
-	public RequestBodyEditor(final IHttpRequestBuilder requestBuilder) {
-		this.requestBuilder = requestBuilder;
+	public BodyEditor(final IHttpMessageBuilder messageBuilder) {
+		this.messageBuilder = messageBuilder;
 	}
 
 	@Override
@@ -44,8 +44,8 @@ public class RequestBodyEditor implements IHttpBuilderPart {
 
 	@Override
 	public void refresh() {
-		if (requestBuilder.getEntity() != null) {
-			requestBodyViewer.setContent(requestRenderer.renderEntity(requestBuilder.getEntity()));
+		if (messageBuilder.getEntity() != null) {
+			requestBodyViewer.setContent(requestRenderer.renderEntity(messageBuilder.getEntity()));
 		}
 	}
 
@@ -59,9 +59,9 @@ public class RequestBodyEditor implements IHttpBuilderPart {
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
 			}
-			requestBuilder.setEntity(entity);
+			messageBuilder.setEntity(entity);
 		} else {
-			requestBuilder.setEntity(null);
+			messageBuilder.setEntity(null);
 		}
 	}
 

@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.http.Header;
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -50,15 +49,13 @@ public class HttpRequestParser extends ParserBase {
 		if (parseRequestLine(parser, builder, buf, bufCursor) < 0) {
 			return null;
 		}
-		parseRequestHeaders(parser, builder, buf, bufCursor);
+		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd()) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}
 
-		if (params != null) {
-			builder.setParams(params);
-		}
+		builder.setParams(params);
 		
 		return builder.buildRequest();
 	}
@@ -107,26 +104,6 @@ public class HttpRequestParser extends ParserBase {
 		builder.setRawRequestLine(lnBuf.toString());
 		
 		return 0;
-	}
-
-	private void parseRequestHeaders(final LineParser parser, final IHttpRequestBuilder builder, final CharArrayBuffer buf, final ParserCursor bufCursor) {
-		final CharArrayBuffer lnBuf = new CharArrayBuffer(0);
-		while (true) {
-			lnBuf.clear();
-			int idxPos = bufCursor.getPos();
-			if (readLineHeader(buf, bufCursor, lnBuf) > 0) {
-				try {
-					Header header = parser.parseHeader(lnBuf); // REVISIT don't want an extra step
-					builder.addHeader(header.getName(), header.getValue());
-				} catch (ParseException e) {
-					// for now we'll move the cursor back so the line gets treated as the start of the body
-					bufCursor.updatePos(idxPos);
-					return;
-				}
-			} else {
-				break;
-			}
-		}
 	}
 	
 }

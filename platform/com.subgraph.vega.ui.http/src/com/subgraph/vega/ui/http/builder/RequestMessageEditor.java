@@ -67,9 +67,11 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 				sb.append(h.getValue());
 				sb.append('\n');
 			}
+		}
+
+		if (requestLine != null || headers.length != 0) {
 			sb.append('\n');
 		}
-		
 		final HttpEntity entity = requestBuilder.getEntity();
 		if (entity != null) {
 			sb.append(requestRenderer.renderEntity(requestBuilder.getEntity()));

@@ -26,13 +26,13 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
-import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 
 /**
- * Manages visual components used to edit request headers. 
+ * Manages visual components used to edit HTTP message headers. 
  */
-public class RequestHeaderEditor implements IHttpBuilderPart {
-	private IHttpRequestBuilder requestBuilder;
+public class HeaderEditor implements IHttpBuilderPart {
+	private IHttpMessageBuilder messageBuilder;
 	private Composite parentComposite;
 	private TableViewer tableViewerHeaders;
 	private Button buttonCreate;
@@ -44,8 +44,8 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 	/**
 	 * @param heightInRows Height of header table in text rows, or 0 to fill available space. 
 	 */
-	public RequestHeaderEditor(final IHttpRequestBuilder requestBuilder, int heightInRows) {
-		this.requestBuilder = requestBuilder;
+	public HeaderEditor(final IHttpMessageBuilder messageBuilder, int heightInRows) {
+		this.messageBuilder = messageBuilder;
 		this.heightInRows = heightInRows;
 	}
 
@@ -65,7 +65,7 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 		final Composite compTableButtons = createHeaderTableButtons(parentComposite);
 		compTableButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-		tableViewerHeaders.setInput(requestBuilder);
+		tableViewerHeaders.setInput(messageBuilder);
 
 		return parentComposite;
 	}
@@ -183,7 +183,7 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				requestBuilder.addHeader("", "");
+				messageBuilder.addHeader("", "");
 				tableViewerHeaders.refresh();
 				tableViewerHeaders.editElement(tableViewerHeaders.getElementAt(tableViewerHeaders.getTable().getItemCount() - 1), 0);
 			}
@@ -196,7 +196,7 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerHeaders.getSelection();
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					requestBuilder.removeHeader((IHttpHeaderBuilder) i.next());
+					messageBuilder.removeHeader((IHttpHeaderBuilder) i.next());
 				}
 				tableViewerHeaders.refresh();
 			}
@@ -209,9 +209,9 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerHeaders.getSelection();
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					int idx = requestBuilder.getHeaderIdxOf((IHttpHeaderBuilder) i.next());
+					int idx = messageBuilder.getHeaderIdxOf((IHttpHeaderBuilder) i.next());
 					if (idx != 0) {
-						requestBuilder.swapHeader(idx - 1, idx);
+						messageBuilder.swapHeader(idx - 1, idx);
 					} else {
 						break;
 					}
@@ -229,12 +229,12 @@ public class RequestHeaderEditor implements IHttpBuilderPart {
 				int idx[] = new int[selection.size()];
 				int offset = 1;
 				for (Iterator<?> i = selection.iterator(); i.hasNext(); offset++) {
-					idx[idx.length - offset] = requestBuilder.getHeaderIdxOf((IHttpHeaderBuilder) i.next());
+					idx[idx.length - offset] = messageBuilder.getHeaderIdxOf((IHttpHeaderBuilder) i.next());
 				}
 
-				if (idx[0] + 1 != requestBuilder.getHeaderCnt()) {
+				if (idx[0] + 1 != messageBuilder.getHeaderCnt()) {
 					for (int i = 0; i < idx.length; i++) {
-						requestBuilder.swapHeader(idx[i], idx[i] + 1);
+						messageBuilder.swapHeader(idx[i], idx[i] + 1);
 					}
 				}
 				tableViewerHeaders.refresh();

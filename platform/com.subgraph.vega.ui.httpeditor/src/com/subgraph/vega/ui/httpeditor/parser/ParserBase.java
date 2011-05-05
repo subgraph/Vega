@@ -1,8 +1,13 @@
 package com.subgraph.vega.ui.httpeditor.parser;
 
+import org.apache.http.Header;
+import org.apache.http.ParseException;
+import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.CharArrayBuffer;
+
+import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 
 public abstract class ParserBase {
 
@@ -125,6 +130,35 @@ public abstract class ParserBase {
 			idxPos++;
 		}
         lnCursor.updatePos(idxPos);
+	}
+
+	/**
+	 * Parse HTTP headers and add them to a IHttpMessageBuilder until a non-header line is encountered.
+	 * 
+	 * @param parser HC line parser.
+	 * @param builder IHttpMessageBuilder to add parsed headers to.
+	 * @param buf Buffer containing header data.
+	 * @param bufCursor Parser cursor for buf. Adjusted to one character past the end of headers and optional CRLF line.
+	 */
+	protected void parseHeaders(final LineParser parser, final IHttpMessageBuilder builder, final CharArrayBuffer buf, final ParserCursor bufCursor) {
+		final CharArrayBuffer lnBuf = new CharArrayBuffer(0);
+		while (true) {
+			lnBuf.clear();
+			int idxPos = bufCursor.getPos();
+			if (readLineHeader(buf, bufCursor, lnBuf) > 0) {
+				try {
+					// REVISIT don't want an extra step
+					Header header = parser.parseHeader(lnBuf);
+					builder.addHeader(header.getName(), header.getValue());
+				} catch (ParseException e) {
+					// for now we'll move the cursor back so the line gets treated as the start of the body
+					bufCursor.updatePos(idxPos);
+					return;
+				}
+			} else {
+				break;
+			}
+		}
 	}
 
 }

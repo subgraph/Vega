@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
@@ -12,6 +13,7 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
 import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
+import com.subgraph.vega.ui.httpeditor.parser.HttpResponseParser;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class TransactionManager {
@@ -118,7 +120,6 @@ public class TransactionManager {
 			}
 		} else {
 			setInactive();
-			return;
 		}
 	}
 	
@@ -159,13 +160,17 @@ public class TransactionManager {
 		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent(), currentTransaction.getRequest().getParams().copy());
 		if (request != null) {
 			currentTransaction.setUriRequest(request);
-			currentTransaction.setEventHandler(transactionEventHandler);
 			currentTransaction.doForward();
 		}
 	}
 
-	synchronized void forwardResponse() {
-		currentTransaction.doForward();
+	synchronized void forwardResponse() throws UnsupportedEncodingException {
+		final HttpResponseParser parser = new HttpResponseParser(currentTransaction.getRequestEngine());
+		final HttpResponse response = parser.parseResponse(responseViewer.getContent(), currentTransaction.getResponse().getRawResponse().getParams().copy());
+		if (response != null) {
+			currentTransaction.getResponse().setRawResponse(response);
+			currentTransaction.doForward();
+		}
 	}
 	
 	synchronized void dropRequest() {

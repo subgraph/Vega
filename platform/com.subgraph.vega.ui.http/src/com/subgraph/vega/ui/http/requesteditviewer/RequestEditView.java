@@ -26,7 +26,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.builder.RequestHeaderEditor;
+import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
@@ -40,7 +40,7 @@ public class RequestEditView extends ViewPart {
 	private SashForm parentComposite;
 	private IHttpBuilderPart requestBuilderPartCurr;
 	private RequestEditor requestEditor;
-	private RequestHeaderEditor requestHeaderEditor;
+	private HeaderEditor requestHeaderEditor;
 	private TabFolder requestTabFolder;
 	private TabItem requestTabItem;
 	private TabItem requestHeaderTabItem;
@@ -148,7 +148,7 @@ public class RequestEditView extends ViewPart {
 
 		requestHeaderTabItem = new TabItem(requestTabFolder, SWT.NONE);
 		requestHeaderTabItem.setText("Headers");
-		requestHeaderEditor = new RequestHeaderEditor(requestBuilder, 0);
+		requestHeaderEditor = new HeaderEditor(requestBuilder, 0);
 		requestHeaderEditor.createPartControl(requestTabFolder);
 		requestHeaderTabItem.setControl(requestHeaderEditor.getControl());
 		requestHeaderTabItem.setData(requestHeaderEditor);

@@ -13,7 +13,14 @@ public interface IHttpRequestEngine {
 	 * @return HttpRequestBuilder instance.
 	 */
 	IHttpRequestBuilder createRequestBuilder();
-	
+
+	/**
+	 * Instantiate a HttpResponseBuilder.
+	 *
+	 * @return HttpResponseBuilder instance.
+	 */
+	IHttpResponseBuilder createResponseBuilder();
+
 	IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException, ClientProtocolException;
 	IHttpResponse sendRequest(HttpUriRequest request) throws IOException, ClientProtocolException;
 	void registerResponseProcessor(IHttpResponseProcessor processor);
