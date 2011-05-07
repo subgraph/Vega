@@ -11,7 +11,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.subgraph.vega.ui.hexeditor.HexEditControl;
-import com.subgraph.vega.ui.hexeditor.HexEditModel;
 
 public class HoverInformationControl extends AbstractInformationControl implements IInformationControlExtension2 {
 
@@ -57,13 +56,11 @@ public class HoverInformationControl extends AbstractInformationControl implemen
 	private void createBinaryDataControl(IBinaryEncodedData data) {
 		Label label = new Label(rootComposite, SWT.NONE);
 		label.setText(data.getDescription());
-		HexEditControl hec = new HexEditControl();
-		hec.createTableViewer(rootComposite);
-		HexEditModel hem = new HexEditModel(data.getDecodedBytes());
-		hec.setModel(hem);
-		haveInput= true;
-		
+		HexEditControl hec = new HexEditControl(rootComposite);
+		hec.setInput(data.getDecodedBytes());
+		haveInput= true;		
 	}
+
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			@Override

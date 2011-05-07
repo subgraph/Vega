@@ -44,8 +44,9 @@ public class RequestPartitionRule implements IPredicateRule {
 				return false;
 		
 			characterCount++;
-			if(c == '\n')
+			if(c == '\r' || c == '\n') {
 				return false;
+			}
 			if(c == ':')
 				return false;
 			if(!isRequest && c == '/')
