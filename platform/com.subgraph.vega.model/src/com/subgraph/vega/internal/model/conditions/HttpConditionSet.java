@@ -51,6 +51,9 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	private boolean matchesAllConditions(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
+			if (conditionList.size() == 0) {
+				return false;
+			}
 			for(IHttpCondition c: conditionList) {
 				if(c.isEnabled() && !c.matches(request, response))
 					return false;

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,28 +83,47 @@ public class HttpProxy implements IHttpInterceptProxy {
 		return new Runnable() {
 			@Override
 			public void run() {
-				try {
-					proxyAcceptLoop();
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "IO error processing incoming connection: "+ e.getMessage(), e);
-				}
+				proxyAcceptLoop();
 			}
 		};
 	}
 
-	private void proxyAcceptLoop() throws IOException {
+	private void proxyAcceptLoop() {
 		while(!Thread.interrupted()) {
-			Socket s = serverSocket.accept();
+			Socket s;
+			try {
+				s = serverSocket.accept();
+			} catch (IOException e) {
+				if (!Thread.interrupted()) {
+					logger.log(Level.WARNING, "IO error processing incoming connection: "+ e.getMessage(), e);
+				}
+				break;
+			}
+
 			logger.fine("Connection accepted from "+ s.getRemoteSocketAddress());
 			VegaHttpServerConnection c = new VegaHttpServerConnection(params);
-			c.bind(s, params);
+			try {
+				c.bind(s, params);
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "Unexpected error: " + e.getMessage(), e);
+				continue;
+			}
+
 			executor.execute(new ConnectionTask(httpService, c, HttpProxy.this));
 		}
+
+		executor.shutdownNow();
 	}
 
 	@Override
 	public void stopProxy() {
 		proxyThread.interrupt();
+		try {
+			// close the socket to interrupt accept() in proxyAcceptLoop()
+			serverSocket.close();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Unexpected exception closing server socket: " + e.getMessage(), e);
+		}
 	}
 
 	@Override

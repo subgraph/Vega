@@ -102,18 +102,24 @@ public class TransactionViewer extends Composite {
 	private SelectionListener createForwordButtonListener() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if(direction == TransactionDirection.DIRECTION_REQUEST)
+				if(direction == TransactionDirection.DIRECTION_REQUEST) {
 					try {
 						manager.forwardRequest();
 					} catch (URISyntaxException e1) {
-						// TODO Auto-generated catch block
+						// XXX
 						e1.printStackTrace();
 					} catch (UnsupportedEncodingException e2) {
-						// TODO Auto-generated catch block
+						// XXX
 						e2.printStackTrace();
 					}
-				else
-					manager.forwardResponse();
+				} else {
+					try {
+						manager.forwardResponse();
+					} catch (UnsupportedEncodingException e1) {
+						// XXX
+						e1.printStackTrace();
+					}
+				}
 			}
 			
 		};

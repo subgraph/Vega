@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.http.Header;
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -12,6 +11,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.CharArrayBuffer;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
@@ -23,19 +23,24 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 public class HttpRequestParser extends ParserBase {
 	final private IHttpRequestBuilder builder;
 
+	public HttpRequestParser(final IHttpRequestBuilder builder) {
+		this.builder = builder;
+	}
+	
 	public HttpRequestParser(IHttpRequestEngine requestEngine) {
 		builder = requestEngine.createRequestBuilder();
 	}
 
 	/**
-	 * Parse a manually-entered request to build a HttpUriRequest.
+	 * Parse a manually-entered HTTP request to build a HttpUriRequest.
 	 * 
-	 * @param content
-	 * @return HttpUriRequest, or null if the 
+	 * @param content Manually-entered HTTP request.
+	 * @param params Request parameters, or null.
+	 * @return HttpUriRequest, or null if the given HTTP request was empty. 
 	 * @throws URISyntaxException
 	 * @throws UnsupportedEncodingException
 	 */
-	public HttpUriRequest parseRequest(final String content) throws URISyntaxException, UnsupportedEncodingException {
+	public HttpUriRequest parseRequest(final String content, HttpParams params) throws URISyntaxException, UnsupportedEncodingException {
 		final CharArrayBuffer buf = new CharArrayBuffer(0);
 		buf.append(content);
 		final ParserCursor bufCursor = new ParserCursor(0, buf.length()); 
@@ -44,12 +49,14 @@ public class HttpRequestParser extends ParserBase {
 		if (parseRequestLine(parser, builder, buf, bufCursor) < 0) {
 			return null;
 		}
-		parseRequestHeaders(parser, builder, buf, bufCursor);
+		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd()) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}
 
+		builder.setParams(params);
+		
 		return builder.buildRequest();
 	}
 	
@@ -97,26 +104,6 @@ public class HttpRequestParser extends ParserBase {
 		builder.setRawRequestLine(lnBuf.toString());
 		
 		return 0;
-	}
-
-	private void parseRequestHeaders(final LineParser parser, final IHttpRequestBuilder builder, final CharArrayBuffer buf, final ParserCursor bufCursor) {
-		final CharArrayBuffer lnBuf = new CharArrayBuffer(0);
-		while (true) {
-			lnBuf.clear();
-			int idxPos = bufCursor.getPos();
-			if (readLineHeader(buf, bufCursor, lnBuf) > 0) {
-				try {
-					Header header = parser.parseHeader(lnBuf); // REVISIT don't want an extra step
-					builder.addHeader(header.getName(), header.getValue());
-				} catch (ParseException e) {
-					// for now we'll move the cursor back so the line gets treated as the start of the body
-					bufCursor.updatePos(idxPos);
-					return;
-				}
-			} else {
-				break;
-			}
-		}
 	}
 	
 }

@@ -9,6 +9,7 @@ Import-Package: com.subgraph.vega.api.html,
  org.apache.http;version="4.0.0",
  org.apache.http.client,
  org.apache.http.client.methods,
+ org.apache.http.params;version="4.0.0",
  org.apache.http.protocol;version="4.0.0",
  org.jsoup.nodes,
  org.w3c.dom.html2

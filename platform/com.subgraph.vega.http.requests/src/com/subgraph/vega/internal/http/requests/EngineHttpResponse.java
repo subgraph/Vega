@@ -23,7 +23,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final URI requestUri;
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
-	private final HttpResponse rawResponse;
+	private /*final*/ HttpResponse rawResponse;
 	private final long requestTime;
 	private final IHTMLParser htmlParser;
 	
@@ -50,10 +50,15 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
-	public HttpResponse getRawResponse() {
-		return rawResponse;
+	public synchronized void setRawResponse(HttpResponse response) {
+		rawResponse = response;
 	}
 
+	@Override
+	public synchronized HttpResponse getRawResponse() {
+		return rawResponse;
+	}
+	
 	@Override
 	public String getBodyAsString() {
 		synchronized (rawResponse) {

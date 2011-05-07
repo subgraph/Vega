@@ -9,10 +9,12 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 import com.subgraph.vega.ui.http.preferencepage.PreferenceConstants;
 
@@ -27,7 +29,9 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceTracker modelTracker;
 	private ServiceTracker proxyServiceTracker;
 	private ServiceTracker httpRequestEngineFactoryServiceTracker;
-	
+	private ServiceTracker contentAnalyzerFactoryTracker;
+	private ServiceTracker scannerModuleRegistryTracker;
+
 	private ProxyStatusLineContribution statusLineContribution = new ProxyStatusLineContribution();
 	
 	/**
@@ -53,6 +57,12 @@ public class Activator extends AbstractUIPlugin {
 		
 		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
 		httpRequestEngineFactoryServiceTracker.open();
+
+		contentAnalyzerFactoryTracker = new ServiceTracker(context, IContentAnalyzerFactory.class.getName(), null);
+		contentAnalyzerFactoryTracker.open();
+
+		scannerModuleRegistryTracker = new ServiceTracker(context, IScannerModuleRegistry.class.getName(), null);
+		scannerModuleRegistryTracker.open();
 	}
 
 	/*
@@ -95,7 +105,15 @@ public class Activator extends AbstractUIPlugin {
 	public IHttpRequestEngineFactory getHttpRequestEngineFactoryService() {
 		return (IHttpRequestEngineFactory) httpRequestEngineFactoryServiceTracker.getService();
 	}
+
+	public IContentAnalyzerFactory getContentAnalyzerFactoryService() {
+		return (IContentAnalyzerFactory) contentAnalyzerFactoryTracker.getService();
+	}
 	
+	public IScannerModuleRegistry getScannerModuleRegistry() {
+		return (IScannerModuleRegistry) scannerModuleRegistryTracker.getService();
+	}
+
 	public ContributionItem getStatusLineContribution() {
 		return statusLineContribution;
 	}
