@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-	<title>Directory Traversal</title>
+	<title>Possible Directory Traversal</title>
 	
-	<class>Information</class>
+	<class>Access Validation Error</class>
 	<severity>High</severity>
 
+	<impact>Vega has detected a possible directory traversal attack.</impact>
+	<impact>Directory traversal attacks may allow for unauthorized file access, including files outside of the webroot.</impact>
+	<impact>This could aid in an attacker obtaining unauthorized access to the server.</impact>
+
+	<remediation>The developer should investigate the page and the parameter to manually verify that a path traversal vulnerability exists.</remediation>
+	<remediation>To prevent this type of vulnerability, the developer should canonicalize the path of any filesystem resource that has a path composed of externally-supplied input and then perform an authorization check prior to access.</remediation>
+	<remediation>The realpath() library call will return the canonical path of the resource. It is implemented in PHP, Perl, and Python.</remediation>
+	<remediation>For Ruby frameworks, File.expand_path can be used.</remediation>
+	<remediation>GetFullPath() can be used on ASP.NET applications.</remediation>
+	<remediation>getCanonicalPath() can be used in Java code.</remediation>
+	<remediation>Additional protection against unauthorized access to filesystem resources can be obtained by using chroot() or similar mechanisms to limit filesystem access to the web application and http server process, although this can be difficult to manage.</remediation>
+
 	<discussion>
-		Discuss issue here.
+	Directory traversal, also known as "path traversal", is a type of vulnerability that occurs when externally-supplied input is used to construct the path to some filesystem resource that is later accessed by the web application. The vulnerability is manifested when malicious users embed path parts such as "../" (on UNIX systems) to refer to resources relative to a parent directory. 
 	</discussion>
 
-  <impact>
-		Explain impact here.
-  </impact>
-
-  <remediation>
-    Investigate further.
-  </remediation>
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Directory_traversal">Directory Traversal (Wikipedia)</url>
+		<url address="https://www.owasp.org/index.php/Path_Traversal">Path Traversal (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/File_System#Path_traversal">Avoiding Path Traversal (OWASP)</url>
+	</references>
 
 </alert>
 

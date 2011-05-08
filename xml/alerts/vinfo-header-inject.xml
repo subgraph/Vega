@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Blank Body Detected</title>
+<title>Possible HTTP Header Injection</title>
 	
-	<class>Information</class>
-	<severity>Info</severity>
+	<class>Input Validation Error</class>
+	<severity>Medium</severity>
+
+	<impact>HTTP header injection vulnerabilities allow for attackers to forge request responses from servers.</impact>
+	<impact>Attackers may be able to poison the caches of caching HTTP proxies</impact>
+
+	<remediation>Some languages/platforms offer some protection against this class of attacks. On versions of PHP4.4 and later, the header() function will only send one header at a time.</remediation>
+	<remediation>If a safe function is not found, the externally supplied data used in header fields must have newlines sanitized before inclusion in the response header.</remediation>
 
 	<discussion>
-    Vega has detected that this URI returned a blank body response.  
+	HTTP Header injection vulnerabilities can occur when an application or server uses externally supplied input to construct the headers in the HTTP response. This can be a vulnerability in environments where multiple hosts are accessing HTTP servers through a proxy. Forged HTTP responses can be used to poison proxy caches.
 	</discussion>
 
-  <impact>
-    This may be indicative of an error condition and should be manually investigated further.
-  </impact>
-
-  <remediation>
-    Investigate further.
-  </remediation>
+	<references>
+		<url address="http://en.wikipedia.org/wiki/HTTP_header_injection">HTTP Header Injection (Wikipedia)</url>
+		<url address="https://www.owasp.org/index.php/HTTP_Response_Splitting">HTTP Response Splitting</url>
+		<url address="https://www.owasp.org/index.php/HTTP_Request_Smuggling">HTTP Request Smuggling</url>
+	</references>
 
 </alert>
 

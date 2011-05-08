@@ -5,5 +5,18 @@
 	<class>Information</class>
 	<severity>Info</severity>		
 	
-	<impact>WSDL code has been detected.</impact>
+	<impact>Vega has detected a possible WSDL definition.</impact>
+	<impact>This may mean that there are web services interfaces that are worth further investigation.</impact>
+	<impact>This finding does not constitute a vulnerability.</impact>
+
+	<remediation>This is a purely informational finding.</remediation>
+
+	<discussion>WSDL (Web Services Description Language) is an XML document that describes web services. The description includes the connection details and available operations. Web services clients can interpret the WSDL to understand the available services and how to use them. A WSDL is of interest because it may expose web service operations where vulnerabilities can be present. In some environments, the WSDL definition itself may constitute an unacceptable exposure.
+	</discussion>
+	
+	<references>
+		<url address="http://www.w3.org/TR/wsdl">WSDL (W3C)</url>
+		<url address="http://en.wikipedia.org/wiki/Web_Services_Description_Language">Web Services Description Language</url>
+	</references>
+
 </alert>

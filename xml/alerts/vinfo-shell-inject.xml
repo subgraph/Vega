@@ -5,17 +5,22 @@
 	<class>Information</class>
 	<severity>High</severity>
 
+	<impact>Vega has detected a possible command injection vulnerability.</impact>
+	<impact>Attackers may be able to run commands on the server.</impact>
+	<impact>Exploitation may lead to unauthorized remote access.</impact>
+
+	<remediation>Developers should examine the code corresponding to the page in detail to determine if the vulnerability exists.</remediation>
+	<remediation>Execution of system commands through a command interpreter, such as with system(), should be avoided.</remediation>
+	<remediation>If absolutely necessary, the developer should take extra care with validating the input before it is passed to the interpreter.</remediation>
+
 	<discussion>
-		Discuss issue here.
+	Command injection vulnerabilities often occur when inadequately sanitized externally supplied data is used to execute system commands through a command interpreter, or shell. Vulnerabilities such as these can be exploited by using shell metacharacters to execute commands that were not intended to be executed by the application developer. The system() function, and derivatives, are often responsible, as these functions are very simple to use.
 	</discussion>
 
-  <impact>
-		Explain impact here.
-  </impact>
-
-  <remediation>
-    Investigate further.
-  </remediation>
+	<references>
+		<url address="https://www.owasp.org/index.php/Command_Injection">Command Injection (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/Reviewing_Code_for_OS_Injection">Reviewing Code for OS Injection (OWASP)</url>
+	</references>
 
 </alert>
 
