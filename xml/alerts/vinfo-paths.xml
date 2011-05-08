@@ -3,11 +3,24 @@
 <title>Local Filesystem Paths Found</title>
 	
 	<class>Information</class>
-	<severity>Info</severity>
+	<severity>Low</severity>
+
+	<impact>Vega has detected what may be absolute filesystem paths in scanned content.</impact>
+	<impact>Disclosure of these paths reveals information about the filesystem layout.</impact>
+	<impact>This information can be sensitive, its disclosure can increase the chances of success for other attacks.</impact>
+
+	<remediation>Absolute paths are often found in error output.</remediation>
+	<remediation>Both the system administrators and developers should be made aware, as the problem may be due to an application error or server misconfiguration.</remediation>
+	<remediation>Error output containing sensitive information such as absolute system paths should not be sent to remote clients on production servers.</remediation>
+	<remediation>This output should be sent to another output stream, such as an error log.</remediation>
+
+
 	<discussion>
-    Found filesystem paths.
+	Vega has detected a possible absolute filesystem path (i.e. one that is not relative to the web root). This information is sensitive, as it may reveal things about the server environment to an attacker. Knowing filesystem layout can increase the chances of success for blind attacks. Full system paths are very often found in error output. This output should never be sent to clients on production systems. It should be redirected to another output channel (such as an error log) for analysis by developers and system administrators.
 	</discussion>
 	
-	
+	<references>
+		<url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+	</references>	
 </alert>
 

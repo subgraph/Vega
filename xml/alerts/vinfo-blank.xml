@@ -6,7 +6,7 @@
 	<severity>Info</severity>
 
 	<discussion>
-    Vega has detected that this URI returned a blank body response.  
+	    Vega has detected that this URI returned a blank body response.  
 	</discussion>
 
   <impact>

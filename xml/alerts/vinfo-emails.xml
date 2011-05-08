@@ -4,10 +4,23 @@
 	
 	<class>Information</class>
 	<severity>Info</severity>
+
+	<impact>E-mail addresses exposed to the Internet will be scraped by spambots and added to spam lists.</impact>
+	<impact>E-mail addresses can also be used in targeted and phishing attacks.</impact>
+	<impact>E-mail addresses could be used to more accurately guess application usernames.</impact>
+
+	<remediation>If the e-mail addresses are those of users, developers should investigate why they are being output and try to remove or obfuscate them.</remediation>
+	<remediation>E-mail addresses embedded in user-supplied content should be filtered or obfuscated to prevent unintented disclosure.</remediation>
+	<remediation>It is common that e-mail addresses may be automatically included in third-party components, such as Javascript libraries.</remediation>
+	<remediation>Another possibility is that the server is automatically configured to include e-mail addresses. Tweaking configuration can usually remove these.</remediation>
+	
 	<discussion>
-    Found email addresses.
+	Vega has found patterns that resemble e-mail addresses in scanned content. These may be user the addresses of system users, addresses inserted in user-supplied content, or third-party addresses embedded in components of the application (such as Javascript libraries). Automatically scraping websites is one way that spammers and phishers collect e-mail addresses for their distribution lists. It is recommended that e-mail addresses not be displayed on exposed parts of the web application, directly or indirectly.
 	</discussion>
 	
-	
+	<references>
+		<url address="http://en.wikipedia.org/wiki/E-mail_address_harvesting">E-mail address harvesting (Wikipedia)</url>
+		<url address="http://techblog.tilllate.com/2008/07/20/ten-methods-to-obfuscate-e-mail-addresses-compared/">Nine ways to obfuscate your e-mail address (Tilllate TechBlog)</url>
+	</references>
 </alert>
 

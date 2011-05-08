@@ -5,17 +5,17 @@
 	<class>Personally Identifiable Information (PII)</class>
 	<severity>High</severity>
 
-	<discussion>
-    Vega has found possible credit card numbers on a resource.
-	</discussion>
+	<impact>Vega has detected a string of digits that have some of the properties of credit card numbers.</impact>
+        <impact>Unauthorized disclosure of this information could lead to fraud, or identity theft.</impact>
+        <impact>Unauthorized disclosure could also lead to regulatory penalties.</impact>
 
-  <impact>
-    Card numbers inadvertantly exposed may result in identity theft of card holders, monetary loss for the merchant or revocation of card processing privileges.
-  </impact>
+	<remediation>This should be investigated to identify the nature of the data matching the detection pattern. The root cause of a disclosure could be test data, a flat file database, or the triggering of some unexpected vulnerability. </remediation>
 
-  <remediation>
-    The recommendation is to investigate further and remove card data as soon as possible.
-  </remediation>
+	<discussion>Vega has detected a string of digits that have similar characteristics to credit card numbers. This should be reviewed carefully (which can be done by examining the server response). </discussion>
+
+	<references>
+		<url address="http://www.merriampark.com/anatomycc.htm">Anatomy of a Credit Card Number</url>
+	</references>
 
 </alert>
 

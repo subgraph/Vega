@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Cookie not set as http only</title>
+<title>Cookie Not Set HTTPOnly</title>
 	
-	<class>Information</class>
+	<class>Environment Error</class>
 	<severity>Info</severity>		
+
+	<impact>Vega detected a cookie that was not set with the HttpOnly flag.</impact>
+	<impact>This means that the cookie value is accessible by Javascript, making it susceptible to stealing via cross-site scripting attacks.</impact>
+
+	<remediation>Cookies used for security sensitive purposes, such as maintaining authenticated sessions, should be set HttpOnly, if possible.</remediation>
+	<remediation>Many server-side application development frameworks include support for setting this flag in a straightforward manner (as a boolean property).</remediation>
+
 	<discussion>
-		The cookie was not set as http only
+		Vega has detected a cookie set by the server that was not set as HttpOnly. The HttpOnly flag was introduced in 2002 for MSIE 6 SP1. All modern browsers support it. The flag indicates to the browser that the cookie should only be transmitted in HTTP request headers and not accessible (i.e. by Javascript) through the DOM. The purpose of this feature is to limit the impact of cross-site scripting vulnerabilities.
 	</discussion>
 	
-	
+	<references>
+		<url address="https://www.owasp.org/index.php/HttpOnly">HttpOnly (OWASP)</url>
+		<url address="http://msdn.microsoft.com/en-us/library/ms533046(v=vs.85).aspx">Mitigating Cross-site Scripting With HTTP-Only Cookies (MSDN)</url>
+		<url address="http://en.wikipedia.org/wiki/HTTP_cookie#Secure_and_HttpOnly">HTTP Cookie (Wikipedia)</url>
+	</references>
+		
 </alert>
 

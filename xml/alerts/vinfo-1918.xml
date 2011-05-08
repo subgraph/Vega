@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>RFC 1918 Addresses Found</title>
+<title>Internal Addresses Found</title>
 	
 	<class>Information</class>
 	<severity>Info</severity>
+
+        <impact>May reveal internal network structure to outside attackers.</impact>
+	<impact>Internal IP addresses that have been disclosed could be used as targets in otherwise blind attacks.</impact>
+
 	<discussion>
-    Found addresses meant for use in internal networks (non-routable on the Internet).
+	Vega has discovered references to internal hosts or networks in publicly accessible content. These addresses may reveal inform an attacker about the internal network structure, increasing the likelihood of blind attacks involving other vulnerabilities.
 	</discussion>
-	
+
+	<remediation>The cause may be related to the code, content, or due to the configuration of the server environment. </remediation>
+	<remediation>It is recommended that the discovered page be inspected to determine where the exposed address originates. </remediation>
+
+	<references>
+		<url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">WASC: Information Leakage</url>
+	</references>	
 	
 </alert>
 

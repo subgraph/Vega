@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>VCS Users Found</title>
+<title>Version Control String Found</title>
 	
 	<class>Information</class>
 	<severity>Info</severity>
+	<impact>Vega has detected a version control string in scanned content.</impact>
+	<impact>These strings can contain developer usernames or reveal other sensitive information about the application.</impact>
+	<impact>This information can be used to help make brute-force or other attacks more likely to succeed.</impact>
+
+	<remediation>Developers should ensure that this information is not included in content that is deployed on production servers. These strings should be also removed from third-party static content if left there by the developer, as it unnecessarily aids application or patchlevel fingerprinting.</remediation>
 	<discussion>
-    Found VCS information.
+	Version control systems (VCSs) are tools for tracking changes to files over time. Some of these systems tag each file with a string indicating the current revision, the last change, and a timestamp. This information may be sensitive and care should be taken that it not be inadvertently exposed on production servers exposed to potentially hostile clients. In addition to exposing usernames or e-mail addresses, these strings can be
 	</discussion>
 	
 	

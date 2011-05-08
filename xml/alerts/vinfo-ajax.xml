@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>AJAX Detected</title>
+<title>Possible AJAX code detected</title>
 	
 	<class>Information</class>
 	<severity>Info</severity>
+
+	<impact>Vega has detected content the use of AJAX, indicating the existence of possible injection points where vulnerabilities may exist.</impact>
+	<impact>The AJAX backend API should be manually inspected for vulnerabilities.</impact>
+
+	<remediation>
+	This is not a vulnerability. This alert is only to flag that code associated with use of AJAX has been detected in scanned content. Backend AJAX interfaces can expose possible vulnerabilities and manual inspection should be included in any comprehensive security assessment.
+	</remediation>
+
 	<discussion>
-    Found AJAX code.
+	AJAX (Asynchronous Javascript and XML) refers to a collection of technologies used to make the user experience of web applications more interactive. AJAX functionality often involves the asynchronous sending of requests and processing of their responses using Javascript, without requiring page reloads. These requests are made to (effectively) RPC endpoints, which accept parameters, making them injection points where vulnerabilities could exist. 
 	</discussion>
 	
-	
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Ajax_(programming)">AJAX (Wikipedia)</url>
+		<url address="http://en.wikipedia.org/wiki/XMLHttpRequest">XMLHttpRequest (Wikipedia)</url>
+	</references>	
 </alert>
 

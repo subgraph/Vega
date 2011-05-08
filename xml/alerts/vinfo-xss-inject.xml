@@ -2,19 +2,29 @@
 <alert>
 <title>Cross Site Scripting</title>
 	
-	<class>Information</class>
-	<severity>Info</severity>
+	<class>Input Validation</class>
+	<severity>High</severity>
 
-	<discussion>
-		Discuss issue here.
-	</discussion>
+	<impact>Untrustworthy data that is external in origin is possibly being output by the server to clients without adequate filtering.</impact>
+	<impact>Consequently, it may be possible for a third-party to inject malicious script code that runs in the context of another user visiting the server.</impact>
+	<impact>This code would be able to manipulate the DOM of the target user and, potentially, the cookie set by the server.</impact>
+	<impact>The precise impact depends greatly on the application.</impact>
+	<impact>XSS is generally a threat to web applications which have authenticated users or are otherwise security sensitive.</impact>
+	<impact>Malicious code may be able to manipulate the content of the site, changing its appearance and/or function for another user.</impact>
+	<impact>This includes modifying the behavior of the web application (such as redirecting forms, etc).</impact>
+	<impact>The code may also be able to perform actions within the application without user knowledge.</impact>
+	<impact>Script code can also obtain and retransmit cookie values if they haven't been set HttpOnly.</impact>
 
-  <impact>
-		Explain impact here.
-  </impact>
+	<remediation>The developer must identify how the untrustworthy data is being output to the client without adequate filtering.</remediation>
+	<remediation>There are various language/platform specific techniques for filtering untrustworthy data.</remediation>
+	<remediation>General rules for preventing XSS can be found in the recommended OWASP XSS Prevention Cheat Sheet (see references).</remediation>	
 
-  <remediation>
-    Investigate further.
-  </remediation>
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Cross-site_scripting">Cross-Site Scripting (Wikipedia)</url>
+		<url address="https://www.owasp.org/index.php/XSS">Cross-Site Scripting (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">XSS Prevention Cheat Sheet</url>
+		<url address="http://projects.webappsec.org/w/page/13246920/Cross-Site-Scripting">Cross-Site Scripting (WASC)</url>
+	</references>
+
 </alert>
 

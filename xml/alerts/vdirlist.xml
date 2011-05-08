@@ -6,13 +6,16 @@
 	<severity>Low</severity>		
 	
 	<impact> The server is outputting the contents of directories.</impact>
-  <impact> This could expose files not meant for user retrieval (old htaccess files, backups, source code).</impact>
-  <impact> The directory listing may additionally provide useful information about the system layout and characteristics, such as naming conventions used by the developers and administrators.</impact>
-  <impact> This information can increase the probability of success for blind attacks and brute force guessing.</impact>
+	<impact> This could expose files not meant for user retrieval (old htaccess files, backups, source code).</impact>
+	<impact> The directory listing may additionally provide useful information about the system layout and characteristics, such as naming conventions used by the developers and administrators.</impact>
+	<impact> This information can increase the probability of success for blind attacks and brute force guessing.</impact>
 
-  <discussion> Listing directory contents when no index file is present in a common misconfiguration. The directory contents can provide useful information to an attacker, especially if there are files that are not meant to be accessible, such as source code or backups.  The directory listing may also provide useful information about the habits of the server administration and/or web developers, such as file naming convention, that could be used to increase the probable success of brute-force or other attacks.</discussion>
+	<discussion> Listing directory contents when no index file is present in a common misconfiguration. The directory contents can provide useful information to an attacker, especially if there are files that are not meant to be accessible, such as source code or backups.  The directory listing may also provide useful information about the habits of the server administration and/or web developers, such as file naming convention, that could be used to increase the probable success of brute-force or other attacks.
+	</discussion>
 
 	<remediation>
-	  For Apache, do one of the following: add "IndexIgnore *" to the directory's .htaccess file, or alternatively remove "Indexes" from the line "Options All Indexes FollowSymLinks MultiViews" in your Apache configuration file.  For lighttpd, change "dir-listing.activate = "enable"" to "dir-listing.activate = "disable"" in your lighttpd configuration file.
+	  For Apache, do one of the following: add "IndexIgnore *" to the directory's .htaccess file, or alternatively remove "Indexes" from the line "Options All Indexes FollowSymLinks MultiViews" in your Apache configuration file.  </remediation>
+	<remediation>For lighttpd, change "dir-listing.activate = "enable"" to "dir-listing.activate = "disable"" in your lighttpd configuration file.
 	</remediation>
+
 </alert>

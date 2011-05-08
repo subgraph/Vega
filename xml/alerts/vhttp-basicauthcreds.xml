@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>HTTP authentication credentials detected</title>
+<title>URI Credentials Detected</title>
 	
 	<class>Information</class>
 	<severity>Medium</severity>		
 	
-	<impact>HTTP authentication credentials have been detected at this URL. These credentials could be abused to allow unauthorized access to server resources.</impact>
+	<impact>Vega has detected a link that includes HTTP Basic authentication credentials in scanned content.</impact>
+	<impact>The exposure of these credentials may allow unauthorized access to server resources.</impact>
+
+	<remediation>The link should be investigated by developers to determine if they are valid credentials and to assess the impact of their disclosure.</remediation>
+	<remediation>The code or static content responsible for this disclosure should be corrected.</remediation>
+	<remediation>The password should be changed.</remediation>
+
+	<discussion>It's possible to define a URI that includes a password in the userinfo section of the URI, in the form of http://username:password@host. Browsers can support URI credentials for authenticating to both HTTP servers (via Basic authentication) and FTP servers. The inclusion of credentials in URIs is considered a security risk as these credentials can be left exposed to attackers and/or transmitted in the clear. Disclosure of credentials can lead to unauthorized access.
+	</discussion>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/URI_scheme">URI Scheme (Wikipedia)</url>
+		<url address="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396 - Sections 3.2.2 and 7 (IETF)</url>
+	</references>
 </alert>
