@@ -42,17 +42,23 @@ public class ScanAlertModel implements IScanAlertModel {
 
 	@Override
 	public IScanAlert createAlert(String type, String key) {
-		return alertFactory.createAlert(key, type, -1);
+		return alertFactory.createAlert(key, type, -1, -1);
 	}
 
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
-		return alertFactory.createAlert(key, type, requestId);
+		return alertFactory.createAlert(key, type, -1, requestId);
+	}
+
+	@Override
+	public IScanAlert createAlert(String type, String key, long scanId,
+			long requestId) {
+		return alertFactory.createAlert(key, type, scanId, requestId);
 	}
 
 	@Override
 	public IScanAlert createAlert(String type) {
-		return alertFactory.createAlert(null, type, -1);
+		return alertFactory.createAlert(null, type, -1, -1);
 	}
 
 	@Override

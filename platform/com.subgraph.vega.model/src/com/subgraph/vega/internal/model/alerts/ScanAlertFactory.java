@@ -18,7 +18,7 @@ public class ScanAlertFactory {
 		this.xmlRepository = xmlRepository;
 	}
 	
-	ScanAlert createAlert(String key, String name, long requestId) {
+	ScanAlert createAlert(String key, String name, long scanId, long requestId) {
 		Document doc = xmlRepository.getDocument("alerts/"+ name +".xml");
 		if(doc == null)
 			doc = xmlRepository.getDocument("alerts/default.xml");
@@ -31,7 +31,7 @@ public class ScanAlertFactory {
 			return null;
 		final Severity severity = parseSeverity(alert);
 		final String title = parseTitle(alert);
-		return new ScanAlert(key, name, title, severity, requestId);
+		return new ScanAlert(key, name, title, severity, scanId, requestId);
 	}
 	
 

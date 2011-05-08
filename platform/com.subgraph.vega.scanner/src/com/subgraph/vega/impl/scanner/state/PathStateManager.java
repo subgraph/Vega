@@ -50,6 +50,10 @@ public class PathStateManager {
 		scanId = r.nextInt(999999) + 1;
 	}
 
+	public int getScanId() {
+		return scanId;
+	}
+
 	public IScannerModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}
