@@ -1,32 +1,54 @@
 package com.subgraph.vega.ui.hexeditor;
 
 public class HexEditModelItem {
-	private final int offset;
+	private final int itemOffset;
 	private final byte[] data;
+	private final int rowCount;
+	private final int rowLength;
 	
-	HexEditModelItem(int offset, byte[] data) {
-		if(data.length > HexEditModel.ROW_LENGTH)
-			throw new IllegalArgumentException();
-		this.offset = offset;
+	
+	HexEditModelItem(int offset, byte[] data, int rowCount, int rowLength) {
+		this.itemOffset = offset;
 		this.data = data;
+		// XXX We can calculate this, right?
+		this.rowCount = rowCount;
+		this.rowLength = rowLength;
 	}
 	
 	int getOffset() {
-		return offset;
+		return itemOffset;
 	}
 	
-	int getByteAt(int index) {
-		if(index < 0 || index >= HexEditModel.ROW_LENGTH)
-			throw new IllegalArgumentException();
-		
-		if(index >= data.length)
-			return -1;
-		
-		return data[index] & 0xFF;
+	int getRowByteCount() {
+		return rowCount;
 	}
-	
-	byte[] getData() {
-		return data;
+	int getRowLength() {
+		return rowLength;
 	}
 
+	int getByteAt(int index) {
+		if(index < 0 || index >= rowLength)
+			throw new IllegalArgumentException();
+		
+		if(index + itemOffset >= data.length)
+			return -1;
+		
+		return data[index + itemOffset] & 0xFF;
+	}
+	
+	void setByteAt(int index, int value) {
+		if(index < 0 || index >= rowCount)
+			throw new IllegalArgumentException();
+		data[index + itemOffset] = (byte) value;
+	}
+
+	void getData(byte[] buffer) {
+		getData(buffer, 0);
+	}
+
+	void getData(byte[] buffer, int offset) {
+		if((buffer.length - offset) < rowCount)
+			throw new IllegalArgumentException();
+		System.arraycopy(data, itemOffset, buffer, offset, rowCount);
+	}
 }

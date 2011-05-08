@@ -249,7 +249,9 @@ public class Workspace implements IWorkspace {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				db.commit();
+				if(!db.ext().isClosed()) {
+					db.commit();
+				}
 			}
 		};
 	}

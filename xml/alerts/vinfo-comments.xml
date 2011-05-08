@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Interesting HTML comments</title>
+<title>Interesting HTML Comments Detected</title>
 	
 	<class>Information</class>
 	<severity>Info</severity>		
 	
-	<impact>HTML comments could indicate security-relevant info.</impact>
+	<impact>Vega has detected comments in scanned content that may include sensitive comment.</impact>
+	<impact>Comments left by developers can include source code, usernames, passwords, or configuration settings.</impact>
+	<impact>This information, while not visible on the rendered page, is still transmitted to the client.</impact>
+	<impact>Disclosure of sensitive information could be used by an attacker to perform more intelligent attacks.</impact>
+
+	<remediation>The developers should investigate the flagged link and manually confirm the presence of comments containing sensitive information. Any such comments should be removed.</remediation>
+	
+	<discussion>Programming and markup languages allow for arbitrary text or segments of code to be marked as comments, meaning that they are in the source code file but excluded from parsing and execution or rendering. Some comments, including HTML comments, are transmitted to the client. Comments written by developers containing sensitive information can constitute a vulnerability. Additionally, developers sometimes comment out server-side code that would never otherwise be seen by clients as HTML comments, resulting in it beign transmitted to clients as part of the web application output. *need external refs</discussion>
 </alert>

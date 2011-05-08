@@ -20,7 +20,7 @@ function run() {
 
 	var ruby = [ "Ruby on Rails application could not be started</h1>", ];
 
-	var django = [ "PythonHandler django.core.handlers.modpython", "t = loader.get_template(template_name) # You need to create a 404.html template.", "<h2>Traceback <span>(innermost last)</span></h2>" ];
+	var django = [ "you have <code>DEBUG = True</code>", "<div id=\"pastebinTraceback\" class=\"pastebin\">", "PythonHandler django.core.handlers.modpython", "t = loader.get_template(template_name) # You need to create a 404.html template.", "<h2>Traceback <span>(innermost last)</span></h2>" ];
 
 	var java = [ "[java.lang.", "class java.lang.", "java.lang.NullPointerException", "java.rmi.ServerException", "at org.apache.", "full exception chain stacktrace" ];
 
@@ -30,7 +30,8 @@ function run() {
 		if (x>=0) {
 			htmlres = 1;
 		}
-	}
+	} 
+
 	for (i=0;i<=php.length-1;i+=1) {
 		x = response.bodyAsString.indexOf(php[i]);
 		if (x>=0) {
@@ -53,6 +54,7 @@ function run() {
 		x = response.bodyAsString.indexOf(django[i]);
 		if (x>=0) {
 			djangores = 1;
+			print("test");
 		}
 	}
 	for (i=0;i<=java.length-1;i+=1) {
@@ -63,7 +65,7 @@ function run() {
 	}
 
 	if(htmlres) {
-		model.alert("vinfo-errorpages-html", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );
+		model.alert("vinfo-errorpages-html", {"output": response.bodyAsString.substring(0,200), "resource": httpRequest.requestLine.uri, response: response } );
 	}
 	if(phpres) {
 		model.alert("vinfo-errorpages-php", {"output": response.bodyAsString, "resource": httpRequest.requestLine.uri, response: response } );

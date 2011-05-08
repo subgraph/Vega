@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>XML Injection</title>
+<title>Possible XML Injection</title>
 	
-	<class>Information</class>
-	<severity>Info</severity>
+	<class>Input Validation</class>
+	<severity>Medium</severity>
+
+	<impact>Vega has detected that it may be possible to corrupt the structure of a server-side XML document.</impact>
+	<impact>This could affect the logic of the application, depending on how the XML document is used.</impact>
+	<impact>An XML injection vulnerability can lead to a loss of integrity of the data used or stored by the application.</impact>
+	<impact>XML may be an injection vector that bypasses content filters (e.g. including javascript in a CDATA section).</impact>
 
 	<discussion>
-		Discuss issue here.
+	Vega has detected a possible XML injection vulnerability. XML injection can occur when externally supplied data that has not been sufficiently validated is used to create an XML document. It is possible for this data to corrupt the structure of the documents. The possible consequences depend on the XML document and what it is used for.
 	</discussion>
 
-  <impact>
-		Explain impact here.
-  </impact>
+  	<remediation>
+	Developers should investigate the code to manually verify that an XML injection vulnerability does exist.	
+  	</remediation>
+	<remediation>
+	Characters that can be interpreted as XML should be filtered. 	
+	</remediation>
 
-  <remediation>
-    Investigate further.
-  </remediation>
-
+  <references>
+    <url address="https://www.owasp.org/index.php/Interpreter_Injection#XML_Injection">XML Injection (OWASP)</url>
+    <url address="https://www.owasp.org/index.php/Testing_for_XML_Injection">Testing for XML Injection (OWASP)</url>
+    <url address="http://projects.webappsec.org/w/page/13247004/XML-Injection">XML Injection (WASC)</url>
+  </references>
 </alert>
 

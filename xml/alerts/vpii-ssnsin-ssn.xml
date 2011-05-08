@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Social Security Number detected</title>
+<title>Possible Social Security number detected</title>
 	
 	<class>Information</class>
 	<severity>High</severity>		
 	
-	<impact>A social security number has been detected. Misuse of this number could lead to fraud, or identity theft.</impact>
+	<impact>Unauthorized disclosure of this information could lead to fraud, or identity theft.</impact>
+	<impact>Unauthorized disclosure could also lead to regulatory penalties.</impact>
+
+	<remediation>This should be investigated to identify the nature of the data matching the detection pattern. The root cause of a disclosure could be test data, a flat file database, or the triggering of some unexpected vulnerability. </remediation>
+
+	<discussion>Vega has detected a numerical pattern matching the structure of a social security number in scanned content. This could be a false positive against a pattern with the same characteristics. </discussion>
 </alert>

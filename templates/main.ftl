@@ -19,7 +19,7 @@
   doc.alert.impact
 />
 
-<@remediation
+<@remediationsection
   doc.alert.remediation
 />
 

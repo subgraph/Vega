@@ -56,11 +56,15 @@
 </#if>
 </#macro>
 
-<#macro remediation text>
-<#if defined(text)>
+<#macro remediationsection remediation>
+<#if defined(remediation)>
 <div class="section" id="remediationsection">
 <h2>Remediation</h2>
-${text}
+<ul>
+  <#list remediation as item>
+    <li>${item}</li>
+  </#list>
+</ul>
 </div>
 </#if>
 </#macro>
