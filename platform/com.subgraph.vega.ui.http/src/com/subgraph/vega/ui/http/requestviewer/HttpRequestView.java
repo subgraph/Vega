@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ViewPart;
 
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.web.IWebEntity;
@@ -65,9 +67,16 @@ public class HttpRequestView extends ViewPart {
 
 	public void  focusOnRecord(long requestId) {
 		final Object inputObj = tableViewer.getInput();
-		if(!(inputObj instanceof IRequestLog))
+		if(!(inputObj instanceof IModel)) {
 			return;
-		final IRequestLog requestLog = (IRequestLog) inputObj;
+		}
+		final IModel model = (IModel) inputObj;
+		final IWorkspace workspace = model.getCurrentWorkspace();
+		if(workspace == null) {
+			return;
+		}
+		
+		final IRequestLog requestLog = workspace.getRequestLog();
 		final IRequestLogRecord record = requestLog.lookupRecord(requestId);
 		if(record == null)
 			return;
