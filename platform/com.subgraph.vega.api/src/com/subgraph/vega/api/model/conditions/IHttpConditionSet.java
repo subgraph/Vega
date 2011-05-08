@@ -13,4 +13,5 @@ public interface IHttpConditionSet {
 	void clearConditions();
 	List<IHttpCondition> getAllConditions();
 	IHttpConditionManager getConditionManager();
+	void setMatchOnEmptySet(boolean flag);
 }

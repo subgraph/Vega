@@ -21,6 +21,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	private final String name;
 	private final List<IHttpCondition> conditionList = new ActivatableArrayList<IHttpCondition>();
+	private boolean matchOnEmptySet;
 	private transient HttpConditionManager conditionManager;
 	
 	HttpConditionSet(String name, HttpConditionManager conditionManager) {
@@ -52,7 +53,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
 			if (conditionList.size() == 0) {
-				return false;
+				return matchOnEmptySet;
 			}
 			for(IHttpCondition c: conditionList) {
 				if(c.isEnabled() && !c.matches(request, response))
@@ -122,6 +123,12 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 			((AbstractCondition) c).filterRequestLogQuery(query);
 		}
 		return query.execute();		
+	}
+
+	@Override
+	public void setMatchOnEmptySet(boolean flag) {
+		activate(ActivationPurpose.WRITE);
+		matchOnEmptySet = flag;
 	}
 
 	private transient Activator activator;
