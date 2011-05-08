@@ -9,6 +9,4 @@ public interface IModuleContext {
 	void debug(String msg);
 	void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response, Object ...properties);
 	void publishAlert(String type, String message, HttpUriRequest request, IHttpResponse response, Object ...properties);
-	
-
 }
