@@ -17,6 +17,9 @@ import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HTTP;
 
+import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
+import com.subgraph.vega.http.requests.custom.HttpRawRequest;
+
 public class UriRequestCreator {
 	private final static String HTTP_SCHEME = "http://";
 	private final static String HTTPS_SCHEME = "https://";
@@ -29,18 +32,19 @@ public class UriRequestCreator {
 
 	public HttpUriRequest createUriRequest(HttpRequest request, boolean isSSL) throws HttpException {
 		final URI uri = getUriForRequest(request, isSSL);
-		final HttpUriRequest uriRequest = methodStringToUriRequest(request.getRequestLine().getMethod(), uri);
-		maybeSetEntity(request, uriRequest);
+		final HttpUriRequest uriRequest;
+		if (request instanceof HttpEntityEnclosingRequest) {
+			HttpEntityEnclosingRawRequest tmp = new HttpEntityEnclosingRawRequest(null, request.getRequestLine().getMethod(), uri);
+			tmp.setEntity(((HttpEntityEnclosingRequest) request).getEntity());
+			uriRequest = tmp;
+		} else {
+			uriRequest = new HttpRawRequest(null, request.getRequestLine().getMethod(), uri);
+		}
 		uriRequest.setParams(request.getParams());
 		uriRequest.setHeaders(request.getAllHeaders());
 		return uriRequest;
 	}
 
-	private void maybeSetEntity(HttpRequest request, HttpUriRequest uriRequest) {
-		if(request instanceof HttpEntityEnclosingRequest && uriRequest instanceof HttpEntityEnclosingRequest) {
-			((HttpEntityEnclosingRequest) uriRequest).setEntity( ((HttpEntityEnclosingRequest) request).getEntity());
-		}
-	}
 	public URI getUriForRequest(HttpRequest request, boolean isSSL) throws HttpException {
 		final String scheme = (isSSL) ? HTTPS_SCHEME : HTTP_SCHEME;
 		final String hostname = getHostname(request);
@@ -55,26 +59,6 @@ public class UriRequestCreator {
 		} catch (URISyntaxException e) {
 			throw new HttpException("Cannot create URI from request because URI format is incorrect.", e);
 		}
-	}
-
-	private HttpUriRequest methodStringToUriRequest(String methodString, URI uri) {
-		final String m = methodString.toUpperCase();
-		if(m.equals("GET"))
-			return new HttpGet(uri);
-		else if(m.equals("POST"))
-			return new HttpPost(uri);
-		else if(m.equals("HEAD"))
-			return new HttpHead(uri);
-		else if(m.equals("PUT"))
-			return new HttpPut(uri);
-		else if(m.equals("DELETE"))
-			return new HttpDelete(uri);
-		else if(m.equals("OPTIONS"))
-			return new HttpOptions(uri);
-		else if(m.equals("TRACE"))
-			return new HttpTrace(uri);
-		else 
-			throw new IllegalArgumentException("Illegal HTTP method name "+ methodString);
 	}
 
 	private String getHostname(HttpRequest request) {

@@ -1,47 +1,71 @@
 package com.subgraph.vega.api.http.requests;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
-public interface IHttpRequestBuilder {
+public  interface IHttpRequestBuilder extends IHttpMessageBuilder {
 	/**
 	 * Set request fields from a HttpRequest provided by IRequestLogRecord. Any previously set fields are unset.
 	 *
 	 * @param request IRequestLogRecord containing HttpRequest.
 	 * @throws URISyntaxException 
 	 */
-	public void setFromRequest(IRequestLogRecord request) throws URISyntaxException;
+	void setFromRequest(IRequestLogRecord record) throws URISyntaxException;
 
 	/**
 	 * Set request fields from a HttpRequest. Any previously set fields are unset.
 	 *
-	 * @param reqest HttpRequest.
+	 * @param request HttpRequest
 	 * @throws URISyntaxException 
 	 */
-	public void setFromRequest(HttpRequest request) throws URISyntaxException;
+	void setFromRequest(HttpRequest request) throws URISyntaxException;
 
-	public void setHost(String host);
-	public String getHost();
-	public void setHostPort(int port);
-	public int getHostPort();
+	/**
+	 * Set the request method, scheme, host, host port, path, and protocol version fields from a RequestLine.
+	 *
+	 * @param requestLine RequestLine 
+	 * @throws URISyntaxException 
+	 */
+	void setFromRequestLine(RequestLine requestLine) throws URISyntaxException;
+
+	/**
+	 * Set the scheme, host, host port, and path from a URI.
+	 * 
+	 * @param uri URI
+	 */
+	void setFromUri(URI uri);
+
+	/**
+	 * Set the scheme, host, and host port from a HttpHost.
+	 *
+	 * @param host HttpHost
+	 */
+	void setFromHttpHost(HttpHost host);
 	
-	public void setMethod(String method);
-	public String getMethod();
-	public void setPath(String path);
-	public String getPath();
-	public String getRequestLine();
+	void setScheme(String scheme);
+	String getScheme();
 
-	public IHttpHeaderBuilder addHeader(String name, String value);
-	public void removeHeader(IHttpHeaderBuilder header);
-	public void swapHeader(int idx1, int idx2);
-	public int getHeaderIdxOf(IHttpHeaderBuilder next);
-	public int getHeaderCnt();
-	public IHttpHeaderBuilder getHeader(int idx);
-	public IHttpHeaderBuilder[] getHeaders();
+	void setHost(String host);
+	String getHost();
+	void setHostPort(int port);
+	int getHostPort();
+	
+	void setMethod(String method);
+	String getMethod();
 
-	public HttpUriRequest buildRequest() throws URISyntaxException;
+	void setPath(String path);
+	String getPath();
+
+	void setRawRequestLine(String line);
+	String getRawRequestLine();
+	String getRequestLine();
+
+	HttpUriRequest buildRequest() throws URISyntaxException;
 }

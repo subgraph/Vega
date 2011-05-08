@@ -82,6 +82,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		}
 		
 		filterCondition = model.addConditionSetTracker(IHttpConditionManager.CONDITION_SET_FILTER, conditionSetListener);
+		filterCondition.setMatchOnEmptySet(true);
 		
 		currentWorkspace = model.addWorkspaceListener(createWorkspaceListener());
 		if(currentWorkspace != null) 
@@ -176,6 +177,8 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	}
 
 	public void setConditionFilter(IHttpConditionSet conditionSet) {
+		if(conditionSet != null)
+			conditionSet.setMatchOnEmptySet(true);
 		final IRequestLog requestLog = currentWorkspace.getRequestLog();
 		filterCondition = conditionSet;
 		requestLog.removeUpdateListener(callback);

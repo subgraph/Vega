@@ -8,6 +8,7 @@ import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
@@ -32,6 +33,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IWorkspace currentWorkspace;
 	private IPathFinder pathFinder;
 
+	private ProxyTransactionManipulator transactionManipulator;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
 
@@ -42,6 +44,8 @@ public class HttpProxyService implements IHttpProxyService {
 				processTransaction(transaction);
 			}
 		};
+
+		transactionManipulator = new ProxyTransactionManipulator(); 
 	}
 
 	public void activate() {
@@ -65,7 +69,7 @@ public class HttpProxyService implements IHttpProxyService {
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
-		proxy = new HttpProxy(proxyPort, interceptor, requestEngine, sslContextRepository);
+		proxy = new HttpProxy(proxyPort, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
 	}
@@ -88,6 +92,11 @@ public class HttpProxyService implements IHttpProxyService {
 		proxy.stopProxy();
 		contentAnalyzer = null;
 		currentWorkspace.unlock();
+	}
+
+	@Override
+	public IHttpProxyTransactionManipulator getTransactionManipulator() {
+		return transactionManipulator;
 	}
 
 	@Override
@@ -134,4 +143,5 @@ public class HttpProxyService implements IHttpProxyService {
 	protected void unsetPathFinder(IPathFinder pathFinder) {
 		this.pathFinder = null;
 	}
+
 }

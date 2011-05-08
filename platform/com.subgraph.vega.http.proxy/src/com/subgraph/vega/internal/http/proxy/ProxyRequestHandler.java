@@ -2,18 +2,15 @@ package com.subgraph.vega.internal.http.proxy;
 
 import java.io.IOException;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpServerConnection;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
@@ -29,9 +26,18 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
+	/**
+	 * Hop-by-hop headers to be removed by this proxy as per RFC2616 section 13.5.1.
+	 */
 	private final static String[] HOP_BY_HOP_HEADERS = {
-		HTTP.CONTENT_LEN, HTTP.TRANSFER_ENCODING, HTTP.CONN_DIRECTIVE, 
-		"Keep-Alive", "Proxy-Authenticate", "TE", "Trailers", "Upgrade"
+		HTTP.CONN_DIRECTIVE, // "Connection"
+		HTTP.CONN_KEEP_ALIVE, // "Keep-Alive"
+		"Proxy-Authenticate",
+		"Proxy-Authorization",
+		"TE",
+		"Trailers",
+		HTTP.TRANSFER_ENCODING, // "Transfer-Encoding"
+		"Upgrade",
 	};
 
 	private final HttpProxy httpProxy;
@@ -50,39 +56,39 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
 
 		try {
-			if (handleRequest(transaction, request, context) == false) {
+			if (handleRequest(transaction, request) == false) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(false);
 				return;
 			}
-			final boolean isSSL = isSslConnection(context);
-			HttpUriRequest uriRequest = uriRequestCreator.createUriRequest(transaction.getRequest(), isSSL);
+
+			HttpUriRequest uriRequest = getUriRequest(transaction, context);
 			BasicHttpContext ctx = new BasicHttpContext();
+			transaction.signalForward();
 			IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
 			if(r == null) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(false);
 				return;
 			}
-
-			transaction.setHttpHost((HttpHost) ctx.getAttribute(ExecutionContext.HTTP_TARGET_HOST));
 
 			if (handleResponse(transaction, r) == false) {
 				response.setStatusCode(503);
-				transaction.signalComplete();
+				transaction.signalComplete(true);
 				return;
 			}
-
+			
 			HttpResponse httpResponse = copyResponse(r.getRawResponse());
-			removeHopByHopHeaders(httpResponse);
+			removeHeaders(httpResponse);
 			response.setStatusLine(httpResponse.getStatusLine());
 			response.setHeaders(httpResponse.getAllHeaders());
 			response.setEntity(httpResponse.getEntity());
+			transaction.signalForward();
 		} catch (InterruptedException e) {
 			response.setStatusCode(503);
 			e.printStackTrace();
 		} finally {
-			transaction.signalComplete();
+			transaction.signalComplete(false);
 		}
 	}
 
@@ -91,34 +97,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		if(!(conn instanceof VegaHttpServerConnection))
 			throw new HttpException("HttpServerConnection is not expected type "+ conn);
 		return ((VegaHttpServerConnection) conn).isSslConnection();
-	}
-
-	private HttpRequest copyRequest(HttpRequest request) {
-		if(request instanceof HttpEntityEnclosingRequest)
-			return copyEntityEnclosingRequest((HttpEntityEnclosingRequest) request);
-		else
-			return copyBasicRequest(request);
-	}
-
-	private HttpRequest copyEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
-		final HttpEntity e = copyEntity(request.getEntity());
-		final BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
-		r.setEntity(e);
-		copyHeaders(request, r);
-		return r;
-	}
-
-	private HttpRequest copyBasicRequest(HttpRequest request) {
-		if(request == null)
-			return null;
-		final HttpRequest r = new BasicHttpRequest(request.getRequestLine());
-		copyHeaders(request, r);
-		return r;
-	}
-
-	private static void copyHeaders(HttpMessage from, HttpMessage to) {
-		for(Header h: from.getAllHeaders())
-			to.addHeader(new BasicHeader(h.getName(), h.getValue()));
 	}
 
 	private HttpEntity copyEntity(HttpEntity entity) {
@@ -135,6 +113,20 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		}
 	}
 
+	private HttpRequest copyRequest(HttpRequest request) {
+		final HttpRequest cp;
+		if (request instanceof HttpEntityEnclosingRequest) {
+			BasicHttpEntityEnclosingRequest cpEntityRequest = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
+			cpEntityRequest.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
+			cp = cpEntityRequest;
+		} else {
+			cp = new BasicHttpRequest(request.getRequestLine());
+		}
+		cp.setHeaders(request.getAllHeaders());
+		cp.setParams(request.getParams());
+		return cp;
+	}
+
 	private HttpResponse copyResponse(HttpResponse originalResponse) {
 		HttpResponse r = new BasicHttpResponse(originalResponse.getStatusLine());
 		r.setHeaders(originalResponse.getAllHeaders());
@@ -142,15 +134,17 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		return r;
 	}
 
-	private void removeHopByHopHeaders(HttpMessage message) {
-		for(String hdr: HOP_BY_HOP_HEADERS) 
+	private void removeHeaders(HttpMessage message) {
+		for(String hdr: HOP_BY_HOP_HEADERS) { 
 			message.removeHeaders(hdr);
+		}
+		message.removeHeaders(HTTP.CONTENT_LEN); 
 	}
 
-	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request, HttpContext context) throws InterruptedException {
-		removeHopByHopHeaders(request);
+	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request) throws InterruptedException {
+		removeHeaders(request);
 		transaction.setRequest(copyRequest(request));
-		
+
 		if (httpProxy.handleTransaction(transaction) == true) {
 			return transaction.getForward();
 		} else {
@@ -158,9 +152,18 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		}
 	}
 
+	private HttpUriRequest getUriRequest(ProxyTransaction transaction, HttpContext context) throws HttpException {
+		HttpUriRequest uriRequest = transaction.getUriRequest();
+		if (uriRequest == null) {
+			final boolean isSSL = isSslConnection(context);
+			uriRequest = uriRequestCreator.createUriRequest(transaction.getRequest(), isSSL);
+			transaction.setUriRequest(uriRequest);
+		}
+		return uriRequest;
+	}
+
 	private boolean handleResponse(ProxyTransaction transaction, IHttpResponse response) throws InterruptedException {
 		transaction.setResponse(response);
-
 		if (httpProxy.handleTransaction(transaction) == true) {
 			return transaction.getForward();
 		} else {

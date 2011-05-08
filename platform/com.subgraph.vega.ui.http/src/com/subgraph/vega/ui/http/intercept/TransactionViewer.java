@@ -1,5 +1,8 @@
 package com.subgraph.vega.ui.http.intercept;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -64,7 +67,6 @@ public class TransactionViewer extends Composite {
 		layout.verticalSpacing = 0;
 		layout.horizontalSpacing = 2;
 		return layout;
-		
 	}
 	
 	private Label createStatusLabel() {
@@ -100,10 +102,24 @@ public class TransactionViewer extends Composite {
 	private SelectionListener createForwordButtonListener() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if(direction == TransactionDirection.DIRECTION_REQUEST)
-					manager.forwardRequest();
-				else
-					manager.forwardResponse();
+				if(direction == TransactionDirection.DIRECTION_REQUEST) {
+					try {
+						manager.forwardRequest();
+					} catch (URISyntaxException e1) {
+						// XXX
+						e1.printStackTrace();
+					} catch (UnsupportedEncodingException e2) {
+						// XXX
+						e2.printStackTrace();
+					}
+				} else {
+					try {
+						manager.forwardResponse();
+					} catch (UnsupportedEncodingException e1) {
+						// XXX
+						e1.printStackTrace();
+					}
+				}
 			}
 			
 		};
@@ -119,8 +135,7 @@ public class TransactionViewer extends Composite {
 			}
 		};
 	}
-	
-	
+
 	private void doConfigure() {
 		int x = configureButton.getBounds().x;
 		int y = configureButton.getBounds().y + configureButton.getBounds().height;
@@ -152,4 +167,9 @@ public class TransactionViewer extends Composite {
 		else
 			httpRequestViewer.setContent(httpContent);
 	}
+
+	public String getContent() {
+		return httpRequestViewer.getContent();
+	}
+
 }

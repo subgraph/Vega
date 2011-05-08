@@ -18,6 +18,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 
@@ -71,4 +72,10 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	public IHttpRequestBuilder createRequestBuilder() {
 		return new HttpRequestBuilder();
 	}
+
+	@Override
+	public IHttpResponseBuilder createResponseBuilder() {
+		return new HttpResponseBuilder();
+	}
+
 }

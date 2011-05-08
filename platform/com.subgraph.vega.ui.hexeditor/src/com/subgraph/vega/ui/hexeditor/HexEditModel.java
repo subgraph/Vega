@@ -1,40 +1,57 @@
 package com.subgraph.vega.ui.hexeditor;
 
 public class HexEditModel {
-	final static int ROW_LENGTH = 16;
+	final static int DEFAULT_ROW_LENGTH = 16;
 	
 	private final byte[] binaryData;
+	private final int rowLength;
 	private final int lineCount;
 	
 	public HexEditModel(byte[] binaryData) {
-		this.binaryData = binaryData;
-		lineCount = (binaryData.length + (ROW_LENGTH - 1)) / ROW_LENGTH;
-		
+		this(binaryData, DEFAULT_ROW_LENGTH);
 	}
-	
+
+	public HexEditModel(byte[] binaryData, int rowLength) {
+		if(rowLength <= 0)
+			throw new IllegalArgumentException();
+		this.binaryData = binaryData;
+		this.rowLength = rowLength;
+		this.lineCount = (binaryData.length + (rowLength - 1)) / rowLength;
+	}
+
+	int getOffsetForLine(int line) {
+		if (line >= lineCount) {
+			return 0;
+		} else {
+			return line * rowLength;
+		}
+	}
+
+	int getLineForOffset(int offset) {
+		if (offset >= binaryData.length) {
+			return 0;
+		} else {
+			return offset / rowLength;
+		}
+	}
+
 	int getLineCount() {
 		return lineCount;
 	}
-	
+
+	HexEditModel getModelForRowLength(int rowLength) {
+		return new HexEditModel(binaryData, rowLength);
+	}
+
 	HexEditModelItem getItemForLine(int line) {
 		if(line >= lineCount)
 			throw new IllegalArgumentException();
-		if(line == lineCount - 1)
-			return getItemForLastLine();
 		
-		final byte[] lineData = new byte[ROW_LENGTH];
-		int lineOffset = ROW_LENGTH * line;
-		System.arraycopy(binaryData, lineOffset, lineData, 0, ROW_LENGTH);
-		return new HexEditModelItem(lineOffset, lineData);
-			
-	}
-	
-	private HexEditModelItem getItemForLastLine() {
-		int lastLineOffset = (ROW_LENGTH * (lineCount - 1));
-		int lastLineLength = binaryData.length - lastLineOffset;
-		byte[] lineData = new byte[lastLineLength];
-		System.arraycopy(binaryData, lastLineOffset, lineData, 0, lastLineLength);
-		return new HexEditModelItem(lastLineOffset, lineData);
-		
+		int lineOffset = rowLength * line;
+		if(line == lineCount - 1) {
+			int lastLineLength = binaryData.length - lineOffset;
+			return new HexEditModelItem(lineOffset, binaryData, lastLineLength, rowLength);
+		}
+		return new HexEditModelItem(lineOffset, binaryData, rowLength, rowLength);
 	}
 }

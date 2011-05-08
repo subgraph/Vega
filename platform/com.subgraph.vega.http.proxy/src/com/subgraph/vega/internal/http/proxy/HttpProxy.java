@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +34,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 
 	private final Logger logger = Logger.getLogger("proxy");
 
+	private final ProxyTransactionManipulator transactionManipulator;
 	private final HttpInterceptor interceptor;
 	private final List<IHttpInterceptProxyEventHandler> eventHandlers;
 	private final int listenPort;
@@ -42,8 +44,9 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private ExecutorService executor = Executors.newCachedThreadPool();
 	private Thread proxyThread;
 	
-	public HttpProxy(int listenPort, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
+	public HttpProxy(int listenPort, ProxyTransactionManipulator transactionManipulator, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
+		this.transactionManipulator = transactionManipulator;
 		this.interceptor = interceptor;
 		this.listenPort = listenPort;
 		this.params = new BasicHttpParams();
@@ -80,28 +83,47 @@ public class HttpProxy implements IHttpInterceptProxy {
 		return new Runnable() {
 			@Override
 			public void run() {
-				try {
-					proxyAcceptLoop();
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "IO error processing incoming connection: "+ e.getMessage(), e);
-				}
+				proxyAcceptLoop();
 			}
 		};
 	}
 
-	private void proxyAcceptLoop() throws IOException {
+	private void proxyAcceptLoop() {
 		while(!Thread.interrupted()) {
-			Socket s = serverSocket.accept();
+			Socket s;
+			try {
+				s = serverSocket.accept();
+			} catch (IOException e) {
+				if (!Thread.interrupted()) {
+					logger.log(Level.WARNING, "IO error processing incoming connection: "+ e.getMessage(), e);
+				}
+				break;
+			}
+
 			logger.fine("Connection accepted from "+ s.getRemoteSocketAddress());
 			VegaHttpServerConnection c = new VegaHttpServerConnection(params);
-			c.bind(s, params);
+			try {
+				c.bind(s, params);
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "Unexpected error: " + e.getMessage(), e);
+				continue;
+			}
+
 			executor.execute(new ConnectionTask(httpService, c, HttpProxy.this));
 		}
+
+		executor.shutdownNow();
 	}
 
 	@Override
 	public void stopProxy() {
 		proxyThread.interrupt();
+		try {
+			// close the socket to interrupt accept() in proxyAcceptLoop()
+			serverSocket.close();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Unexpected exception closing server socket: " + e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -119,6 +141,12 @@ public class HttpProxy implements IHttpInterceptProxy {
 	}
 
 	public boolean handleTransaction(ProxyTransaction transaction) throws InterruptedException {
+		if (transaction.hasResponse() == false) {
+			transactionManipulator.process(transaction.getRequest());
+		} else {
+			transactionManipulator.process(transaction.getResponse().getRawResponse());
+		}
+
 		boolean rv = interceptor.handleTransaction(transaction);
 		if (rv == true) {
 			transaction.await();

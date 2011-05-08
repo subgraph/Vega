@@ -1,11 +1,19 @@
 package com.subgraph.vega.ui.http.intercept;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
+import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
+import com.subgraph.vega.ui.httpeditor.parser.HttpResponseParser;
 import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 
 public class TransactionManager {
@@ -33,7 +41,12 @@ public class TransactionManager {
 		};
 		transactionEventHandler = new IProxyTransactionEventHandler() {
 			@Override
-			public void notifyComplete() {
+			public void notifyForward() {
+				handleTransactionForward();
+			}
+
+			@Override
+			public void notifyComplete(boolean dropped) {
 				handleTransactionComplete();
 			}
 		};
@@ -53,12 +66,13 @@ public class TransactionManager {
 	void setInactive() {
 		setRequestInactive();
 		setResponseInactive();
-	}
-
+	}	
+	
 	private void handleTransactionRequest(final IProxyTransaction transaction) {
 		synchronized(this) {
 			if(currentTransaction == null) {
 				currentTransaction = transaction;
+				currentTransaction.setEventHandler(transactionEventHandler);
 				setRequestPending();
 			}
 		}
@@ -66,10 +80,20 @@ public class TransactionManager {
 
 	private void handleTransactionResponse(final IProxyTransaction transaction) {
 		synchronized(this) {
-			if(currentTransaction == null || currentTransaction == transaction) {
+			if (currentTransaction == null || currentTransaction == transaction) {
 				currentTransaction = transaction;
-				currentTransaction.setEventHandler(null);
 				setResponsePending();
+			}
+		}
+	}
+
+	private void handleTransactionForward() {
+		synchronized(this) {
+			if (currentTransaction.hasResponse()) {
+				currentTransaction.setEventHandler(null);
+				getNextTransaction();
+			} else {
+				setRequestSent();
 			}
 		}
 	}
@@ -77,45 +101,30 @@ public class TransactionManager {
 	private void handleTransactionComplete() {
 		synchronized(this) {
 			currentTransaction.setEventHandler(null);
-			currentTransaction = interceptor.transactionQueuePop();
-			setTransactionComplete();
+			getNextTransaction();
 		}
 	}
 	
-	private void setTransactionComplete() {
-		synchronized(this) {
-			if(currentTransaction != null) {
-				if(!currentTransaction.hasResponse()) {
-					setRequestPending();
-					setResponseInactive();
-				} else {
-					setResponsePending();
-				}
-			} else {
-				setRequestInactive();
+	/**
+	 * Must be invoked in a synchronized block.
+	 */
+	private void getNextTransaction() {
+		currentTransaction = interceptor.transactionQueueGet(0);
+		if(currentTransaction != null) {
+			currentTransaction.setEventHandler(transactionEventHandler);
+			if(!currentTransaction.hasResponse()) {
+				setRequestPending();
 				setResponseInactive();
+			} else {
+				setResponsePending();
 			}
-		}
-	}
-
-	private void popTransaction() {
-		currentTransaction = interceptor.transactionQueuePop();
-		if(currentTransaction == null) {
-			setRequestInactive();
-			setResponseInactive();
-			return;
-		}
-		
-		if(!currentTransaction.hasResponse()) {
-			setRequestPending();
-			setResponseInactive();
 		} else {
-			setResponsePending();
+			setInactive();
 		}
 	}
-
+	
 	private synchronized void setRequestPending() {
-		final String message = "Request pending to "+ getTransactionHostPart(currentTransaction);
+		final String message = "Request pending to "+ getRequestHostPart(currentTransaction.getRequest());
 		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
 		requestViewer.setStatus(message, true, content);
 		currentRequestTransaction = currentTransaction;
@@ -127,13 +136,18 @@ public class TransactionManager {
 	}
 
 	private synchronized void setRequestSent() {
-		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
+		final String content = requestRenderer.renderRequestText(currentTransaction.getUriRequest());
 		requestViewer.setStatus("Request sent, awaiting response", false, content);
 		currentRequestTransaction = currentTransaction;
 	}
 	
-	private String getTransactionHostPart(IProxyTransaction transaction) {
-		final URI uri = currentTransaction.getUri();
+	private String getRequestHostPart(HttpRequest request) {
+		URI uri;
+		try {
+			uri = new URI(request.getRequestLine().getUri());
+		} catch (URISyntaxException e) {
+			return new String("unknown host - error parsing URI");
+		}
 		String httpHost = uri.getScheme() + "://" + uri.getHost();
 		if (uri.getPort() != -1) {
 			httpHost += ":" + uri.getPort();
@@ -141,31 +155,30 @@ public class TransactionManager {
 		return httpHost;
 	}
 
-	synchronized void forwardRequest() {
-		currentTransaction.setEventHandler(transactionEventHandler);
-		currentTransaction.doForward();
-		setRequestSent();	
+	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
+		final HttpRequestParser parser = new HttpRequestParser(currentTransaction.getRequestEngine());
+		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent(), currentTransaction.getRequest().getParams().copy());
+		if (request != null) {
+			currentTransaction.setUriRequest(request);
+			currentTransaction.doForward();
+		}
 	}
 
-	synchronized void forwardResponse() {
-		currentTransaction.doForward();
-		popTransaction();
+	synchronized void forwardResponse() throws UnsupportedEncodingException {
+		final HttpResponseParser parser = new HttpResponseParser(currentTransaction.getRequestEngine());
+		final HttpResponse response = parser.parseResponse(responseViewer.getContent(), currentTransaction.getResponse().getRawResponse().getParams().copy());
+		if (response != null) {
+			currentTransaction.getResponse().setRawResponse(response);
+			currentTransaction.doForward();
+		}
 	}
 	
 	synchronized void dropRequest() {
-		currentTransaction.setEventHandler(null);
 		currentTransaction.doDrop();
-		currentTransaction = interceptor.transactionQueuePop();
-		if(currentTransaction != null) {
-			setRequestPending();
-		} else {
-			setRequestInactive();
-		}
 	}
 
 	synchronized void dropResponse() {
 		currentTransaction.doDrop();
-		popTransaction();
 	}
 
 	private synchronized void setResponseInactive() {
@@ -176,7 +189,9 @@ public class TransactionManager {
 	private synchronized void setResponsePending() {
 		final String content = requestRenderer.renderResponseText(currentTransaction.getResponse().getRawResponse());
 		responseViewer.setStatus("Reponse pending", true, content);
-		if(currentRequestTransaction != currentTransaction) 
+		if(currentRequestTransaction != currentTransaction) {
 			setRequestSent();
+		}
 	}
+
 }

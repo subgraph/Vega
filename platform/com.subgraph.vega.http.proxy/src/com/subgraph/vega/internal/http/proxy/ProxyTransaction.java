@@ -1,12 +1,11 @@
 package com.subgraph.vega.internal.http.proxy;
 
-import java.net.URI;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
@@ -19,9 +18,8 @@ public class ProxyTransaction implements IProxyTransaction {
 	private final HttpContext context;
 	private IProxyTransactionEventHandler eventHandler;
 	private HttpRequest request;
-	private URI uri;
+	private HttpUriRequest uriRequest;
 	private IHttpResponse response;
-	private HttpHost httpHost;
     private HttpInterceptor interceptor; 
     private boolean isPending = false;
     private boolean doForward = false;
@@ -45,16 +43,8 @@ public class ProxyTransaction implements IProxyTransaction {
 		this.request = request;
 	}
 
-	public synchronized void setUri(URI uri) {
-		this.uri = uri;
-	}
-
 	public synchronized void setResponse(IHttpResponse response) {
 		this.response = response;
-	}
-
-	public synchronized void setHttpHost(HttpHost httpHost) {
-		this.httpHost = httpHost;
 	}
 
 	public void await() throws InterruptedException {
@@ -66,7 +56,7 @@ public class ProxyTransaction implements IProxyTransaction {
 			lock.unlock();
 		}
 	}
-		
+
 	public synchronized void setPending(HttpInterceptor interceptor) {
 		this.interceptor = interceptor;
 		isPending = true;
@@ -87,16 +77,6 @@ public class ProxyTransaction implements IProxyTransaction {
 	}
 	
 	@Override
-	public synchronized HttpHost getHttpHost() {
-		return httpHost;
-	}
-
-	@Override
-	public synchronized URI getUri() {
-		return uri;
-	}
-
-	@Override
 	public synchronized boolean hasRequest() {
 		return (request != null);
 	}
@@ -104,6 +84,16 @@ public class ProxyTransaction implements IProxyTransaction {
 	@Override
 	public synchronized HttpRequest getRequest() {
 		return request;
+	}
+
+	@Override
+	public void setUriRequest(HttpUriRequest request) {
+		this.uriRequest = request;
+	}
+
+	@Override
+	public synchronized HttpUriRequest getUriRequest() {
+		return uriRequest;
 	}
 
 	@Override
@@ -156,10 +146,24 @@ public class ProxyTransaction implements IProxyTransaction {
 		}
 	}
 
-	@Override
-	public synchronized void signalComplete() {
+	/**
+	 * Signal that the pending transaction is about to be forwarded.
+	 */
+	public synchronized void signalForward() {
 		if (eventHandler != null) {
-			eventHandler.notifyComplete();
+			eventHandler.notifyForward();
+		}
+	}
+
+	/**
+	 * Signal that the transaction is complete.
+	 * 
+	 * @param dropped Boolean indicating whether the transaction was dropped.
+	 */
+	public synchronized void signalComplete(boolean dropped) {
+		if (eventHandler != null) {
+			eventHandler.notifyComplete(dropped);
 		}		
 	}
+	
 }
