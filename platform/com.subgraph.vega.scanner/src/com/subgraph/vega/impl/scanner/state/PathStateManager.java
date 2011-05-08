@@ -17,7 +17,7 @@ import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
@@ -110,15 +110,15 @@ public class PathStateManager {
 		return crawler;
 	}
 
-	public void analyzePage(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzePage(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzePage(ctx, request, response);
 	}
 
-	public void analyzeContent(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzeContent(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzeContent(ctx, request, response);
 	}
 
-	public void analyzePivot(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzePivot(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzePivot(ctx, request, response);
 	}
 

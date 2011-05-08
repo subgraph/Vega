@@ -5,14 +5,14 @@ import org.mozilla.javascript.Function;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class ModuleContextJS {
-	private final IModuleContext context;
+	private final IInjectionModuleContext context;
 	
 
-	ModuleContextJS(IModuleContext context) {
+	ModuleContextJS(IInjectionModuleContext context) {
 		this.context = context;
 	}
 

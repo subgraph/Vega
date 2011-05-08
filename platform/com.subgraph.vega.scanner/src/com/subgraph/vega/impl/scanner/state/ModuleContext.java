@@ -11,11 +11,11 @@ import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
 
-public class ModuleContext implements IModuleContext {
+public class ModuleContext implements IInjectionModuleContext {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final PathStateManager scanState;
 	private final IRequestBuilder requestBuilder;

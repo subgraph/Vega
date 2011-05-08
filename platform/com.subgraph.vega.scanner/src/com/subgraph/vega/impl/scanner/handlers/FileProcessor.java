@@ -6,7 +6,7 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class FileProcessor implements ICrawlerResponseProcessor {
@@ -17,7 +17,7 @@ public class FileProcessor implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final IModuleContext ctx = (IModuleContext) argument;
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
 		
 		final IPathState ps = ctx.getPathState();
 		ps.setResponse(response);

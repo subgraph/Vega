@@ -5,7 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class PutChecks extends CrawlerModule {
@@ -18,14 +18,14 @@ public class PutChecks extends CrawlerModule {
 
 	@Override
 	public void initialize(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		HttpUriRequest req = new HttpPut(ps.getPath().getUri().resolve("PUT-putfile"));
 		ctx.submitRequest(req, this);
 	}
 
 	@Override
 	public void runModule(HttpUriRequest request, IHttpResponse response,
-			IModuleContext ctx) {
+			IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "during PUT checks");

@@ -8,7 +8,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponse.ResponseStatus;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class DirIPSCheck extends CrawlerModule {
@@ -34,7 +34,7 @@ public class DirIPSCheck extends CrawlerModule {
 
 	@Override
 	public void initialize(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		ctx.submitRequest(createRequest(ps, IPS_TEST), this, 0);
 		ctx.submitRequest(createRequest(ps, IPS_SAFE), this, 1);
 	}
@@ -52,7 +52,7 @@ public class DirIPSCheck extends CrawlerModule {
 	}
 
 	@Override
-	public void runModule(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
+	public void runModule(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
 		if(ctx.hasModuleFailed())
 			return;

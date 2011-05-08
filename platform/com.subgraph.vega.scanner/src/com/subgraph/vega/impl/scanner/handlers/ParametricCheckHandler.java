@@ -5,7 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class ParametricCheckHandler extends CrawlerModule {
@@ -15,7 +15,7 @@ public class ParametricCheckHandler extends CrawlerModule {
 
 	@Override
 	public void initialize(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		// XXX check URI filter and parameter filter
 		if(!ps.isParametric() || false) {
 			ctx.debug("not parametric??");
@@ -31,7 +31,7 @@ public class ParametricCheckHandler extends CrawlerModule {
 
 	@Override
 	public void runModule(HttpUriRequest request, IHttpResponse response,
-			IModuleContext ctx) {
+			IInjectionModuleContext ctx) {
 
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "during parameter behavior test");
@@ -66,14 +66,14 @@ public class ParametricCheckHandler extends CrawlerModule {
 		maybeScheduleNext(ctx);
 	}
 
-	private void maybeScheduleNext(IModuleContext ctx) {
+	private void maybeScheduleNext(IInjectionModuleContext ctx) {
 		if(ctx.incrementResponseCount() < 5)
 			return;
 		scheduleNext(ctx.getPathState());
 	}
 
 	private void scheduleNext(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		final String pname = ps.getFuzzableParameter().getName();
 		if(!ps.isBogusParameter() && !ps.getResponseVaries() && pname != null) {
 			ctx.submitAlteredParameterNameRequest(ognlHandler, "[0]['"+pname+"']", 0);

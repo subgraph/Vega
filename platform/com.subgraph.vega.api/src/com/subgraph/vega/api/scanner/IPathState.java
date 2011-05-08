@@ -29,7 +29,7 @@ public interface IPathState {
 	void setResponseVaries();
 	boolean getResponseVaries();
 	NameValuePair getFuzzableParameter();
-	IModuleContext createModuleContext();
+	IInjectionModuleContext createModuleContext();
 	void setUnknownFingerprint(IPageFingerprint fp);
 	IPageFingerprint getPathFingerprint();
 	IPageFingerprint getUnknownFingerprint();

@@ -4,7 +4,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class PageVariabilityCheck extends CrawlerModule {
@@ -18,7 +18,7 @@ public class PageVariabilityCheck extends CrawlerModule {
 
 	@Override
 	public void initialize(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 
 		for(int i = 0; i < BH_CHECKS; i++) {
 			ctx.submitRequest(ps.createRequest(), this, i);
@@ -27,7 +27,7 @@ public class PageVariabilityCheck extends CrawlerModule {
 
 
 	@Override
-	public void runModule(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
+	public void runModule(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
 
 		if(response.isFetchFail())
@@ -46,7 +46,7 @@ public class PageVariabilityCheck extends CrawlerModule {
 
 	}
 
-	private void testResponse(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
+	private void testResponse(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPageFingerprint fp = response.getPageFingerprint();
 		final IPathState ps = ctx.getPathState();
 		if(!ps.matchesPathFingerprint(fp)) {

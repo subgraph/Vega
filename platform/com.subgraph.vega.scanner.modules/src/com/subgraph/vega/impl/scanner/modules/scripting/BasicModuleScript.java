@@ -9,7 +9,7 @@ import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.WrappedException;
 
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
@@ -26,7 +26,7 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 
 	@Override
 	public void runScript(IPathState pathState) {
-		final IModuleContext ctx = pathState.createModuleContext();
+		final IInjectionModuleContext ctx = pathState.createModuleContext();
 		try {
 			final Object[] args = new Object[] { new ModuleContextJS(ctx) };
 			Context cx = Context.enter();

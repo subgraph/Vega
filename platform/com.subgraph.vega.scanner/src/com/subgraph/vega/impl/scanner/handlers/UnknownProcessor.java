@@ -10,7 +10,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class UnknownProcessor implements ICrawlerResponseProcessor {
@@ -21,7 +21,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final IModuleContext ctx = (IModuleContext) argument;
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
 		final IPathState ps = ctx.getPathState();
 		if(ctx.getCurrentIndex() == 0) {
 			processInitialResponse(request, response, ctx, ps);
@@ -30,7 +30,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		}
 	}
 
-	private void processInitialResponse(HttpUriRequest request, IHttpResponse response, IModuleContext ctx, IPathState ps) {
+	private void processInitialResponse(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx, IPathState ps) {
 		ps.setResponse(response);
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "during initial resource fetch");
@@ -67,12 +67,12 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 	}
 
 	private void sendProbeRequests(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		ctx.submitAlteredRequest(this, "/", 1);
 		ctx.submitAlteredRequest(this, "/abc123/", 2);
 	}
 
-	private void processProbeResponses(HttpUriRequest request, IHttpResponse response, IModuleContext ctx, IPathState ps) {
+	private void processProbeResponses(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx, IPathState ps) {
 		if(response.isFetchFail()) {
 			ctx.error(request, response, "Fetch failed processing unknown path probe responses");
 			callFetchHandler(ctx, ps);
@@ -83,7 +83,7 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 			analyzeResponses(ctx, ps);
 	}
 
-	private void analyzeResponses(IModuleContext ctx, IPathState ps) {
+	private void analyzeResponses(IInjectionModuleContext ctx, IPathState ps) {
 
 		// http://host.com/foo/bar.php/ vs. http://host.com/foo/bar.php/abc123/ vs http://host.com/foo/bar.php
 		if(ctx.isFingerprintMatch(1, 2) && ctx.isFingerprintMatch(2, ps.getPathFingerprint())) {
@@ -150,14 +150,14 @@ public class UnknownProcessor implements ICrawlerResponseProcessor {
 		return lh.getValue();
 	}
 
-	private void assumeDirectory(IHttpResponse response, IModuleContext ctx, IPathState ps) {
+	private void assumeDirectory(IHttpResponse response, IInjectionModuleContext ctx, IPathState ps) {
 		ps.getPath().setPathType(PathType.PATH_DIRECTORY);
 		ps.setUnknownFingerprint(ps.getPathFingerprint());
 		ps.setResponse(response);
 		callFetchHandler(ctx, ps);
 	}
 
-	private void callFetchHandler(IModuleContext ctx, IPathState ps) {
+	private void callFetchHandler(IInjectionModuleContext ctx, IPathState ps) {
 		final IWebPath path = ps.getPath();
 		final HttpUriRequest req = ps.createRequest();
 		final IHttpResponse res = ps.getResponse();
