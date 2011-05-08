@@ -20,19 +20,11 @@ import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
-import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
-import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
-import com.subgraph.vega.api.scanner.modules.IPerMountPointModule;
-import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.BasicModuleScript;
-import com.subgraph.vega.impl.scanner.modules.scripting.PerDirectoryScript;
-import com.subgraph.vega.impl.scanner.modules.scripting.PerHostScript;
-import com.subgraph.vega.impl.scanner.modules.scripting.PerMountPointScript;
-import com.subgraph.vega.impl.scanner.modules.scripting.PerResourceScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ResponseProcessorScript;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptLoader;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptedModule;
@@ -106,13 +98,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
 			if(enabledOnly && !m.getEnabledState())
 				continue;
-			if(m.getModuleType() == ModuleScriptType.PER_SERVER)
-				modules.add(new PerHostScript(m));
-			else if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY)
-				modules.add(new PerDirectoryScript(m));
-			else if(m.getModuleType() == ModuleScriptType.PER_RESOURCE)
-				modules.add(new PerResourceScript(m));
-			else if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
+			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
 			else if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
 				modules.add(new BasicModuleScript(m));
@@ -122,42 +108,6 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 
 	}
 
-	@Override
-	public List<IPerHostScannerModule> getPerHostModules(boolean enabledOnly) {
-		final List<IPerHostScannerModule> modules = new ArrayList<IPerHostScannerModule>();
-
-		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
-			if(m.getModuleType() == ModuleScriptType.PER_SERVER)
-				modules.add(new PerHostScript(m));
-		}
-		return modules;
-	}
-
-	@Override
-	public List<IPerDirectoryScannerModule> getPerDirectoryModules(boolean enabledOnly) {
-		final List<IPerDirectoryScannerModule> modules = new ArrayList<IPerDirectoryScannerModule>();
-		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
-			if(m.getModuleType() == ModuleScriptType.PER_DIRECTORY)
-				modules.add(new PerDirectoryScript(m));
-		}
-		return modules;
-	}
-
-	@Override
-	public List<IPerResourceScannerModule> getPerResourceModules(boolean enabledOnly) {
-		final List<IPerResourceScannerModule> modules = new ArrayList<IPerResourceScannerModule>();
-		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
-			if(m.getModuleType() == ModuleScriptType.PER_RESOURCE)
-				modules.add(new PerResourceScript(m));
-		}
-		return modules;
-	}
 
 	@Override
 	public List<IResponseProcessingModule> getResponseProcessingModules(boolean enabledOnly) {
@@ -167,19 +117,6 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 				continue;
 			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
-		}
-		return modules;
-	}
-
-
-	@Override
-	public List<IPerMountPointModule> getPerMountPointModules(boolean enabledOnly) {
-		final List<IPerMountPointModule> modules = new ArrayList<IPerMountPointModule>();
-		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
-			if(m.getModuleType() == ModuleScriptType.PER_MOUNTPOINT)
-				modules.add(new PerMountPointScript(m));
 		}
 		return modules;
 	}
