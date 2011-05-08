@@ -96,7 +96,7 @@ public class HttpEntityViewer extends Composite {
 	private String contentType(HttpEntity entity) {
 		final Header hdr = entity.getContentType();
 		if(hdr == null)
-			return null;
+			return "";
 		else
 			return hdr.getValue();
 	}
