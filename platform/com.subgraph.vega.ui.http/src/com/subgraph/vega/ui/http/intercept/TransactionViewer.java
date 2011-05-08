@@ -4,17 +4,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
@@ -22,15 +26,19 @@ import org.eclipse.ui.PlatformUI;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
+import com.subgraph.vega.ui.http.builder.BodyEditor;
+import com.subgraph.vega.ui.http.builder.HeaderEditor;
+import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
+import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionPanel;
-import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
 
 public class TransactionViewer extends Composite {
 	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/filter.gif").createImage();
 	private static final Image IMAGE_FORWARD = Activator.getImageDescriptor("icons/start_16x16.png").createImage();
 	private static final Image IMAGE_DROP = Activator.getImageDescriptor("icons/stop_16x16.png").createImage();
-	
 	private final IModel model;
 	private final TransactionDirection direction;
 	private final TransactionManager manager;
@@ -38,26 +46,30 @@ public class TransactionViewer extends Composite {
 	private ToolItem forwardButton;
 	private ToolItem dropButton;
 	private ToolItem configureButton;
-	private HttpRequestViewer httpRequestViewer;
+
+	private Composite viewerControl;
+	private StackLayout viewerLayout;
+	private Menu viewerMenu;
+	private IHttpBuilderPart builderPartCurr;
 	
 	public TransactionViewer(Composite parent, IModel model, TransactionManager manager, TransactionDirection direction) {
 		super(parent, SWT.NONE);
 		this.model = model;
 		this.direction = direction;
 		this.manager = manager;
-		if(direction == TransactionDirection.DIRECTION_REQUEST) 
-			manager.setRequestViewer(this);
-		else
-			manager.setResponseViewer(this);
-		
 		setLayout(createLayout());
 		createStatusLabel();
-		createToolbar();
-		
+		createToolbar(direction);
 		final Group viewerGroup = new Group(this, SWT.NONE);
 		viewerGroup.setLayout(new FillLayout());
-		viewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 2, 1));
-		httpRequestViewer = new HttpRequestViewer(viewerGroup);
+		viewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		if(direction == TransactionDirection.DIRECTION_REQUEST) { 
+			createViewersRequest(viewerGroup);
+			manager.setRequestViewer(this);
+		} else {
+			createViewersResponse(viewerGroup);
+			manager.setResponseViewer(this);
+		}
 	}
 	
 	private GridLayout createLayout() {
@@ -75,14 +87,30 @@ public class TransactionViewer extends Composite {
 		return statusLabel;
 	}
 	
-	private ToolBar createToolbar() {
+	private ToolBar createToolbar(TransactionDirection direction) {
 		final ToolBar toolBar = new ToolBar(this, SWT.FLAT);
+
+		viewerMenu = new Menu(this.getParent().getShell(), SWT.POP_UP);
+	    final ToolItem item = new ToolItem(toolBar, SWT.DROP_DOWN);
+	    item.setText("View");
+	    item.addSelectionListener(new SelectionAdapter() {
+	    	@Override
+	    	public void widgetSelected(SelectionEvent event) {
+	        	Rectangle rect = item.getBounds();
+	        	Point pt = new Point(rect.x, rect.y + rect.height);
+	            pt = toolBar.toDisplay(pt);
+	            viewerMenu.setLocation(pt.x, pt.y);
+	            viewerMenu.setVisible(true);
+	    	}
+	    });
+	    
 		configureButton = createToolbarButton(toolBar, IMAGE_CONFIGURE, "Configure interception rules", createConfigureButtonListener());
 		forwardButton = createToolbarButton(toolBar, IMAGE_FORWARD, "Forward", createForwordButtonListener());
 		dropButton = createToolbarButton(toolBar, IMAGE_DROP, "Drop", createDropButtonListener());
+		
 		return toolBar;
 	}
-
+	
 	private ToolItem createToolbarButton(ToolBar toolBar, Image image, String tooltip, SelectionListener listener) {
 		final ToolItem buttonItem = new ToolItem(toolBar, SWT.PUSH);
 		buttonItem.setImage(image);
@@ -98,10 +126,11 @@ public class TransactionViewer extends Composite {
 			}
 		};
 	}
-	
+
 	private SelectionListener createForwordButtonListener() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				builderPartCurr.processContents();
 				if(direction == TransactionDirection.DIRECTION_REQUEST) {
 					try {
 						manager.forwardRequest();
@@ -136,6 +165,71 @@ public class TransactionViewer extends Composite {
 		};
 	}
 
+	private void createViewersRequest(final Composite parent) {
+		viewerControl = new Composite(parent, SWT.NONE);
+		viewerLayout = new StackLayout();
+		viewerControl.setLayout(viewerLayout);
+		
+		IHttpRequestBuilder requestBuilder = manager.getRequestBuilder();
+		final SelectionListener listener = createSelectionListenerMenuItem();
+
+		RequestEditor requestEditor = new RequestEditor(requestBuilder);
+		Composite childControl = requestEditor.createPartControl(viewerControl);
+	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
+	    menuItem.setText("Request");
+	    menuItem.setData(requestEditor);
+	    menuItem.addSelectionListener(listener);
+	    viewerLayout.topControl = childControl;
+		builderPartCurr = requestEditor;
+
+	    HeaderEditor headerEditor = new HeaderEditor(requestBuilder, 0);
+	    childControl = headerEditor.createPartControl(viewerControl);
+	    menuItem = new MenuItem(viewerMenu, SWT.NONE);
+	    menuItem.setText("Headers");
+	    menuItem.setData(headerEditor);
+	    menuItem.addSelectionListener(listener);
+	}
+
+	private void createViewersResponse(final Composite parent) {
+		viewerControl = new Composite(parent, SWT.NONE);
+		viewerLayout = new StackLayout();
+		viewerControl.setLayout(viewerLayout);
+
+		IHttpResponseBuilder responseBuilder = manager.getResponseBuilder();
+		final SelectionListener listener = createSelectionListenerMenuItem();
+
+		BodyEditor responseEditor = new BodyEditor(responseBuilder);
+		Composite childControl = responseEditor.createPartControl(viewerControl);
+	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
+	    menuItem.setText("Response");
+	    menuItem.setData(responseEditor);
+	    menuItem.addSelectionListener(listener);
+	    viewerLayout.topControl = childControl;
+		builderPartCurr = responseEditor;
+
+	    HeaderEditor headerEditor = new HeaderEditor(responseBuilder, 0);
+	    childControl = headerEditor.createPartControl(viewerControl);
+	    menuItem = new MenuItem(viewerMenu, SWT.NONE);
+	    menuItem.setText("Headers");
+	    menuItem.setData(headerEditor);
+	    menuItem.addSelectionListener(listener);
+	}
+	
+	private SelectionAdapter createSelectionListenerMenuItem() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				final MenuItem menuItem = (MenuItem) event.widget;
+				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
+				builderPartCurr.processContents();
+				builderPartCurr = builderPart;
+				builderPartCurr.refresh();
+				viewerLayout.topControl = builderPartCurr.getControl();
+				viewerControl.layout();
+			}
+		};
+	}
+
 	private void doConfigure() {
 		int x = configureButton.getBounds().x;
 		int y = configureButton.getBounds().y + configureButton.getBounds().height;
@@ -143,33 +237,26 @@ public class TransactionViewer extends Composite {
 		final ConfigureInterceptionPanel configPanel = new ConfigureInterceptionPanel(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), p, model, direction);
 		configPanel.open();
 	}
-	
-	void setStatus(String statusMessage, boolean buttonState) {
-		setStatus(statusMessage, buttonState, null);
-	}
 
-	void setStatus(final String statusMessage, final boolean buttonState, final String content) {
+	public void notifyUpdate(final String statusMessage, final boolean hasContent) {
 		getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				doSetStatus(statusMessage, buttonState, content);
+				doUpdate(statusMessage, hasContent);
 			}
 		});
 	}
 	
-	private void doSetStatus(String statusMessage, boolean buttonState, String httpContent) {
-		if(isDisposed())
+	private void doUpdate(String statusMessage, boolean hasContent) {
+		if (isDisposed()) {
 			return;
-		statusLabel.setText(statusMessage);
-		forwardButton.setEnabled(buttonState);
-		dropButton.setEnabled(buttonState);
-		if(httpContent == null)
-			httpRequestViewer.clearContent();
-		else
-			httpRequestViewer.setContent(httpContent);
-	}
+		}
 
-	public String getContent() {
-		return httpRequestViewer.getContent();
+		statusLabel.setText(statusMessage);
+		forwardButton.setEnabled(hasContent);
+		dropButton.setEnabled(hasContent);
+		if (builderPartCurr != null) {
+			builderPartCurr.refresh();
+		}
 	}
 
 }

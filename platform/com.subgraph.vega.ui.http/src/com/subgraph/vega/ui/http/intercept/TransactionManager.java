@@ -12,21 +12,22 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
-import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
-import com.subgraph.vega.ui.httpeditor.parser.HttpResponseParser;
-import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.ui.http.Activator;
 
 public class TransactionManager {
 	private IHttpInterceptor interceptor;
-
 	private IHttpInterceptorEventHandler interceptorEventHandler;
 	private IProxyTransactionEventHandler transactionEventHandler;
 	private IProxyTransaction currentTransaction;
 	private IProxyTransaction currentRequestTransaction;
 	private TransactionViewer requestViewer;
-	private final RequestRenderer requestRenderer = new RequestRenderer();
-
 	private TransactionViewer responseViewer;
+	private IHttpRequestBuilder requestBuilder;
+	private IHttpResponseBuilder responseBuilder;
 	
 	TransactionManager(IHttpInterceptor interceptor) {
 		interceptorEventHandler = new IHttpInterceptorEventHandler() {
@@ -53,6 +54,11 @@ public class TransactionManager {
 		
 		interceptor.setEventHandler(interceptorEventHandler);	
 		this.interceptor = interceptor;
+
+		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+		requestBuilder = requestEngine.createRequestBuilder();
+		responseBuilder = requestEngine.createResponseBuilder();
 	}
 	
 	void setRequestViewer(TransactionViewer viewer) {
@@ -125,20 +131,24 @@ public class TransactionManager {
 	
 	private synchronized void setRequestPending() {
 		final String message = "Request pending to "+ getRequestHostPart(currentTransaction.getRequest());
-		final String content = requestRenderer.renderRequestText(currentTransaction.getRequest());
-		requestViewer.setStatus(message, true, content);
 		currentRequestTransaction = currentTransaction;
+		try {
+			requestBuilder.setFromRequest(currentTransaction.getRequest());
+		} catch (URISyntaxException e) {
+			// XXX
+		}
+		requestViewer.notifyUpdate(message, true);
 	}
 	
 	private synchronized void setRequestInactive() {
-		requestViewer.setStatus("No request pending", false);
 		currentRequestTransaction = currentTransaction;
+		requestBuilder.clear();
+		requestViewer.notifyUpdate("No request pending", false);
 	}
 
 	private synchronized void setRequestSent() {
-		final String content = requestRenderer.renderRequestText(currentTransaction.getUriRequest());
-		requestViewer.setStatus("Request sent, awaiting response", false, content);
 		currentRequestTransaction = currentTransaction;
+		requestViewer.notifyUpdate("Request sent, awaiting response", true);
 	}
 	
 	private String getRequestHostPart(HttpRequest request) {
@@ -156,8 +166,7 @@ public class TransactionManager {
 	}
 
 	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
-		final HttpRequestParser parser = new HttpRequestParser(currentTransaction.getRequestEngine());
-		final HttpUriRequest request = parser.parseRequest(requestViewer.getContent(), currentTransaction.getRequest().getParams().copy());
+		HttpUriRequest request = requestBuilder.buildRequest();
 		if (request != null) {
 			currentTransaction.setUriRequest(request);
 			currentTransaction.doForward();
@@ -165,8 +174,7 @@ public class TransactionManager {
 	}
 
 	synchronized void forwardResponse() throws UnsupportedEncodingException {
-		final HttpResponseParser parser = new HttpResponseParser(currentTransaction.getRequestEngine());
-		final HttpResponse response = parser.parseResponse(responseViewer.getContent(), currentTransaction.getResponse().getRawResponse().getParams().copy());
+		HttpResponse response = responseBuilder.buildResponse();
 		if (response != null) {
 			currentTransaction.getResponse().setRawResponse(response);
 			currentTransaction.doForward();
@@ -182,16 +190,25 @@ public class TransactionManager {
 	}
 
 	private synchronized void setResponseInactive() {
-		responseViewer.setStatus("No response pending", false);
 		currentRequestTransaction = null;
+		responseBuilder.clear();
+		responseViewer.notifyUpdate("No response pending", false);
 	}
 
 	private synchronized void setResponsePending() {
-		final String content = requestRenderer.renderResponseText(currentTransaction.getResponse().getRawResponse());
-		responseViewer.setStatus("Reponse pending", true, content);
+		responseBuilder.setFromResponse(currentTransaction.getResponse().getRawResponse());
 		if(currentRequestTransaction != currentTransaction) {
 			setRequestSent();
 		}
+		responseViewer.notifyUpdate("Reponse pending", true);
 	}
 
+	IHttpRequestBuilder getRequestBuilder() {
+		return requestBuilder;
+	}
+	
+	IHttpResponseBuilder getResponseBuilder() {
+		return responseBuilder;
+	}
+	
 }

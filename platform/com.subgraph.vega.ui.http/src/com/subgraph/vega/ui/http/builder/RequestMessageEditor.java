@@ -86,7 +86,7 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 			// REVISIT: the parser should be clearing these 
 			requestBuilder.clearHeaders();
 			requestBuilder.setEntity(null);
-			requestParser.parseRequest(requestViewer.getContent(), null);
+			requestParser.parseRequest(requestViewer.getContent());
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
 		} catch (URISyntaxException e) {
