@@ -10,6 +10,7 @@ public interface IScanAlertModel {
 	IScanAlert createAlert(String type);
 	IScanAlert createAlert(String type, String key);
 	IScanAlert createAlert(String type, String key, long requestId);
+	IScanAlert createAlert(String type, String key, long scanId, long requestId);
 	void addAlert(IScanAlert alert);
 	boolean hasAlertKey(String key);
 	IScanAlert getAlertByKey(String key);
