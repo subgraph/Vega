@@ -21,6 +21,7 @@ import com.subgraph.vega.impl.scanner.urls.UriParser;
 public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	private final Logger logger = Logger.getLogger("scanner");
+	private final long scanId;
 	private final Scanner scanner;
 	private final IScannerConfig scannerConfig;
 	private final IWorkspace workspace;
@@ -30,7 +31,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
-	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+	ScannerTask(long scanId, Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+		this.scanId = scanId;
 		this.scanner = scanner;
 		this.scannerConfig = config;
 		this.workspace = workspace;
@@ -83,7 +85,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer);
+		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanId);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

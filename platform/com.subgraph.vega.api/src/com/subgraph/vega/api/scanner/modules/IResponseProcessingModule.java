@@ -9,7 +9,7 @@ public interface IResponseProcessingModule extends IScannerModule {
 	boolean responseCodeFilter(int code);
 	boolean mimeTypeFilter(String mimeType);
 	
-	void processResponse(HttpRequest request, IHttpResponse response, IWorkspace workspace);
+	void processResponse(long scanId, HttpRequest request, IHttpResponse response, IWorkspace workspace);
 
 	
 }

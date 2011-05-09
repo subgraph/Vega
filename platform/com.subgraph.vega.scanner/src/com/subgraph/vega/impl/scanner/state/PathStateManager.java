@@ -3,7 +3,6 @@ package com.subgraph.vega.impl.scanner.state;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -38,19 +37,18 @@ public class PathStateManager {
 	private int currentXssId = 0;
 	private final Map<Integer, HttpUriRequest> xssRequests = new HashMap<Integer, HttpUriRequest>();
 
-	private final int scanId;
+	private final long scanId;
 
-	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer) {
+	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, long scanId) {
 		this.config = config;
 		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.responseAnalyzer = responseAnalyzer;
-		final Random r = new Random();
-		scanId = r.nextInt(999999) + 1;
+		this.scanId = scanId;
 	}
 
-	public int getScanId() {
+	public long getScanId() {
 		return scanId;
 	}
 

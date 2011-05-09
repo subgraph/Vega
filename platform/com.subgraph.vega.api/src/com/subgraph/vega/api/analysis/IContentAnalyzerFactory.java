@@ -1,5 +1,5 @@
 package com.subgraph.vega.api.analysis;
 
 public interface IContentAnalyzerFactory {
-	IContentAnalyzer createContentAnalyzer();
+	IContentAnalyzer createContentAnalyzer(long scanId);
 }

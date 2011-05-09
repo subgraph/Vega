@@ -22,8 +22,8 @@ public class ContentAnalyzerFactory implements IContentAnalyzerFactory {
 	}
 	
 	@Override
-	public IContentAnalyzer createContentAnalyzer() {
-		return new ContentAnalyzer(this);
+	public IContentAnalyzer createContentAnalyzer(long scanId) {
+		return new ContentAnalyzer(this, scanId);
 	}
 
 	private IEventHandler createWorkspaceEventHandler() {

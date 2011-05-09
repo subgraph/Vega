@@ -31,12 +31,12 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 
-	public UriParser(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer) {
+	public UriParser(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer, long scanId) {
 		this.workspace = workspace;
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter));
+		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter), scanId);
 	}
 
 	public IPathState processUri(URI uri) {
