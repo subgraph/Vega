@@ -13,14 +13,11 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizardPage3 extends WizardPage {
-
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 	private final static String VEGA_LOGO = "icons/vega_small.png";
-
-	Composite container;
-	Composite innerContainer;
-	Composite innerContainer2;
-	
+	private Composite container;
+//	private Composite innerContainer;
+//	private Composite innerContainer2;
 	private Text basicUsername;
 	private Text basicPassword;
 	private Text basicRealm;
@@ -28,16 +25,12 @@ public class NewScanWizardPage3 extends WizardPage {
 	private Text ntlmUsername;
 	private Text ntlmPassword;
 	
-	
 	public NewScanWizardPage3() {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("Authentication");
 		setImageDescriptor(ImageDescriptor.createFromImage(imageCache.get(VEGA_LOGO)));
-
 	}
-
-
 
 	@Override
 	public void createControl(Composite parent) {
@@ -88,8 +81,6 @@ public class NewScanWizardPage3 extends WizardPage {
 		ntlmLabel.setText("NTLM Authentication");
 		ntlmLabel.setLayoutData(gd2);
 		
-
-		
 		ntlmUsernameLabel = new Label(container, SWT.NONE);
 		ntlmUsernameLabel.setText("Username:");
 		ntlmUsername = new Text(container, SWT.BORDER);
@@ -104,7 +95,6 @@ public class NewScanWizardPage3 extends WizardPage {
 		setPageComplete(true);
 	}
 
-	
 	public String getBasicUsername() {
 		return basicUsername.getText();
 	}

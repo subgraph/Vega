@@ -7,8 +7,7 @@ import java.util.List;
 import org.eclipse.jface.wizard.Wizard;
 
 public class NewScanWizard extends Wizard {
-
-	private NewScanWizardPage page;
+	private NewScanWizardPage page1;
 	private NewScanWizardPage2 page2;
 	private NewScanWizardPage3 page3;
 	private URI scanHostURI;
@@ -26,36 +25,33 @@ public class NewScanWizard extends Wizard {
 	
 	@Override
 	public void addPages() {
-		page = new NewScanWizardPage(targetField);
+		page1 = new NewScanWizardPage(targetField);
+		addPage(page1);
 		page2 = new NewScanWizardPage2();
-		page3 = new NewScanWizardPage3();
-		addPage(page);
 		addPage(page2);
+		page3 = new NewScanWizardPage3();
 		addPage(page3);
-		
 	}
 	
 	@Override 
 	public boolean canFinish() {
-		final String scanHostText = page.getScanTarget();
+		final String scanHostText = page1.getScanTarget();
 		if(scanHostText.isEmpty())
 			return false;
 		
 		return (createTargetURI(scanHostText) != null);
-
 	}
 	
 	@Override
 	public boolean performFinish() {
-		
-		String target = page.getScanTarget();
+		String target = page1.getScanTarget();
 		if(target.equals("domtest")) {
 			isDomTest = true;
 			return true;
 		}
 		
 		exclusions = page2.getExclusions();
-		scanHostURI = createTargetURI(page.getScanTarget());
+		scanHostURI = createTargetURI(page1.getScanTarget());
 		cookieString = page2.getCookieString();
 		basicUsername = page3.getBasicUsername();
 		basicPassword = page3.getBasicPassword();

@@ -21,23 +21,18 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizardPage2 extends WizardPage {
-	
+	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
+	private final static String VEGA_LOGO = "icons/vega_small.png";
 	private Text cookieString;
 	private Table exclusionsTable;
-	private final static String VEGA_LOGO = "icons/vega_small.png";
-	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
-
-
 	
 	public NewScanWizardPage2() {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("Cookie and Exclusions");
 		setImageDescriptor(ImageDescriptor.createFromImage(imageCache.get(VEGA_LOGO)));
-
 	}
-	
-	
+
 	@Override
 	public void createControl(Composite parent) {
 		Composite container;
@@ -64,6 +59,7 @@ public class NewScanWizardPage2 extends WizardPage {
 		exclusionLabel = new Label(container, SWT.NULL);
 		exclusionLabel.setText("Set scan exclusion patterns:");
 		exclusionText = new Text(container, SWT.BORDER | SWT.SINGLE);
+		exclusionText.setMessage("regular expression");
 		exclusionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		addButton = new Button(container, SWT.PUSH);
 		addButton.setText("Add exclusion");
@@ -83,7 +79,8 @@ public class NewScanWizardPage2 extends WizardPage {
 		addButton.addListener(SWT.Selection, new Listener() {
 	        public void handleEvent(Event event) {
 		          if (event.widget == addButton) {
-		        	  if (exclusionText.getText() != null) {
+		        	  final String value = exclusionText.getText(); 
+		        	  if (value != null) {
 		        		  boolean found = false;
 		        		  TableItem items[] = exclusionsTable.getItems();
 		        		  for (TableItem t: items) 
