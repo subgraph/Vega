@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Django python error detected</title>
+<title>Django Debug Output Detected</title>
 	
 	<class>Information</class>
 	<severity>Low</severity>		
-	
-	<impact>A Django Python error has been detected. This could indicate badly written code, and could disclose sensitive information.</impact>
+
+	<impact>Vega has detected content that matches the verbose Django error output.</impact>
+	<impact>The Django error output includes sensitive information that could increase the likelihood of other attacks.</impact>
+	<impact>Disclosure of absolute system paths and filesystem layout.</impact>
+	<impact>Disclosure of system configuration settings and software versions.</impact>
+	<impact>Disclosure of database configuration settings.</impact>
+	<impact>The application error itself may suggest a security vulnerability.</impact>
+
+	<remediation>Verbose debug / error output should not be sent to remote clients on production systems.</remediation>
+	<remediation>This can be disabled (and it is recommended to do so) by assigning the boolean DEBUG setting to False.</remediation>
+	<remediation>This should be done in the settings file (e.g. settings.py).</remediation>
+	<remediation>Users deploying with Apache and mod_python should also have PythonDebug Off in the Apache configuration files.</remediation>
+	<remediation>The developers should investigate why the error occurred and whether or not there are security implications.</remediation>
+
+	<discussion>Vega has detected content that matches the verbose error data output by servers running Django with the Django DEBUG setting set to True. The information in this output is sensitive: it includes absolute system paths, system configuration settings, information about the application code structure, system patchlevels, and database configuration. For production servers, it is strongly recommended that the DEBUG setting, a boolean value in the settings file, be set to False. The information obtained from this error page could increase the likelihood of success of another attack. Finally, the error itself should be investigated for security implications.</discussion>
+
+	<references>
+		<url address="http://www.djangobook.com/en/2.0/chapter20/">Chapter 20: Security (Django Book)</url>
+		<url address="http://docs.djangoproject.com/en/dev/ref/settings/">Django Settings (Django documentation)</url>
+		<url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+		<url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
+	</references>
+
 </alert>
