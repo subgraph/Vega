@@ -54,7 +54,6 @@ public class ScriptedModuleRunningTime implements IScannerModuleRunningTime {
 				worstTime = ts;
 				worstTimeTarget = target;
 			}
-			
 		}
 	}
 	
