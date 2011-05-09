@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.RequestLine;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -99,7 +100,9 @@ public class AlertRenderer {
 				final IRequestLogRecord record = requestLog.lookupRecord(alert.getRequestId());
 				if(record != null) {
 					vars.put("requestId", Long.toString(alert.getRequestId()));
-					vars.put("requestText", record.getRequest().getRequestLine().getUri());
+					final RequestLine line = record.getRequest().getRequestLine();
+					final String requestText = line.getMethod() +" "+ line.getUri();
+					vars.put("requestText", requestText);
 				}
 			}
 			root.put("vars", vars);
@@ -178,7 +181,6 @@ public class AlertRenderer {
 			return "inforisk";
 		case UNKNOWN:
 			return "unknownrisk";
-			
 		}
 		return null;
 	}
