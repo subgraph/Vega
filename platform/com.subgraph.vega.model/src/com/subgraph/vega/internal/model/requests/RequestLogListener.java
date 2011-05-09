@@ -26,8 +26,9 @@ public class RequestLogListener {
 	}
 
 	void filterRecord(IRequestLogRecord record) {
-		if(matchesRecord(record))
+		if(matchesRecord(record)) {
 			count += 1;
+		}
 		listenerCallback.update(new RequestLogUpdateEvent(count));
 	}
 
