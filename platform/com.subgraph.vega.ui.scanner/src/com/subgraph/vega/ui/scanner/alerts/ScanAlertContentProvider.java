@@ -53,13 +53,13 @@ public class ScanAlertContentProvider implements ITreeContentProvider {
 	private void setNewModelAndViewer(IWorkspace newWorkspace, Viewer newViewer) {
 		if(newWorkspace != workspace) {
 			if(workspace != null) {
-				workspace.getScanAlertModel().removeAlertListener(alertListener);
+				//workspace.getScanAlertModel().removeAlertListener(alertListener);
 			}
 			workspace = newWorkspace;
 
 			resetAlertMap();
 			this.viewer = newViewer;
-			workspace.getScanAlertModel().addAlertListenerAndPopulate(alertListener);			
+			//workspace.getScanAlertModel().addAlertListenerAndPopulate(alertListener);			
 		}
 	}
 	

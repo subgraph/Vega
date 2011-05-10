@@ -37,6 +37,7 @@ public class DashboardPane extends Composite {
 	private static final int UPDATE_INTERVAL = 100;
 	private final Display display;
 	private final Timer renderTimer = new Timer();
+	private final IEventHandler alertEventHandler;
 	private TimerTask renderTask;
 	private CrawlerPane crawlerPane;
 	private AlertPane alertPane;
@@ -53,6 +54,7 @@ public class DashboardPane extends Composite {
 	public DashboardPane(Composite parent) {
 		super(parent, SWT.NONE);
 		this.display = parent.getDisplay();
+		this.alertEventHandler = createAlertHandler();
 		final IScanner scanner = Activator.getDefault().getScanner();
 		final IModel model = Activator.getDefault().getModel();
 		scanner.registerScannerStatusChangeListener(createEventHandler());
@@ -73,8 +75,9 @@ public class DashboardPane extends Composite {
 					handleWorkspaceReset((WorkspaceResetEvent) event);
 			}
 		});
-		if(currentWorkspace != null)
-			currentWorkspace.getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+		if(currentWorkspace != null) {
+			currentWorkspace.getScanAlertRepository().addAlertListenerAndPopulate(alertEventHandler);
+		}
 		renderOutput();
 	}
 	
@@ -110,17 +113,19 @@ public class DashboardPane extends Composite {
 	}
 	
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		event.getWorkspace().getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+		event.getWorkspace().getScanAlertRepository().addAlertListenerAndPopulate(alertEventHandler);
 	}
 	
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		event.getWorkspace().getScanAlertRepository().removeAlertListener(alertEventHandler);
 		createDashboardForm();
 		renderOutput();
 	}
 	
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
 		createDashboardForm();
-		event.getWorkspace().getScanAlertModel().addAlertListenerAndPopulate(createAlertHandler());
+		event.getWorkspace().getScanAlertRepository().removeAlertListener(alertEventHandler);
+		event.getWorkspace().getScanAlertRepository().addAlertListenerAndPopulate(alertEventHandler);
 		renderOutput();
 	}
 	

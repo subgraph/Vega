@@ -1,7 +1,5 @@
 package com.subgraph.vega.impl.scanner;
 
-import java.util.Random;
-
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.events.EventListenerManager;
@@ -14,6 +12,7 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -71,7 +70,6 @@ public class Scanner implements IScanner {
 		return model;
 	}
 	
-	
 	void fireStatusChangeEvent(IEvent event) {
 		scanStatusListeners.fireEvent(event);
 	}
@@ -124,9 +122,9 @@ public class Scanner implements IScanner {
 		moduleRegistry.refreshModuleScripts();
 		
 		currentWorkspace.lock();
-		final Random r = new Random();
-		final long scanId = r.nextInt(999999) + 1;
-		scannerTask = new ScannerTask(scanId, this, config, requestEngine, currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(scanId));
+		
+		final IScanInstance scanInstance = currentWorkspace.getScanAlertRepository().createNewScanInstance();
+		scannerTask = new ScannerTask(scanInstance, this, config, requestEngine, currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(scanInstance.getScanId()));
 		scannerThread = new Thread(scannerTask);
 		setScannerStatus(ScannerStatus.SCAN_STARTING);
 

@@ -10,6 +10,7 @@ import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
@@ -21,7 +22,7 @@ import com.subgraph.vega.impl.scanner.urls.UriParser;
 public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	private final Logger logger = Logger.getLogger("scanner");
-	private final long scanId;
+	private final IScanInstance scanInstance;
 	private final Scanner scanner;
 	private final IScannerConfig scannerConfig;
 	private final IWorkspace workspace;
@@ -31,8 +32,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
-	ScannerTask(long scanId, Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
-		this.scanId = scanId;
+	ScannerTask(IScanInstance scanInstance, Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+		this.scanInstance = scanInstance;
 		this.scanner = scanner;
 		this.scannerConfig = config;
 		this.workspace = workspace;
@@ -85,7 +86,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanId);
+		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanInstance);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

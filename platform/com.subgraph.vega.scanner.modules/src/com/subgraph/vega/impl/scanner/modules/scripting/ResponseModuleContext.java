@@ -12,7 +12,8 @@ import org.mozilla.javascript.Wrapper;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.scanner.IModuleContext;
 
@@ -100,16 +101,21 @@ public class ResponseModuleContext implements IModuleContext {
 			HttpRequest request, IHttpResponse response,
 			Object... properties) {
 		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] "+ message);
-		final IScanAlertModel alertModel = workspace.getScanAlertModel();
+		final IScanAlertRepository alertRepository = workspace.getScanAlertRepository();
+		final IScanInstance scan = alertRepository.getScanInstanceByScanId(scanId);
+		if(scan == null) {
+			logger.warning("Could not find scan instance for scanId = "+ scanId);
+			return;
+		}
 		final IRequestLog requestLog = workspace.getRequestLog();
 		
 		try {
-			alertModel.lock();
-			if(key != null && alertModel.hasAlertKey(key)) {
+			scan.lock();
+			if(key != null && scan.hasAlertKey(key)) {
 				return;
 			}
 			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
-			final IScanAlert alert = alertModel.createAlert(type, key, scanId, requestId);
+			final IScanAlert alert = scan.createAlert(type, key, requestId);
 			
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
@@ -122,9 +128,9 @@ public class ResponseModuleContext implements IModuleContext {
 			if(message != null) {
 				alert.setStringProperty("message", message);
 			}
-			alertModel.addAlert(alert);
+			scan.addAlert(alert);
 		} finally {
-			alertModel.unlock();
+			scan.unlock();
 		}
 	}
 }

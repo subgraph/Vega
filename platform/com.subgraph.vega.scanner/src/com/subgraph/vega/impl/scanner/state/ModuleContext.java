@@ -10,7 +10,7 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
@@ -243,14 +243,14 @@ public class ModuleContext implements IInjectionModuleContext {
 
 	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties) {
 		debug("Publishing Alert: ("+ type + ") ["+ request.getRequestLine().getUri() + "] " + message);
-		final IScanAlertModel alertModel = scanState.getScanAlertModel();
+		final IScanInstance scan = scanState.getScanInstance();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
-			alertModel.lock();
-			if(key != null && alertModel.hasAlertKey(key))
+			scan.lock();
+			if(key != null && scan.hasAlertKey(key))
 				return;
 			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
-			final IScanAlert alert = alertModel.createAlert(type, key, scanState.getScanId(), requestId);
+			final IScanAlert alert = scan.createAlert(type, key, requestId);
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
 					alert.setProperty((String) properties[i], properties[i + 1]);
@@ -260,9 +260,9 @@ public class ModuleContext implements IInjectionModuleContext {
 			}
 			if(message != null)
 				alert.setStringProperty("message", message);
-			alertModel.addAlert(alert);
+			scan.addAlert(alert);
 		} finally {
-			alertModel.unlock();
+			scan.unlock();
 		}
 	}
 	

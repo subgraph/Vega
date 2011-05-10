@@ -2,6 +2,7 @@ package com.subgraph.vega.ui.scanner.alerts.tree;
 
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 
 public class AlertTree extends AbstractAlertTreeNode {
 
@@ -11,6 +12,18 @@ public class AlertTree extends AbstractAlertTreeNode {
 		this.workspace = workspace;
 	}
 	
+	public synchronized void addScan(IScanInstance scan) {
+		final String key = Long.toString(scan.getScanId());
+		if(!nodeMap.containsKey(key)) {
+			nodeMap.put(key, new AlertScanNode(scan.getScanId(), workspace));
+			return;
+		}
+		final AlertScanNode scanNode = (AlertScanNode) nodeMap.get(key);
+		if(scanNode.getScanInstance() == null) {
+			scanNode.setScanInstance(scan);
+		}
+	}
+
 	@Override
 	public String getLabel() {
 		return "[root]";

@@ -12,5 +12,6 @@ public class NewScanAlertEvent implements IEvent {
 	public IScanAlert getAlert() {
 		return alert;
 	}
+	
 
 }

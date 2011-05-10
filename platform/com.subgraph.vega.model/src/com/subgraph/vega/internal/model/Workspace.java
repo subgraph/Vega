@@ -17,12 +17,12 @@ import com.subgraph.vega.api.model.IWorkspaceEntry;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
-import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.xml.IXmlRepository;
-import com.subgraph.vega.internal.model.alerts.ScanAlertModel;
+import com.subgraph.vega.internal.model.alerts.ScanAlertRepository;
 import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.web.WebModel;
@@ -40,7 +40,7 @@ public class Workspace implements IWorkspace {
 
 	private IWebModel webModel;
 	private  IRequestLog requestLog;
-	private IScanAlertModel scanAlerts;
+	private IScanAlertRepository scanAlerts;
 	private HttpConditionManager conditionManager;
 
 	private ObjectContainer database;
@@ -92,7 +92,7 @@ public class Workspace implements IWorkspace {
 			final ObjectContainer db = configurationFactory.openContainer(databasePath);
 			webModel = new WebModel(db);
 			requestLog = new RequestLog(db);
-			scanAlerts = new ScanAlertModel(db, xmlRepository);
+			scanAlerts = new ScanAlertRepository(db, xmlRepository);
 			conditionManager = new HttpConditionManager(db, conditionChangeManager);
 			return db;
 		} catch (DatabaseFileLockedException e) {
@@ -119,7 +119,7 @@ public class Workspace implements IWorkspace {
 	}
 
 	@Override
-	public IScanAlertModel getScanAlertModel() {
+	public IScanAlertRepository getScanAlertRepository() {
 		if(!opened)
 			throw new IllegalStateException("Must open workspace first");
 		return scanAlerts;

@@ -7,6 +7,7 @@ import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.api.model.alerts.NewScanInstanceEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertTree;
 import com.subgraph.vega.ui.util.ImageCache;
@@ -41,13 +42,13 @@ public class AlertTreeContentProvider implements ITreeContentProvider {
 	private void setNewModelAndViewer(IWorkspace newWorkspace, Viewer newViewer) {
 		if(newWorkspace != workspace) {
 			if(workspace != null) {
-				workspace.getScanAlertModel().removeAlertListener(alertListener);
+				workspace.getScanAlertRepository().removeAlertListener(alertListener);
 			}
 			workspace = newWorkspace;
 
 			tree = new AlertTree(workspace);
 			this.viewer = newViewer;
-			workspace.getScanAlertModel().addAlertListenerAndPopulate(alertListener);			
+			workspace.getScanAlertRepository().addAlertListenerAndPopulate(alertListener);
 		}
 	}
 
@@ -88,6 +89,8 @@ public class AlertTreeContentProvider implements ITreeContentProvider {
 			public void handleEvent(IEvent event) {
 				if(event instanceof NewScanAlertEvent) {
 					handleNewScanAlert((NewScanAlertEvent) event);
+				} else if (event instanceof NewScanInstanceEvent) {
+					handleNewScanInstance((NewScanInstanceEvent) event);
 				}
 			}
 		};
@@ -100,6 +103,13 @@ public class AlertTreeContentProvider implements ITreeContentProvider {
 		}
 	}
 	
+	private void handleNewScanInstance(NewScanInstanceEvent event) {
+		if(tree != null) {
+			tree.addScan(event.getScanInstance());
+			refreshViewer();
+		}
+	}
+
 	private void refreshViewer() {
 		if(viewer != null && !viewer.getControl().isDisposed()) {
 			synchronized(viewer) {

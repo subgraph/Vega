@@ -12,7 +12,7 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.alerts.IScanAlertModel;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
@@ -37,19 +37,15 @@ public class PathStateManager {
 	private int currentXssId = 0;
 	private final Map<Integer, HttpUriRequest> xssRequests = new HashMap<Integer, HttpUriRequest>();
 
-	private final long scanId;
+	private final IScanInstance scanInstance;
 
-	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, long scanId) {
+	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance) {
 		this.config = config;
 		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.responseAnalyzer = responseAnalyzer;
-		this.scanId = scanId;
-	}
-
-	public long getScanId() {
-		return scanId;
+		this.scanInstance = scanInstance;
 	}
 
 	public IScannerModuleRegistry getModuleRegistry() {
@@ -130,7 +126,7 @@ public class PathStateManager {
 		}
 	}
 	public String createXssTag(String prefix, int xssId) {
-		return String.format("%s-->\">'>'\"<vvv%06dv%06d>", prefix, xssId, scanId);
+		return String.format("%s-->\">'>'\"<vvv%06dv%06d>", prefix, xssId, scanInstance.getScanId());
 	}
 
 	public void registerXssRequest(HttpUriRequest request, int xssId) {
@@ -141,7 +137,7 @@ public class PathStateManager {
 
 	public HttpUriRequest getXssRequest(int xssId, int scanId) {
 		synchronized(xssRequests) {
-			if(scanId == this.scanId && xssId < currentXssId)
+			if(scanId == scanInstance.getScanId() && xssId < currentXssId)
 				return xssRequests.get(xssId);
 			else
 				return null;
@@ -152,8 +148,8 @@ public class PathStateManager {
 		return workspace.getRequestLog();
 	}
 
-	public IScanAlertModel getScanAlertModel() {
-		return workspace.getScanAlertModel();
+	public IScanInstance getScanInstance() {
+		return scanInstance;
 	}
 
 	public void debug(String message) {

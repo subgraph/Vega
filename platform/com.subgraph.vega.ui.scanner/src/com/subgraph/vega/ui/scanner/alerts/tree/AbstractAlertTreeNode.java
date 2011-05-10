@@ -8,7 +8,7 @@ import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 	
-	private final Map<String, IAlertTreeNode> nodeMap = new HashMap<String, IAlertTreeNode>();
+	protected final Map<String, IAlertTreeNode> nodeMap = new HashMap<String, IAlertTreeNode>();
 
 	@Override
 	public void addAlert(IScanAlert alert) {
