@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Possible Social Security number detected</title>
+<title>Possible Social Security Number Detected</title>
 	
 	<class>Information</class>
 	<severity>High</severity>		
@@ -11,4 +11,8 @@
 	<remediation>This should be investigated to identify the nature of the data matching the detection pattern. The root cause of a disclosure could be test data, a flat file database, or the triggering of some unexpected vulnerability. </remediation>
 
 	<discussion>Vega has detected a numerical pattern matching the structure of a social security number in scanned content. This could be a false positive against a pattern with the same characteristics. </discussion>
+	
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Social_Security_number">Social Security Number (Wikipedia)</url>
+	</references>
 </alert>
