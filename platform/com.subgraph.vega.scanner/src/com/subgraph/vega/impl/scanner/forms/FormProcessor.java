@@ -9,7 +9,7 @@ import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
@@ -27,7 +27,7 @@ public class FormProcessor {
 		this.uriParser = uriParser;
 	}
 
-	public void processForms(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void processForms(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		final IHTMLParseResult html = response.getParsedHTML();
 		if(html == null)
 			return;
@@ -43,7 +43,7 @@ public class FormProcessor {
 		}
 	}
 
-	private void processFormElement(IModuleContext ctx, HttpUriRequest request, Element form) {
+	private void processFormElement(IInjectionModuleContext ctx, HttpUriRequest request, Element form) {
 		final FormProcessingState fps = new FormProcessingState(request.getURI(), form.getAttribute("action"), form.getAttribute("method"), config.getFormCredentials());
 		if(!fps.isValid())
 			return;

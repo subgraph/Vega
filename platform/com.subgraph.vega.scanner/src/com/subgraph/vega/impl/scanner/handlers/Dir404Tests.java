@@ -5,7 +5,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class Dir404Tests extends CrawlerModule {
@@ -16,12 +16,12 @@ public class Dir404Tests extends CrawlerModule {
 
 	@Override
 	public void initialize(IPathState ps) {
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		ctx.submitAlteredRequest(this, "/"+ PAGE_DOES_NOT_EXIST);
 	}
 
 	@Override
-	public void runModule(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
+	public void runModule(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
 		final boolean isFirstResponse = ctx.getCurrentIndex() == 0;
 		boolean failed = false;
@@ -43,7 +43,7 @@ public class Dir404Tests extends CrawlerModule {
 		finishProcessingResponse(ctx, ps);
 	}
 
-	private void finishProcessingResponse(IModuleContext ctx, IPathState ps) {
+	private void finishProcessingResponse(IInjectionModuleContext ctx, IPathState ps) {
 		ctx.incrementResponseCount();
 		if(!ctx.allResponsesReceived())
 			return;
@@ -52,7 +52,7 @@ public class Dir404Tests extends CrawlerModule {
 		dirParentCheck.initialize(ps);
 	}
 
-	private void finishProcessingFirstResponse(IModuleContext ctx, IPathState ps) {
+	private void finishProcessingFirstResponse(IInjectionModuleContext ctx, IPathState ps) {
 		if(!ps.has404Fingerprints()) {
 			ctx.debug("First 404 probe failed to produce a signature");
 		} else {
@@ -62,7 +62,7 @@ public class Dir404Tests extends CrawlerModule {
 		}
 	}
 
-	private void processResponseFingerprint(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, boolean isFirstResponse) {
+	private void processResponseFingerprint(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, boolean isFirstResponse) {
 		final IPageFingerprint fp = res.getPageFingerprint();
 		final IPathState ps = ctx.getPathState();
 
@@ -84,7 +84,7 @@ public class Dir404Tests extends CrawlerModule {
 		}
 	}
 
-	private void scheduleProbes(IModuleContext ctx) {
+	private void scheduleProbes(IInjectionModuleContext ctx) {
 		for(String ext: ctx.getFileExtensionList())
 			ctx.submitAlteredRequest(this, PAGE_DOES_NOT_EXIST + "."+ ext, 1);
 		ctx.submitAlteredRequest(this, "lpt9", 1);
@@ -92,7 +92,7 @@ public class Dir404Tests extends CrawlerModule {
 		ctx.submitAlteredRequest(this, PAGE_DOES_NOT_EXIST, 1);
 	}
 
-	private void handleFailed404Detection(IModuleContext ctx, IPathState ps) {
+	private void handleFailed404Detection(IInjectionModuleContext ctx, IPathState ps) {
 		final int code = (ps.getResponse() == null) ? (0) : (ps.getResponse().getResponseCode());
 		if(code == 404) {
 			ps.setPageMissing();
@@ -118,7 +118,7 @@ public class Dir404Tests extends CrawlerModule {
 		}
 	}
 
-	private void logFailureMessage(IModuleContext ctx, int httpCode) {
+	private void logFailureMessage(IInjectionModuleContext ctx, int httpCode) {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("Directory resource is not accessible: HTTP response code (");
 		sb.append(httpCode);

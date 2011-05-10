@@ -8,7 +8,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class DirParentCheck extends CrawlerModule {
@@ -21,7 +21,7 @@ public class DirParentCheck extends CrawlerModule {
 			return;
 		}
 		
-		final IModuleContext ctx = ps.createModuleContext();
+		final IInjectionModuleContext ctx = ps.createModuleContext();
 		final HttpUriRequest req = createRequest(ps.getPath());
 		ctx.submitRequest(req, this, 0);
 	}
@@ -47,7 +47,7 @@ public class DirParentCheck extends CrawlerModule {
 	}
 
 	@Override
-	public void runModule(HttpUriRequest request, IHttpResponse response, IModuleContext ctx) {
+	public void runModule(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
 		
 		if(response.isFetchFail()) {

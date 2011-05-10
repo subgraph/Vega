@@ -69,7 +69,7 @@ public class RequestEditView extends ViewPart {
 
 		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
 		final IScannerModuleRegistry moduleRepository = Activator.getDefault().getScannerModuleRegistry();
-		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer();
+		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(IScannerModuleRegistry.PROXY_SCAN_ID);
 		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);

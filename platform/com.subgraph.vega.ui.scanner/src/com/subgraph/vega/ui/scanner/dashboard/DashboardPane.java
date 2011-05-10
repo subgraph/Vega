@@ -155,9 +155,6 @@ public class DashboardPane extends Composite {
 		case SCAN_IDLE:
 			renderIdleState(buffer);
 			break;
-		case SCAN_CRAWLING:
-			renderCrawlingState(buffer);
-			break;
 		case SCAN_AUDITING:
 			renderAuditingState(buffer);
 			break;
@@ -189,13 +186,7 @@ public class DashboardPane extends Composite {
 	private void renderStartingState(StringBuilder sb) {
 		addDefault(sb, "Scanner starting.");
 	}
-	
-	private void renderCrawlingState(StringBuilder sb) {
-		renderCrawlerSection(sb);
-		addVSpaces(sb, 2);
-		addGrey(sb, "Auditing Stage");	
-	}
-	
+
 	private void renderAuditingState(StringBuilder sb) {
 		renderCrawlerSection(sb);
 		addVSpaces(sb, 2);
@@ -247,12 +238,6 @@ public class DashboardPane extends Composite {
 		sb.append("</span></li>");
 	}
 	
-	private void addGrey(StringBuilder sb, String value) {
-		sb.append("<li bindent='20'><span font='big' color='grey'>");
-		sb.append(value);
-		sb.append("</span></li>");
-	}
-	
 	private void addVSpaces(StringBuilder sb, int count) {
 		sb.append("<p>");
 		for(int i = 0; i < count; i++)
@@ -292,7 +277,6 @@ public class DashboardPane extends Composite {
 	}
 	
 	private void handleScannerStatusChanged(IScannerStatusChangeEvent event) {
-		final ScannerStatus lastStatus = currentStatus;
 		currentStatus = event.getScannerStatus();
 
 		switch(currentStatus) {
@@ -302,23 +286,19 @@ public class DashboardPane extends Composite {
 			renderTask = createTimerTask();
 			renderTimer.scheduleAtFixedRate(renderTask, 0, UPDATE_INTERVAL);
 			break;
-		case SCAN_CRAWLING:
-			crawlerPane.setCrawlerStarting();
-			renderNeeded = true;
-			break;
 		case SCAN_AUDITING:
-			if(lastStatus == ScannerStatus.SCAN_CRAWLING)
-				crawlerPane.setCrawlerFinished();
+			crawlerPane.setCrawlerStarting();
 			renderNeeded = true;
 			break;
 			
 		case SCAN_CANCELED:
-			if(lastStatus == ScannerStatus.SCAN_CRAWLING && !crawlerPane.isCrawlerFinished()) 
+			if(!crawlerPane.isCrawlerFinished())
 				crawlerPane.setCrawlerCancelled();
 			renderTask.cancel();
 			renderOutput();
 			break;
 		case SCAN_COMPLETED:
+			crawlerPane.setCrawlerFinished();
 			renderTask.cancel();
 			renderOutput();
 			break;

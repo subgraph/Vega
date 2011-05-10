@@ -1,10 +1,6 @@
 package com.subgraph.vega.api.scanner.modules;
 
 public enum ModuleScriptType {
-	PER_SERVER("per-server", "Host Modules"),
-	PER_DIRECTORY("per-directory", "Directory Modules"),
-	PER_MOUNTPOINT("per-mountpoint", "Mountpoint Modules"),
-	PER_RESOURCE("per-resource", "Resource Modules"),
 	RESPONSE_PROCESSOR("response-processor", "Response Processing Modules"),
 	BASIC_MODULE("basic", "Basic module"),
 	DOM_TEST("dom-test", "DOM testing Modules");

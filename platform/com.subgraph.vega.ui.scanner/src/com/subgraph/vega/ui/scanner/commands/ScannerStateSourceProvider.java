@@ -71,7 +71,6 @@ public class ScannerStateSourceProvider extends AbstractSourceProvider implement
 				setScannerStopped();
 				break;
 			case SCAN_AUDITING:
-			case SCAN_CRAWLING:
 			case SCAN_STARTING:
 				setScannerRunning();
 				break;

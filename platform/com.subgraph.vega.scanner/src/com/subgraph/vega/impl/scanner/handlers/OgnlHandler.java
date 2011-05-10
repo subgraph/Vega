@@ -6,14 +6,14 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 
 public class OgnlHandler implements ICrawlerResponseProcessor {
 
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request,
 			IHttpResponse response, Object argument) {
-		final IModuleContext ctx = (IModuleContext) argument;
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
 
 		if(ctx.hasModuleFailed())
 			return;

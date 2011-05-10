@@ -24,8 +24,8 @@ public class ScanAlertView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		viewer = new TreeViewer(parent);
-		viewer.setContentProvider(new ScanAlertContentProvider());
-		viewer.setLabelProvider(new ScanAlertLabelProvider());
+		viewer.setContentProvider(new AlertTreeContentProvider());
+		viewer.setLabelProvider(new AlertTreeLabelProvider());
 		final IModel model = Activator.getDefault().getModel();
 		if(model == null) {
 			logger.warning("Failed to obtain reference to model");
@@ -64,5 +64,4 @@ public class ScanAlertView extends ViewPart {
 	public void setFocus() {
 		viewer.getTree().setFocus();
 	}
-
 }

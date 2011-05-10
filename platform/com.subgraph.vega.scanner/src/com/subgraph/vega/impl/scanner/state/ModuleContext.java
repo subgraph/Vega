@@ -3,6 +3,7 @@ package com.subgraph.vega.impl.scanner.state;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
@@ -11,11 +12,11 @@ import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
 
-public class ModuleContext implements IModuleContext {
+public class ModuleContext implements IInjectionModuleContext {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final PathStateManager scanState;
 	private final IRequestBuilder requestBuilder;
@@ -236,12 +237,12 @@ public class ModuleContext implements IModuleContext {
 	}
 	
 	
-	public void publishAlert(String type, String message, HttpUriRequest request, IHttpResponse response, Object ...properties) {
+	public void publishAlert(String type, String message, HttpRequest request, IHttpResponse response, Object ...properties) {
 		publishAlert(type, null, message, request, response, properties);
 	}
 
-	public void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response, Object ...properties) {
-		debug("Publishing Alert: ("+ type + ") ["+ request.getURI() + "] " + message);
+	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties) {
+		debug("Publishing Alert: ("+ type + ") ["+ request.getRequestLine().getUri() + "] " + message);
 		final IScanAlertModel alertModel = scanState.getScanAlertModel();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
@@ -249,7 +250,7 @@ public class ModuleContext implements IModuleContext {
 			if(key != null && alertModel.hasAlertKey(key))
 				return;
 			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
-			final IScanAlert alert = alertModel.createAlert(type, key, requestId);
+			final IScanAlert alert = alertModel.createAlert(type, key, scanState.getScanId(), requestId);
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
 					alert.setProperty((String) properties[i], properties[i + 1]);

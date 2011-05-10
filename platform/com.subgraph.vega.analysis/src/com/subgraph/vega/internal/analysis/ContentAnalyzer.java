@@ -22,6 +22,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	
 	private final Logger logger = Logger.getLogger("analysis");
 	
+	private final long scanId;
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
@@ -33,8 +34,9 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
 		
-	ContentAnalyzer(ContentAnalyzerFactory factory) {
+	ContentAnalyzer(ContentAnalyzerFactory factory, long scanId) {
 		this.factory = factory;
+		this.scanId = scanId;
 		this.addLinksToModel = true;
 		this.defaultAddToRequestLog = true;
 		responseProcessingExecutor = createNewExecutor();
@@ -105,7 +107,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		if(responseProcessingModules == null || !response.isMostlyAscii())
 			return;
 		synchronized(responseProcessingLock) {
-			responseProcessingExecutor.execute(new ResponseProcessingTask(request, response, workspace, responseProcessingModules));
+			responseProcessingExecutor.execute(new ResponseProcessingTask(scanId, request, response, workspace, responseProcessingModules));
 		}
 	}
 

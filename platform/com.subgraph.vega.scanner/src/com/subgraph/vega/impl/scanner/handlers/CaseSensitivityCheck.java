@@ -3,14 +3,14 @@ package com.subgraph.vega.impl.scanner.handlers;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class CaseSensitivityCheck extends CrawlerModule {
 	
 	@Override
 	public void runModule(HttpUriRequest request, IHttpResponse response,
-			IModuleContext ctx) {
+			IInjectionModuleContext ctx) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -15,7 +15,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.requests.BasicRequestBuilder;
@@ -136,7 +136,7 @@ public class PathState implements IPathState {
 	}
 
 	private void performInitialFetch() {
-		final IModuleContext ctx = new ModuleContext(pathStateManager, requestBuilder, this, 0);
+		final IInjectionModuleContext ctx = new ModuleContext(pathStateManager, requestBuilder, this, 0);
 		final HttpUriRequest req = createRequest();
 
 		if(response != null) {
@@ -173,16 +173,16 @@ public class PathState implements IPathState {
 
 	public void submitRequest(ICrawlerResponseProcessor callback) {
 		final HttpUriRequest req = requestBuilder.createBasicRequest();
-		final IModuleContext ctx = createModuleContext();
+		final IInjectionModuleContext ctx = createModuleContext();
 		submitRequest(req, callback, ctx);
 	}
 
 	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback) {
-		final IModuleContext ctx = createModuleContext();
+		final IInjectionModuleContext ctx = createModuleContext();
 		submitRequest(request, callback, ctx);
 	}
 
-	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IModuleContext ctx) {
+	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IInjectionModuleContext ctx) {
 		pathStateManager.getCrawler().submitTask(request, getWrappedCallback(callback), ctx);
 	}
 
@@ -411,7 +411,7 @@ public class PathState implements IPathState {
 	}
 
 	@Override
-	public IModuleContext createModuleContext() {
+	public IInjectionModuleContext createModuleContext() {
 		return new ModuleContext(pathStateManager, requestBuilder, this);
 	}
 

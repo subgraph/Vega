@@ -3,7 +3,6 @@ package com.subgraph.vega.impl.scanner.state;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -17,7 +16,7 @@ import com.subgraph.vega.api.model.alerts.IScanAlertModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
@@ -38,19 +37,18 @@ public class PathStateManager {
 	private int currentXssId = 0;
 	private final Map<Integer, HttpUriRequest> xssRequests = new HashMap<Integer, HttpUriRequest>();
 
-	private final int scanId;
+	private final long scanId;
 
-	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer) {
+	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, long scanId) {
 		this.config = config;
 		this.moduleRegistry = moduleRegistry;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.responseAnalyzer = responseAnalyzer;
-		final Random r = new Random();
-		scanId = r.nextInt(999999) + 1;
+		this.scanId = scanId;
 	}
 
-	public int getScanId() {
+	public long getScanId() {
 		return scanId;
 	}
 
@@ -110,15 +108,15 @@ public class PathStateManager {
 		return crawler;
 	}
 
-	public void analyzePage(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzePage(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzePage(ctx, request, response);
 	}
 
-	public void analyzeContent(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzeContent(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzeContent(ctx, request, response);
 	}
 
-	public void analyzePivot(IModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
+	public void analyzePivot(IInjectionModuleContext ctx, HttpUriRequest request, IHttpResponse response) {
 		responseAnalyzer.analyzePivot(ctx, request, response);
 	}
 

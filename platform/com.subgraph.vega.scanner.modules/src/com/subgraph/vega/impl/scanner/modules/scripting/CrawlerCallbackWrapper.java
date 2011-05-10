@@ -13,7 +13,7 @@ import org.mozilla.javascript.WrappedException;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 
 public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 	private static final Logger logger = Logger.getLogger("scanner");
@@ -27,10 +27,10 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 	
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request, IHttpResponse response, Object argument) {
-		if(!(argument instanceof IModuleContext)) {
+		if(!(argument instanceof IInjectionModuleContext)) {
 			
 		}
-		final IModuleContext ctx = (IModuleContext) argument;
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
 		final Scriptable scope = callbackFunction.getParentScope();
 		final Object[] arguments = { request, response, new ModuleContextJS(ctx) };
 		try {

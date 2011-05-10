@@ -10,14 +10,8 @@ import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.web.IWebHost;
-import com.subgraph.vega.api.model.web.IWebModel;
-import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.modules.IPerDirectoryScannerModule;
-import com.subgraph.vega.api.scanner.modules.IPerHostScannerModule;
-import com.subgraph.vega.api.scanner.modules.IPerResourceScannerModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
@@ -27,6 +21,7 @@ import com.subgraph.vega.impl.scanner.urls.UriParser;
 public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	private final Logger logger = Logger.getLogger("scanner");
+	private final long scanId;
 	private final Scanner scanner;
 	private final IScannerConfig scannerConfig;
 	private final IWorkspace workspace;
@@ -36,7 +31,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
-	ScannerTask(Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+	ScannerTask(long scanId, Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+		this.scanId = scanId;
 		this.scanner = scanner;
 		this.scannerConfig = config;
 		this.workspace = workspace;
@@ -62,16 +58,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	public void run() {
 		final List<IResponseProcessingModule> responseModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
 		contentAnalyzer.setResponseProcessingModules(responseModules);
-		scanner.setScannerStatus(ScannerStatus.SCAN_CRAWLING);
-		runCrawlerPhase();
-		if(!stopRequested)
-			scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
-		if(!stopRequested)
-			runPerHostModulePhase();
-		if(!stopRequested)
-			runPerDirectoryModulePhase();
-		if(!stopRequested)
-			runPerResourceModulePhase();
+		scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
+		runCrawlerPhase();		
 		if(stopRequested) {
 			scanner.setScannerStatus(ScannerStatus.SCAN_CANCELED);
 			logger.info("Scanner cancelled.");
@@ -97,7 +85,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer);
+		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanId);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();
@@ -111,45 +99,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		logger.info("Crawler finished");
 	}
 
-	private void runPerHostModulePhase() {
-		logger.info("Starting per host module phase");
-
-		final IWebModel webModel = workspace.getWebModel();
-		for(IWebHost host: webModel.getUnscannedHosts()) {
-			for(IPerHostScannerModule m: scanner.getModuleRegistry().getPerHostModules(true)) {
-				if(stopRequested)
-					return;
-				m.runScan(host, requestEngine, workspace);
-			}
-			host.setScanned();
-		}
-	}
-	
-	private void runPerDirectoryModulePhase() {
-		logger.info("Starting per directory module phase");
-		final IWebModel webModel = workspace.getWebModel();
-		for(IWebPath path: webModel.getUnscannedPaths()) {
-			for(IPerDirectoryScannerModule m: scanner.getModuleRegistry().getPerDirectoryModules(true)) {
-				if(stopRequested)
-					return;
-				m.runScan(path, requestEngine, workspace);
-				
-			}
-			path.setScanned();
-		}
-	}
-
-	private void runPerResourceModulePhase() {
-		logger.info("Starting per resource module phase");
-		final IWebModel webModel = workspace.getWebModel();
-		for(IWebPath path: webModel.getAllPaths()) {
-			for(IPerResourceScannerModule m: scanner.getModuleRegistry().getPerResourceModules(true)) {
-				if(stopRequested)
-					return;
-				m.runModule(path, requestEngine, workspace);
-			}
-		}
-	}
 	@Override
 	public void progressUpdate(int completed, int total) {
 		scanner.updateCrawlerProgress(completed, total);		

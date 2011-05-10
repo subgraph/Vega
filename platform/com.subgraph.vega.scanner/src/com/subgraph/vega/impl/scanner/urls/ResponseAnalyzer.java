@@ -14,7 +14,7 @@ import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.scanner.IModuleContext;
+import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.impl.scanner.forms.FormProcessor;
 
@@ -36,10 +36,10 @@ public class ResponseAnalyzer {
 		return contentAnalyzer;
 	}
 
-	public void analyzePivot(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
+	public void analyzePivot(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 
 	}
-	public void analyzePage(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
+	public void analyzePage(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 
 		final IContentAnalyzerResult result = contentAnalyzer.processResponse(res, false, true);
 		for(URI u: result.getDiscoveredURIs()) {
@@ -49,12 +49,12 @@ public class ResponseAnalyzer {
 		formProcessor.processForms(ctx, req, res);
 	}
 
-	public void analyzeContent(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
+	public void analyzeContent(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		analyzeHtml(ctx, req, res);
 		contentAnalyzer.processResponse(res, false, false);
 	}
 
-	private void analyzeHtml(IModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
+	private void analyzeHtml(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		IHTMLParseResult html = res.getParsedHTML();
 		if(html == null)
 			return;
@@ -68,7 +68,7 @@ public class ResponseAnalyzer {
 		}
 	}
 
-	private void analyzeHtmlElement(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, Element elem) {
+	private void analyzeHtmlElement(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, Element elem) {
 		boolean remoteScript = false;
 		NamedNodeMap attributes = elem.getAttributes();
 		final String tag = elem.getTagName().toLowerCase();
@@ -115,7 +115,7 @@ public class ResponseAnalyzer {
 		}
 	}
 
-	private void possibleXssAlert(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text, int offset, String type, String message) {
+	private void possibleXssAlert(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text, int offset, String type, String message) {
 		final int[] xids = extractXssTag(text, offset);
 		if(xids == null)
 			return;
@@ -165,7 +165,7 @@ public class ResponseAnalyzer {
 		}
 	}
 
-	private void checkJavascriptXSS(IModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text) {
+	private void checkJavascriptXSS(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text) {
 		if(text == null)
 			return;
 		int lastWordIdx = 0;
