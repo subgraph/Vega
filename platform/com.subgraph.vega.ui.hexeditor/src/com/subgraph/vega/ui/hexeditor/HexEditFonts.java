@@ -27,8 +27,10 @@ public class HexEditFonts {
 	}
 	
 	private void addFonts() {
-		add(HEX_ELEMENT_FONT, "Monospace", 10, SWT.NORMAL);
-		add(HEX_ASCII_FONT, "Monospace", 10, SWT.NORMAL);
+		// Monospace or Monospaced font doesn't exist on Mac... All platforms should
+		// have Courier, fixes bug #63
+		add(HEX_ELEMENT_FONT, "Courier", 10, SWT.NORMAL);
+		add(HEX_ASCII_FONT, "Courier", 10, SWT.NORMAL);
 	}
 	
 	private void add(String tag, String name, int size, int flags) {
