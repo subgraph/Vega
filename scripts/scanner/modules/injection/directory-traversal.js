@@ -41,20 +41,20 @@ function handler(req, res, ctx)
 
 	if(!ps.isParametric()) {
 		if(ctx.getSavedResponse(0).getResponseCode() < 300 && !ctx.isFingerprintMatch(0, fp) && !ctx.isFingerprintMatch(0, 1)) {
-			publishAlert(ctx, "Unique response for /./", 0);
+			publishAlert(ctx, "Unique response for /./", 0, req, res);
 			ctx.responseChecks(ps.createRequest(), ctx.getSavedResponse(0));
 		}
 		if(ctx.getSavedResponse(2).getResponseCode() < 300 && !ctx.isFingerprintMatch(2, fp) && !ctx.isFingerprintMatch(2, 3)) {
-			publishAlert(ctx, "Unique response for \\.\\", 2);
+			publishAlert(ctx, "Unique response for \\.\\", 2, req, res);
 			ctx.responseChecks(2);
 		}
 	} else {
 		if(!ctx.isFingerprintMatch(0, 1)) {
-			publishAlert(ctx, "Responses for ./val and .../val look different", 1);
+			publishAlert(ctx, "Responses for ./val and .../val look different", 1, req, res);
 			ctx.responseChecks(0);
 		}
 		if(!ctx.isFingerprintMatch(2, 3)) {
-			publishAlert(ctx, "Responses for .\\val and ...\\val look different", 3);
+			publishAlert(ctx, "Responses for .\\val and ...\\val look different", 3, req, res);
 			ctx.responseChecks(2);
 		}
 	}
@@ -62,6 +62,12 @@ function handler(req, res, ctx)
 
 function publishAlert(ctx, msg, idx)
 {
-	ctx.publishAlert("vinfo-directory-traversal", msg, ctx.getSavedRequest(idx), ctx.getSavedResponse(idx));
+
+        ctx.alert("vinfo-directory-traversal", ctx.getSavedRequest(idx), ctx.getSavedResponse(idx), {
+                  output:   ctx.getSavedResponse(idx).bodyAsString,
+                  key:      "vinfo-1918:" + ctx.getSavedRequest(idx).requestLine.uri,
+                  resource: ctx.getSavedRequest(idx).requestLine.uri
+                });
+
 }
 
