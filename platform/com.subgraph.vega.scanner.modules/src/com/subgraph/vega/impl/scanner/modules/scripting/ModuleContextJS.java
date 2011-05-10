@@ -1,7 +1,13 @@
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Wrapper;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -145,11 +151,58 @@ public class ModuleContextJS {
 		return new CrawlerCallbackWrapper(callback);
 	}
 	
-	public void publishAlert(String type, String message, HttpUriRequest request, IHttpResponse response) {
+	public void alert(String type, HttpUriRequest request, IHttpResponse response) {
+		alert(type, request, response, null);
+	}
+	
+	public void alert(String type, HttpRequest request, IHttpResponse response, Scriptable ob) {
+		List<Object> properties = new ArrayList<Object>();
+		String keyValue = null;
+		String messageValue = null;
+		if(ob == null) {
+			publishAlert(type, null, request, response);
+			return;
+		}
+
+		for(Object k: ob.getIds()) {
+			if(k instanceof String) {
+				String key = (String) k;
+				String val = lookup(key, ob);
+				if(val != null) {
+					if("key".equals(key)) {
+						keyValue = val;
+					} else if("message".equals(key)) {
+						messageValue = val;
+					} else {
+						properties.add(key);
+						properties.add(val);
+					}
+				}
+			}
+		}
+		context.publishAlert(type, keyValue, messageValue, request, response, properties.toArray());		
+	}
+
+	private String lookup(String key, Scriptable ob) {
+		final Object value = ob.get(key, ob);
+		if(value instanceof String) {
+			return (String) value;
+		} else if(value instanceof Wrapper) {
+			Wrapper w = (Wrapper) value;
+			if(w.unwrap() instanceof String) {
+				return (String) w.unwrap();
+			}
+			return null;
+		} else {
+			return null;
+		}
+	}
+	
+	public void publishAlert(String type, String message, HttpRequest request, IHttpResponse response) {
 		context.publishAlert(type, message, request, response);
 	}
 	
-	public void publishAlert(String type, String key, String message, HttpUriRequest request, IHttpResponse response) {
+	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response) {
 		context.publishAlert(type, key, message, request, response);
 	}
 }
