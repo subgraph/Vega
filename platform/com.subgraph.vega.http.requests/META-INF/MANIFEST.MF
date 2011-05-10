@@ -25,6 +25,7 @@ Import-Package: com.subgraph.vega.api.html,
  org.apache.http.message;version="4.0.0",
  org.apache.http.params;version="4.0.0",
  org.apache.http.protocol;version="4.0.0",
- org.apache.http.util;version="4.0.0"
+ org.apache.http.util;version="4.0.0",
+ org.w3c.dom.html2
 Service-Component: OSGI-INF/request-engine-factory.xml
 Export-Package: com.subgraph.vega.http.requests.custom

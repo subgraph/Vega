@@ -12,7 +12,6 @@ import org.mozilla.javascript.Wrapper;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.scanner.IModuleContext;
@@ -21,11 +20,11 @@ public class ResponseModuleContext implements IModuleContext {
 	private final static Logger logger = Logger.getLogger("modules");
 
 	private final IWorkspace workspace;
-	private final long scanId;
+	private final IScanInstance scanInstance;
 	
-	ResponseModuleContext(IWorkspace workspace, long scanId) {
+	ResponseModuleContext(IWorkspace workspace, IScanInstance scanInstance) {
 		this.workspace = workspace;
-		this.scanId = scanId;
+		this.scanInstance = scanInstance;
 	}
 
 	@Override
@@ -101,21 +100,15 @@ public class ResponseModuleContext implements IModuleContext {
 			HttpRequest request, IHttpResponse response,
 			Object... properties) {
 		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] "+ message);
-		final IScanAlertRepository alertRepository = workspace.getScanAlertRepository();
-		final IScanInstance scan = alertRepository.getScanInstanceByScanId(scanId);
-		if(scan == null) {
-			logger.warning("Could not find scan instance for scanId = "+ scanId);
-			return;
-		}
 		final IRequestLog requestLog = workspace.getRequestLog();
 		
 		try {
-			scan.lock();
-			if(key != null && scan.hasAlertKey(key)) {
+			scanInstance.lock();
+			if(key != null && scanInstance.hasAlertKey(key)) {
 				return;
 			}
 			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
-			final IScanAlert alert = scan.createAlert(type, key, requestId);
+			final IScanAlert alert = scanInstance.createAlert(type, key, requestId);
 			
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
@@ -128,9 +121,44 @@ public class ResponseModuleContext implements IModuleContext {
 			if(message != null) {
 				alert.setStringProperty("message", message);
 			}
-			scan.addAlert(alert);
+			scanInstance.addAlert(alert);
 		} finally {
-			scan.unlock();
+			scanInstance.unlock();
 		}
+	}
+
+	@Override
+	public void setProperty(String name, Object value) {
+		scanInstance.setProperty(name, value);
+	}
+
+	@Override
+	public void setStringProperty(String name, String value) {
+		scanInstance.setStringProperty(name, value);
+	}
+
+	@Override
+	public void setIntegerProperty(String name, int value) {
+		scanInstance.setIntegerProperty(name, value);
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		return scanInstance.getProperty(name);
+	}
+
+	@Override
+	public String getStringProperty(String name) {
+		return scanInstance.getStringProperty(name);
+	}
+
+	@Override
+	public Integer getIntegerProperty(String name) {
+		return scanInstance.getIntegerProperty(name);
+	}
+
+	@Override
+	public List<String> propertyKeys() {
+		return scanInstance.propertyKeys();
 	}
 }

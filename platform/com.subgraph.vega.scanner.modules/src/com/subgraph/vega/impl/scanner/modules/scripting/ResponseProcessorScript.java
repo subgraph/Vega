@@ -11,6 +11,7 @@ import org.mozilla.javascript.WrappedException;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
@@ -25,9 +26,9 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 	}
 
 	@Override
-	public void processResponse(long scanId, HttpRequest request, IHttpResponse response,
+	public void processResponse(IScanInstance scanInstance, HttpRequest request, IHttpResponse response,
 			IWorkspace workspace) {
-		final ResponseModuleContext ctx = new ResponseModuleContext(workspace, scanId);
+		final ResponseModuleContext ctx = new ResponseModuleContext(workspace, scanInstance);
 		try {
 			final Object[] args = new Object[] { request, response, ctx	};
 			Context cx = Context.enter();
@@ -40,13 +41,6 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 		} finally {
 			Context.exit();
 		}
-		/*
-		final List<ExportedObject> exports = new ArrayList<ExportedObject>();
-		export(exports, "httpRequest", request);
-		export(exports, "httpResponse", response);
-		export(exports, "workspace", workspace);
-		runScript(exports, request.getRequestLine().getUri());
-		*/
 	}
 
 	@Override

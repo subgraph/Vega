@@ -9,6 +9,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 
 public class ContentAnalyzerFactory implements IContentAnalyzerFactory {
 	
@@ -22,8 +23,8 @@ public class ContentAnalyzerFactory implements IContentAnalyzerFactory {
 	}
 	
 	@Override
-	public IContentAnalyzer createContentAnalyzer(long scanId) {
-		return new ContentAnalyzer(this, scanId);
+	public IContentAnalyzer createContentAnalyzer(IScanInstance scanInstance) {
+		return new ContentAnalyzer(this, scanInstance);
 	}
 
 	private IEventHandler createWorkspaceEventHandler() {

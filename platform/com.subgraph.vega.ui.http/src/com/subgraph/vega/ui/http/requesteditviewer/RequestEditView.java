@@ -23,6 +23,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.http.Activator;
@@ -69,10 +70,13 @@ public class RequestEditView extends ViewPart {
 
 		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
 		final IScannerModuleRegistry moduleRepository = Activator.getDefault().getScannerModuleRegistry();
-		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(IScannerModuleRegistry.PROXY_SCAN_ID);
-		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
-		contentAnalyzer.setDefaultAddToRequestLog(true);
-		contentAnalyzer.setAddLinksToModel(true);
+		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
+		if(workspace != null) {
+			contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(workspace.getScanAlertRepository().getProxyScanInstance());
+			contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
+			contentAnalyzer.setDefaultAddToRequestLog(true);
+			contentAnalyzer.setAddLinksToModel(true);
+		}
 	}
 
 	@Override
@@ -129,8 +133,10 @@ public class RequestEditView extends ViewPart {
 				displayError(e.getCause().getMessage());
 			}
 			return;
-		}	
-		contentAnalyzer.processResponse(response);
+		}
+		if(contentAnalyzer != null) {
+			contentAnalyzer.processResponse(response);
+		}
 	}
 
 	private Composite createRequestEditor(Composite parent) {

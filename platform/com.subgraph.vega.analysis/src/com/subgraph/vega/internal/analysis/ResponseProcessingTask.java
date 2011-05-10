@@ -6,18 +6,19 @@ import org.apache.http.HttpRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public class ResponseProcessingTask implements Runnable {
 	
-	private final long scanId;
+	private final IScanInstance scanInstance;
 	private final HttpRequest request;
 	private final IHttpResponse response;
 	private final IWorkspace workspace;
 	private final List<IResponseProcessingModule> modules;
 		
-	ResponseProcessingTask(long scanId, HttpRequest request, IHttpResponse response, IWorkspace workspace, List<IResponseProcessingModule> modules) {
-		this.scanId = scanId;
+	ResponseProcessingTask(IScanInstance scanInstance, HttpRequest request, IHttpResponse response, IWorkspace workspace, List<IResponseProcessingModule> modules) {
+		this.scanInstance = scanInstance;
 		this.request = request;
 		this.response = response;
 		this.workspace = workspace;
@@ -27,6 +28,6 @@ public class ResponseProcessingTask implements Runnable {
 	@Override
 	public void run() {
 		for(IResponseProcessingModule m: modules)
-			m.processResponse(scanId, request, response, workspace);		
+			m.processResponse(scanInstance, request, response, workspace);		
 	}
 }

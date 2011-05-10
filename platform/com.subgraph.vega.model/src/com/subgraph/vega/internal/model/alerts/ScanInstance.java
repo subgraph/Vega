@@ -14,10 +14,12 @@ import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanInstance implements IScanInstance, Activatable {
 	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
+	private final ModelProperties properties;
 	
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
@@ -28,6 +30,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	
 	ScanInstance(long scanId) {
 		this.scanId = scanId;
+		this.properties = new ModelProperties();
 	}
 
 	void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory, EventListenerManager eventManager) {
@@ -123,6 +126,48 @@ public class ScanInstance implements IScanInstance, Activatable {
 		lock.unlock();
 	}
 	
+	@Override
+	public void setProperty(String name, Object value) {
+		activate(ActivationPurpose.READ);
+		properties.setProperty(name, value);
+	}
+
+	@Override
+	public void setStringProperty(String name, String value) {
+		activate(ActivationPurpose.READ);
+		properties.setStringProperty(name, value);
+	}
+
+	@Override
+	public void setIntegerProperty(String name, int value) {
+		activate(ActivationPurpose.READ);
+		properties.setIntegerProperty(name, value);
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		activate(ActivationPurpose.READ);
+		return properties.getProperty(name);
+	}
+
+	@Override
+	public String getStringProperty(String name) {
+		activate(ActivationPurpose.READ);
+		return properties.getStringProperty(name);
+	}
+
+	@Override
+	public Integer getIntegerProperty(String name) {
+		activate(ActivationPurpose.READ);
+		return properties.getIntegerProperty(name);
+	}
+
+	@Override
+	public List<String> propertyKeys() {
+		activate(ActivationPurpose.READ);
+		return properties.propertyKeys();
+	}
+
 	private boolean rejectDuplicateAlert(IScanAlert alert) {
 		if(alert.getResource() == null) {
 			return false;

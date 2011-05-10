@@ -64,7 +64,7 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();
-		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(IScannerModuleRegistry.PROXY_SCAN_ID);
+		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(currentWorkspace.getScanAlertRepository().getProxyScanInstance());
 		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);

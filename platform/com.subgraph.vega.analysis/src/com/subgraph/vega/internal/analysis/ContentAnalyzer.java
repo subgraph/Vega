@@ -14,6 +14,7 @@ import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.internal.analysis.urls.UrlExtractor;
@@ -22,7 +23,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	
 	private final Logger logger = Logger.getLogger("analysis");
 	
-	private final long scanId;
+	private final IScanInstance scanInstance;
 	private final ContentAnalyzerFactory factory;
 	private final UrlExtractor urlExtractor = new UrlExtractor();
 	private final MimeDetector mimeDetector = new MimeDetector();
@@ -34,9 +35,9 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private boolean addLinksToModel;
 	private boolean defaultAddToRequestLog;
 		
-	ContentAnalyzer(ContentAnalyzerFactory factory, long scanId) {
+	ContentAnalyzer(ContentAnalyzerFactory factory, IScanInstance scanInstance) {
 		this.factory = factory;
-		this.scanId = scanId;
+		this.scanInstance = scanInstance;
 		this.addLinksToModel = true;
 		this.defaultAddToRequestLog = true;
 		responseProcessingExecutor = createNewExecutor();
@@ -107,7 +108,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		if(responseProcessingModules == null || !response.isMostlyAscii())
 			return;
 		synchronized(responseProcessingLock) {
-			responseProcessingExecutor.execute(new ResponseProcessingTask(scanId, request, response, workspace, responseProcessingModules));
+			responseProcessingExecutor.execute(new ResponseProcessingTask(scanInstance, request, response, workspace, responseProcessingModules));
 		}
 	}
 

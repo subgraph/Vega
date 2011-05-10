@@ -2,7 +2,9 @@ package com.subgraph.vega.api.model.alerts;
 
 import java.util.List;
 
-public interface IScanInstance {
+import com.subgraph.vega.api.model.IModelProperties;
+
+public interface IScanInstance extends IModelProperties {
 	long getScanId();
 	IScanAlert createAlert(String type);
 	IScanAlert createAlert(String type, String key);

@@ -269,4 +269,39 @@ public class ModuleContext implements IInjectionModuleContext {
 	public List<String> getFileExtensionList() {
 		return scanState.getFileExtensionList();
 	}
+
+	@Override
+	public void setProperty(String name, Object value) {
+		scanState.getScanInstance().setProperty(name, value);
+	}
+
+	@Override
+	public void setStringProperty(String name, String value) {
+		scanState.getScanInstance().setStringProperty(name, value);		
+	}
+
+	@Override
+	public void setIntegerProperty(String name, int value) {
+		scanState.getScanInstance().setIntegerProperty(name, value);		
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		return scanState.getScanInstance().getProperty(name);
+	}
+
+	@Override
+	public String getStringProperty(String name) {
+		return scanState.getScanInstance().getStringProperty(name);
+	}
+
+	@Override
+	public Integer getIntegerProperty(String name) {
+		return scanState.getScanInstance().getIntegerProperty(name);
+	}
+
+	@Override
+	public List<String> propertyKeys() {
+		return scanState.getScanInstance().propertyKeys();
+	}
 }

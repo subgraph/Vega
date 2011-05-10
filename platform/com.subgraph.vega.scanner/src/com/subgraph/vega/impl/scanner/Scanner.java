@@ -124,7 +124,7 @@ public class Scanner implements IScanner {
 		currentWorkspace.lock();
 		
 		final IScanInstance scanInstance = currentWorkspace.getScanAlertRepository().createNewScanInstance();
-		scannerTask = new ScannerTask(scanInstance, this, config, requestEngine, currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(scanInstance.getScanId()));
+		scannerTask = new ScannerTask(scanInstance, this, config, requestEngine, currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(scanInstance));
 		scannerThread = new Thread(scannerTask);
 		setScannerStatus(ScannerStatus.SCAN_STARTING);
 

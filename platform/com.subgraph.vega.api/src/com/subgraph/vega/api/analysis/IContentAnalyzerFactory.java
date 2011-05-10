@@ -1,5 +1,7 @@
 package com.subgraph.vega.api.analysis;
 
+import com.subgraph.vega.api.model.alerts.IScanInstance;
+
 public interface IContentAnalyzerFactory {
-	IContentAnalyzer createContentAnalyzer(long scanId);
+	IContentAnalyzer createContentAnalyzer(IScanInstance scanInstance);
 }
