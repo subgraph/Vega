@@ -58,11 +58,13 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
+		activate(ActivationPurpose.READ);
 		return alertFactory.createAlert(key, type, scanId, requestId);
 	}
 
 	@Override
 	public void addAlert(IScanAlert alert) {
+		activate(ActivationPurpose.READ);
 		if(rejectDuplicateAlert(alert)) {
 			return;
 		}
@@ -96,6 +98,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	private List<ScanAlert> getAlertListForKey(final String key) {
+		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -107,6 +110,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public List<IScanAlert> getAllAlerts() {
+		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<IScanAlert>() {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -187,6 +191,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	private List<ScanAlert> getAlertListForResource(final String resource) {
+		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
 			@Override

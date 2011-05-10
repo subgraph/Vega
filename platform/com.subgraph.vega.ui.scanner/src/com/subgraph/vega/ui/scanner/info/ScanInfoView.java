@@ -22,6 +22,7 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.dashboard.DashboardPane;
@@ -83,7 +84,9 @@ public class ScanInfoView extends ViewPart {
 				if(o instanceof IScanAlert) {		
 					IScanAlert alert = (IScanAlert) o;
 					displayAlert(alert);
-				}				
+				} else if (o instanceof IScanInstance) {
+					
+				}
 			}
 			
 		});

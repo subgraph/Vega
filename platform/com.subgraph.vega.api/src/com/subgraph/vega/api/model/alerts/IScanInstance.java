@@ -4,8 +4,7 @@ import java.util.List;
 
 import com.subgraph.vega.api.model.IModelProperties;
 
-public interface IScanInstance extends IModelProperties {
-	long getScanId();
+public interface IScanInstance extends IModelProperties, IScanIdProvider {
 	IScanAlert createAlert(String type);
 	IScanAlert createAlert(String type, String key);
 	IScanAlert createAlert(String type, String key, long requestId);

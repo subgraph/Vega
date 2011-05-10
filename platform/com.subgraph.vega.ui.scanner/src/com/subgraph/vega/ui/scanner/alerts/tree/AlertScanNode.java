@@ -4,11 +4,14 @@ import org.apache.http.HttpHost;
 
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanIdProvider;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
-public class AlertScanNode extends AbstractAlertTreeNode {
+public class AlertScanNode extends AbstractAlertTreeNode implements IScanIdProvider {
 	private final static String SCAN_IMAGE = "icons/scanner.png";
+	private final static String PROXY_IMAGE = "icons/proxy.png";
+
 
 	private final static String NO_HOSTNAME = "No Hostname";
 	
@@ -31,7 +34,11 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 	}
 	@Override
 	public String getLabel() {
-		return "Scan [id: #"+ Long.toString(scanId) +"]  ";
+		if(scanId == -1) {
+			return "Proxy  ";
+		} else {
+			return "Scan [id: #"+ Long.toString(scanId) +"]  ";
+		}
 	}
 
 	@Override
@@ -40,7 +47,11 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 	}
 	@Override
 	public String getImage() {
-		return SCAN_IMAGE;
+		if(scanId == -1) {
+			return PROXY_IMAGE;
+		} else {
+			return SCAN_IMAGE;
+		}
 	}
 
 	@Override
@@ -57,5 +68,10 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 			return NO_HOSTNAME;
 		}
 		return host.toString();
+	}
+
+	@Override
+	public long getScanId() {
+		return scanId;
 	}
 }
