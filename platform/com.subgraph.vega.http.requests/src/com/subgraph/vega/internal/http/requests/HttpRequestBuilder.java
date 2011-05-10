@@ -2,6 +2,8 @@ package com.subgraph.vega.internal.http.requests;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -225,7 +227,12 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			throw new IllegalArgumentException("Invalid host");
 		}
 		
-		final URI requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + path);
+		URI requestUri;
+		try {
+			requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + URLEncoder.encode(path, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new URISyntaxException("Unsupported Encoding", e.getMessage());
+		}
 		IHttpRawRequest request;
 		HttpEntity entity = getEntity();
 		
