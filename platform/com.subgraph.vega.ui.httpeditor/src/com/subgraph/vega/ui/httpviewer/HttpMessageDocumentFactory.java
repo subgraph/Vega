@@ -13,6 +13,8 @@ import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.jface.text.rules.Token;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.ui.httpviewer.partitioning.HeaderPartitionRule;
 import com.subgraph.vega.ui.httpviewer.partitioning.RequestLinePartitionRule;
 import com.subgraph.vega.ui.httpviewer.partitioning.ResponseLinePartitionRule;
@@ -36,11 +38,21 @@ public class HttpMessageDocumentFactory {
 		return createDocumentForText((uriDecode) ? (decodeContent(text)) : (text));
 	}
 	
+	public IDocument createDocumentForRequest(IHttpRequestBuilder builder, boolean uriDecode) {	
+		final String text = messageRenderer.getRequestAsText(builder);
+		return createDocumentForText((uriDecode) ? (decodeContent(text)) : (text));
+	}
+
 	public IDocument createDocumentForResponse(HttpResponse response, boolean uriDecode) {
 		final String text = messageRenderer.getResponseAsText(response);
 		return createDocumentForText((uriDecode) ? (decodeContent(text)) : (text));
 	}
 	
+	public IDocument createDocumentForResponse(IHttpResponseBuilder builder, boolean uriDecode) {
+		final String text = messageRenderer.getResponseAsText(builder);
+		return createDocumentForText((uriDecode) ? (decodeContent(text)) : (text));
+	}
+
 	private IDocument createDocumentForText(String text) {
 		final IDocument document = createDocument();
 		document.set(text);

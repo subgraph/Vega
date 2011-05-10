@@ -1,26 +1,25 @@
 package com.subgraph.vega.ui.http.builder;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
-import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.ui.httpeditor.parser.HttpResponseParser;
 import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 
 /**
- * Manages visual components to edit a HTTP request message.
+ * Manages visual components to edit a HTTP response message.
  */
-public class RequestMessageEditor implements IHttpBuilderPart {
-	private final IHttpRequestBuilder builder;
-	private final HttpRequestParser requestParser;
+public class ResponseMessageEditor implements IHttpBuilderPart {
+	private final IHttpResponseBuilder builder;
+	private final HttpResponseParser responseParser;
 	private HttpMessageViewer messageViewer;
 
-	public RequestMessageEditor(final IHttpRequestBuilder builder) {
+	public ResponseMessageEditor(final IHttpResponseBuilder builder) {
 		this.builder = builder;
-		requestParser = new HttpRequestParser(this.builder);
+		responseParser = new HttpResponseParser(this.builder);
 	}
 	
 	@Override
@@ -38,7 +37,7 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 
 	@Override
 	public void refresh() {
-		messageViewer.displayHttpRequest(builder);
+		messageViewer.displayHttpResponse(builder);
 	}
 
 	@Override
@@ -48,10 +47,8 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 		builder.setEntity(null);
 
 		try {
-			requestParser.parseRequest(messageViewer.getContent());
+			responseParser.parseResponse(messageViewer.getContent());
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
-		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
 		}
 	}

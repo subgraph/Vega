@@ -12,6 +12,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.ui.httpviewer.entity.HttpEntityViewer;
 
 public class HttpMessageViewer extends Composite {
@@ -44,13 +46,17 @@ public class HttpMessageViewer extends Composite {
 	}
 
 	public void setEditable(boolean flag) {
-		
+		viewer.setEditable(flag);
 	}
 
 	public void clearContent() {
 		
 	}
 
+	public String getContent() {
+		return viewer.getDocument().get();
+	}
+	
 	public void setDecodeUrlEncoding(boolean flag) {
 		if(flag == isDecodingEnabled)
 			return;
@@ -82,6 +88,13 @@ public class HttpMessageViewer extends Composite {
 		displayDocumentForDecodeState();
 		entityViewer.displayHttpEntity(maybeGetRequestEntity(request));
 	}
+
+	public void displayHttpRequest(IHttpRequestBuilder builder) {
+		rawDocument = documentFactory.createDocumentForRequest(builder, false);
+		decodedDocument = documentFactory.createDocumentForRequest(builder, true);
+		displayDocumentForDecodeState();
+		entityViewer.displayHttpEntity(builder.getEntity());
+	}
 	
 	private HttpEntity maybeGetRequestEntity(HttpRequest request) {
 		if(request instanceof HttpEntityEnclosingRequest) {
@@ -90,7 +103,7 @@ public class HttpMessageViewer extends Composite {
 			return null;
 		}
 	}
-	
+
 	public void displayHttpResponse(HttpResponse response) {
 		rawDocument = documentFactory.createDocumentForResponse(response, false);
 		decodedDocument = documentFactory.createDocumentForResponse(response, true);
@@ -98,6 +111,13 @@ public class HttpMessageViewer extends Composite {
 		entityViewer.displayHttpEntity(response.getEntity());
 	}
 	
+	public void displayHttpResponse(IHttpResponseBuilder builder) {
+		rawDocument = documentFactory.createDocumentForResponse(builder, false);
+		decodedDocument = documentFactory.createDocumentForResponse(builder, true);
+		displayDocumentForDecodeState();
+		entityViewer.displayHttpEntity(builder.getEntity());
+	}
+
 	private SourceViewer createSourceViewer() {
 		final SourceViewer sv = new SourceViewer(this, new VerticalRuler(0), SWT.BORDER | SWT.MULTI | SWT.WRAP);
 		return sv;

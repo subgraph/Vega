@@ -31,7 +31,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	private String rawRequestLine;
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		super.clear();
 		scheme = "http";
 		host = "";
@@ -42,13 +42,13 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public void setFromRequest(IRequestLogRecord record) throws URISyntaxException {
+	public synchronized void setFromRequest(IRequestLogRecord record) throws URISyntaxException {
 		setFromRequest(record.getRequest());
 		setFromHttpHost(record.getHttpHost());
 	}
 
 	@Override
-	public void setFromRequest(HttpRequest request) throws URISyntaxException {
+	public synchronized void setFromRequest(HttpRequest request) throws URISyntaxException {
 		setParams(request.getParams().copy());
 		setFromRequestLine(request.getRequestLine());
 		setHeaders(request.getAllHeaders());
@@ -61,7 +61,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public void setFromRequestLine(RequestLine requestLine) throws URISyntaxException {
+	public synchronized void setFromRequestLine(RequestLine requestLine) throws URISyntaxException {
 		method = requestLine.getMethod();
 
 		final URI requestUri = new URI(requestLine.getUri());
@@ -99,7 +99,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public void setFromUri(URI uri) {
+	public synchronized void setFromUri(URI uri) {
 		scheme = uri.getScheme();
 		if (scheme == null) {
 			scheme = "http";
@@ -128,7 +128,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public void setFromHttpHost(HttpHost host) {
+	public synchronized void setFromHttpHost(HttpHost host) {
 		scheme = host.getSchemeName();
 		if (scheme == null) {
 			scheme = "http";
@@ -146,67 +146,67 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 	
 	@Override
-	public void setScheme(String scheme) {
+	public synchronized void setScheme(String scheme) {
 		this.scheme = scheme;
 	}
 
 	@Override
-	public String getScheme() {
+	public synchronized String getScheme() {
 		return scheme;
 	}
 
 	@Override
-	public void setHost(String host) {
+	public synchronized void setHost(String host) {
 		this.host = host;
 	}
 
 	@Override
-	public String getHost() {
+	public synchronized String getHost() {
 		return host;
 	}
 
 	@Override
-	public void setHostPort(int port) {
+	public synchronized void setHostPort(int port) {
 		this.hostPort = port;
 	}
 
 	@Override
-	public int getHostPort() {
+	public synchronized int getHostPort() {
 		return hostPort;
 	}
 
 	@Override
-	public void setMethod(String method) {
+	public synchronized void setMethod(String method) {
 		this.method = method;
 	}
 
 	@Override
-	public String getMethod() {
+	public synchronized String getMethod() {
 		return method;
 	}
 
 	@Override
-	public String getPath() {
+	public synchronized String getPath() {
 		return path;
 	}
 
 	@Override
-	public void setPath(String path) {
+	public synchronized void setPath(String path) {
 		this.path = path;
 	}
 
 	@Override
-	public void setRawRequestLine(String line) {
+	public synchronized void setRawRequestLine(String line) {
 		this.rawRequestLine = line;
 	}
 
 	@Override
-	public String getRawRequestLine() {
+	public synchronized String getRawRequestLine() {
 		return rawRequestLine;
 	}
 	
 	@Override
-	public String getRequestLine() {
+	public synchronized String getRequestLine() {
 		if (rawRequestLine != null) {
 			return rawRequestLine;
 		} else {
@@ -220,7 +220,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public HttpUriRequest buildRequest() throws URISyntaxException {
+	public synchronized HttpUriRequest buildRequest() throws URISyntaxException {
 		if (host == null || host.length() == 0) {
 			throw new IllegalArgumentException("Invalid host");
 		}

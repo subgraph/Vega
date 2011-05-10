@@ -29,10 +29,10 @@ import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
-import com.subgraph.vega.ui.http.builder.BodyEditor;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
+import com.subgraph.vega.ui.http.builder.ResponseMessageEditor;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionPanel;
 
 public class TransactionViewer extends Composite {
@@ -59,7 +59,7 @@ public class TransactionViewer extends Composite {
 		this.manager = manager;
 		setLayout(createLayout());
 		createStatusLabel();
-		createToolbar(direction);
+		createToolbar();
 		final Group viewerGroup = new Group(this, SWT.NONE);
 		viewerGroup.setLayout(new FillLayout());
 		viewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -87,7 +87,7 @@ public class TransactionViewer extends Composite {
 		return statusLabel;
 	}
 	
-	private ToolBar createToolbar(TransactionDirection direction) {
+	private ToolBar createToolbar() {
 		final ToolBar toolBar = new ToolBar(this, SWT.FLAT);
 
 		viewerMenu = new Menu(this.getParent().getShell(), SWT.POP_UP);
@@ -198,7 +198,7 @@ public class TransactionViewer extends Composite {
 		IHttpResponseBuilder responseBuilder = manager.getResponseBuilder();
 		final SelectionListener listener = createSelectionListenerMenuItem();
 
-		BodyEditor responseEditor = new BodyEditor(responseBuilder);
+		ResponseMessageEditor responseEditor = new ResponseMessageEditor(responseBuilder);
 		Composite childControl = responseEditor.createPartControl(viewerControl);
 	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Response");
