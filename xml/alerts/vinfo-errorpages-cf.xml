@@ -1,9 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>ColdFusion error detected</title>
+<title>ColdFusion Debug Output Detected</title>
 	
 	<class>Information</class>
 	<severity>Low</severity>		
-	
-	<impact>A ColdFusion error has been detected. This could indicate badly written code, and could disclose sensitive information.</impact>
+
+	<impact>Vega has detect content that corresponds to verbose debugging output from a ColdFusion server.</impact>
+	<impact>This output can contain sensitive information which could make other attacks easier.</impact>
+	<impact>System configuration settings, absolute file paths, and other information may be disclosed.</impact>
+	<impact>If Robust Exception Information is enabled, this data could include SQL statements and detailed information abou the application error.</impact>
+	<impact>The error itself may indicate a vulnerability.</impact> 
+
+	<remediation>ColdFusion can and should be configured to limit the output of debug data when errors occur.</remediation>
+	<remediation>This is managed in the ColdFusion Administrator, the "Debugging & Logging" section.</remediation>
+	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "Robust Exception Information".</remediation>
+	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "AJAX Debug Log Window".</remediation>
+	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "Request Debugging Output".</remediation>
+	<remediation>If absolutely necessary, ColdFusion can be configured to restrict debugging output to specific IP addresses.</remediation>
+	<remediation>This can be also be managed from the ColdFusion Administrator, on the Debugging IP Addresses page.</remediation>
+	<remediation>The developers should investigate the error to ensure that it is not linked to a security vulnerability.</remediation>
+
+	<discussion>
+	Vega has detected content that matches the verbose error data output by servers running ColdFusion configured to send debug data to remote clients. The information in this output is sensitive: it can include absolute system paths, system configuration settings, information about the application code structure, system patchlevels, database queries, and database configuration settings. For production servers, it is strongly recommended that the debug output configuration options be disabled. The ColdFusion 9 lockdown guide recommends turning all of the settings off and provides instructions for doing so. The information obtained from this error page could increase the likelihood of success of another attack. Finally, the error itself should be investigated for security implications.
+	</discussion>
+
+	<references>
+		<url address="http://www.adobe.com/products/coldfusion/whitepapers/pdf/91025512_cf9_lockdownguide_wp_ue.pdf">ColdFusion 9 Lockdown Guide (Adobe)</url>
+		<url address="http://help.adobe.com/en_US/ColdFusion/9.0/Admin/WSc3ff6d0ea77859461172e0811cbf3638e6-7fe0.html">Using the ColdFusion Administrator: Debugging & Logging section</url>
+                <url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+                <url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
+	</references>
+
 </alert>
