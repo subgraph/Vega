@@ -28,14 +28,12 @@ function run(request, response, ctx) {
 
 	
 	for (i=0;i<=html.length-1;i+=1) {
-		print("vinfo-errorpages: test2.1.x" + i);
 		x = response.responseCode.toString();
 		x = x.indexOf(html[i]);
 		if (x>=0) {
 			htmlres = 1;
 		}
 	} 
-	print("vinfo-errorpages: test2.1");
 
 	for (i=0;i<=php.length-1;i+=1) {
 		x = response.bodyAsString.indexOf(php[i]);
