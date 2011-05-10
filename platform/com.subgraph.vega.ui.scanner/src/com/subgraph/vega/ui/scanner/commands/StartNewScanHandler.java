@@ -1,7 +1,6 @@
 package com.subgraph.vega.ui.scanner.commands;
 
 import java.net.URI;
-import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -38,28 +37,17 @@ public class StartNewScanHandler extends AbstractHandler {
 				}
 				
 				URI uri = wizard.getScanHostURI();
-				String cookieString = wizard.getCookieString();
-				String basicUsername = wizard.getBasicUsername();
-				String basicPassword = wizard.getBasicPassword();
-				String basicRealm = wizard.getBasicRealm();
-				String basicDomain = wizard.getBasicDomain();
-				String ntlmUsername = wizard.getNtlmUsername();
-				String ntlmPassword = wizard.getNtlmPassword();
-				List<String> exclusions = wizard.getExclusions();
-				
-				
 				if(uri != null) {
-					lastTargetValue = wizard.getTargetField();
-				
+//					lastTargetValue = wizard.getTargetField();
 					scannerConfig.setBaseURI(uri);
-					scannerConfig.setCookieString(cookieString);
-					scannerConfig.setBasicUsername(basicUsername);
-					scannerConfig.setBasicPassword(basicPassword);
-					scannerConfig.setBasicRealm(basicRealm);
-					scannerConfig.setBasicDomain(basicDomain);
-					scannerConfig.setExclusions(exclusions);
-					scannerConfig.setNtlmUsername(ntlmUsername);
-					scannerConfig.setNtlmPassword(ntlmPassword);
+					scannerConfig.setCookieString(wizard.getCookieString());
+					scannerConfig.setBasicUsername(wizard.getBasicUsername());
+					scannerConfig.setBasicPassword(wizard.getBasicPassword());
+					scannerConfig.setBasicRealm(wizard.getBasicRealm());
+					scannerConfig.setBasicDomain(wizard.getBasicDomain());
+					scannerConfig.setExclusions(wizard.getExclusions());
+					scannerConfig.setNtlmUsername(wizard.getNtlmUsername());
+					scannerConfig.setNtlmPassword(wizard.getNtlmPassword());
 					final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 					scannerConfig.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
 					scannerConfig.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
@@ -68,9 +56,7 @@ public class StartNewScanHandler extends AbstractHandler {
 				}
 			}
 		}
-
 		return null;
-
 	}
 
 	

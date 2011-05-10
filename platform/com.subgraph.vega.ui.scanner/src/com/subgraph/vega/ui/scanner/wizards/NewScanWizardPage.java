@@ -20,7 +20,6 @@ import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
 import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizardPage extends WizardPage {
-
 	private Composite container;
 	private IScannerModuleRegistry registry;
 	private CheckboxTreeViewer viewer;
@@ -30,7 +29,6 @@ public class NewScanWizardPage extends WizardPage {
 	private final static String VEGA_LOGO = "icons/vega_small.png";
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 
-	
 	public NewScanWizardPage(String targetValue) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
@@ -39,6 +37,7 @@ public class NewScanWizardPage extends WizardPage {
 		this.targetValue = targetValue;
 		registry = Activator.getDefault().getIScannerModuleRegistry();
 	}
+
 	@Override
 	public void createControl(Composite parent) {
 		container = new Composite(parent, SWT.NULL);

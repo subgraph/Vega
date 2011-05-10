@@ -29,32 +29,30 @@ public class HttpResponseParser extends ParserBase {
 	}
 
 	/**
-	 * Parse a HTTP response in a string to build a HttpResponse.
+	 * Parse a HTTP response in a string.
 	 * 
 	 * @param content HTTP response string.
-	 * @param params Response parameters, or null.
-
 	 * @return HttpResponse, or null if the given HTTP response was empty. 
 	 * @throws UnsupportedEncodingException
 	 */
-	public HttpResponse parseResponse(final String content, HttpParams params) throws UnsupportedEncodingException {
+	public void parseResponse(final String content) throws UnsupportedEncodingException {
 		final CharArrayBuffer buf = new CharArrayBuffer(0);
 		buf.append(content);
 		final ParserCursor bufCursor = new ParserCursor(0, buf.length()); 
 		final LineParser parser = new BasicLineParser();
 
 		if (parseStatusLine(parser, builder, buf, bufCursor) < 0) {
-			return null;
+			return;
 		}
 		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd()) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}
-
-		builder.setParams(params);
-		
-		return builder.buildResponse();
+	}
+	
+	public IHttpResponseBuilder getResponseBuilder() {
+		return builder;
 	}
 
 	/**

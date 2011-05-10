@@ -32,34 +32,30 @@ public class HttpRequestParser extends ParserBase {
 	}
 
 	/**
-	 * Parse a manually-entered HTTP request to build a HttpUriRequest.
+	 * Parse a manually-entered HTTP request.
 	 * 
 	 * @param content Manually-entered HTTP request.
-	 * @param params Request parameters, or null.
-	 * @return HttpUriRequest, or null if the given HTTP request was empty. 
-	 * @throws URISyntaxException
-	 * @throws UnsupportedEncodingException
 	 */
-	public HttpUriRequest parseRequest(final String content, HttpParams params) throws URISyntaxException, UnsupportedEncodingException {
+	public void parseRequest(final String content) throws URISyntaxException, UnsupportedEncodingException {
 		final CharArrayBuffer buf = new CharArrayBuffer(0);
 		buf.append(content);
 		final ParserCursor bufCursor = new ParserCursor(0, buf.length()); 
 		final LineParser parser = new BasicLineParser();
 
 		if (parseRequestLine(parser, builder, buf, bufCursor) < 0) {
-			return null;
+			return;
 		}
 		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd()) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}
-
-		builder.setParams(params);
-		
-		return builder.buildRequest();
 	}
-	
+
+	public IHttpRequestBuilder getRequestBuilder() {
+		return builder;
+	}
+
 	/**
 	 * Read and parse the request line.
 	 * 

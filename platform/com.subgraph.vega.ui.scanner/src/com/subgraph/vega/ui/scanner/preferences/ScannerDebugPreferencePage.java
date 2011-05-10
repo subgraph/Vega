@@ -17,13 +17,13 @@ public class ScannerDebugPreferencePage extends FieldEditorPreferencePage implem
 	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		setDescription("Scanner debugging options");		
+		setDescription("Scanner Debugging Options");		
 	}
 
 	@Override
 	protected void createFieldEditors() {
-		BooleanFieldEditor logRequestsField = new BooleanFieldEditor("LogAllRequests", "Log All Scanner Requests", getFieldEditorParent());
-		BooleanFieldEditor debugOutputField = new BooleanFieldEditor("DisplayDebugOutput", "Display debug output in console.", getFieldEditorParent());
+		BooleanFieldEditor logRequestsField = new BooleanFieldEditor("LogAllRequests", "Log all scanner requests", getFieldEditorParent());
+		BooleanFieldEditor debugOutputField = new BooleanFieldEditor("DisplayDebugOutput", "Display debug output in console", getFieldEditorParent());
 		addField(logRequestsField);
 		addField(debugOutputField);
 	}
