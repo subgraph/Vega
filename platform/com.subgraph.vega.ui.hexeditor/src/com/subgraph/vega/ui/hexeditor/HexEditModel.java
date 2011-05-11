@@ -7,16 +7,31 @@ public class HexEditModel {
 	private final int rowLength;
 	private final int lineCount;
 	
+	private boolean dirtyFlag;
+	
 	public HexEditModel(byte[] binaryData) {
-		this(binaryData, DEFAULT_ROW_LENGTH);
+		this(binaryData, DEFAULT_ROW_LENGTH, false);
 	}
 
 	public HexEditModel(byte[] binaryData, int rowLength) {
+		this(binaryData, rowLength, false);
+	}
+	
+	public HexEditModel(byte[] binaryData, int rowLength, boolean dirtyFlag) {
 		if(rowLength <= 0)
 			throw new IllegalArgumentException();
 		this.binaryData = binaryData;
 		this.rowLength = rowLength;
 		this.lineCount = (binaryData.length + (rowLength - 1)) / rowLength;
+		this.dirtyFlag = dirtyFlag;
+	}
+
+	byte[] getContent() {
+		return binaryData;
+	}
+
+	boolean isDirty() {
+		return dirtyFlag;
 	}
 
 	int getOffsetForLine(int line) {
@@ -38,9 +53,13 @@ public class HexEditModel {
 	int getLineCount() {
 		return lineCount;
 	}
+	
+	void markDirty() {
+		dirtyFlag = true;
+	}
 
 	HexEditModel getModelForRowLength(int rowLength) {
-		return new HexEditModel(binaryData, rowLength);
+		return new HexEditModel(binaryData, rowLength, dirtyFlag);
 	}
 
 	HexEditModelItem getItemForLine(int line) {
@@ -50,8 +69,8 @@ public class HexEditModel {
 		int lineOffset = rowLength * line;
 		if(line == lineCount - 1) {
 			int lastLineLength = binaryData.length - lineOffset;
-			return new HexEditModelItem(lineOffset, binaryData, lastLineLength, rowLength);
+			return new HexEditModelItem(this, lineOffset, binaryData, lastLineLength, rowLength);
 		}
-		return new HexEditModelItem(lineOffset, binaryData, rowLength, rowLength);
+		return new HexEditModelItem(this, lineOffset, binaryData, rowLength, rowLength);
 	}
 }

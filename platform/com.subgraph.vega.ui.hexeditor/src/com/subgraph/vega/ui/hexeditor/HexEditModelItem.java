@@ -1,13 +1,15 @@
 package com.subgraph.vega.ui.hexeditor;
 
 public class HexEditModelItem {
+	private final HexEditModel model;
 	private final int itemOffset;
 	private final byte[] data;
 	private final int rowCount;
 	private final int rowLength;
 	
 	
-	HexEditModelItem(int offset, byte[] data, int rowCount, int rowLength) {
+	HexEditModelItem(HexEditModel model, int offset, byte[] data, int rowCount, int rowLength) {
+		this.model = model;
 		this.itemOffset = offset;
 		this.data = data;
 		// XXX We can calculate this, right?
@@ -40,6 +42,7 @@ public class HexEditModelItem {
 		if(index < 0 || index >= rowCount)
 			throw new IllegalArgumentException();
 		data[index + itemOffset] = (byte) value;
+		model.markDirty();
 	}
 
 	void getData(byte[] buffer) {

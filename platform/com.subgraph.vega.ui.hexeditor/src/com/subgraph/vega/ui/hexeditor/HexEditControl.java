@@ -133,7 +133,19 @@ public class HexEditControl extends Composite {
 		}
 		changeModel(model);
 	}
-
+	
+	public boolean isContentDirty() {
+		if(model != null) {
+			return model.isDirty();
+		} else {
+			return false;
+		}
+	}
+	
+	public byte[] getContent() {
+		return model.getContent();
+	}
+	
 	private void changeModel(final HexEditModel model) {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=200214
 		enablePreserveSelection = false;
