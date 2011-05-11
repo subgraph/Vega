@@ -26,6 +26,8 @@ public class HttpEntityViewer extends Composite {
 	private boolean displayImagesAsHex = false;
 	private byte[] currentImageBytes;
 	private ImageData currentImageData;
+	private String currentImageContentType;
+	private String currentImageContentEncoding;
 	
 	private EntityDisplayMode currentDisplayMode;
 	private HttpEntity currentlyDisplayedEntity;
@@ -51,8 +53,10 @@ public class HttpEntityViewer extends Composite {
 		}
 		try {
 			final String asString = EntityUtils.toString(entity);
+			final String contentType = contentType(entity);
+			final String contentEncoding = contentEncoding(entity);
 			if(isBodyAscii(asString)) {
-				displayTextViewer(asString, contentType(entity));
+				displayTextViewer(asString, contentType, contentEncoding);
 				return;
 			}
 			byte[] binary = EntityUtils.toByteArray(entity);
@@ -62,9 +66,9 @@ public class HttpEntityViewer extends Composite {
 			}
 			final ImageData imageData = binaryToImageData(binary);
 			if(imageData != null) {
-				displayImageViewer(imageData, binary);
+				displayImageViewer(imageData, binary, contentType, contentEncoding);
 			} else {
-				displayHexViewer(binary);
+				displayHexViewer(binary, contentType, contentEncoding);
 			}
 		} catch (ParseException e) {
 			displayEmptyViewer();
@@ -117,6 +121,15 @@ public class HttpEntityViewer extends Composite {
 		else
 			return hdr.getValue();
 	}
+	
+	private String contentEncoding(HttpEntity entity) {
+		final Header hdr = entity.getContentEncoding();
+		if(hdr == null) {
+			return ""; 
+		} else {
+			return hdr.getValue();
+		}
+	}
 
 	private boolean isBodyAscii(String body) {
 		if(body == null || body.isEmpty())
@@ -145,19 +158,21 @@ public class HttpEntityViewer extends Composite {
 		layout();
 	}
 	
-	private void displayTextViewer(String text, String contentType) {
+	private void displayTextViewer(String text, String contentType, String contentEncoding) {
 		currentDisplayMode = EntityDisplayMode.DISPLAY_TEXT;
 		resetViewers();
 		stack.topControl = textViewer;
 		layout();
-		textViewer.setInput(text, contentType);
+		textViewer.setInput(text, contentType, contentEncoding);
 	}
 	
-	private void displayImageViewer(ImageData imageData, byte[] imageBytes) {
+	private void displayImageViewer(ImageData imageData, byte[] imageBytes, String contentType, String contentEncoding) {
 		currentDisplayMode = EntityDisplayMode.DISPLAY_IMAGE;
 		resetViewers();
 		currentImageData = imageData;
 		currentImageBytes = imageBytes;
+		currentImageContentType = contentType;
+		currentImageContentEncoding = contentEncoding;
 		displayImageViewerByFlags();
 	}
 	
@@ -168,7 +183,7 @@ public class HttpEntityViewer extends Composite {
 		} else if(displayImagesAsHex) {
 			stack.topControl = binaryViewer;
 			layout();
-			binaryViewer.setInput(currentImageBytes);
+			binaryViewer.setInput(currentImageBytes, currentImageContentType, currentImageContentEncoding);
 		} else {
 			stack.topControl = imageViewer;
 			layout();
@@ -176,12 +191,12 @@ public class HttpEntityViewer extends Composite {
 		}
 	}
 	
-	private void displayHexViewer(byte[] data) {
+	private void displayHexViewer(byte[] data, String contentType, String contentEncoding) {
 		currentDisplayMode = EntityDisplayMode.DISPLAY_BINARY;
 		resetViewers();
 		stack.topControl = binaryViewer;
 		layout();
-		binaryViewer.setInput(data);
+		binaryViewer.setInput(data, contentType, contentEncoding);
 	}
 	
 	private void resetViewers() {
@@ -190,5 +205,7 @@ public class HttpEntityViewer extends Composite {
 		binaryViewer.clear();
 		currentImageBytes = null;
 		currentImageData = null;
+		currentImageContentType = null;
+		currentImageContentEncoding = null;
 	}
 }

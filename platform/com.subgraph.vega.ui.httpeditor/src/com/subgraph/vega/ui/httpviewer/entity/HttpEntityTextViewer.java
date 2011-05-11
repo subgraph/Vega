@@ -23,6 +23,8 @@ public class HttpEntityTextViewer extends Composite {
 	private final Colors colors;
 	
 	private IDocument currentDocument;
+	private String currentContentType;
+	private String currentContentEncoding;
 	private boolean isDirty;
 	
 	HttpEntityTextViewer(Composite parent) {
@@ -39,8 +41,10 @@ public class HttpEntityTextViewer extends Composite {
 		return new SourceViewer(this, new VerticalRuler(0), SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 	}
 
-	public void setInput(String text, String contentType) {
+	public void setInput(String text, String contentType, String contentEncoding) {
 		viewer.unconfigure();
+		currentContentType = contentType;
+		currentContentEncoding = contentEncoding;
 		currentDocument = documentFactory.createDocument(text, contentType);
 		viewer.setDocument(currentDocument);
 		configureForContentType(contentType);
@@ -58,6 +62,9 @@ public class HttpEntityTextViewer extends Composite {
 	}
 
 	public void clear() {
+		currentDocument = null;
+		currentContentType = null;
+		currentContentEncoding = null;
 		viewer.setInput(null);
 	}
 	
@@ -75,12 +82,19 @@ public class HttpEntityTextViewer extends Composite {
 
 	private HttpEntity createEntityForDocument(IDocument document) {
 		try {
-			return new StringEntity(document.get());
+			final StringEntity entity = new StringEntity(document.get());
+			if(currentContentType != null && !currentContentType.isEmpty()) {
+				entity.setContentType(currentContentType);
+			}
+			if(currentContentEncoding != null && !currentContentEncoding.isEmpty()) {
+				entity.setContentEncoding(currentContentEncoding);
+			}
+			return entity;
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Failed to create entity from document", e);
 		}
 	}
-	
+
 	private void configureForContentType(String contentType) {
 		final String lower = contentType.toLowerCase();
 		if(isJavascript(lower)) {

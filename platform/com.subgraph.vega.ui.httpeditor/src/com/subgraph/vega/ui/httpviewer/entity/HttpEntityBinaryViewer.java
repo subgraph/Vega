@@ -11,17 +11,24 @@ import com.subgraph.vega.ui.hexeditor.HexEditControl;
 public class HttpEntityBinaryViewer extends Composite {
 	private final HexEditControl hexedit;
 	
+	private String inputContentType;
+	private String inputContentEncoding;
+	
 	public HttpEntityBinaryViewer(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new FillLayout());
 		hexedit = new HexEditControl(this);
 	}
 		
-	void setInput(byte[] data) {
+	void setInput(byte[] data, String contentType, String contentEncoding) {
+		inputContentType = contentType;
+		inputContentEncoding = contentEncoding;
 		hexedit.setInput(data);
 	}
 	
 	void clear() {
+		inputContentType = null;
+		inputContentEncoding = null;
 		hexedit.setInput(new byte[0]);
 	}
 	
@@ -34,7 +41,18 @@ public class HttpEntityBinaryViewer extends Composite {
 		if(content == null) {
 			return null;
 		} else {
-			return new ByteArrayEntity(content);
+			return createEntity(content, inputContentType, inputContentEncoding);
 		}
+	}
+	
+	private HttpEntity createEntity(byte[] content, String contentType, String contentEncoding) {
+		final ByteArrayEntity entity = new ByteArrayEntity(content);
+		if(contentType != null && !contentType.isEmpty()) {
+			entity.setContentType(contentType);
+		}
+		if(contentEncoding != null && !contentEncoding.isEmpty()) {
+			entity.setContentEncoding(contentEncoding);
+		}
+		return entity;		
 	}
 }
