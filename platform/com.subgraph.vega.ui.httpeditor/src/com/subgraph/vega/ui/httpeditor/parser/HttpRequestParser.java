@@ -6,12 +6,10 @@ import java.net.URISyntaxException;
 
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
-import org.apache.http.params.HttpParams;
 import org.apache.http.util.CharArrayBuffer;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
@@ -21,14 +19,20 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
  * Class to parse a request created by a user in an editor.
  */
 public class HttpRequestParser extends ParserBase {
-	final private IHttpRequestBuilder builder;
+	private final IHttpRequestBuilder builder;
+	private final boolean parseInlineEntities;
+
+	public HttpRequestParser(final IHttpRequestBuilder builder, boolean parseInlineEntities) {
+		this.builder = builder;
+		this.parseInlineEntities = parseInlineEntities;
+	}
 
 	public HttpRequestParser(final IHttpRequestBuilder builder) {
-		this.builder = builder;
+		this(builder, true);
 	}
 	
 	public HttpRequestParser(IHttpRequestEngine requestEngine) {
-		builder = requestEngine.createRequestBuilder();
+		this(requestEngine.createRequestBuilder(), true);
 	}
 
 	/**
@@ -46,7 +50,7 @@ public class HttpRequestParser extends ParserBase {
 			return;
 		}
 		parseHeaders(parser, builder, buf, bufCursor);
-		if (!bufCursor.atEnd()) {
+		if (!bufCursor.atEnd() && parseInlineEntities) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}
