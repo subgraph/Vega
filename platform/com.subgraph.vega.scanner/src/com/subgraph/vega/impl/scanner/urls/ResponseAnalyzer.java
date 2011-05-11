@@ -1,6 +1,7 @@
 package com.subgraph.vega.impl.scanner.urls;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.http.client.methods.HttpUriRequest;
 import org.w3c.dom.Attr;
@@ -81,15 +82,15 @@ public class ResponseAnalyzer {
 					remoteScript = true;
 				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && match(tag, "input")))) {
 					if(v.startsWith("vega://"))
-						ctx.publishAlert("vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
+						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
 
 					if(v.startsWith("http://vega.invalid/") || v.startsWith("//vega.invalid/")) {
 						if(match(tag, "script", "link"))
-							ctx.publishAlert("vinfo-url-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
+							alert(ctx, "vinfo-url-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
 						else if(match(tag, "a"))
-							ctx.publishAlert("vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
+							alert(ctx, "vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
 						else
-							ctx.publishAlert("vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res);
+							alert(ctx, "vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res);
 					}
 
 				}
@@ -121,9 +122,9 @@ public class ResponseAnalyzer {
 			return;
 		final HttpUriRequest xssReq = ctx.getPathState().getXssRequest(xids[0], xids[1]);
 		if(xssReq != null)
-			ctx.publishAlert(type, message, xssReq, res);
+			alert(ctx, type, message, xssReq, res);
 		else
-			ctx.publishAlert(type, message + " (from previous scan)", req, res);
+			alert(ctx, type, message + " (from previous scan)", req, res);
 	}
 
 	private boolean match(String s, String ...options) {
@@ -181,7 +182,7 @@ public class ResponseAnalyzer {
 				inQuote = true;
 				if(matchStartsWith(text, lastWordIdx, "innerHTML", "open", "url", "href", "write") &&
 						matchStartsWith(text, idx + 1, "//vega.invalid/", "http://vega.invalid", "vega:")) {
-					ctx.publishAlert("vinfo-url-inject", "Injected URL in JS/CSS code", req, res);
+					alert(ctx, "vinfo-url-inject", "Injected URL in JS/CSS code", req, res);
 				}
 			} else if (c == '\'' || c == '"') {
 				inQuote = false;
@@ -236,5 +237,28 @@ public class ResponseAnalyzer {
 		}
 		return savedIdx;
 
+	}
+	
+	private void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
+		final String resource = request.getURI().toString();
+		final String key = createAlertKey(ctx, type, request);
+		ctx.publishAlert(type, key, message, request, response, "resource", resource);
+	}
+		
+	private String createAlertKey(IInjectionModuleContext ctx, String type, HttpUriRequest request) {
+		if(ctx.getPathState().isParametric()) {
+			final String uri = stripQuery(request.getURI()).toString();
+			return type + ":" + uri + ":" + ctx.getPathState().getFuzzableParameter().getName();
+		} else {
+			return type + ":" + request.getURI();
+		}
+	}
+	
+	private URI stripQuery(URI uri) {
+		try {
+			return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 }
