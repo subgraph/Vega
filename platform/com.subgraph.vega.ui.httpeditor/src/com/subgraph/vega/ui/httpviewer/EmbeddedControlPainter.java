@@ -47,7 +47,25 @@ public class EmbeddedControlPainter implements IPainter, PaintListener, ControlL
 		textViewer.addTextInputListener(this);
 		textWidget.addVerifyListener(this);
 	}
-	
+
+	/**
+	 * Extract the text from a document as a String, stripping off the embedded control
+	 * tag if present.
+	 * 
+	 * @param document The document to extract the content from.
+	 * @return The document content as a String, not including the tag string added by this class.
+	 */
+	static String getDocumentContent(IDocument document) {
+		final String content = document.get();
+		final String tag = "\n" + TAG_CHARACTER;
+		final int tagIndex = content.indexOf(tag);
+		if(tagIndex == -1) {
+			return content.substring(0, tagIndex);
+		} else {
+			return content;
+		}
+	}
+
 	private void appendTagToDocument(IDocument document) {
 		if(document == null) {
 			return;
