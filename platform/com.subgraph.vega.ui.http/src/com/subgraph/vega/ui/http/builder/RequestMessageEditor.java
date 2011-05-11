@@ -20,7 +20,7 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 
 	public RequestMessageEditor(final IHttpRequestBuilder builder) {
 		this.builder = builder;
-		requestParser = new HttpRequestParser(this.builder);
+		requestParser = new HttpRequestParser(this.builder, false);
 	}
 	
 	@Override
@@ -45,7 +45,6 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 	public void processContents() {
 		// REVISIT: the parser should be clearing these 
 		builder.clearHeaders();
-		builder.setEntity(null);
 
 		try {
 			requestParser.parseRequest(messageViewer.getContent());
