@@ -77,6 +77,19 @@ public class HttpEntityViewer extends Composite {
 		}
 	}
 
+	public boolean isEntityContentDirty() {
+		switch(currentDisplayMode) {
+		case DISPLAY_IMAGE:
+		case DISPLAY_BINARY:
+			return binaryViewer.isContentDirty();
+		case DISPLAY_TEXT:
+			return textViewer.isContentDirty();
+		case DISPLAY_EMPTY:
+		default:
+			return false;
+		}
+	}
+
 	public HttpEntity getEntityContent() {
 		if(currentDisplayMode == EntityDisplayMode.DISPLAY_TEXT && textViewer.isContentDirty()) {
 			return textViewer.getEntityContent();	

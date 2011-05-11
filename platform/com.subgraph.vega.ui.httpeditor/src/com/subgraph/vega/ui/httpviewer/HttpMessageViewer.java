@@ -57,6 +57,10 @@ public class HttpMessageViewer extends Composite {
 		return EmbeddedControlPainter.getDocumentContent(viewer.getDocument());
 	}
 	
+	public boolean isEntityContentDirty() {
+		return entityViewer.isEntityContentDirty();
+	}
+
 	public HttpEntity getEntityContent() {
 		return entityViewer.getEntityContent();
 	}
