@@ -30,8 +30,7 @@ import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
-import com.subgraph.vega.ui.text.httpeditor.HttpRequestViewer;
-import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
+import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 
 public class RequestEditView extends ViewPart {
 	public final static String VIEW_ID = "com.subgraph.vega.views.requestEdit";
@@ -45,8 +44,7 @@ public class RequestEditView extends ViewPart {
 	private TabFolder requestTabFolder;
 	private TabItem requestTabItem;
 	private TabItem requestHeaderTabItem;
-	private final RequestRenderer requestRenderer = new RequestRenderer();	
-	private HttpRequestViewer responseViewer;
+	private HttpMessageViewer responseViewer;
 
 	public RequestEditView() {
 		super();
@@ -125,7 +123,7 @@ public class RequestEditView extends ViewPart {
 		IHttpResponse response;
 		try {
 			response = requestEngine.sendRequest(uriRequest, ctx);
-			responseViewer.setContent(requestRenderer.renderResponseText(response.getRawResponse()));
+			responseViewer.displayHttpResponse(response.getRawResponse());
 		} catch (Exception e) {
 			if (e.getMessage() != null) {
 				displayError(e.getMessage());
@@ -187,7 +185,8 @@ public class RequestEditView extends ViewPart {
 		rootControl.setText("Response");
 		rootControl.setLayout(new FillLayout());
 
-		responseViewer = new HttpRequestViewer(rootControl);
+		responseViewer = new HttpMessageViewer(rootControl);
+		responseViewer.setEditable(false);
 
 		return rootControl;
 	}
