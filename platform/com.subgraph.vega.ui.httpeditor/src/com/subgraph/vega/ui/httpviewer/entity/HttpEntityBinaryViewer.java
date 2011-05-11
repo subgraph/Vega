@@ -1,5 +1,7 @@
 package com.subgraph.vega.ui.httpviewer.entity;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -21,5 +23,18 @@ public class HttpEntityBinaryViewer extends Composite {
 	
 	void clear() {
 		hexedit.setInput(new byte[0]);
-	}		
+	}
+	
+	boolean isContentDirty() {
+		return hexedit.isContentDirty();
+	}
+	
+	HttpEntity getEntityContent() {
+		final byte[] content = hexedit.getContent();
+		if(content == null) {
+			return null;
+		} else {
+			return new ByteArrayEntity(content);
+		}
+	}
 }

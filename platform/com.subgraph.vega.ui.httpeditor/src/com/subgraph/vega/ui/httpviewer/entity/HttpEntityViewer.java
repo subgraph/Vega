@@ -14,6 +14,8 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Composite;
 
 public class HttpEntityViewer extends Composite {	
+	private enum EntityDisplayMode { DISPLAY_EMPTY, DISPLAY_TEXT, DISPLAY_IMAGE, DISPLAY_BINARY };
+	
 	private final StackLayout stack;
 	private final HttpEntityImageViewer imageViewer;
 	private final HttpEntityBinaryViewer binaryViewer;
@@ -24,6 +26,9 @@ public class HttpEntityViewer extends Composite {
 	private boolean displayImagesAsHex = false;
 	private byte[] currentImageBytes;
 	private ImageData currentImageData;
+	
+	private EntityDisplayMode currentDisplayMode;
+	private HttpEntity currentlyDisplayedEntity;
 	
 	public HttpEntityViewer(Composite parent) {
 		super(parent, SWT.NONE);
@@ -36,8 +41,10 @@ public class HttpEntityViewer extends Composite {
 		displayEmptyViewer();
 	}
 
-	
 	public void displayHttpEntity(HttpEntity entity) {
+
+		currentlyDisplayedEntity = entity;
+		
 		if(entity == null || entity.getContentLength() == 0) {
 			displayEmptyViewer();
 			return;
@@ -53,7 +60,6 @@ public class HttpEntityViewer extends Composite {
 				displayEmptyViewer();
 				return;
 			}
-			
 			final ImageData imageData = binaryToImageData(binary);
 			if(imageData != null) {
 				displayImageViewer(imageData, binary);
@@ -64,6 +70,17 @@ public class HttpEntityViewer extends Composite {
 			displayEmptyViewer();
 		} catch (IOException e) {
 			displayEmptyViewer();
+		}
+	}
+
+	public HttpEntity getEntityContent() {
+		if(currentDisplayMode == EntityDisplayMode.DISPLAY_TEXT && textViewer.isContentDirty()) {
+			return textViewer.getEntityContent();	
+		} else if ((currentDisplayMode == EntityDisplayMode.DISPLAY_IMAGE || currentDisplayMode == EntityDisplayMode.DISPLAY_BINARY) 
+				&& binaryViewer.isContentDirty()) {
+			return binaryViewer.getEntityContent();
+		} else {
+			return currentlyDisplayedEntity;
 		}
 	}
 
@@ -122,12 +139,14 @@ public class HttpEntityViewer extends Composite {
 	}
 	
 	private void displayEmptyViewer() {
+		currentDisplayMode = EntityDisplayMode.DISPLAY_EMPTY;
 		resetViewers();
 		stack.topControl = emptyViewer;
 		layout();
 	}
 	
 	private void displayTextViewer(String text, String contentType) {
+		currentDisplayMode = EntityDisplayMode.DISPLAY_TEXT;
 		resetViewers();
 		stack.topControl = textViewer;
 		layout();
@@ -135,6 +154,7 @@ public class HttpEntityViewer extends Composite {
 	}
 	
 	private void displayImageViewer(ImageData imageData, byte[] imageBytes) {
+		currentDisplayMode = EntityDisplayMode.DISPLAY_IMAGE;
 		resetViewers();
 		currentImageData = imageData;
 		currentImageBytes = imageBytes;
@@ -157,6 +177,7 @@ public class HttpEntityViewer extends Composite {
 	}
 	
 	private void displayHexViewer(byte[] data) {
+		currentDisplayMode = EntityDisplayMode.DISPLAY_BINARY;
 		resetViewers();
 		stack.topControl = binaryViewer;
 		layout();

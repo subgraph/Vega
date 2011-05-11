@@ -33,7 +33,7 @@ public class HttpMessageViewer extends Composite {
 		viewer = createSourceViewer();
 		viewer.getTextWidget().setWrapIndent(20);
 		entityViewer = new HttpEntityViewer(viewer.getTextWidget());
-		painter = new EmbeddedControlPainter(viewer, entityViewer,200);
+		painter = new EmbeddedControlPainter(viewer, entityViewer, 200);
 		viewer.addPainter(painter);
 		colors = new Colors(getDisplay());
 		viewer.configure(new Configuration(colors));
@@ -54,9 +54,13 @@ public class HttpMessageViewer extends Composite {
 	}
 
 	public String getContent() {
-		return viewer.getDocument().get();
+		return EmbeddedControlPainter.getDocumentContent(viewer.getDocument());
 	}
 	
+	public HttpEntity getEntityContent() {
+		return entityViewer.getEntityContent();
+	}
+
 	public void setDecodeUrlEncoding(boolean flag) {
 		if(flag == isDecodingEnabled)
 			return;
