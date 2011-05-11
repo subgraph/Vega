@@ -177,7 +177,9 @@ public class EngineHttpResponse implements IHttpResponse {
 		if(entity == null)
 			return;
 		try {
-			final HttpEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+			newEntity.setContentType(entity.getContentType());
+			newEntity.setContentEncoding(entity.getContentEncoding());
 			rawResponse.setEntity(newEntity);
 			entity.consumeContent();
 		} catch (IOException e) {
