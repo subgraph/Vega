@@ -5,7 +5,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.swt.SWT;
@@ -22,11 +24,13 @@ public class HttpMessageViewer extends Composite {
 	private final HttpMessageDocumentFactory documentFactory;
 	private final HttpEntityViewer entityViewer;
 	private final EmbeddedControlPainter painter;
-	
+
 	private IDocument rawDocument;
+	private boolean isRawDocumentDirty;
 	private IDocument decodedDocument;
+	private boolean isDecodedDocumentDirty;
 	private boolean isDecodingEnabled;
-	
+
 	public HttpMessageViewer(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new FillLayout());
@@ -56,7 +60,15 @@ public class HttpMessageViewer extends Composite {
 	public String getContent() {
 		return EmbeddedControlPainter.getDocumentContent(viewer.getDocument());
 	}
-	
+
+	public boolean isHeaderContentDirty() {
+		if(isDecodingEnabled) {
+			return isDecodedDocumentDirty;
+		} else {
+			return isRawDocumentDirty;
+		}
+	}
+
 	public boolean isEntityContentDirty() {
 		return entityViewer.isEntityContentDirty();
 	}
@@ -72,7 +84,7 @@ public class HttpMessageViewer extends Composite {
 		isDecodingEnabled = flag;
 		displayDocumentForDecodeState();
 	}
-	
+
 	private void displayDocumentForDecodeState() {
 		if(isDecodingEnabled) {
 			viewer.setDocument(decodedDocument);
@@ -82,28 +94,54 @@ public class HttpMessageViewer extends Composite {
 		viewer.refresh();
 	}
 
+	private void displayNewDocument() {
+		displayDocumentForDecodeState();
+
+		isRawDocumentDirty = false;
+		isDecodedDocumentDirty = false;
+
+		rawDocument.addDocumentListener(new IDocumentListener() {			
+			@Override
+			public void documentChanged(DocumentEvent event) {
+			}
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent event) {
+				isRawDocumentDirty = true;
+			}
+		});
+
+		decodedDocument.addDocumentListener(new IDocumentListener() {
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent event) {
+			}
+			@Override
+			public void documentChanged(DocumentEvent event) {
+				isDecodedDocumentDirty = false;
+			}			
+		});	
+	}
 	public void setDisplayImages(boolean flag) {
 		entityViewer.setDisplayImages(flag);
 	}
-	
+
 	public void setDisplayImagesAsHex(boolean flag) {
 		entityViewer.setDisplayImagesAsHex(flag);
 	}
-	
+
 	public void displayHttpRequest(HttpRequest request) {
 		rawDocument = documentFactory.createDocumentForRequest(request, false);
 		decodedDocument = documentFactory.createDocumentForRequest(request, true);
-		displayDocumentForDecodeState();
+		displayNewDocument();
 		entityViewer.displayHttpEntity(maybeGetRequestEntity(request));
 	}
 
 	public void displayHttpRequest(IHttpRequestBuilder builder) {
 		rawDocument = documentFactory.createDocumentForRequest(builder, false);
 		decodedDocument = documentFactory.createDocumentForRequest(builder, true);
-		displayDocumentForDecodeState();
+		displayNewDocument();
 		entityViewer.displayHttpEntity(builder.getEntity());
 	}
-	
+
 	private HttpEntity maybeGetRequestEntity(HttpRequest request) {
 		if(request instanceof HttpEntityEnclosingRequest) {
 			return ((HttpEntityEnclosingRequest) request).getEntity();
@@ -115,14 +153,14 @@ public class HttpMessageViewer extends Composite {
 	public void displayHttpResponse(HttpResponse response) {
 		rawDocument = documentFactory.createDocumentForResponse(response, false);
 		decodedDocument = documentFactory.createDocumentForResponse(response, true);
-		displayDocumentForDecodeState();
+		displayNewDocument();
 		entityViewer.displayHttpEntity(response.getEntity());
 	}
-	
+
 	public void displayHttpResponse(IHttpResponseBuilder builder) {
 		rawDocument = documentFactory.createDocumentForResponse(builder, false);
 		decodedDocument = documentFactory.createDocumentForResponse(builder, true);
-		displayDocumentForDecodeState();
+		displayNewDocument();
 		entityViewer.displayHttpEntity(builder.getEntity());
 	}
 
