@@ -2,13 +2,11 @@ package com.subgraph.vega.ui.httpeditor.parser;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
-import org.apache.http.params.HttpParams;
 import org.apache.http.util.CharArrayBuffer;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -19,13 +17,15 @@ import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
  */
 public class HttpResponseParser extends ParserBase {
 	final private IHttpResponseBuilder builder;
+	private final boolean parseInlineEntities;
 
-	public HttpResponseParser(final IHttpResponseBuilder builder) {
+	public HttpResponseParser(final IHttpResponseBuilder builder, boolean parseInlineEntities) {
 		this.builder = builder;
+		this.parseInlineEntities = parseInlineEntities;
 	}
 	
 	public HttpResponseParser(IHttpRequestEngine requestEngine) {
-		builder = requestEngine.createResponseBuilder();
+		this(requestEngine.createResponseBuilder(), true);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class HttpResponseParser extends ParserBase {
 			return;
 		}
 		parseHeaders(parser, builder, buf, bufCursor);
-		if (!bufCursor.atEnd()) {
+		if (!bufCursor.atEnd() && parseInlineEntities) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
 			builder.setEntity(entity);
 		}

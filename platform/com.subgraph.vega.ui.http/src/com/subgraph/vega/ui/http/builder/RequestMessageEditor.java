@@ -27,6 +27,8 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 	public Composite createPartControl(Composite parent) {
 		messageViewer = new HttpMessageViewer(parent);
 		messageViewer.setEditable(true);
+		messageViewer.setDisplayImages(true);
+		messageViewer.setDisplayImagesAsHex(true);
 		refresh();
 		return messageViewer;
 	}
@@ -48,6 +50,11 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 
 		try {
 			requestParser.parseRequest(messageViewer.getContent());
+			if (messageViewer.isEntityContentDirty()) {
+				builder.setEntity(messageViewer.getEntityContent());
+//			} else {
+//				builder.setEntity(null);
+			}
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
 		} catch (URISyntaxException e) {
