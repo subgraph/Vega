@@ -27,9 +27,10 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 public class ProxyRequestHandler implements HttpRequestHandler {
 
 	/**
-	 * Hop-by-hop headers to be removed by this proxy as per RFC2616 section 13.5.1.
+	 * Hop-by-hop headers to be removed by this proxy.
 	 */
 	private final static String[] HOP_BY_HOP_HEADERS = {
+		// Hop-by-hop headers specified in RFC2616 section 13.5.1.
 		HTTP.CONN_DIRECTIVE, // "Connection"
 		HTTP.CONN_KEEP_ALIVE, // "Keep-Alive"
 		"Proxy-Authenticate",
@@ -38,6 +39,9 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		"Trailers",
 		HTTP.TRANSFER_ENCODING, // "Transfer-Encoding"
 		"Upgrade",
+
+		// Not part of the RFC but should be forwarded; see http://homepage.ntlworld.com/jonathan.deboynepollard/FGA/web-proxy-connection-header.html
+		"Proxy-Connection",
 	};
 
 	private final HttpProxy httpProxy;
