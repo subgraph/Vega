@@ -40,7 +40,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		HTTP.TRANSFER_ENCODING, // "Transfer-Encoding"
 		"Upgrade",
 
-		// Not part of the RFC but should be forwarded; see http://homepage.ntlworld.com/jonathan.deboynepollard/FGA/web-proxy-connection-header.html
+		// Not part of the RFC but should not be forwarded; see http://homepage.ntlworld.com/jonathan.deboynepollard/FGA/web-proxy-connection-header.html
 		"Proxy-Connection",
 	};
 
