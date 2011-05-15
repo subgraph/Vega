@@ -81,12 +81,12 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			}
 		}
 
-		path = requestUri.getPath();
-		if (requestUri.getQuery() != null) {
-			path += "?" + requestUri.getQuery();
+		path = requestUri.getRawPath();
+		if (requestUri.getRawQuery() != null) {
+			path += "?" + requestUri.getRawQuery();
 		}
-		if (requestUri.getFragment() != null) {
-			path += "#" + requestUri.getFragment();
+		if (requestUri.getRawFragment() != null) {
+			path += "#" + requestUri.getRawFragment();
 		}
 
 		setProtocolVersion(requestLine.getProtocolVersion());
@@ -118,12 +118,12 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			}
 		}
 		
-		path = uri.getPath();
-		if (uri.getQuery() != null) {
-			path += "?" + uri.getQuery();
+		path = uri.getRawPath();
+		if (uri.getRawQuery() != null) {
+			path += "?" + uri.getRawQuery();
 		}
-		if (uri.getFragment() != null) {
-			path += "#" + uri.getFragment();
+		if (uri.getRawFragment() != null) {
+			path += "#" + uri.getRawFragment();
 		}
 	}
 
