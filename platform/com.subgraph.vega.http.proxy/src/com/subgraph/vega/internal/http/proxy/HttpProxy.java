@@ -18,7 +18,6 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseConnControl;
-import org.apache.http.protocol.ResponseContent;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
@@ -56,8 +55,8 @@ public class HttpProxy implements IHttpInterceptProxy {
 
 		BasicHttpProcessor inProcessor = new BasicHttpProcessor();
 		inProcessor.addInterceptor(new ResponseConnControl());
-		inProcessor.addInterceptor(new ResponseContent());
-
+		inProcessor.addInterceptor(new ResponseContentCustom());
+		
 		HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 		registry.register("*", new ProxyRequestHandler(this, requestEngine));
 
