@@ -21,6 +21,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.RequestContent;
 
 import com.subgraph.vega.internal.http.requests.unencoding.UnencodingThreadSafeClientConnectionManager;
 
@@ -39,6 +40,8 @@ public class HttpClientFactory {
 		final DefaultHttpClient client = new DefaultHttpClient(ccm, params);
 		
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+		client.removeRequestInterceptorByClass(RequestContent.class);
+		client.addRequestInterceptor(new RequestContentCustom()); // REVISIT: put at list position that RequestContent was at? 
 		client.addRequestInterceptor(new RequestCopyHeadersInterceptor());
 		return client;
 	}

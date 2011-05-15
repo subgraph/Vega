@@ -142,7 +142,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		for(String hdr: HOP_BY_HOP_HEADERS) { 
 			message.removeHeaders(hdr);
 		}
-		message.removeHeaders(HTTP.CONTENT_LEN); 
 	}
 
 	private boolean handleRequest(ProxyTransaction transaction, HttpRequest request) throws InterruptedException {
