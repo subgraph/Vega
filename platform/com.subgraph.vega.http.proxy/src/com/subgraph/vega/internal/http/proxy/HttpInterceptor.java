@@ -12,6 +12,10 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.conditions.ConditionSetChanged;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
@@ -19,19 +23,65 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.internal.http.proxy.ProxyTransaction;
 
 public class HttpInterceptor implements IHttpInterceptor {
-	private final Object interceptorLock = new Object(); /**< Lock for contents of object. */
+	private static final String propertyInterceptorLevelRequest = "vega.preferences.proxy.interceptor.level.request"; 
+	private static final String propertyInterceptorLevelResponse = "vega.preferences.proxy.interceptor.level.response"; 
+	private final Object interceptorLock = new Object(); /**< Lock for contents of object */
 	private IHttpInterceptorEventHandler eventHandler;
 	private HttpInterceptorLevel interceptorLevelRequest = HttpInterceptorLevel.DISABLED;
 	private HttpInterceptorLevel interceptorLevelResponse = HttpInterceptorLevel.DISABLED; 
 	private IHttpConditionSet breakpointSetRequest; 
 	private IHttpConditionSet breakpointSetResponse; 
 	private final ArrayList<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>(); /**< Queue of intercepted transactions pending processing */
-
+	private IWorkspace currentWorkspace;
+	
 	HttpInterceptor(IModel model) {
+		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof WorkspaceOpenEvent) {
+					handleWorkspaceOpen((WorkspaceOpenEvent) event);
+				} else if(event instanceof WorkspaceCloseEvent) {
+					handleWorkspaceClose((WorkspaceCloseEvent) event);
+				} else if (event instanceof WorkspaceResetEvent) {
+					handleWorkspaceReset((WorkspaceResetEvent) event);
+				}
+			}
+		});
+		loadInterceptorLevelRequest();
+		loadInterceptorLevelResponse();
 		breakpointSetRequest = createConditionSet(model, true);
 		breakpointSetResponse = createConditionSet(model, false);
+		
 	}
 
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		currentWorkspace = event.getWorkspace();
+	}
+
+	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		currentWorkspace = null;
+	}
+
+	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		currentWorkspace = event.getWorkspace();
+		loadInterceptorLevelRequest();		
+		loadInterceptorLevelResponse();
+	}
+
+	private void loadInterceptorLevelRequest() {
+		interceptorLevelRequest = HttpInterceptorLevel.fromValue(currentWorkspace.getIntegerProperty(propertyInterceptorLevelRequest));
+		if (interceptorLevelRequest == null) {
+			interceptorLevelRequest = HttpInterceptorLevel.DISABLED;
+		}
+	}
+
+	private void loadInterceptorLevelResponse() {
+		interceptorLevelResponse = HttpInterceptorLevel.fromValue(currentWorkspace.getIntegerProperty(propertyInterceptorLevelResponse));
+		if (interceptorLevelResponse == null) {
+			interceptorLevelResponse = HttpInterceptorLevel.DISABLED;
+		}
+	}
+	
 	private IHttpConditionSet createConditionSet(IModel model, boolean isRequestSet) {
 		final String name = (isRequestSet) ? (IHttpConditionManager.CONDITION_SET_BREAKPOINTS_REQUEST) : (IHttpConditionManager.CONDITION_SET_BREAKPOINTS_RESPONSE);
 		return model.addConditionSetTracker(name, createConditionSetChangedHandler(isRequestSet));
@@ -115,8 +165,10 @@ public class HttpInterceptor implements IHttpInterceptor {
 		synchronized(interceptorLock) {
 			if (direction == TransactionDirection.DIRECTION_REQUEST) {
 				interceptorLevelRequest = level;
+				currentWorkspace.setIntegerProperty(propertyInterceptorLevelRequest, level.getSerializeValue());
 			} else {
 				interceptorLevelResponse = level;
+				currentWorkspace.setIntegerProperty(propertyInterceptorLevelResponse, level.getSerializeValue());
 			}
 			releaseOnChange(direction);
 		}
