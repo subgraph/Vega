@@ -92,17 +92,21 @@ class RequestTask implements Callable<IHttpResponse> {
 
 		String contentType = (entity.getContentType() == null) ? (null) : (entity.getContentType().getValue());
 		String contentEncoding = (entity.getContentEncoding() == null) ? (null) : (entity.getContentEncoding().getValue());
-		return new RepeatableStreamingEntity(input, entity.getContentLength(), entity.isChunked(), contentType, contentEncoding);
+		return new RepeatableStreamingEntity(input, entity.getContentLength(), false, entity.isChunked(), contentType, contentEncoding);
 	}
 
 	private HttpEntity processGzipEncodedEntity(HttpResponse response, HttpEntity entity) throws IOException {
 		final InputStream input = entity.getContent();
-		if(input == null)
+		if(input == null) {
+			response.setHeader(HTTP.CONTENT_LEN, "0");
 			return new ByteArrayEntity(new byte[0]);
+		}
 		final InputStream gzipInput = new GZIPInputStream(input);
 		response.removeHeaders(HTTP.CONTENT_ENCODING);
 		String contentType = (entity.getContentType() == null) ? (null) : (entity.getContentType().getValue());
-		return new RepeatableStreamingEntity(gzipInput, -1, entity.isChunked(), contentType, null);
+		RepeatableStreamingEntity newEntity = new RepeatableStreamingEntity(gzipInput, -1, true, entity.isChunked(), contentType, null);
+		response.setHeader(HTTP.CONTENT_LEN, Long.toString(newEntity.getContentLength()));
+		return newEntity;
 	}
 
 	private boolean isGzipEncoded(HttpEntity entity) {
