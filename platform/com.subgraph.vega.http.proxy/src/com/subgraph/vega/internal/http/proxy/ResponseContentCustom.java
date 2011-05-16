@@ -35,7 +35,7 @@ public class ResponseContentCustom implements HttpResponseInterceptor {
             long len = entity.getContentLength();
 
             if (entity.isChunked() && !ver.lessEquals(HttpVersion.HTTP_1_0)) {
-            	response.removeHeaders(HTTP.CHUNK_CODING);
+            	response.removeHeaders(HTTP.CONTENT_LEN);
             	response.setHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
             } else if (len >= 0) {
             	response.removeHeaders(HTTP.TRANSFER_ENCODING);
