@@ -8,7 +8,7 @@ var resultssn;
 var resultsin;
 var outputssn = [];
 var outputsin = [];
-var ssn = /[0-9-]{11,11}/g;
+var ssn = /\b\d{3}([- ]?)(\d{3}\1\d{3}|\d{2}\1\d{4})\b/gm;
 
 function run(request, response, ctx) {
 
@@ -18,6 +18,7 @@ function run(request, response, ctx) {
 		var temp = value; 
 		if (value.indexOf("-") != -1) { temp = (value.split("-")).join(""); } 
 		if (value.indexOf(" ") != -1) { temp = (value.split(" ")).join(""); } 
+		if (temp.substring(0, 3) == "666") { return false; } 
 		if (temp.substring(0, 3) == "000") { return false; } 
 		if (temp.substring(3, 5) == "00") { return false; } 
 		if (temp.substring(5, 9) == "0000") { return false; } 

@@ -21,7 +21,8 @@ function luhncheck(str) {
 
 function run(request, response, ctx)
 {
-  var regexp = /\b(?:\d[ -]*?){13,16}\b/gm;
+  // Regex compatible with Visa (16&13 numbers), MC, Amex, Discover, JCB, Diner's Club
+  var regexp = /\b(([453]\d{3}|6011)([- ]?)\d{4}\3\d{4}\3\d{4}|3\d{3}([- ]?)\d{6}\4\d{4,5}|4\d{12})\b/gm;
   var cards = [];
   var res;
   
