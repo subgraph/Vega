@@ -51,7 +51,7 @@ import sun.security.x509.X509CertInfo;
 public class CertificateCreator {
 	private final static String CA_SUBJECT_NAME = "cn=Vega Proxy Certificate Authority,ou=Vega Web Vulnerability Scanner,o=Subgraph,l=Montreal,st=Quebec,c=CA";
 	private final static String SIGNATURE_ALGORITHM = "SHA1withRSA";
-	private final static long DEFAULT_VALIDITY = 365 * 24 * 60 * 60 * 1000;
+	*24private final static long DEFAULT_VALIDITY = 60L * 60L * 24L * 365L * 5L * 1000L; // 5 years in microseconds
 
 	private final CertificateStore certificateStore;
 	private final KeyPairGenerator keyGenerator;
