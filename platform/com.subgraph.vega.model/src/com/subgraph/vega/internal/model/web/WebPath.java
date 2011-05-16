@@ -77,7 +77,7 @@ public class WebPath extends WebEntity implements IWebPath {
 	private URI generateURI() {
 		final URI hostUri = mountPoint.getWebHost().getUri();
 		try {
-			return new URI(hostUri.getScheme(), hostUri.getAuthority(), getFullPath(), null);
+			return new URI(hostUri.getScheme(), hostUri.getAuthority(), getFullPath(), null, null);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
