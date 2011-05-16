@@ -43,7 +43,7 @@ public class RequestContentCustom implements HttpRequestInterceptor {
                 if (ver.lessEquals(HttpVersion.HTTP_1_0)) {
                     throw new ProtocolException("Chunked transfer encoding not allowed for " + ver);
                 }
-                request.removeHeaders(HTTP.CHUNK_CODING);
+                request.removeHeaders(HTTP.CONTENT_LEN);
                 request.setHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
             } else {
                 request.removeHeaders(HTTP.TRANSFER_ENCODING);
