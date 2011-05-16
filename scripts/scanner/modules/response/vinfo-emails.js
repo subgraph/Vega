@@ -9,7 +9,7 @@ function run(request, response, ctx) {
 		strictMailRegex = /[\w!#$%&'*+-\/=?^`{|}~.]+@(?:(([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+(?:aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])/i,
 		body = response.bodyAsString,
 		emails = [],
-		r, sr;
+		r, sr, i, found;
 	
 	if(!atDomainRegex.test(body))
 		return;
@@ -17,16 +17,27 @@ function run(request, response, ctx) {
 	while(r = mailRegex.exec(body)) {
 		sr = strictMailRegex.exec(r[0]);
 		if(sr && emails.indexOf(sr[0]) == -1) {
-			emails.push(sr[0]);
+			found = 0;
+			for (i = 0; i < emails.length; i++) {
+				if (emails[i] == sr[0].toLowerCase()) {
+					found = 1;
+				}
+			}
+			if (!found) {
+				emails.push(sr[0].toLowerCase());
+			}
 		}
 	}
-	var key = emails.join(" ");
 	if (emails.length) {
+	    var key = emails.sort().join(" ");
+	    var uristr = String(request.requestLine.uri);
+	    var uripart = uristr.replace(/\?.*/,"");
+	    print(uripart + key);
 	    ctx.alert("vinfo-emails",request, response, {
 	    	"output": emails.join(" "), 
-	    	"resource": request.requestLine.uri, 
+	    	"resource": uripart, 
 	    	response: response, 
-	    	key: "vinfo-emails" + request.requestLine.uri + key
+	    	key: "vinfo-emails" + uripart + key
 	    	} );
 	}
 }
