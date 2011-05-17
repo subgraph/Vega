@@ -15,34 +15,37 @@ import org.apache.http.util.EntityUtils;
  * into a repeatable entity by storing the data as it streams in from
  * a connection (or other streaming source).  When all streaming data has
  * been received, the entity behaves like a ByteArrayEntity. 
- * 
- *
  */
 public class RepeatableStreamingEntity extends AbstractHttpEntity {
-	private final static int BUFFER_SIZE = 2048;
+	private final static int BUFFER_SIZE = 8192;
 	private boolean isStreaming = true;
 	private long length;
-
 	private HttpEntity bufferEntity;
 	private volatile InputStream input;
 
-	RepeatableStreamingEntity(InputStream input, long length, boolean isChunked, String contentType, String contentEncoding) {
+	/**
+	 * @param consumeInput Boolean indicating whether to immediately consume all input into buffer. 
+	 * @throws IOException 
+	 */
+	RepeatableStreamingEntity(InputStream input, long length, boolean consumeInput, boolean isChunked, String contentType, String contentEncoding) throws IOException {
 		setChunked(isChunked);
 		setContentType(contentType);
 		setContentEncoding(contentEncoding);
 		setActiveInputStream(input, length);
+		if (consumeInput != false) {
+			consumeAllInput();
+		}
 	}
 
 	RepeatableStreamingEntity(HttpEntity originalEntity) throws IOException {
-		copyEntityData(originalEntity);
-		
+		copyEntityProperties(originalEntity);
 		if(originalEntity.isStreaming()) 
 			setActiveInputStream(originalEntity.getContent(), originalEntity.getContentLength());
 		else 
 			setActiveByteArrayEntity(EntityUtils.toByteArray(originalEntity));
 	}
 
-	private void copyEntityData(HttpEntity e) {
+	private void copyEntityProperties(HttpEntity e) {
 		setChunked(e.isChunked());
 		if(e.getContentType() != null)
 			setContentType(e.getContentType().getValue());
@@ -68,6 +71,23 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 		input = null;
 	}
 
+	private void consumeAllInput() throws IOException {
+		int rv;
+		if (length < 0) {
+			while ((rv = input.read()) != -1);
+		} else {
+			int remaining = (int)this.length;
+			byte[] buffer = new byte[BUFFER_SIZE];
+			while (remaining > 0) {
+				int sz = (remaining < BUFFER_SIZE) ? (remaining) : (BUFFER_SIZE);
+				rv = input.read(buffer, 0, sz);
+				if(rv == -1)
+					break;
+				remaining -= rv;
+			}
+		}
+	}
+	
 	@Override
 	public boolean isRepeatable() {
 		return true;
