@@ -23,6 +23,9 @@ function run(request, response, ctx) {
         }
       });
 
+  } else
+  {
+    print("not a document");
   }
   
   if (found)
