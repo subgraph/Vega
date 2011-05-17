@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
-
 <product name="Subgraph Vega" id="com.subgraph.vega.application.product" application="com.subgraph.vega.application.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
@@ -18,7 +17,7 @@
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="icons/alt_window_16.gif" i32="/com.subgraph.vega.application/icons/vega-icon-100x100.png"/>
+   <windowImages i16="/com.subgraph.vega.application/icons/16x16Vega.png" i32="/com.subgraph.vega.application/icons/32x32Vega.png" i48="/com.subgraph.vega.application/icons/48x48Vega.png" i64="/com.subgraph.vega.application/icons/64x64Vega.png" i128="/com.subgraph.vega.application/icons/128x128Vega.png"/>
 
    <launcher name="Vega">
       <macosx icon="/com.subgraph.vega.application/icons/VegaIcons-OSX.icns"/>
@@ -27,6 +26,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>

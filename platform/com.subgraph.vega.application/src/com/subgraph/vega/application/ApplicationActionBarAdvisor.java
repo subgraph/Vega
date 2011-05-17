@@ -29,8 +29,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     	viewList = ContributionItemFactory.VIEWS_SHORTLIST.create(window);
     	preferenceAction = ActionFactory.PREFERENCES.create(window);
     	resetPerspectiveAction = ActionFactory.RESET_PERSPECTIVE.create(window);
-        aboutAction = ActionFactory.ABOUT.create(window);
-        register(aboutAction);
+     //   aboutAction = ActionFactory.ABOUT.create(window);
+     //  register(aboutAction);
     	register(preferenceAction);
     	register(resetPerspectiveAction);
     }
@@ -41,7 +41,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         MenuManager helpMenu = new MenuManager("&Help", IWorkbenchActionConstants.M_HELP);
         
     	winMenu.add(preferenceAction);
-    	helpMenu.add(aboutAction);
+    //	helpMenu.add(aboutAction);
     	
     	MenuManager viewMenu = new MenuManager("Show View");
     	viewMenu.add(viewList);

@@ -4,9 +4,6 @@ var module = {
 };
 
 function run(request, response, ctx) {
-  var banner = response.getRawResponse().getFirstHeader("Server");
-  var host = response.getOriginalRequest().getFirstHeader("Host");
-
   var pathlinux = new Array("/bin/","/boot/","/cdrom/","/dev/","/etc/",
                             "/home/","/initrd/","/lib/","/media/","/mnt/",
                             "/opt/","/proc/","/root/","/sbin/","/sys/",

@@ -8,12 +8,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
+import com.subgraph.vega.api.model.alerts.IScanInstance;
+
 public class CrawlerPane extends Composite {
 	private final CrawlerProgressPane progressPane;
 	private final Label crawlLabel;
 	private volatile boolean changed;
-	private boolean finished;
-	private boolean canceled;
+	private int scannerStatus;
 	private int crawlerTotal;
 	private int crawlerCompleted;
 	private double crawlerPercent;
@@ -35,29 +36,6 @@ public class CrawlerPane extends Composite {
 		crawlLabel.setLayoutData(gd);
 		crawlLabel.setBackground(parent.getBackground());
 	}
-	
-	
-	boolean isCrawlerFinished() {
-		return finished;
-	}
-	
-	void setCrawlerStarting() {
-		crawlerTotal = 0;
-		crawlerCompleted = 0;
-		finished = false;
-		canceled = false;
-		changed = true;
-	}
-	
-	void setCrawlerFinished() {
-		finished = true;
-		changed = true;
-	}
-	
-	void setCrawlerCancelled() {
-		canceled = true;
-		changed = true;
-	}
 
 	void renderChanges() {
 		if(!changed)
@@ -75,33 +53,44 @@ public class CrawlerPane extends Composite {
 		});
 	}
 	
-	synchronized void updateCrawlerProgress(int total, int completed) {
-		if(total == crawlerTotal && completed == crawlerCompleted)
+	synchronized void updateCrawlerProgress(int status, int total, int completed) {
+		if(status == scannerStatus && total == crawlerTotal && completed == crawlerCompleted ) {
 			return;
+		}
 		
+		scannerStatus = status;
 		crawlerTotal = total;
 		crawlerCompleted = completed;
-		crawlerPercent = ((double)crawlerCompleted) / ((double)crawlerTotal) * 100.0;
+		if(crawlerTotal == 0) {
+			crawlerPercent = 0.0;
+		} else {
+			crawlerPercent = ((double)crawlerCompleted) / ((double)crawlerTotal) * 100.0;
+		}
 		changed = true;	
 	}
 	
-	synchronized private void renderProgress() {
-		if(canceled) {
-			progressPane.setLabelText("Scanner canceled.");
-			return;
-		}
-		else if(finished && !canceled) {
-			progressPane.setLabelText("Scanner completed.");
-			return;
-		} else if(canceled) {
-			progressPane.setLabelText("Scanner canceled.");
-			return;
-		} else {
+	private void renderProgress() {
+		switch(scannerStatus) {
+		case IScanInstance.SCAN_IDLE:
+		case IScanInstance.SCAN_STARTING:
+		case IScanInstance.SCAN_AUDITING:
 			progressPane.setProgressBarValue((int) crawlerPercent);
+			break;
+		case IScanInstance.SCAN_CANCELLED:
+			progressPane.setLabelText("Scanner canceled.");
+			break;
+		case IScanInstance.SCAN_COMPLETED:
+			progressPane.setLabelText("Scanner completed.");
+			break;
+			
 		}
 	}
 	
-	synchronized private void renderLabel() {
+	private void renderLabel() {
+		if(crawlerPercent < 0.01) {
+			crawlLabel.setText("");
+			return;
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawlerCompleted);
 		sb.append(" out of ");

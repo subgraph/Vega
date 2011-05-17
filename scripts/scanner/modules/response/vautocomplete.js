@@ -22,7 +22,6 @@ function run(request, response, ctx) {
           }
         }
       });
-
   }
   
   if (found)
