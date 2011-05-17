@@ -19,18 +19,24 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.ActiveScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.alerts.ScanAlertView;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertTitleNode;
 import com.subgraph.vega.ui.scanner.dashboard.DashboardPane;
 
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 
-public class ScanInfoView extends ViewPart {
+public class ScanInfoView extends ViewPart implements IEventHandler {
 	private final Logger logger = Logger.getLogger("info-view");
 
 	public static String ID = "com.subgraph.vega.views.scaninfo";
@@ -41,6 +47,7 @@ public class ScanInfoView extends ViewPart {
 	private final AlertRenderer renderer;
 	private StackLayout stackLayout = new StackLayout();
 	private BrowserFunction linkClick;
+	private IWorkspace currentWorkspace;
 	
 	public ScanInfoView() {
 		final TemplateLoader loader = createTemplateLoader();
@@ -84,32 +91,30 @@ public class ScanInfoView extends ViewPart {
 				if(o instanceof IScanAlert) {		
 					IScanAlert alert = (IScanAlert) o;
 					displayAlert(alert);
-				} else if (o instanceof IScanInstance) {
-					
+				} else if (o instanceof AlertScanNode) {
+					final AlertScanNode node = (AlertScanNode) o;
+					displayScanSummary(node.getScanInstance());
+				} else if (o instanceof AlertTitleNode) {
+					final AlertTitleNode node = (AlertTitleNode) o;
+					if(node.getAlertCount() == 1) {
+						displayAlert(node.getFirstAlert());
+					}
 				}
 			}
-			
 		});
 		
 		stackLayout.topControl = dashboard;
 		contentPanel.layout();
 		
 		final IModel model = Activator.getDefault().getModel();
-		if(model != null)
-			addWorkspaceListener(model);
-	}
-	
-	private void addWorkspaceListener(IModel model) {
-		model.addWorkspaceListener(new IEventHandler() {
-
-			@Override
-			public void handleEvent(IEvent event) {
-				if((event instanceof WorkspaceCloseEvent) || (event instanceof WorkspaceResetEvent)) {
-					resetState();
-				}				
-			}
-			
-		});
+		if(model != null) {
+			setCurrentWorkspace(model.addWorkspaceListener(this));
+		}
+		IStructuredSelection selection = (IStructuredSelection) getSite().getPage().getSelection(ScanAlertView.ID);
+		if(selection != null && selection.getFirstElement() instanceof AlertScanNode) {
+			AlertScanNode node = (AlertScanNode) selection.getFirstElement();
+			displayScanSummary(node.getScanInstance());
+		}
 	}
 	
 	private void resetState() {
@@ -125,6 +130,21 @@ public class ScanInfoView extends ViewPart {
 		contentPanel.layout();
 	}
 	
+	private void displayScanSummary(final IScanInstance scan) {
+		if(scan == null) {
+			return;
+		}
+		if(!dashboard.getDisplay().isDisposed()) {
+			dashboard.getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					dashboard.displayScanInstance(scan);
+					showDashboard();
+				}
+				
+			});
+		}
+	}
 	public void showDashboard() {
 		stackLayout.topControl = dashboard;
 		contentPanel.layout();
@@ -141,4 +161,51 @@ public class ScanInfoView extends ViewPart {
 		super.dispose();
 	}
 
+	@Override
+	public void handleEvent(IEvent event) {
+		if(event instanceof WorkspaceOpenEvent) {
+			handleWorkspaceOpen((WorkspaceOpenEvent) event);
+		} else if(event instanceof WorkspaceCloseEvent) {
+			handleWorkspaceCloseEvent((WorkspaceCloseEvent) event);
+		} else if(event instanceof WorkspaceResetEvent) {
+			handleWorkspaceResetEvent((WorkspaceResetEvent) event);
+		} else if(event instanceof ActiveScanInstanceEvent) {
+			handleActiveScanInstance((ActiveScanInstanceEvent) event);
+		}
+	}
+	
+	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		setCurrentWorkspace(event.getWorkspace());
+	}
+	
+	private void handleWorkspaceCloseEvent(WorkspaceCloseEvent event) {
+		setCurrentWorkspace(null);
+		resetState();
+	}
+	
+	private void handleWorkspaceResetEvent(WorkspaceResetEvent event) {
+		setCurrentWorkspace(event.getWorkspace());
+		resetState();
+	}
+	
+	private void handleActiveScanInstance(ActiveScanInstanceEvent event) {
+		setActiveScanInstance(event.getScanInstance());
+	}
+
+	private void setCurrentWorkspace(IWorkspace workspace) {
+		if(currentWorkspace != null) {
+			currentWorkspace.getScanAlertRepository().removeActiveScanInstanceListener(this);
+		}
+		if(workspace != null) {
+			final IScanInstance activeScanInstance = workspace.getScanAlertRepository().addActiveScanInstanceListener(this);
+			if(activeScanInstance != null) {
+				setActiveScanInstance(activeScanInstance);
+			}
+		}
+		currentWorkspace = workspace;
+	}
+	
+	private void setActiveScanInstance(IScanInstance scanInstance) {
+		displayScanSummary(scanInstance);
+	}
 }

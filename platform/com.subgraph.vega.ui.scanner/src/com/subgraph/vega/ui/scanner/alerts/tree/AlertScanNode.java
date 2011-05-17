@@ -1,14 +1,15 @@
 package com.subgraph.vega.ui.scanner.alerts.tree;
 
+import java.text.SimpleDateFormat;
+
 import org.apache.http.HttpHost;
 
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanIdProvider;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
-public class AlertScanNode extends AbstractAlertTreeNode implements IScanIdProvider {
+public class AlertScanNode extends AbstractAlertTreeNode {
 	private final static String SCAN_IMAGE = "icons/scanner.png";
 	private final static String PROXY_IMAGE = "icons/proxy.png";
 
@@ -17,6 +18,7 @@ public class AlertScanNode extends AbstractAlertTreeNode implements IScanIdProvi
 	
 	private final IWorkspace workspace;
 	private final long scanId;
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	
 	private IScanInstance scanInstance;
 	
@@ -32,13 +34,42 @@ public class AlertScanNode extends AbstractAlertTreeNode implements IScanIdProvi
 	public IScanInstance getScanInstance() {
 		return scanInstance;
 	}
+
 	@Override
 	public String getLabel() {
 		if(scanId == -1) {
 			return "Proxy  ";
-		} else {
+		} else if(scanInstance == null) {
 			return "Scan [id: #"+ Long.toString(scanId) +"]  ";
+		} else {
+			return renderScanInstance();
 		}
+	}
+
+	private String renderScanInstance() {
+		final StringBuilder sb = new StringBuilder();
+		sb.append(dateFormat.format(scanInstance.getStartTime()));
+
+		sb.append(" [");
+		switch(scanInstance.getScanStatus()) {
+		case IScanInstance.SCAN_IDLE:
+			sb.append("Idle");
+			break;
+		case IScanInstance.SCAN_STARTING:
+			sb.append("Starting");
+			break;
+		case IScanInstance.SCAN_AUDITING:
+			sb.append("Auditing");
+			break;
+		case IScanInstance.SCAN_CANCELLED:
+			sb.append("Cancelled");
+			break;
+		case IScanInstance.SCAN_COMPLETED:
+			sb.append("Completed");
+			break;
+		}
+		sb.append("] ");
+		return sb.toString();
 	}
 
 	@Override
@@ -70,7 +101,6 @@ public class AlertScanNode extends AbstractAlertTreeNode implements IScanIdProvi
 		return host.toString();
 	}
 
-	@Override
 	public long getScanId() {
 		return scanId;
 	}

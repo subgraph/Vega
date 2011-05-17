@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -23,11 +24,13 @@ public class AlertPane extends Composite {
 	
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);		
 	private final Map<Severity, AlertSeverityCell> alertSeverityCells = new HashMap<Severity, AlertSeverityCell>();
+	private Composite rootComposite;
 	
 	AlertPane(Composite parent) {
 		super(parent, SWT.NONE);
-		setLayout(new GridLayout());
-		addSeverityCells(parent.getBackground());
+		setLayout(new FillLayout());
+		setBackground(parent.getBackground());
+		reset();
 	}
 	
 	
@@ -50,7 +53,7 @@ public class AlertPane extends Composite {
 		final Image severityDisabledImage = imageCache.getDisabled(severityImageKey);
 		if(severityImage == null || severityDisabledImage == null)
 			return null;
-		final AlertSeverityCell cell = new AlertSeverityCell(this, background, severityImage, severityDisabledImage, severityLabel);
+		final AlertSeverityCell cell = new AlertSeverityCell(rootComposite, background, severityImage, severityDisabledImage, severityLabel);
 		cell.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cell.setBackground(background);
 		return cell;
@@ -84,14 +87,25 @@ public class AlertPane extends Composite {
 		return null;
 	}
 	
+	void reset() {
+		if(rootComposite != null) {
+			rootComposite.dispose();
+		}
+		rootComposite = new Composite(this, SWT.NULL);
+		rootComposite.setBackground(getBackground());
+		rootComposite.setLayout(new GridLayout());
+		addSeverityCells(getParent().getBackground());
+		layout();
+	}
+
 	void addAlert(final IScanAlert alert) {
 		final AlertSeverityCell cell = alertSeverityCells.get(alert.getSeverity());
 		if(cell == null)
 			return;
-		getDisplay().asyncExec(new Runnable() {
+		getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				cell.addAlert(alert);				
+				cell.addAlert(alert);
 			}
 		});
 	}

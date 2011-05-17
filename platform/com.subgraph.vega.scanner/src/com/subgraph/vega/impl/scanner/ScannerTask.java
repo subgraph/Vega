@@ -11,7 +11,6 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
-import com.subgraph.vega.api.scanner.IScanner.ScannerStatus;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
@@ -59,15 +58,16 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	public void run() {
 		final List<IResponseProcessingModule> responseModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
 		contentAnalyzer.setResponseProcessingModules(responseModules);
-		scanner.setScannerStatus(ScannerStatus.SCAN_AUDITING);
+		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
 		runCrawlerPhase();		
 		if(stopRequested) {
-			scanner.setScannerStatus(ScannerStatus.SCAN_CANCELED);
+			scanInstance.updateScanStatus(IScanInstance.SCAN_CANCELLED);
 			logger.info("Scanner cancelled.");
 		} else {
-			scanner.setScannerStatus(ScannerStatus.SCAN_COMPLETED);
+			scanInstance.updateScanStatus(IScanInstance.SCAN_COMPLETED);
 			logger.info("Scanner completed");
 		}
+		workspace.getScanAlertRepository().setActiveScanInstance(null);
 		workspace.unlock();
 		printModuleRuntimeStats();
 	}
@@ -98,10 +98,11 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		}
 		currentCrawler = null;
 		logger.info("Crawler finished");
+		System.out.println("CROWLUR FINISHED");
 	}
 
 	@Override
 	public void progressUpdate(int completed, int total) {
-		scanner.updateCrawlerProgress(completed, total);		
+		scanInstance.updateScanProgress(completed, total);
 	}
 }

@@ -19,6 +19,9 @@ public class AlertTitleNode implements IAlertTreeNode {
 	
 	@Override
 	public String getLabel() {
+		if(alerts.size() == 1) {
+			return title + " (" + alerts.get(0).getResource() + ")";
+		}
 		return title;
 	}
 	
@@ -29,7 +32,7 @@ public class AlertTitleNode implements IAlertTreeNode {
 
 	@Override
 	public boolean hasChildren() {
-		return alerts.size() > 0;
+		return alerts.size() > 1;
 	}
 
 	@Override
@@ -39,9 +42,20 @@ public class AlertTitleNode implements IAlertTreeNode {
 
 	@Override
 	public Object[] getChildren() {
-		return alerts.toArray();
+		if(alerts.size() > 1) {
+			return alerts.toArray();
+		} else {
+			return new Object[0];
+		}
 	}
 
+	public IScanAlert getFirstAlert() {
+		if(alerts.isEmpty()) {
+			return null;
+		} else {
+			return alerts.get(0);
+		}
+	}
 	@Override
 	public String getImage() {
 		return ALERT_ITEM;

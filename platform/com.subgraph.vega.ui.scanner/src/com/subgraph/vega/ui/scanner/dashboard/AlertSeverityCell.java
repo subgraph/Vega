@@ -52,7 +52,7 @@ public class AlertSeverityCell extends Composite {
 		
 		countLabel = new Label(this, SWT.LEFT);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-		gd.widthHint = 80;
+		gd.widthHint = 85;
 		countLabel.setLayoutData(gd);
 		countLabel.setText("(None found)");
 		countLabel.setBackground(background);
@@ -65,7 +65,7 @@ public class AlertSeverityCell extends Composite {
 		gd.horizontalSpan = 3;
 		spacer.setLayoutData(gd);
 	}
-	
+
 	private void setLabelForegroundGrey(Label label) {
 		label.setData("saved-foreground", label.getForeground());
 		label.setForeground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
@@ -82,6 +82,7 @@ public class AlertSeverityCell extends Composite {
 		final String title = alert.getTitle();
 		if(!alertTitleToItem.containsKey(title)) {
 			alertTitleToItem.put(title, createAlertItemRow(title));
+			getParent().layout();
 		}
 		AlertItemRow row = alertTitleToItem.get(title);
 		row.incrementCount();
