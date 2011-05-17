@@ -19,7 +19,7 @@
             name="Subgraph Vega">
          <property
                name="windowImages"
-               value="icons/16x16Vega.png,icons/vega-icon-100x100.png">
+               value="icons/16x16Vega.png,icons/32x32Vega.png,icons/48x48Vega.png,icons/64x64Vega.png,icons/128x128Vega.png">
          </property>
          <property
                name="appName"
