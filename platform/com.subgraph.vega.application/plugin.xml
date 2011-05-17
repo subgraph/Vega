@@ -133,7 +133,6 @@
               id="com.subgraph.vega.aboutaction"
               label="About Subgraph Vega"
               menubarPath="help/"
-              pulldown="true"
               state="true"
               style="push">
         </action>

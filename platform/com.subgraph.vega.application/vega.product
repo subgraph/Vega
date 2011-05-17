@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
-
-<product name="Subgraph Vega" application="com.subgraph.vega.application.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="Subgraph Vega" id="com.subgraph.vega.application.product" application="com.subgraph.vega.application.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/com.subgraph.vega.application/icons/vega_small.png"/>
