@@ -62,6 +62,9 @@ public class CrawlerProgressPane extends Composite {
 	}
 
 	void setLabelText(String text) {
+		if(progressLabel.isDisposed()) {
+			return;
+		}
 		progressLabel.setText(text);
 		if(stack.topControl != progressLabelPage) {
 			stack.topControl = progressLabelPage;
@@ -70,6 +73,9 @@ public class CrawlerProgressPane extends Composite {
 	}
 	
 	void setProgressBarValue(int value) {
+		if(progressBar.isDisposed()) {
+			return;
+		}
 		progressBar.setSelection(value);
 		if(stack.topControl != progressBarPage) {
 			stack.topControl = progressBarPage;
