@@ -98,7 +98,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		}
 		currentCrawler = null;
 		logger.info("Crawler finished");
-		System.out.println("CROWLUR FINISHED");
 	}
 
 	@Override
