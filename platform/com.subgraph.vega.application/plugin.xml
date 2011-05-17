@@ -19,7 +19,7 @@
             name="Subgraph Vega">
          <property
                name="windowImages"
-               value="icons/alt_window_16.gif,icons/vega-icon-100x100.png">
+               value="icons/16x16Vega.png,icons/vega-icon-100x100.png">
          </property>
          <property
                name="appName"
@@ -122,5 +122,23 @@
          </variable>
       </sourceProvider>
    </extension>
+ <extension
+        point="org.eclipse.ui.actionSets">
+     <actionSet
+           id="com.subgraph.vega.aboutactionset"
+           label="About Subgraph Vega"
+           visible="true">
+        <action
+              class="com.subgraph.vega.application.about.AboutDialogAction"
+              id="com.subgraph.vega.aboutaction"
+              label="About Subgraph Vega"
+              menubarPath="help/"
+              pulldown="true"
+              state="true"
+              style="push">
+        </action>
+     </actionSet>
+</extension>
+
 
 </plugin>
