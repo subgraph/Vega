@@ -13,10 +13,9 @@ import com.db4o.events.EventRegistryFactory;
 import com.db4o.query.Predicate;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.ActiveScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
-import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.NewScanInstanceEvent;
 import com.subgraph.vega.api.xml.IXmlRepository;
 
@@ -25,12 +24,14 @@ public class ScanAlertRepository implements IScanAlertRepository {
 	private final ObjectContainer database;
 	private final Object scanInstanceLock = new Object();
 	private final ScanAlertFactory alertFactory;
-	private final EventListenerManager eventManager;
+	private final EventListenerManager scanInstanceEventManager;
+	
+	private IScanInstance activeScanInstance;
 	
 	public ScanAlertRepository(ObjectContainer db, IXmlRepository xmlRepository) {
 		this.database = db;
 		this.alertFactory = new ScanAlertFactory(xmlRepository);
-		this.eventManager = new EventListenerManager();
+		this.scanInstanceEventManager = new EventListenerManager();
 		final EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
 		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
 			@Override
@@ -38,27 +39,38 @@ public class ScanAlertRepository implements IScanAlertRepository {
 					CancellableObjectEventArgs args) {
 				final Object ob = args.object();
 				if(ob instanceof ScanInstance) {
+					
 					final ScanInstance scan = (ScanInstance) ob;
-					scan.setTransientState(database, alertFactory, eventManager);
+					scan.setTransientState(database, alertFactory);
+					final int status = scan.getScanStatus();
+					if(status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
+						scan.updateScanStatus(IScanInstance.SCAN_CANCELLED);
+					}
 				}				
 			}
 		});
 	}
 
 	@Override
-	public synchronized void addAlertListenerAndPopulate(IEventHandler listener) {
-		for(IScanInstance scan: getAllScanInstances()) {
-			listener.handleEvent(new NewScanInstanceEvent(scan));
-			for(IScanAlert alert: scan.getAllAlerts()) {
-				listener.handleEvent(new NewScanAlertEvent(alert));
-			}
-		}
-		eventManager.addListener(listener);
+	public IScanInstance addActiveScanInstanceListener(IEventHandler listener) {
+		scanInstanceEventManager.addListener(listener);
+		return activeScanInstance;
 	}
 
 	@Override
-	public void removeAlertListener(IEventHandler listener) {
-		eventManager.removeListener(listener);
+	public void removeActiveScanInstanceListener(IEventHandler listener) {
+		scanInstanceEventManager.removeListener(listener);
+	}
+
+	@Override
+	public void setActiveScanInstance(IScanInstance scanInstance) {
+		activeScanInstance = scanInstance;
+		scanInstanceEventManager.fireEvent(new ActiveScanInstanceEvent(scanInstance));
+	}
+
+	@Override
+	public IScanInstance getActiveScanInstance() {
+		return activeScanInstance;
 	}
 
 	@Override
@@ -71,13 +83,14 @@ public class ScanAlertRepository implements IScanAlertRepository {
 		synchronized(scanInstanceLock) {
 			final long scanId = allocateNewScanId();
 			final IScanInstance scan = createScanInstanceForScanId(scanId);
+			scanInstanceEventManager.fireEvent(new NewScanInstanceEvent(scan));
 			return scan;
 		}
 	}
 
 	private IScanInstance createScanInstanceForScanId(long scanId) {
 		final ScanInstance scan = new ScanInstance(scanId);
-		scan.setTransientState(database, alertFactory, eventManager);
+		scan.setTransientState(database, alertFactory);
 		database.store(scan);
 		return scan;
 	}

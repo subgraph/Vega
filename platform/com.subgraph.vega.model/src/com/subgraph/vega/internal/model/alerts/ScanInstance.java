@@ -1,5 +1,6 @@
 package com.subgraph.vega.internal.model.alerts;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,39 +12,53 @@ import com.db4o.activation.Activator;
 import com.db4o.query.Predicate;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanInstance implements IScanInstance, Activatable {
 	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
 	private final ModelProperties properties;
+	private final Date startTime;
+	private int scanStatus;
 	
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
 	private transient ScanAlertFactory alertFactory;
 	private transient Lock lock;
+	private transient int activeScanCompletedCount;
+	private transient int activeScanTotalCount;
 	
 	private transient Activator activator;
 	
 	ScanInstance(long scanId) {
 		this.scanId = scanId;
+		this.scanStatus = SCAN_IDLE;
 		this.properties = new ModelProperties();
+		this.startTime = new Date();
 	}
 
-	void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory, EventListenerManager eventManager) {
+	void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
 		this.database = database;
 		this.alertFactory = alertFactory;
-		this.eventManager = eventManager;
 		this.lock = new ReentrantLock();
+		this.eventManager = new EventListenerManager();
 	}
 
 	@Override
 	public long getScanId() {
 		activate(ActivationPurpose.READ);
 		return scanId;
+	}
+
+	@Override
+	public Date getStartTime() {
+		activate(ActivationPurpose.READ);
+		return startTime;
 	}
 
 	@Override
@@ -69,7 +84,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 			return;
 		}
 		database.store(alert);
-		eventManager.fireEvent(new NewScanAlertEvent(alert));		
+		eventManager.fireEvent(new NewScanAlertEvent(alert));
 	}
 
 	@Override
@@ -103,7 +118,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public boolean match(ScanAlert alert) {
-				return key.equals(alert.getKey());
+				return key.equals(alert.getKey()) && alert.getScanId() == scanId;
 			}			
 		});
 	}
@@ -120,6 +135,56 @@ public class ScanInstance implements IScanInstance, Activatable {
 		});
 	}
 
+
+	@Override
+	public void addScanEventListenerAndPopulate(IEventHandler listener) {
+		lock();
+		try {
+			for(IScanAlert alert: getAllAlerts()) {
+				listener.handleEvent(new NewScanAlertEvent(alert));
+			}
+			listener.handleEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+			eventManager.addListener(listener);
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public void removeScanEventListener(IEventHandler listener) {
+		eventManager.removeListener(listener);
+	}
+
+	@Override
+	public int getScanStatus() {
+		activate(ActivationPurpose.READ);
+		return scanStatus;
+	}
+
+	@Override
+	public int getScanCompletedCount() {
+		return activeScanCompletedCount;
+	}
+
+	@Override
+	public int getScanTotalCount() {
+		return activeScanTotalCount;
+	}
+
+	@Override
+	public void updateScanProgress(int completedCount, int totalCount) {
+		activeScanCompletedCount = completedCount;
+		activeScanTotalCount = totalCount;
+		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	}
+
+	@Override
+	public void updateScanStatus(int status) {
+		activate(ActivationPurpose.WRITE);
+		this.scanStatus = status;
+		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	}
+
 	@Override
 	public void lock() {
 		lock.lock();
@@ -129,7 +194,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	public void unlock() {
 		lock.unlock();
 	}
-	
+
 	@Override
 	public void setProperty(String name, Object value) {
 		activate(ActivationPurpose.READ);
@@ -196,11 +261,10 @@ public class ScanInstance implements IScanInstance, Activatable {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public boolean match(ScanAlert alert) {
-				return resource.equals(alert.getResource());
+				return resource.equals(alert.getResource()) && alert.getScanId() == scanId;
 			}
 		});
 	}
-
 
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {

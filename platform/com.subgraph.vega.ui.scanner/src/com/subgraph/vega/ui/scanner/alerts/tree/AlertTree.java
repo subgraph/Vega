@@ -16,12 +16,19 @@ public class AlertTree extends AbstractAlertTreeNode {
 		final String key = Long.toString(scan.getScanId());
 		if(!nodeMap.containsKey(key)) {
 			nodeMap.put(key, new AlertScanNode(scan.getScanId(), workspace));
-			return;
 		}
 		final AlertScanNode scanNode = (AlertScanNode) nodeMap.get(key);
 		if(scanNode.getScanInstance() == null) {
 			scanNode.setScanInstance(scan);
 		}
+	}
+	
+	public synchronized AlertScanNode getScanNode(long scanId) {
+		final String key = Long.toString(scanId);
+		if(!nodeMap.containsKey(key)) {
+			nodeMap.put(key, new AlertScanNode(scanId, workspace));
+		}
+		return (AlertScanNode) nodeMap.get(key);
 	}
 
 	@Override
