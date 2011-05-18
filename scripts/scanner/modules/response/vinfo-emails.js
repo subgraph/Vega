@@ -32,7 +32,6 @@ function run(request, response, ctx) {
 	    var key = emails.sort().join(" ");
 	    var uristr = String(request.requestLine.uri);
 	    var uripart = uristr.replace(/\?.*/,"");
-	    print(uripart + key);
 	    ctx.alert("vinfo-emails",request, response, {
 	    	"output": emails.join(" "), 
 	    	"resource": uripart, 
