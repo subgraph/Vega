@@ -21,6 +21,13 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceOpenEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
@@ -51,6 +58,8 @@ public class RequestResponseViewer {
 	private boolean urlDecodeState = false;
 	private boolean hideState = false;
 	
+	private IWorkspace currentWorkspace;
+
 	public RequestResponseViewer(SashForm parentForm) {
 		imageCache = new ImageCache(Activator.PLUGIN_ID);
 		this.parentForm = parentForm;
@@ -65,8 +74,22 @@ public class RequestResponseViewer {
 		fd.top = new FormAttachment(0);
 		toolbarComposite.setLayoutData(fd);
 		setTabbedMode();
+
+		IModel model = Activator.getDefault().getModel();
+		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if (event instanceof WorkspaceCloseEvent || event instanceof WorkspaceResetEvent) {
+					handleWorkspaceCloseOrReset();
+				}
+			}
+		});
 	}
-	
+
+	private void handleWorkspaceCloseOrReset() {
+		clearViewers();
+	}
+
 	private Composite createToolbarComposite(Composite parent) {
 		final Composite c = new Composite(parentComposite, SWT.NONE);
 		final GridLayout layout = new GridLayout(2, false);

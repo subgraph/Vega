@@ -54,7 +54,8 @@ public class HttpMessageViewer extends Composite {
 	}
 
 	public void clearContent() {
-		
+		rawDocument.set("");
+		decodedDocument.set("");
 	}
 
 	public String getContent() {
