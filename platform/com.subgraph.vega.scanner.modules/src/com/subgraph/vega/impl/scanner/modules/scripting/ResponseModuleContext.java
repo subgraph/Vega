@@ -30,7 +30,7 @@ public class ResponseModuleContext implements IModuleContext {
 	@Override
 	public void error(HttpUriRequest request, IHttpResponse response,
 			String message) {
-		final long requestId = workspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
+		final long requestId = workspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());
 		logger.warning("Error running module: "+ message + " (request logged with id="+ requestId +")");
 	}
 
@@ -107,7 +107,7 @@ public class ResponseModuleContext implements IModuleContext {
 			if(key != null && scanInstance.hasAlertKey(key)) {
 				return;
 			}
-			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
+			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());
 			final IScanAlert alert = scanInstance.createAlert(type, key, requestId);
 			
 			for(int i = 0; (i + 1) < properties.length; i += 2) {

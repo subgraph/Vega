@@ -63,7 +63,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		}
 		
 		if(addToRequestLog) 
-			workspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());
+			workspace.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());
 
 		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
 		result.setSniffedMimeType(mimeDetector.getSniffedMimeType(response));

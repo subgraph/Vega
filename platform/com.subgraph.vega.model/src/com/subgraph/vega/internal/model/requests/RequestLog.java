@@ -76,17 +76,17 @@ public class RequestLog implements IRequestLog {
 
 
 	@Override
-	public long addRequest(HttpRequest request, HttpHost host) {
+	public long addRequest(HttpRequest request, HttpHost host, long requestTimeMs) {
 		final long id = allocateRequestId();
-		addRequest(id, request, host);
+		addRequest(id, request, host, requestTimeMs);
 		return id;
 	}
 
 	@Override
-	public void addRequest(long requestId, HttpRequest request, HttpHost host) {
+	public void addRequest(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
 		final HttpRequest newRequest = cloner.copyRequest(request);
 		database.store(newRequest);
-		final RequestLogRecord record = new RequestLogRecord(requestId, newRequest, host);
+		final RequestLogRecord record = new RequestLogRecord(requestId, newRequest, host, requestTimeMs);
 		synchronized (lock) {
 			database.store(record);
 			filterNewRecord(record);
@@ -94,14 +94,13 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
-	public long addRequestResponse(HttpRequest request, HttpResponse response,
-			HttpHost host) {
+	public long addRequestResponse(HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
 		final long id = allocateRequestId();
 		final HttpRequest newRequest = cloner.copyRequest(request);
 		final HttpResponse newResponse = cloner.copyResponse(response);
 		database.store(newRequest);
 		database.store(newResponse);
-		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, host);
+		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, host, requestTimeMs);
 		synchronized(lock){
 			database.store(record);
 			filterNewRecord(record);
