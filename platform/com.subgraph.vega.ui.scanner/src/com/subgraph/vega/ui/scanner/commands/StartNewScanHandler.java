@@ -1,7 +1,13 @@
 package com.subgraph.vega.ui.scanner.commands;
 
+import java.net.HttpCookie;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -14,6 +20,7 @@ import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
+import com.subgraph.vega.ui.scanner.wizards.NewWizardDialog;
 
 public class StartNewScanHandler extends AbstractHandler {
 	private String lastTargetValue = null;
@@ -30,7 +37,7 @@ public class StartNewScanHandler extends AbstractHandler {
 		if(scanner != null) {
 			IScannerConfig scannerConfig = scanner.createScannerConfig();
 		
-			WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+			WizardDialog dialog = new NewWizardDialog(HandlerUtil.getActiveShell(event), wizard);
 			if(dialog.open() == IDialogConstants.OK_ID) {
 				if(wizard.isDomTest()) {
 					runDomTest();
@@ -41,7 +48,7 @@ public class StartNewScanHandler extends AbstractHandler {
 				if(uri != null) {
 					lastTargetValue = wizard.getTargetField();
 					scannerConfig.setBaseURI(uri);
-					scannerConfig.setCookieString(wizard.getCookieString());
+					scannerConfig.setCookieList(getCookieList(wizard.getCookieStringList(), uri));
 					scannerConfig.setBasicUsername(wizard.getBasicUsername());
 					scannerConfig.setBasicPassword(wizard.getBasicPassword());
 					scannerConfig.setBasicRealm(wizard.getBasicRealm());
@@ -60,6 +67,37 @@ public class StartNewScanHandler extends AbstractHandler {
 		return null;
 	}
 
+	// gross hack
+	private List<Cookie> getCookieList(List<String> cookieStringList, URI uri) {
+		if (cookieStringList.size() != 0) {
+			ArrayList<Cookie> cookieList = new ArrayList<Cookie>(cookieStringList.size());
+			for (String cookieString: cookieStringList) {
+				List<HttpCookie> parseList = HttpCookie.parse(cookieString);
+				for (HttpCookie cookie: parseList) {
+					BasicClientCookie cp = new BasicClientCookie(cookie.getName(), cookie.getValue());
+					cp.setComment(cookie.getComment());
+					if (cookie.getDomain() != null) {
+						cp.setDomain(cookie.getDomain());
+					} else {
+						// just set it to the target host for now - may need something slightly less specific
+						cp.setDomain(uri.getHost());
+					}
+					long maxAge = cookie.getMaxAge();
+					if (maxAge > 0) {
+						Calendar calendar = Calendar.getInstance();
+						calendar.add(Calendar.SECOND, (int) maxAge);
+						cp.setExpiryDate(calendar.getTime());
+					}
+					cp.setPath(cookie.getPath());
+					cp.setSecure(cookie.getSecure());
+					cp.setVersion(cookie.getVersion());
+					cookieList.add(cp);
+				}
+			}
+			return cookieList;
+		}
+		return null;
+	}
 	
 	private void runDomTest() {
 		IScanner scanner = Activator.getDefault().getScanner();

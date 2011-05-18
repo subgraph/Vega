@@ -45,8 +45,6 @@ class RequestTask implements Callable<IHttpResponse> {
 	public IHttpResponse call() throws Exception {
 		if(config.getForceIdentityEncoding())
 			request.setHeader(HTTP.CONTENT_ENCODING, HTTP.IDENTITY_CODING);
-		if(config.getCookieString() != null && !config.getCookieString().isEmpty())
-			request.setHeader("Cookie",config.getCookieString());
 
 		if(rateLimit != null)
 			rateLimit.maybeDelayRequest();

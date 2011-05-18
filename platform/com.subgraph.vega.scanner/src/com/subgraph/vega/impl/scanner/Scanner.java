@@ -3,6 +3,9 @@ package com.subgraph.vega.impl.scanner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
+
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.events.IEvent;
@@ -122,7 +125,10 @@ public class Scanner implements IScanner {
 			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
 		
 		IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
-		requestEngineConfig.setCookieString(config.getCookieString());
+		CookieStore cookieStore = requestEngineConfig.getCookieStore();
+		for (Cookie c: config.getCookieList()) {
+			cookieStore.addCookie(c);
+		}
 		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
 		reloadModules();
@@ -138,7 +144,7 @@ public class Scanner implements IScanner {
 		currentScan.updateScanStatus(IScanInstance.SCAN_STARTING);
 		scannerThread.start();
 	}
-	
+
 	@Override
 	public void stopScanner() {
 		if(scannerTask != null)

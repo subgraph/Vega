@@ -3,10 +3,11 @@ package com.subgraph.vega.api.scanner;
 import java.net.URI;
 import java.util.List;
 
-public interface IScannerConfig {
+import org.apache.http.cookie.Cookie;
 
+public interface IScannerConfig {
 	void setBaseURI(URI baseURI);
-	void setCookieString(String cookieString);
+	void setCookieList(List<Cookie> list);
 	void setBasicUsername(String username);
 	void setBasicPassword(String password);
 	void setBasicRealm(String realm);
@@ -17,7 +18,7 @@ public interface IScannerConfig {
 	void setExclusions(List<String> exclusions);
 	void setLogAllRequests(boolean flag);
 	void setDisplayDebugOutput(boolean flag);
-	String getCookieString();
+	List<Cookie> getCookieList();
 	String getBasicUsername();
 	String getBasicPassword();
 	String getBasicRealm();
