@@ -38,7 +38,7 @@ public class CrawlerPane extends Composite {
 	}
 
 	void renderChanges() {
-		if(!changed)
+		if(!changed || isDisposed())
 			return;
 		
 		final Display display = getDisplay();
