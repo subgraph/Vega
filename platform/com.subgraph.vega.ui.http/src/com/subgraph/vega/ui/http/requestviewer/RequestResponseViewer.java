@@ -46,6 +46,9 @@ public class RequestResponseViewer {
 	private HttpMessageViewer responseViewer;
 	private IRequestLogRecord currentRecord;
 	
+	private boolean displayImages = true;
+	private boolean displayImagesAsHex = false;
+	private boolean urlDecodeState = false;
 	private boolean hideState = false;
 	
 	public RequestResponseViewer(SashForm parentForm) {
@@ -144,36 +147,41 @@ public class RequestResponseViewer {
 	
 	private Menu createOptionsMenu(Shell shell) {
 		final Menu menu = new Menu(shell, SWT.POP_UP);
-		final MenuItem displayImages = new MenuItem(menu, SWT.CHECK);
-		displayImages.setText("Display Images");
-		displayImages.setSelection(true);
+		final MenuItem displayImagesItem = new MenuItem(menu, SWT.CHECK);
+		displayImagesItem.setText("Display Images");
+		displayImagesItem.setSelection(displayImages);
 		
-		final MenuItem imagesAsHex = new MenuItem(menu, SWT.CHECK);
-		imagesAsHex.setText("Display Images with Hex Viewer");
+		final MenuItem imagesAsHexItem = new MenuItem(menu, SWT.CHECK);
+		imagesAsHexItem.setText("Display Images with Hex Viewer");
 		
-		final MenuItem decode = new MenuItem(menu, SWT.CHECK);
-		decode.setText("Remove URL encoding");
+		final MenuItem decodeItem = new MenuItem(menu, SWT.CHECK);
+		decodeItem.setText("Remove URL encoding");
 		
-		displayImages.addSelectionListener(new SelectionAdapter() {
+		displayImagesItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean value = displayImages.getSelection();
-				imagesAsHex.setEnabled(value);
+				boolean value = displayImagesItem.getSelection();
+				imagesAsHexItem.setEnabled(value);
 				setDisplayImageState(value);
+				displayImages = value;
 			}
 		});
 		
-		imagesAsHex.addSelectionListener(new SelectionAdapter() {
+		imagesAsHexItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setDisplayImagesAsHexState(imagesAsHex.getSelection());
+				boolean value = imagesAsHexItem.getSelection();
+				setDisplayImagesAsHexState(value);
+				displayImagesAsHex = value;
 			}
 		});
 		
-		decode.addSelectionListener(new SelectionAdapter() {
+		decodeItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setUrlDecodeState(decode.getSelection());
+				boolean value = decodeItem.getSelection();
+				setUrlDecodeState(value);
+				urlDecodeState  = value;
 			}
 		});		
 		return menu;
@@ -213,24 +221,32 @@ public class RequestResponseViewer {
 		recreateRootComposite();
 	
 		tabFolder = new TabFolder(rootComposite, SWT.TOP);
-		
+		createMessageViewers(tabFolder);
+
 		final TabItem requestItem = new TabItem(tabFolder, SWT.NONE);
 		requestItem.setText("Request");
-		requestViewer = new HttpMessageViewer(tabFolder);
-		requestViewer.setEditable(false);
 		requestItem.setControl(requestViewer);
 		
 		final TabItem responseItem = new TabItem(tabFolder, SWT.NONE);
 		responseItem.setText("Response");
-		responseViewer = new HttpMessageViewer(tabFolder);
-		responseViewer.setEditable(false);
 		responseItem.setControl(responseViewer);
+
 		parentComposite.layout();
 		if(currentRecord != null)
 			processCurrentTransaction();
 		setDisplayResponse();
 	}
 	
+	private void createMessageViewers(Composite parent) {
+		requestViewer = new HttpMessageViewer(parent);
+		requestViewer.setEditable(false);
+		responseViewer = new HttpMessageViewer(parent);
+		responseViewer.setEditable(false);
+		setDisplayImageState(displayImages);
+		setDisplayImagesAsHexState(displayImagesAsHex);
+		setUrlDecodeState(urlDecodeState);
+	}
+
 	public void setDisplayResponse() {
 		if(tabFolder != null)
 			tabFolder.setSelection(1);
@@ -267,10 +283,9 @@ public class RequestResponseViewer {
 		}
 		recreateRootComposite();
 		sashForm = new SashForm(rootComposite, mode);
-		requestViewer = new HttpMessageViewer(sashForm);
-		requestViewer.setEditable(false);
-		responseViewer = new HttpMessageViewer(sashForm);
-		responseViewer.setEditable(false);
+
+		createMessageViewers(sashForm);
+
 		sashForm.setWeights(new int[] {50, 50});
 		parentComposite.layout();
 		processCurrentTransaction();
