@@ -73,7 +73,7 @@ public class AlertRenderer {
 	}
 	
 	public String render(IScanAlert alert) {
-		
+		final int maxAlertString = Activator.getDefault().getPreferenceStore().getInt("MaxAlertString");
 		Map<String, Object> root = new HashMap<String, Object>();
 		try {
 			Template t = configuration.getTemplate("main.ftl");
@@ -83,8 +83,18 @@ public class AlertRenderer {
 			NodeModel nodeModel = NodeModel.wrap(xmlRoot);
 			root.put("doc", nodeModel);
 			Map<String,Object> vars = new HashMap<String,Object>();
-			for(String k: alert.propertyKeys()) 
-				vars.put(k, alert.getProperty(k));
+			for(String k: alert.propertyKeys()) {
+				Object value = alert.getProperty(k);
+				if(value instanceof String) {
+					String s = (String) value;
+					if(s.length() > maxAlertString) {
+						s = s.substring(0, maxAlertString);
+					} 
+					vars.put(k, s);
+				} else {
+					vars.put(k, alert.getProperty(k));
+				}
+			}
 			String severityVar = severityToString(alert.getSeverity());
 			if(severityVar != null) {
 				vars.put("severity", severityVar);
