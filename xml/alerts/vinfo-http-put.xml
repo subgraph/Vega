@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Possible HTTP PUT File Upload</title>
+	
+	<class>Configuration</class>
+	<severity>High</severity>		
+	
+	<impact>Arbitrary file uploads could affect application or system integrity.</impact>
+	<impact>This could occur if an attacker were to overwrite a resource pre-existing on the server.</impact>
+	
+	<remediation>
+		The server configuration settings should be reviewed to identify and disable the misconfiguration.
+	</remediation>
+	<remediation>
+		Apache allows for methods such as PUT and DELETE to be restricted using the LIMIT directive.
+	</remediation>
+		
+	<discussion>
+		The HTTP PUT method was designed to allow HTTP clients to store resources on a HTTP server. In implementations, this has typically meant file upload capability. As the HTTP RFC states that a server should overwrite pre-existing resources located at the URI of a PUT request, a loss of system or application integrity could occur if such a request were made.
+	</discussion>
+	
+	<references>
+		<url address="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html">RFC 2616 - HTTP 1.1: Section 9 (IETF)</url>
+		<url address="http://httpd.apache.org/docs/2.3/mod/core.html#limit">Apache httpd Core Documentation: Limit Directive (Apache)</url>
+		<url address="http://osvdb.org/show/osvdb/397">OSVDB 397: Multiple Web Server Dangerous HTTP Method PUT (OSVDB)</url>
+	</references>
+	
+</alert>
