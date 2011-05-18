@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -21,7 +23,6 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.BasicModuleScript;
@@ -53,7 +54,6 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 					handleWorkspaceClose((WorkspaceCloseEvent) event);
 			}
 		});
-
 	}
 
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
@@ -91,30 +91,9 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-
-	public List<IScannerModule> getAllModules(boolean enabledOnly) {
-		final List<IScannerModule> modules = new ArrayList<IScannerModule>();
-
-		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
-			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
-				modules.add(new ResponseProcessorScript(m));
-			else if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
-				modules.add(new BasicModuleScript(m));
-		}
-
-		return modules;
-
-	}
-
-
-	@Override
-	public List<IResponseProcessingModule> getResponseProcessingModules(boolean enabledOnly) {
+	public List<IResponseProcessingModule> getResponseProcessingModules() {
 		final List<IResponseProcessingModule> modules = new ArrayList<IResponseProcessingModule>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
 			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
 				modules.add(new ResponseProcessorScript(m));
 		}
@@ -122,20 +101,13 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-	public List<IBasicModuleScript> getBasicModules(boolean enabledOnly) {
+	public List<IBasicModuleScript> getBasicModules() {
 		final List<IBasicModuleScript> modules = new ArrayList<IBasicModuleScript>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
-			if(enabledOnly && !m.getEnabledState())
-				continue;
 			if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
 				modules.add(new BasicModuleScript(m));
 		}
 		return modules;
-	}
-
-	@Override
-	public void refreshModuleScripts() {
-		scriptLoader.reloadModules();
 	}
 
 	protected void setPathFinder(IPathFinder pathFinder) {
@@ -196,8 +168,58 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	@Override
-	public void resetAllModuleTimestamps() {
-		for(IScannerModule m: getAllModules(true))
-			m.getRunningTimeProfile().reset();
+	public List<IResponseProcessingModule> updateResponseProcessingModules(List<IResponseProcessingModule> currentModules) {
+		if(!scriptLoader.reloadModules()) {
+			return currentModules;
+		}
+		
+		final Map<String, ResponseProcessorScript> pathMap = new LinkedHashMap<String, ResponseProcessorScript>();
+		final List<IResponseProcessingModule> newModules = new ArrayList<IResponseProcessingModule>();
+		
+		for(IResponseProcessingModule m: currentModules) {
+			if(m instanceof ResponseProcessorScript) {
+				ResponseProcessorScript rps = (ResponseProcessorScript) m;
+				pathMap.put(rps.getModule().getScriptFile().getPath(), rps);
+			}
+		}
+		
+		for(ScriptedModule sm: scriptLoader.getAllModules()) {
+			String path = sm.getScriptFile().getPath();
+			if(pathMap.containsKey(path)) {
+				ResponseProcessorScript old = pathMap.get(path);
+				newModules.add(new ResponseProcessorScript(sm, old.isEnabled(), old.getRunningTimeProfile()));
+			} else {
+				newModules.add(new ResponseProcessorScript(sm));
+			}
+		}
+		return newModules;
+	}
+
+	@Override
+	public List<IBasicModuleScript> updateBasicModules(List<IBasicModuleScript> currentModules) {
+		if(!scriptLoader.reloadModules()) {
+			return currentModules;
+		}
+		
+		final Map<String, BasicModuleScript> pathMap = new LinkedHashMap<String, BasicModuleScript>();
+		final List<IBasicModuleScript> newModules = new ArrayList<IBasicModuleScript>();
+		
+		for(IBasicModuleScript m: currentModules) {
+			if(m instanceof BasicModuleScript) {
+				BasicModuleScript bms = (BasicModuleScript) m;
+				pathMap.put(bms.getModule().getScriptFile().getPath(), bms);
+			}
+		}
+		
+		for(ScriptedModule sm: scriptLoader.getAllModules()) {
+			String path = sm.getScriptFile().getPath();
+			if(pathMap.containsKey(path)) {
+				BasicModuleScript old = pathMap.get(path);
+				newModules.add(new BasicModuleScript(sm, old.isEnabled(), old.getRunningTimeProfile()));
+			} else {
+				newModules.add(new BasicModuleScript(sm));
+			}
+		}
+		return newModules;
 	}
 }

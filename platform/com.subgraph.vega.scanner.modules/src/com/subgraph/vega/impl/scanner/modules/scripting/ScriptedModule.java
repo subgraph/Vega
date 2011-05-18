@@ -4,32 +4,38 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 
 public class ScriptedModule {
 	private final ScriptFile scriptFile;
 	
-	private final String categoryName;
-	private final String moduleName;
-	private final ModuleScriptType moduleType;
-	private final Function runFunction;
-	private final boolean isDisabledInScript;
-	private final ScriptedModuleRunningTime runningTime;
-	
-	private boolean isEnabled;
-	
-	public ScriptedModule(ScriptFile scriptFile, String categoryName, String moduleName, ModuleScriptType moduleType, Function moduleEntry, boolean isDisabled) {
+	private String categoryName;
+	private String moduleName;
+	private ModuleScriptType moduleType;
+	private Function runFunction;
+	private boolean isDisabledInScript;
+	private boolean isDefaultEnabled;
+
+	public ScriptedModule(ScriptFile scriptFile, String category, ModuleValidator validator) {
 		this.scriptFile = scriptFile;
-		this.categoryName = categoryName;
-		this.moduleName = moduleName;
-		this.moduleType = moduleType;
-		this.runFunction = moduleEntry;
-		this.isDisabledInScript = isDisabled;
-		this.isEnabled = !isDisabled;
-		this.runningTime = new ScriptedModuleRunningTime(moduleName);
+		updateFromValidator(validator);
+		categoryName = category;
+	}
+
+	public ScriptedModule(ScriptFile scriptFile, ModuleValidator validator) {
+		
+		this.scriptFile = scriptFile;
+		updateFromValidator(validator);
 	}
 	
+	public void updateFromValidator(ModuleValidator validator) {
+		categoryName = validator.getCategoryName();
+		moduleName = validator.getName();
+		moduleType = validator.getType();
+		runFunction = validator.getRunFunction();
+		isDisabledInScript = validator.isDisabled();
+		isDefaultEnabled = validator.isDefaultEnabled();
+	}
 	public Scriptable createInstanceScope(Context cx) {
 		Scriptable scope = cx.newObject(scriptFile.getCompiledScript());
 		scope.setPrototype(scriptFile.getCompiledScript());
@@ -37,15 +43,12 @@ public class ScriptedModule {
 		return scope;
 	}
 	
-	public void runModule(Context cx, Scriptable instanceScope, String target) {
-		runModule(cx, instanceScope, new Object[0], target);
+	public void runModule(Context cx, Scriptable instanceScope) {
+		runModule(cx, instanceScope, new Object[0]);
 	}
 
-	public void runModule(Context cx, Scriptable instanceScope, Object[] arguments, String target) {
-		final long startTS = System.currentTimeMillis();
+	public void runModule(Context cx, Scriptable instanceScope, Object[] arguments) {
 		runFunction.call(cx, instanceScope, instanceScope, arguments);
-		final long endTS = System.currentTimeMillis();
-		runningTime.addTimestamp((int) (endTS - startTS), target);
 	}
 	
 	public ScriptFile getScriptFile() {
@@ -68,18 +71,11 @@ public class ScriptedModule {
 		return scriptFile.getCompiledScript();
 	}
 	
+	public boolean isDefaultEnabled() {
+		return isDefaultEnabled;
+	}
+
 	public boolean isDisabled() {
 		return isDisabledInScript;
-	}
-	
-	public void setEnabledState(boolean flag) {
-		isEnabled = flag;
-	}
-	
-	public boolean getEnabledState() {
-		return isEnabled;
-	}
-	public IScannerModuleRunningTime getRunningTime() {
-		return runningTime;
 	}
 }

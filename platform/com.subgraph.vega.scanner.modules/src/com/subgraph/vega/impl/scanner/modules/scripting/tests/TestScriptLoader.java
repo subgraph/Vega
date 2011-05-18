@@ -55,7 +55,7 @@ public class TestScriptLoader {
 		if(validator == null)
 			return null;
 			
-		return new ScriptedModule(scriptFile, "Test Modules", validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
+		return new ScriptedModule(scriptFile, "Test Modules", validator);
 	}
 	
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {
