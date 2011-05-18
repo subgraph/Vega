@@ -174,11 +174,6 @@ public class DashboardPane extends Composite implements IEventHandler {
 		addIndented(sb, 10, "<img href='logo'/>");
 		addVSpaces(sb, 2);
 	}
-	private void addDefault(StringBuilder sb, String value) {
-		sb.append("<li bindent='20'><span font='big'>");
-		sb.append(value);
-		sb.append("</span></li>");
-	}
 	
 	private void addVSpaces(StringBuilder sb, int count) {
 		sb.append("<p>");
