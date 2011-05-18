@@ -25,6 +25,7 @@ public class StartNewScanHandler extends AbstractHandler {
 		NewScanWizard wizard = new NewScanWizard();
 		if(lastTargetValue != null)
 			wizard.setTargetField(lastTargetValue);
+		wizard.setScannerModules(scanner.getAllModules());
 		
 		if(scanner != null) {
 			IScannerConfig scannerConfig = scanner.createScannerConfig();
@@ -38,7 +39,7 @@ public class StartNewScanHandler extends AbstractHandler {
 				
 				URI uri = wizard.getScanHostURI();
 				if(uri != null) {
-//					lastTargetValue = wizard.getTargetField();
+					lastTargetValue = wizard.getTargetField();
 					scannerConfig.setBaseURI(uri);
 					scannerConfig.setCookieString(wizard.getCookieString());
 					scannerConfig.setBasicUsername(wizard.getBasicUsername());

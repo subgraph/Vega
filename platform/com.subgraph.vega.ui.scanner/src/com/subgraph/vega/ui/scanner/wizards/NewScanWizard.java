@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.eclipse.jface.wizard.Wizard;
 
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
+
 public class NewScanWizard extends Wizard {
 	private NewScanWizardPage page1;
 	private NewScanWizardPage2 page2;
@@ -15,6 +17,7 @@ public class NewScanWizard extends Wizard {
 	private String validTargetField;
 	private boolean isDomTest;
 	private String targetField;
+	private List<IScannerModule> scannerModules;
 	private List<String> exclusions;
 	private String basicUsername;
 	private String basicPassword;
@@ -25,7 +28,7 @@ public class NewScanWizard extends Wizard {
 	
 	@Override
 	public void addPages() {
-		page1 = new NewScanWizardPage(targetField);
+		page1 = new NewScanWizardPage(targetField, scannerModules);
 		addPage(page1);
 		page2 = new NewScanWizardPage2();
 		addPage(page2);
@@ -72,6 +75,10 @@ public class NewScanWizard extends Wizard {
 		targetField = value;
 	}
 	
+	public void setScannerModules(List<IScannerModule> modules) {
+		this.scannerModules = modules;
+	}
+
 	public URI getScanHostURI() {
 		return scanHostURI;
 	}

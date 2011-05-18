@@ -3,9 +3,6 @@ package com.subgraph.vega.internal.analysis;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
@@ -29,7 +26,6 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private final MimeDetector mimeDetector = new MimeDetector();
 
 	private final Object responseProcessingLock = new Object();
-	private ExecutorService responseProcessingExecutor;
 
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private boolean addLinksToModel;
@@ -40,18 +36,6 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		this.scanInstance = scanInstance;
 		this.addLinksToModel = true;
 		this.defaultAddToRequestLog = true;
-		responseProcessingExecutor = createNewExecutor();
-	}
-
-	private ExecutorService createNewExecutor() {
-		return Executors.newFixedThreadPool(1, new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				final Thread t = new Thread(r);
-				t.setName("Response Processing Modules");
-				return t;
-			}
-		});
 	}
 
 	@Override
@@ -107,21 +91,18 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
 		if(responseProcessingModules == null || !response.isMostlyAscii())
 			return;
-		synchronized(responseProcessingLock) {
-			responseProcessingExecutor.execute(new ResponseProcessingTask(scanInstance, request, response, workspace, responseProcessingModules));
+		
+		synchronized (responseProcessingLock) {
+			for(IResponseProcessingModule m: responseProcessingModules) {
+				if(m.isEnabled()) {
+					m.processResponse(scanInstance, request, response, workspace);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void setAddLinksToModel(boolean flag) {
 		addLinksToModel = flag;
-	}
-
-	@Override
-	public void resetResponseProcessingQueue() {
-		synchronized(responseProcessingLock) {
-			responseProcessingExecutor.shutdown();
-			responseProcessingExecutor = createNewExecutor();
-		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.subgraph.vega.ui.scanner.wizards;
 
+import java.util.List;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
@@ -12,7 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
@@ -21,21 +23,21 @@ import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizardPage extends WizardPage {
 	private Composite container;
-	private IScannerModuleRegistry registry;
 	private CheckboxTreeViewer viewer;
 	private Text scanTarget;
 	private Text cookieString;
-	private String targetValue;
+	private final String targetValue;
+	private final List<IScannerModule> modules;
 	private final static String VEGA_LOGO = "icons/vega_small.png";
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 
-	public NewScanWizardPage(String targetValue) {
+	public NewScanWizardPage(String targetValue, List<IScannerModule> modules) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("New Scan Parameters");
 		setImageDescriptor(ImageDescriptor.createFromImage(imageCache.get(VEGA_LOGO)));
 		this.targetValue = targetValue;
-		registry = Activator.getDefault().getIScannerModuleRegistry();
+		this.modules = modules;
 	}
 
 	@Override
@@ -77,7 +79,7 @@ public class NewScanWizardPage extends WizardPage {
 		
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH)); 
 
-	    viewer.setInput(registry);
+	    viewer.setInput(modules.toArray(new IScannerModule[0]));
         viewer.addCheckStateListener(checkStateProvider);
             	
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);

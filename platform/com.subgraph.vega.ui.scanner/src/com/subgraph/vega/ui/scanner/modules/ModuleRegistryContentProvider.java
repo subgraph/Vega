@@ -1,10 +1,11 @@
 package com.subgraph.vega.ui.scanner.modules;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class ModuleRegistryContentProvider implements ITreeContentProvider {
 
@@ -22,8 +23,9 @@ public class ModuleRegistryContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput instanceof IScannerModuleRegistry) {
-			treeData = new ModuleTreeData((IScannerModuleRegistry) newInput);
+		if (newInput instanceof IScannerModule[]) {
+			IScannerModule[] modules = (IScannerModule[]) newInput;
+			treeData = new ModuleTreeData(Arrays.asList(modules));
 			checkStateProvider.setTreeData(treeData);	
 		}	
 	}

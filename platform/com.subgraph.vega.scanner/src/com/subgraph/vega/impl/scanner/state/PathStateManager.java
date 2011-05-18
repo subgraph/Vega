@@ -18,14 +18,14 @@ import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.urls.ResponseAnalyzer;
 
 public class PathStateManager {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final IScannerConfig config;
-	private final IScannerModuleRegistry moduleRegistry;
+	private final List<IBasicModuleScript> injectionModules;
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
 	private final ResponseAnalyzer responseAnalyzer;
@@ -39,17 +39,17 @@ public class PathStateManager {
 
 	private final IScanInstance scanInstance;
 
-	public PathStateManager(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance) {
+	public PathStateManager(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance) {
 		this.config = config;
-		this.moduleRegistry = moduleRegistry;
+		this.injectionModules = injectionModules;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.responseAnalyzer = responseAnalyzer;
 		this.scanInstance = scanInstance;
 	}
 
-	public IScannerModuleRegistry getModuleRegistry() {
-		return moduleRegistry;
+	public List<IBasicModuleScript> getInjectionModules() {
+		return injectionModules;
 	}
 
 	public boolean requestLoggingEnabled() {

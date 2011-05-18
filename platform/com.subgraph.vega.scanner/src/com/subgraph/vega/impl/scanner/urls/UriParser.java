@@ -18,7 +18,7 @@ import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
@@ -32,12 +32,12 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 
-	public UriParser(IScannerConfig config, IScannerModuleRegistry moduleRegistry, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer, IScanInstance scanInstance) {
+	public UriParser(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer, IScanInstance scanInstance) {
 		this.workspace = workspace;
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(config, moduleRegistry, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter), scanInstance);
+		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter), scanInstance);
 	}
 
 	public IPathState processUri(URI uri) {

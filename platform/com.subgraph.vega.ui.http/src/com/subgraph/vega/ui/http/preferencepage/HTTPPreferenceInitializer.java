@@ -14,6 +14,7 @@ public class HTTPPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PreferenceConstants.P_USER_AGENT_OVERRIDE, false);
 		store.setDefault(PreferenceConstants.P_DISABLE_BROWSER_CACHE, false);
 		store.setDefault(PreferenceConstants.P_DISABLE_PROXY_CACHE, false);
+		store.setDefault(PreferenceConstants.P_CONFIG_POPUP, true);
 	}
 
 	@Override

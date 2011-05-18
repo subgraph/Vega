@@ -27,11 +27,16 @@ public abstract class AbstractScriptModule implements IScannerModule, IEnableabl
 	}
 	
 	private final ScriptedModule module;
+	private final ScriptedModuleRunningTime runningTime;
+	
+	private boolean isEnabled;
 	
 	protected AbstractScriptModule(ScriptedModule module) {
 		this.module = module;
+		this.isEnabled = module.isDefaultEnabled();
+		this.runningTime = new ScriptedModuleRunningTime(module.getModuleName());
 	}
-	
+
 	public String getModuleName() {
 		return module.getModuleName();
 	}
@@ -49,8 +54,10 @@ public abstract class AbstractScriptModule implements IScannerModule, IEnableabl
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
 			processExports(exports, instance);
-			module.runModule(cx, instance, target);
-			
+			final long startTS = System.currentTimeMillis();
+			module.runModule(cx, instance);
+			final long endTS = System.currentTimeMillis();
+			runningTime.addTimestamp((int) (endTS - startTS), target);
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
 			e.printStackTrace();
@@ -63,17 +70,17 @@ public abstract class AbstractScriptModule implements IScannerModule, IEnableabl
 	
 	@Override
 	public IScannerModuleRunningTime getRunningTimeProfile() {
-		return module.getRunningTime();
+		return runningTime;
 	}
 	
 	@Override
 	public void setEnabled(boolean flag) {
-		module.setEnabledState(flag);
+		isEnabled = flag;
 	}
 	
 	@Override
 	public boolean isEnabled() {
-		return module.getEnabledState();
+		return isEnabled;
 	}
 	
 	protected void export(List<ExportedObject> exports, String name, Object object) {

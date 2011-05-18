@@ -8,7 +8,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 
 public interface IPathState {
 	IPathState getParentState();
@@ -57,8 +57,8 @@ public interface IPathState {
 	void setSureDirectory();
 	boolean isSureDirectory();
 	boolean isRootPath();
-	IScannerModuleRegistry getModuleRegistry();
 
+	List<IBasicModuleScript> getInjectionModules();
 	void setBadParentDirectory();
 	boolean hasBadParentDirectory();
 
