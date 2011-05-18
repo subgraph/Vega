@@ -138,9 +138,12 @@ public class DashboardPane extends Composite implements IEventHandler {
 			display.asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					if(!scrolledFormText.isDisposed())
+					if(!scrolledFormText.isDisposed()) {
 						scrolledFormText.setText(buffer.toString());
-					crawlerPane.layout(true);
+					}
+					if(!crawlerPane.isDisposed()) {
+						crawlerPane.layout(true);
+					}
 				}
 			});
 		}
