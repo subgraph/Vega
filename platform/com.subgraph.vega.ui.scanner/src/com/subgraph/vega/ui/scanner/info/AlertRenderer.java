@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpRequest;
+import org.apache.http.NameValuePair;
 import org.apache.http.RequestLine;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -109,10 +115,12 @@ public class AlertRenderer {
 			if(alert.getRequestId() >= 0 && requestLog != null) {
 				final IRequestLogRecord record = requestLog.lookupRecord(alert.getRequestId());
 				if(record != null) {
+					if(record.getRequest() instanceof HttpEntityEnclosingRequest) {
+						vars.put("requestText", renderEntityEnclosingRequest((HttpEntityEnclosingRequest) record.getRequest()));
+					} else {
+						vars.put("requestText", renderBasicRequest(record.getRequest()));
+					}
 					vars.put("requestId", Long.toString(alert.getRequestId()));
-					final RequestLine line = record.getRequest().getRequestLine();
-					final String requestText = line.getMethod() +" "+ line.getUri();
-					vars.put("requestText", requestText);
 				}
 			}
 			root.put("vars", vars);
@@ -131,6 +139,36 @@ public class AlertRenderer {
 		return null;
 	}
 	
+	private String renderEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
+		final HttpEntity entity = request.getEntity();
+		if(!URLEncodedUtils.isEncoded(entity)) {
+			return renderBasicRequest(request);
+		}
+		
+		try {
+			List<NameValuePair> args = URLEncodedUtils.parse(entity);
+			StringBuilder sb = new StringBuilder();
+			sb.append(renderBasicRequest(request));
+			sb.append("\n[");
+			for(NameValuePair nvp: args) {
+				sb.append(nvp.getName());
+				if(nvp != null) {
+					sb.append("=");
+					sb.append(nvp.getValue());
+				}
+				sb.append("\n");
+			}
+			sb.append("]");
+			return sb.toString();
+		} catch (IOException e) {
+			return renderBasicRequest(request);
+		}
+	}
+	
+	private String renderBasicRequest(HttpRequest request) {
+		final RequestLine line = request.getRequestLine();
+		return line.getMethod() +" "+ line.getUri();
+	}
 	private Document getAlertDocument(String name) {
 		if(alertDocumentCache.containsKey(name))
 			return alertDocumentCache.get(name);
