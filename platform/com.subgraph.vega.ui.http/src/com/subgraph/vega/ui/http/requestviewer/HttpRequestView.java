@@ -24,14 +24,12 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.ui.http.Activator;
 
 public class HttpRequestView extends ViewPart {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
-	private HttpViewFilter filter;
 
 	public HttpRequestView() {
 	}
@@ -106,14 +104,6 @@ public class HttpRequestView extends ViewPart {
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-	}
-
-	private void filterByEntity(IWebEntity entity) {
-		filter.setFilterEntity(entity);
-		if(tableViewer.getTable().getItemCount() == 1) {
-			Object ob = tableViewer.getElementAt(0);
-			tableViewer.setSelection(new StructuredSelection(ob), true);
-		}
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {
