@@ -69,6 +69,10 @@
             class="com.subgraph.vega.ui.http.commands.ResetRequestFilter"
             commandId="com.subgraph.vega.commands.resetRequestFilter">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ConfigureProxyModules"
+            commandId="com.subgraph.vega.commands.proxyConfigureModules">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -117,6 +121,12 @@
             id="com.subgraph.vega.commands.resetRequestFilter"
             name="Reset Request View Filter">
       </command>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            description="Configure Proxy Response Processing Modules"
+            id="com.subgraph.vega.commands.proxyConfigureModules"
+            name="Configure Proxy Response Processing Modules">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -153,6 +163,12 @@
                      </equals>
                   </with>
                </visibleWhen>
+            </command>
+            <command
+                  commandId="com.subgraph.vega.commands.proxyConfigureModules"
+                  icon="icons/configure.png"
+                  style="push"
+                  tooltip="Configure which response processing modules are run on proxy traffic">
             </command>
          </toolbar>
       </menuContribution>

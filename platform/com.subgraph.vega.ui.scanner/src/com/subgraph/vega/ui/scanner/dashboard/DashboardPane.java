@@ -129,8 +129,8 @@ public class DashboardPane extends Composite implements IEventHandler {
 		final StringBuilder buffer = new StringBuilder();
 		buffer.append("<form>");
 		addHeader(buffer);
-		renderAlertSummary(buffer);
 		renderCrawlerSection(buffer);
+		renderAlertSummary(buffer);
 		addVSpaces(buffer, 2);
 		buffer.append("</form>");
 		
@@ -138,16 +138,19 @@ public class DashboardPane extends Composite implements IEventHandler {
 			display.asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					if(!scrolledFormText.isDisposed())
+					if(!scrolledFormText.isDisposed()) {
 						scrolledFormText.setText(buffer.toString());
-					crawlerPane.layout(true);
+					}
+					if(!crawlerPane.isDisposed()) {
+						crawlerPane.layout(true);
+					}
 				}
 			});
 		}
 	}
 	
 	private void renderCrawlerSection(StringBuilder sb) {
-		addDefault(sb, "Scanner Progress");
+		addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
 		addIndented(sb, 20, "<control width='400' height='80' href='crawler'/>");
@@ -173,11 +176,6 @@ public class DashboardPane extends Composite implements IEventHandler {
 		addVSpaces(sb, 2);
 		addIndented(sb, 10, "<img href='logo'/>");
 		addVSpaces(sb, 2);
-	}
-	private void addDefault(StringBuilder sb, String value) {
-		sb.append("<li bindent='20'><span font='big'>");
-		sb.append(value);
-		sb.append("</span></li>");
 	}
 	
 	private void addVSpaces(StringBuilder sb, int count) {

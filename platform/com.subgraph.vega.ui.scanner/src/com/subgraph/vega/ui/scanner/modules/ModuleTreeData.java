@@ -7,15 +7,14 @@ import java.util.Map;
 
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class ModuleTreeData {
 
 	private final Map<String, List<IScannerModule>> categoryToModules;
 	
-	ModuleTreeData(IScannerModuleRegistry registry) {
+	ModuleTreeData(List<IScannerModule> modules) {
 		categoryToModules = new HashMap<String, List<IScannerModule>>();
-		populateModuleMap(registry.getAllModules(false));
+		populateModuleMap(modules);
 	}
 
 	private void populateModuleMap(List<IScannerModule> modules) {

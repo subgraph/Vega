@@ -1,7 +1,5 @@
 package com.subgraph.vega.impl.scanner.handlers;
 
-import java.util.List;
-
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
@@ -32,8 +30,10 @@ public class InjectionChecks {
 	}
 
 	public void launchInjectionModules(IPathState ps) {
-		List<IBasicModuleScript> crawlerModules = ps.getModuleRegistry().getBasicModules(true);
-		for(IBasicModuleScript m: crawlerModules)
-			m.runScript(ps);
+		for(IBasicModuleScript m: ps.getInjectionModules()) {
+			if(m.isEnabled()) {
+				m.runScript(ps);
+			}
+		}
 	}
 }
