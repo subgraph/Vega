@@ -87,10 +87,6 @@
             id="com.subgraph.vega.ui.scanner.stopscan"
             name="Stop Scanner">
       </command>
-      <command
-            id="com.subgraph.vega.ui.scanner.configurescan"
-            name="Configure Scan">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -141,18 +137,6 @@
       <handler
             class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             commandId="com.subgraph.vega.ui.scanner.startnewscan">
-         <enabledWhen>
-            <with
-                  variable="vega.scannerState">
-               <equals
-                     value="idle">
-               </equals>
-            </with>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="com.subgraph.vega.ui.scanner.commands.ConfigureScanHandler"
-            commandId="com.subgraph.vega.ui.scanner.configurescan">
          <enabledWhen>
             <with
                   variable="vega.scannerState">
