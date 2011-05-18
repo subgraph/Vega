@@ -87,11 +87,11 @@ public class CrawlerPane extends Composite {
 	}
 	
 	private void renderLabel() {
-		if(crawlerPercent < 0.01) {
-			if(!crawlLabel.isDisposed()) {
-				crawlLabel.setText("");
-			}
+		if(crawlLabel.isDisposed()) {
 			return;
+		}
+		if(crawlerPercent < 0.01) {
+			crawlLabel.setText("");
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(crawlerCompleted);
