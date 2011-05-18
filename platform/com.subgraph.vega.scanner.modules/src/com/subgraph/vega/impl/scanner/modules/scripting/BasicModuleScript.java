@@ -13,15 +13,28 @@ import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 
 public class BasicModuleScript implements IBasicModuleScript, IEnableableModule {
 	private static final Logger logger = Logger.getLogger("script-module");
 
 	private final ScriptedModule module;
+	private final ScriptedModuleRunningTime runningTime;
 	
+	private boolean isEnabled;
+	
+	public BasicModuleScript(ScriptedModule module, boolean isEnabled, ScriptedModuleRunningTime runningTime) {
+		this.module = module;
+		this.isEnabled = isEnabled;
+		this.runningTime = runningTime;
+	}
 	public BasicModuleScript(ScriptedModule module) {
 		this.module = module;
+		this.isEnabled = module.isDefaultEnabled();
+		this.runningTime = new ScriptedModuleRunningTime(module.getModuleName());
+	}
+
+	public ScriptedModule getModule() {
+		return module;
 	}
 
 	@Override
@@ -31,7 +44,10 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 			final Object[] args = new Object[] { new ModuleContextJS(ctx) };
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
-			module.runModule(cx, instance, args, pathState.toString());
+			final long startTS = System.currentTimeMillis();
+			module.runModule(cx, instance, args);
+			final long endTS = System.currentTimeMillis();
+			runningTime.addTimestamp((int) (endTS - startTS), pathState.toString());
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
 		} catch (RhinoException e) {
@@ -43,12 +59,12 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 
 	@Override
 	public void setEnabled(boolean flag) {
-		module.setEnabledState(flag);		
+		isEnabled = flag;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return module.getEnabledState();
+		return isEnabled;
 	}
 
 	@Override
@@ -62,7 +78,7 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 	}
 
 	@Override
-	public IScannerModuleRunningTime getRunningTimeProfile() {
-		return module.getRunningTime();
+	public ScriptedModuleRunningTime getRunningTimeProfile() {
+		return runningTime;
 	}
 }

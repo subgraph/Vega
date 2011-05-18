@@ -14,15 +14,30 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 
 public class ResponseProcessorScript implements IResponseProcessingModule, IEnableableModule {
 	private static final Logger logger = Logger.getLogger("modules");
 	
 	private final ScriptedModule module;
+	private final ScriptedModuleRunningTime runningTime;
 	
+	private boolean isEnabled;
+	
+	
+	public ResponseProcessorScript(ScriptedModule module, boolean isEnabled, ScriptedModuleRunningTime runningTime) {
+		this.module = module;
+		this.isEnabled = isEnabled;
+		this.runningTime = runningTime;
+	}
+
 	public ResponseProcessorScript(ScriptedModule module) {
 		this.module = module;
+		this.isEnabled = module.isDefaultEnabled();
+		this.runningTime = new ScriptedModuleRunningTime(module.getModuleName());
+	}
+
+	public ScriptedModule getModule() {
+		return module;
 	}
 
 	@Override
@@ -33,7 +48,10 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 			final Object[] args = new Object[] { request, response, ctx	};
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
-			module.runModule(cx, instance, args, request.getRequestLine().getUri());
+			final long startTS = System.currentTimeMillis();
+			module.runModule(cx, instance, args);
+			final long endTS = System.currentTimeMillis();
+			runningTime.addTimestamp((int) (endTS - startTS), request.getRequestLine().getUri());
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
 		} catch (RhinoException e) {
@@ -64,17 +82,17 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 	}
 
 	@Override
-	public IScannerModuleRunningTime getRunningTimeProfile() {
-		return module.getRunningTime();
+	public ScriptedModuleRunningTime getRunningTimeProfile() {
+		return runningTime;
 	}
 
 	@Override
 	public void setEnabled(boolean flag) {
-		module.setEnabledState(flag);
+		isEnabled = flag;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return module.getEnabledState();
+		return isEnabled;
 	}
 }

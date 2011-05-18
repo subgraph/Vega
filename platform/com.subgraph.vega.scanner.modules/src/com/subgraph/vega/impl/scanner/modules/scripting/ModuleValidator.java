@@ -15,6 +15,7 @@ public class ModuleValidator {
 	private Function runFunction;
 	private boolean isValidated;
 	private boolean isDisabled;
+	private boolean isDefaultDisabled;
 	
 	public ModuleValidator(Scriptable moduleScope) {
 		this.moduleScope = moduleScope;
@@ -40,6 +41,7 @@ public class ModuleValidator {
 		
 		runFunction = getEntryFunction();
 		isDisabled = getFlagFromModuleObject(moduleObject, "disabled");
+		isDefaultDisabled = getFlagFromModuleObject(moduleObject, "default-disable");
 		isValidated = true;
 	}
 	
@@ -59,6 +61,13 @@ public class ModuleValidator {
 		if(!isValidated)
 			throw new IllegalStateException("Cannot get disabled flag because module is not validated");
 		return isDisabled;
+	}
+	
+	public boolean isDefaultEnabled() {
+		if(!isValidated) 
+			throw new IllegalStateException("Cannot get default enabled flag because module is not validated");
+
+		return !isDefaultDisabled;
 	}
 	
 	public ModuleScriptType getType() {

@@ -4,16 +4,22 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.jface.window.Window;
 
-import com.subgraph.vega.ui.http.requestfilters.RequestFilterDialog;
+import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
+import com.subgraph.vega.ui.http.requestfilters.RequestFilterConfigContent;
 
 public class OpenRequestViewFilter extends AbstractHandler implements IHandler {
+	private Window dialog;
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-		RequestFilterDialog dialog = new RequestFilterDialog(window.getShell());
+		if(dialog != null && dialog.getShell() != null) {
+			dialog.close();
+			dialog = null;
+			return null;
+		}
+		dialog = ConfigDialogCreator.createDialog(event, new RequestFilterConfigContent());
 		dialog.open();
 		return null;
 	}

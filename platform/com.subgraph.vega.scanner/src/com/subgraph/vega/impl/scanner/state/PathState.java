@@ -17,7 +17,7 @@ import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.impl.scanner.requests.BasicRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.GetParameterRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
@@ -91,11 +91,6 @@ public class PathState implements IPathState {
 	@Override
 	public PathState getParentState() {
 		return parentState;
-	}
-
-	@Override
-	public IScannerModuleRegistry getModuleRegistry() {
-		return pathStateManager.getModuleRegistry();
 	}
 
 	public void addChildState(PathState state) {
@@ -453,5 +448,10 @@ public class PathState implements IPathState {
 			return pathStateManager.getDirectoryInjectionChecksFlag();
 		else
 			return pathStateManager.getNonParameterFileInjectionChecksFlag();
+	}
+
+	@Override
+	public List<IBasicModuleScript> getInjectionModules() {
+		return pathStateManager.getInjectionModules();
 	}
 }

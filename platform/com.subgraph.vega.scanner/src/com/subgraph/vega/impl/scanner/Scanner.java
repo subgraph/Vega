@@ -1,5 +1,8 @@
 package com.subgraph.vega.impl.scanner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.events.IEvent;
@@ -14,6 +17,9 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
+import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class Scanner implements IScanner {
@@ -29,6 +35,9 @@ public class Scanner implements IScanner {
 	private Thread scannerThread;
 	private IWorkspace currentWorkspace;
 	private IContentAnalyzerFactory contentAnalyzerFactory;
+	private List<IResponseProcessingModule> responseProcessingModules;
+	private List<IBasicModuleScript> basicModules;
+	private List<IScannerModule> allModules;
 	
 	protected void activate() {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
@@ -40,8 +49,28 @@ public class Scanner implements IScanner {
 					handleWorkspaceClose((WorkspaceCloseEvent) event);				
 			}
 		});
+		reloadModules();
 	}
 	
+	private void reloadModules() {
+		if(responseProcessingModules == null || basicModules == null) {
+			responseProcessingModules = moduleRegistry.getResponseProcessingModules();
+			basicModules = moduleRegistry.getBasicModules();
+		} else {
+			responseProcessingModules = moduleRegistry.updateResponseProcessingModules(responseProcessingModules);
+			basicModules = moduleRegistry.updateBasicModules(basicModules);
+		}
+		allModules = new ArrayList<IScannerModule>();
+		allModules.addAll(responseProcessingModules);
+		allModules.addAll(basicModules);
+	}
+	
+	private void resetModuleTimestamps() {
+		for(IScannerModule m: allModules) {
+			m.getRunningTimeProfile().reset();
+		}
+	}
+
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
 		this.currentWorkspace = event.getWorkspace();
 	}
@@ -57,11 +86,7 @@ public class Scanner implements IScanner {
 	IWebCrawlerFactory getCrawlerFactory() {
 		return crawlerFactory;
 	}
-	
-	IScannerModuleRegistry getModuleRegistry() {
-		return moduleRegistry;
-	}
-	
+		
 	IModel getModel() {
 		return model;
 	}
@@ -71,6 +96,12 @@ public class Scanner implements IScanner {
 		return persistentConfig;
 	}
 	
+	@Override
+	public List<IScannerModule> getAllModules() {
+		reloadModules();
+		return allModules;
+	}
+
 	@Override
 	public IScannerConfig createScannerConfig() {
 		return new ScannerConfig();
@@ -94,12 +125,14 @@ public class Scanner implements IScanner {
 		requestEngineConfig.setCookieString(config.getCookieString());
 		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
-		moduleRegistry.refreshModuleScripts();
-		
+		reloadModules();
+		resetModuleTimestamps();
 		currentWorkspace.lock();
 		
 		currentScan = currentWorkspace.getScanAlertRepository().createNewScanInstance();
-		scannerTask = new ScannerTask(currentScan, this, config, requestEngine, currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(currentScan));
+		scannerTask = new ScannerTask(currentScan, this, config, requestEngine, 
+				currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(currentScan), 
+				responseProcessingModules, basicModules);
 		scannerThread = new Thread(scannerTask);
 		currentWorkspace.getScanAlertRepository().setActiveScanInstance(currentScan);
 		currentScan.updateScanStatus(IScanInstance.SCAN_STARTING);
