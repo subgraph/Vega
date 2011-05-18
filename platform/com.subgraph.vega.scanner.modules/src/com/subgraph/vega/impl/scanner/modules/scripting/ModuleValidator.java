@@ -41,7 +41,7 @@ public class ModuleValidator {
 		
 		runFunction = getEntryFunction();
 		isDisabled = getFlagFromModuleObject(moduleObject, "disabled");
-		isDefaultDisabled = getFlagFromModuleObject(moduleObject, "default-disable");
+		isDefaultDisabled = getFlagFromModuleObject(moduleObject, "defaultDisabled");
 		isValidated = true;
 	}
 	
