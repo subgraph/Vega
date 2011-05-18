@@ -125,9 +125,11 @@ public class Scanner implements IScanner {
 			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
 		
 		IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
-		CookieStore cookieStore = requestEngineConfig.getCookieStore();
-		for (Cookie c: config.getCookieList()) {
-			cookieStore.addCookie(c);
+		if (config.getCookieList() != null) {
+			CookieStore cookieStore = requestEngineConfig.getCookieStore();
+			for (Cookie c: config.getCookieList()) {
+				cookieStore.addCookie(c);
+			}
 		}
 		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
