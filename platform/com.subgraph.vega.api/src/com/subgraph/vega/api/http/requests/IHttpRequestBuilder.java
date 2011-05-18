@@ -36,7 +36,7 @@ public  interface IHttpRequestBuilder extends IHttpMessageBuilder {
 	void setFromRequestLine(RequestLine requestLine) throws URISyntaxException;
 
 	/**
-	 * Set the scheme, host, host port, and path from a URI.
+	 * Set the path from a URI. The scheme, host, and host port are also set if set within the URI. 
 	 * 
 	 * @param uri URI
 	 */

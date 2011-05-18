@@ -74,7 +74,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		host = requestUri.getHost();
 		hostPort = requestUri.getPort();
 		if (hostPort == -1) {
-			if (scheme == "https") {
+			if (scheme.equals("https")) {
 				hostPort = 443;
 			} else {
 				hostPort = 80;
@@ -100,24 +100,22 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setFromUri(URI uri) {
-		scheme = uri.getScheme();
-		if (scheme == null) {
-			scheme = "http";
-		}
-
-		if (uri.getHost() != null) {
-			host = uri.getHost();
-			if (uri.getPort() != -1) {
-				hostPort = uri.getPort();
-			} else {
-				if (scheme == "https") {
-					hostPort = 443;
+		if (uri.getScheme() != null) {
+			scheme = uri.getScheme();
+			if (uri.getHost() != null) {
+				host = uri.getHost();
+				if (uri.getPort() != -1) {
+					hostPort = uri.getPort();
 				} else {
-					hostPort = 80;
+					if (scheme.equals("https")) {
+						hostPort = 443;
+					} else {
+						hostPort = 80;
+					}
 				}
 			}
 		}
-		
+
 		path = uri.getRawPath();
 		if (uri.getRawQuery() != null) {
 			path += "?" + uri.getRawQuery();
@@ -137,7 +135,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		this.host = host.getHostName();
 		hostPort = host.getPort();
 		if (hostPort == -1) {
-			if (scheme == "https") {
+			if (scheme.equals("https")) {
 				hostPort = 443;
 			} else {
 				hostPort = 80;
@@ -225,7 +223,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			throw new IllegalArgumentException("Invalid host");
 		}
 		
-		final URI requestUri = new URI("http://" + host + ":" + Integer.toString(hostPort) + path);
+		final URI requestUri = new URI(scheme + "://" + host + ":" + Integer.toString(hostPort) + path);
 		IHttpRawRequest request;
 		HttpEntity entity = getEntity();
 		
