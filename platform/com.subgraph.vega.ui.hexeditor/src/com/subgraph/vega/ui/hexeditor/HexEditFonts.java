@@ -7,6 +7,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 public class HexEditFonts {
 	private final static String HEX_ELEMENT_FONT = "hex-element";
@@ -23,18 +24,25 @@ public class HexEditFonts {
 		offsetColumnWidth = calculateOffsetColumnWidth(parent);
 		dataColumnWidth = calculateDataColumnWidth(parent);
 		asciiColumnWordWidth = calculateAsciiColumnWordWidth(parent);
-		addFonts();
+		addFonts(parent.getDisplay());
 	}
 	
-	private void addFonts() {
-		add(HEX_ELEMENT_FONT, "Monospace", 10, SWT.NORMAL);
-		add(HEX_ASCII_FONT, "Monospace", 10, SWT.NORMAL);
+	private void addFonts(Display display) {
+		add(display, HEX_ELEMENT_FONT, 10, "Monospace", "Courier");
+		add(display, HEX_ASCII_FONT, 10, "Monospace", "Courier");
 	}
 	
-	private void add(String tag, String name, int size, int flags) {
-		fontRegistry.put(tag, new FontData[] { new FontData(name, size, flags) });
+	private void add(Display display, String tag, int size, String ...names) {
+		for(String fontName: names) {
+			if(fontNameExists(display, fontName)) {
+				fontRegistry.put(tag, new FontData[] { new FontData(fontName, size, SWT.NORMAL) });
+			}
+		}
 	}
 	
+	boolean fontNameExists(Display display, String name) {
+		return display.getFontList(name, true).length > 0 || display.getFontList(name, false).length > 0;
+	}
 	Font getElementFont() {
 		return fontRegistry.get(HEX_ELEMENT_FONT);
 	}
