@@ -88,7 +88,7 @@ public class AlertRenderer {
 				if(value instanceof String) {
 					String s = (String) value;
 					if(s.length() > maxAlertString) {
-						s = s.substring(0, maxAlertString);
+						s = s.substring(0, maxAlertString) + "...";
 					} 
 					vars.put(k, s);
 				} else {
