@@ -39,6 +39,9 @@ public class HttpPreferencePage extends FieldEditorPreferencePage implements IWo
 
 		final BooleanFieldEditor cacheProxyDisable = new BooleanFieldEditor(PreferenceConstants.P_DISABLE_PROXY_CACHE, "Prevent intermediate (proxy) caching", getFieldEditorParent());
 		addField(cacheProxyDisable);
+		
+		final BooleanFieldEditor configPopup = new BooleanFieldEditor(PreferenceConstants.P_CONFIG_POPUP, "Use Popup style configuration dialogs", getFieldEditorParent());
+		addField(configPopup);
 	}
 
 }

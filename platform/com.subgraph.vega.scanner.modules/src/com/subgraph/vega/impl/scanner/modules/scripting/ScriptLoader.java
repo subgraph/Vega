@@ -94,7 +94,7 @@ public class ScriptLoader {
 	public Scriptable getPreludeScope() {
 		return preludeLoader.getPreludeScope();
 	}
-	
+
 	private ScriptedModule compileModule(ScriptFile scriptFile) {
 		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
 			logger.warning(scriptFile.getCompileFailureMessage());
@@ -105,7 +105,21 @@ public class ScriptLoader {
 		if(validator == null)
 			return null;
 		
-		return new ScriptedModule(scriptFile, validator.getCategoryName(), validator.getName(), validator.getType(), validator.getRunFunction(), validator.isDisabled());
+		return new ScriptedModule(scriptFile, validator);
+	}
+	
+	private ScriptedModule compileModule(ScriptedModule module) {
+		final ScriptFile scriptFile = module.getScriptFile();
+		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
+			logger.warning(scriptFile.getCompileFailureMessage());
+			return null;
+		}
+		
+		final ModuleValidator validator = validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
+		if(validator == null)
+			return null;
+		module.updateFromValidator(validator);
+		return module;
 	}
 	
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {
@@ -133,15 +147,20 @@ public class ScriptLoader {
 			crawlDirectory(d, files);
 	}
 	
-	public void reloadModules() {
+	public boolean reloadModules() {
+		boolean somethingChanged = false;
 		if(preludeLoadFailed)
-			return;
+			return false;
 
 		synchronized(modulePathMap) {
 			synchronizeScriptPaths();
-			for(Map.Entry<File, ScriptFile> entry: scriptPathMap.entrySet()) 
-				compileScriptFileIfNeeded(entry.getKey(), entry.getValue());
+			for(Map.Entry<File, ScriptFile> entry: scriptPathMap.entrySet()) {
+				if(compileScriptFileIfNeeded(entry.getKey(), entry.getValue())) {
+					somethingChanged = true;
+				}
+			}
 		}
+		return somethingChanged;
 	}
 	
 	private void synchronizeScriptPaths() {
@@ -163,16 +182,18 @@ public class ScriptLoader {
 		}
 	}
 		
-	private void compileScriptFileIfNeeded(File path, ScriptFile scriptFile) {
+	private boolean compileScriptFileIfNeeded(File path, ScriptFile scriptFile) {
 		if(!isCompileNeeded(scriptFile))
-			return;
+			return false;
 		
-		if(modulePathMap.containsKey(path))
-			modulePathMap.remove(path);
-			
-		final ScriptedModule module = compileModule(scriptFile);
-		if(module != null)
-			modulePathMap.put(path, module);
+		if(modulePathMap.containsKey(path)) {
+			compileModule(modulePathMap.get(path));
+		} else {
+			final ScriptedModule module = compileModule(scriptFile);
+			if(module != null)
+				modulePathMap.put(path, module);
+		}
+		return true;
 	}
 	
 	private boolean isCompileNeeded(ScriptFile scriptFile) {

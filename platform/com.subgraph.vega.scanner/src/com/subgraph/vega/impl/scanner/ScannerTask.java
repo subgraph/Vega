@@ -12,6 +12,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
@@ -27,19 +28,24 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private final IWorkspace workspace;
 	private final IContentAnalyzer contentAnalyzer;
 	private final IHttpRequestEngine requestEngine;
+	private final List<IResponseProcessingModule> responseProcessingModules;
+	private final List<IBasicModuleScript> basicModules;
 	
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
-	ScannerTask(IScanInstance scanInstance, Scanner scanner, IScannerConfig config,  IHttpRequestEngine requestEngine, IWorkspace workspace, IContentAnalyzer contentAnalyzer) {
+	ScannerTask(IScanInstance scanInstance, Scanner scanner, IScannerConfig config,  
+			IHttpRequestEngine requestEngine, IWorkspace workspace, 
+			IContentAnalyzer contentAnalyzer, List<IResponseProcessingModule> responseModules, List<IBasicModuleScript> basicModules) {
 		this.scanInstance = scanInstance;
 		this.scanner = scanner;
 		this.scannerConfig = config;
 		this.workspace = workspace;
 		this.requestEngine = requestEngine;
 		this.contentAnalyzer = contentAnalyzer;
+		this.responseProcessingModules = responseModules;
+		this.basicModules = basicModules;
 		this.logger.setLevel(Level.ALL);
-		scanner.getModuleRegistry().resetAllModuleTimestamps();
 	}
 	
 	void stop() {
@@ -51,13 +57,11 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		contentAnalyzer.resetResponseProcessingQueue();
 	}
 	
 	@Override
 	public void run() {
-		final List<IResponseProcessingModule> responseModules = scanner.getModuleRegistry().getResponseProcessingModules(true);
-		contentAnalyzer.setResponseProcessingModules(responseModules);
+		contentAnalyzer.setResponseProcessingModules(responseProcessingModules);
 		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
 		runCrawlerPhase();		
 		if(stopRequested) {
@@ -74,10 +78,15 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	private void printModuleRuntimeStats() {
 		logger.info("Scanning module runtime statistics:");
-		for(IScannerModule m: scanner.getModuleRegistry().getAllModules(true)) {
+		for(IScannerModule m: responseProcessingModules) {
 			IScannerModuleRunningTime profile = m.getRunningTimeProfile();
 			if(profile.getInvocationCount() > 0)
-				logger.info(profile.toString());
+				logger.info(profile.toString());			
+		}
+		for(IScannerModule m: basicModules) {
+			IScannerModuleRunningTime profile = m.getRunningTimeProfile();
+			if(profile.getInvocationCount() > 0)
+				logger.info(profile.toString());			
 		}
 	}
 	
@@ -86,7 +95,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scanner.getCrawlerFactory().create(requestEngine);
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scannerConfig, scanner.getModuleRegistry(), workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanInstance);
+		UriParser uriParser = new UriParser(scannerConfig, basicModules, workspace, currentCrawler, new UriFilter(scannerConfig), contentAnalyzer, scanInstance);
 		URI baseURI = scannerConfig.getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();

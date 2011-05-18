@@ -25,7 +25,6 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
@@ -67,11 +66,9 @@ public class RequestEditView extends ViewPart {
 		parentComposite.pack();
 
 		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
-		final IScannerModuleRegistry moduleRepository = Activator.getDefault().getScannerModuleRegistry();
 		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
 		if(workspace != null) {
 			contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(workspace.getScanAlertRepository().getProxyScanInstance());
-			contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
 			contentAnalyzer.setDefaultAddToRequestLog(true);
 			contentAnalyzer.setAddLinksToModel(true);
 		}

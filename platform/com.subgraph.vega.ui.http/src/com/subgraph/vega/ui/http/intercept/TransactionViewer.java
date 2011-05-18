@@ -3,6 +3,7 @@ package com.subgraph.vega.ui.http.intercept;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -21,19 +22,18 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.PlatformUI;
 
-import com.subgraph.vega.api.model.IModel;
-import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
-
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.http.builder.ResponseMessageEditor;
-import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionPanel;
+import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
+import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionContent;
 
 public class TransactionViewer extends Composite {
 	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/filter.gif").createImage();
@@ -51,6 +51,7 @@ public class TransactionViewer extends Composite {
 	private StackLayout viewerLayout;
 	private Menu viewerMenu;
 	private IHttpBuilderPart builderPartCurr;
+	private Window configDialog;
 	
 	public TransactionViewer(Composite parent, IModel model, TransactionManager manager, TransactionDirection direction) {
 		super(parent, SWT.NONE);
@@ -231,11 +232,13 @@ public class TransactionViewer extends Composite {
 	}
 
 	private void doConfigure() {
-		int x = configureButton.getBounds().x;
-		int y = configureButton.getBounds().y + configureButton.getBounds().height;
-		Point p = configureButton.getDisplay().map(configureButton.getParent(), null, x, y);
-		final ConfigureInterceptionPanel configPanel = new ConfigureInterceptionPanel(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), p, model, direction);
-		configPanel.open();
+		if(configDialog != null && configDialog.getShell() != null) {
+			configDialog.close();
+			configDialog = null;
+			return;
+		}
+		configDialog = ConfigDialogCreator.createDialog(configureButton, new ConfigureInterceptionContent(model, direction));
+		configDialog.open();
 	}
 
 	public void notifyUpdate(final String statusMessage, final boolean hasContent) {

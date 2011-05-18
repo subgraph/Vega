@@ -1,5 +1,7 @@
 package com.subgraph.vega.internal.http.proxy;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.paths.IPathFinder;
+import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.internal.http.proxy.ssl.ProxySSLInitializationException;
 import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
@@ -27,6 +30,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IContentAnalyzerFactory contentAnalyzerFactory;
 	private IContentAnalyzer contentAnalyzer;
+	private List<IResponseProcessingModule> responseProcessingModules;
 
 	private IScannerModuleRegistry moduleRepository;
 	private HttpProxy proxy;
@@ -50,6 +54,7 @@ public class HttpProxyService implements IHttpProxyService {
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
+		responseProcessingModules = loadModules();
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
 		} catch (ProxySSLInitializationException e) {
@@ -64,14 +69,23 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();
+		responseProcessingModules = loadModules();
 		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(currentWorkspace.getScanAlertRepository().getProxyScanInstance());
-		contentAnalyzer.setResponseProcessingModules(moduleRepository.getResponseProcessingModules(true));
+		contentAnalyzer.setResponseProcessingModules(responseProcessingModules);
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
+	}
+
+	private List<IResponseProcessingModule> loadModules() {
+		if(responseProcessingModules == null) {
+			return moduleRepository.getResponseProcessingModules();
+		} else {
+			return moduleRepository.updateResponseProcessingModules(responseProcessingModules);
+		}
 	}
 
 	private void processTransaction(IProxyTransaction transaction) {
@@ -144,4 +158,13 @@ public class HttpProxyService implements IHttpProxyService {
 		this.pathFinder = null;
 	}
 
+	@Override
+	public List<IResponseProcessingModule> getResponseProcessingModules() {
+		responseProcessingModules = loadModules();
+		if(responseProcessingModules == null) {
+			return Collections.emptyList();
+		} else {
+			return responseProcessingModules;
+		}
+	}
 }

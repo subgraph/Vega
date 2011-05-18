@@ -1,6 +1,7 @@
 var module = {
   name : "E-Mail Finder Module",
-  type: "response-processor"
+  type: "response-processor",
+  defaultDisabled: true
 };
 
 function run(request, response, ctx) {
