@@ -129,8 +129,8 @@ public class DashboardPane extends Composite implements IEventHandler {
 		final StringBuilder buffer = new StringBuilder();
 		buffer.append("<form>");
 		addHeader(buffer);
-		renderAlertSummary(buffer);
 		renderCrawlerSection(buffer);
+		renderAlertSummary(buffer);
 		addVSpaces(buffer, 2);
 		buffer.append("</form>");
 		
@@ -147,7 +147,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 	}
 	
 	private void renderCrawlerSection(StringBuilder sb) {
-		addDefault(sb, "Scanner Progress");
+		addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
 		addIndented(sb, 20, "<control width='400' height='80' href='crawler'/>");
