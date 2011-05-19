@@ -4,7 +4,6 @@ var module = {
 };
 
 function run(request, response, ctx) {
-
   var pathlinux = new Array("/bin/","/boot/","/cdrom/","/dev/","/etc/",
                             "/home/","/initrd/","/lib/","/media/","/mnt/",
                             "/opt/","/proc/","/root/","/sbin/","/sys/",

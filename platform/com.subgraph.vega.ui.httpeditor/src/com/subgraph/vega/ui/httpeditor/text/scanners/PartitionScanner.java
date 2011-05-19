@@ -107,7 +107,8 @@ public class PartitionScanner implements IPartitionTokenScanner {
 			resetResumeState();
 			return bodyToken;
 		} else {
-			return null;
+			// If this returns null, the parser will get a NullPointerException
+			return Token.EOF;
 		}
 	}
 	@Override

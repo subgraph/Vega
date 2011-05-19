@@ -69,10 +69,10 @@ function run(request, response, ctx) {
 
 	if(htmlres) {
 		ctx.alert("vinfo-errorpages-html",request, response, {
-			output: response.bodyAsString.substring(0,200), 
+			output: response.getRawResponse().getStatusLine().toString(),
 			resource: request.requestLine.uri, 
 			response: response,
-			key: "vinfo-errorpages-cf" + request.requestLine.uri 
+			key: "vinfo-errorpages-html" + request.requestLine.uri 
 			} );
 	}
 	if(phpres) {
@@ -80,7 +80,7 @@ function run(request, response, ctx) {
 			"output": response.bodyAsString, 
 			"resource": request.requestLine.uri, 
 			response: response,
-			key: "vinfo-errorpages-cf" + request.requestLine.uri 
+			key: "vinfo-errorpages-php" + request.requestLine.uri 
 			} );
 	}
 	if(cfres) {

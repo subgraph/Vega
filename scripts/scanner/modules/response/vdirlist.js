@@ -4,13 +4,13 @@ var module = {
 };
 
 function run(request, response, ctx) {
-	var keywords = ["Index of", "Name", "Size", "Parent Directory", "Folder Listing", "Directory Listing"];
+	var patterns = [/\bIndex of\b/gm, /\bName\b/gm, /\bSize\b/gm, /\bParent Directory\b/gm, /\bFolder Listing\b/gm, /\bDirectory Listing\b/gm];
 	var res = 0;
 	var url = request.getRequestLine().getUri();
 
-	for (i=0;i<=keywords.length-1;i+=1) {
-		x = response.bodyAsString.indexOf(keywords[i]);
-		if (x>=0) {
+	for (i=0;i<=patterns.length-1;i+=1) {
+		// First match, good enough.
+		if (patterns[i].exec(response.bodyAsString)) {
 			res += 1;
 		}
 	}

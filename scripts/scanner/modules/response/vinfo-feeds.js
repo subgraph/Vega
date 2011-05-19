@@ -11,11 +11,11 @@ function run(request, response, ctx) {
 	var opml = new RegExp("<opml.*version.*?>", "ig");
 
 	var x = rss.exec(response.bodyAsString);
-	if (x) { output += x[1]; output += "\n"; res = 1; }
+	if (x) { output += x[0]; output += "\n"; res = 1; }
 	var y = atom.exec(response.bodyAsString);
-	if (y) { output += y[1]; output += "\n"; res = 1; }
+	if (y) { output += y[0]; output += "\n"; res = 1; }
 	var z = opml.exec(response.bodyAsString);
-	if (z) { output += z[1]; output += "\n"; res = 1; }
+	if (z) { output += z[0]; output += "\n"; res = 1; }
 
 	if (res) {
 		ctx.alert("vinfo-feeds",request, response, {
