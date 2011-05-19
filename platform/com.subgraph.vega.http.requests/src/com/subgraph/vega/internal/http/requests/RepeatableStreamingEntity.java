@@ -154,8 +154,9 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 			input.close();
 			input = null;
 		}
-		if(bufferEntity != null)
-			bufferEntity.consumeContent();
+		if(bufferEntity != null) {
+			EntityUtils.consume(bufferEntity);
+		}
 	}
 
 	private class CachingInputStream extends InputStream {

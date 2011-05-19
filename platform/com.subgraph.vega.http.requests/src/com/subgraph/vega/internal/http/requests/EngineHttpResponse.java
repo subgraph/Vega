@@ -181,7 +181,7 @@ public class EngineHttpResponse implements IHttpResponse {
 			newEntity.setContentType(entity.getContentType());
 			newEntity.setContentEncoding(entity.getContentEncoding());
 			rawResponse.setEntity(newEntity);
-			entity.consumeContent();
+			EntityUtils.consume(entity);
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
 		}		
