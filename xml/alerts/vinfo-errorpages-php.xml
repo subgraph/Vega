@@ -3,7 +3,7 @@
 <title>PHP error detected</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>		
+	<severity>Medium</severity>		
 	
 	<impact>Vega has detected the signature of a PHP error page.</impact>
 	<impact>Automatically generated error pages can leak sensitive information.</impact>
