@@ -3,7 +3,7 @@
 <title>Django Debug Output Detected</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>		
+	<severity>Medium</severity>		
 
 	<impact>Vega has detected content that matches the verbose Django error output.</impact>
 	<impact>The Django error output includes sensitive information that could increase the likelihood of other attacks.</impact>

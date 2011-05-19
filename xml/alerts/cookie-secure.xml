@@ -2,10 +2,26 @@
 <alert>
 <title>Cookie not set as http only</title>
 	
-	<class>Information</class>
-	<severity>Info</severity>		
+	<class>Configuration Error</class>
+	<severity>High</severity>		
+	
+	<impact>Vega has detected a cookie associated with an TLS (https) session that does not have the Secure flag set.</impact>
+	<impact>These cookies can be transmitted over unencrypted HTTP connections.</impact>
+	<impact>Cookies containing sensitive information, such as session identifiers, could be vulnerable to eavesdropping.</impact>
+
+	<remediation>
+		The application must set the Secure flag for all cookies set by the server. This will prevent unintented leakage.
+	</remediation>
+
 	<discussion>
-		The cookie was not set as secure	
+		Vega has detected that a cookie was not set with the Secure flag associated with an application that relies on TLS. The Secure flag indicates to the client that the cookie must only transmitted over TLS (https) connections. Not doing so leaves the application vulnerable to network eavesdropping if the client ever communicates with the server over unencrypted HTTP.
 	</discussion>
+	
+	<references>
+		<url address="http://en.wikipedia.org/wiki/HTTP_cookie">HTTP cookie (Wikipedia)</url>
+		<url address="http://php.net/manual/en/function.setcookie.php">setcookie (PHP)</url>
+		<url address="http://docs.djangoproject.com/en/dev/topics/http/sessions/#session-cookie-secure">Sessions: SESSION_COOKIE_SECURE (Django documentation)</url>
+		<url address="http://msdn.microsoft.com/en-us/library/system.net.cookie.secure.aspx">Cookie.Secure Property (MSDN)</url>
+		<url address="http://codebutler.github.com/firesheep/tc12/">Hey Web 2.0: Start protecting user privacy instead of pretending to (Eric Butler / Ian Gallagher)</url>
 </alert>
 
