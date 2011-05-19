@@ -102,7 +102,7 @@ public class AlertPane extends Composite {
 		final AlertSeverityCell cell = alertSeverityCells.get(alert.getSeverity());
 		if(cell == null)
 			return;
-		getDisplay().syncExec(new Runnable() {
+		getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				cell.addAlert(alert);
