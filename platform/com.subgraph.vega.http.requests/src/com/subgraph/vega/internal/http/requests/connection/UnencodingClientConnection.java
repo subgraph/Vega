@@ -1,9 +1,10 @@
-package com.subgraph.vega.internal.http.requests.unencoding;
+package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.impl.conn.DefaultClientConnection;
 import org.apache.http.io.HttpMessageWriter;
 import org.apache.http.io.SessionOutputBuffer;
 import org.apache.http.params.HttpParams;
+
 
 public class UnencodingClientConnection extends DefaultClientConnection {
 	@Override
