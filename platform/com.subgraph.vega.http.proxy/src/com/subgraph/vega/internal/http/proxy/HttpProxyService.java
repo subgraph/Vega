@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.HttpClient;
+
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
@@ -74,7 +76,9 @@ public class HttpProxyService implements IHttpProxyService {
 		contentAnalyzer.setResponseProcessingModules(responseProcessingModules);
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+
+		final HttpClient httpClient = requestEngineFactory.createBasicClient();
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
 		proxy = new HttpProxy(proxyPort, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		proxy.registerEventHandler(eventHandler);
 		proxy.startProxy();
