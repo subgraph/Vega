@@ -18,6 +18,7 @@ Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.modules,
  org.apache.http;version="4.0.0",
+ org.apache.http.client,
  org.apache.http.client.entity,
  org.apache.http.client.methods,
  org.apache.http.client.utils,
@@ -25,3 +26,4 @@ Import-Package: com.google.common.base;version="1.6.0",
  org.apache.http.protocol;version="4.0.0",
  org.w3c.dom.html2
 Service-Component: OSGI-INF/scanner-factory.xml
+Require-Bundle: org.apache.http.client

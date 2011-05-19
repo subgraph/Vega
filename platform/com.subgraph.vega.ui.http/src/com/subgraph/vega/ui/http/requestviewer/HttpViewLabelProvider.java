@@ -35,7 +35,7 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 		case 0:
 			return Long.toString(record.getRequestId());
 		case 1:
-			return record.getHttpHost().getHostName();
+			return record.getHttpHost().toURI();
 		case 2:
 			return record.getRequest().getRequestLine().getMethod();
 		case 3:
@@ -47,6 +47,8 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 			return new Integer(record.getResponse().getStatusLine().getStatusCode()).toString();
 		case 5:
 			return getResponseLength(record.getResponse());
+		case 6:
+			return Long.toString(record.getRequestMilliseconds());
 		}
 		return null;
 	}

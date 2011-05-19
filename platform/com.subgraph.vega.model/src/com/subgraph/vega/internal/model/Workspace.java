@@ -236,6 +236,7 @@ public class Workspace implements IWorkspace {
 			}
 			database = openDatabase(getDatabasePath());
 			if(database != null) {
+				workspaceStatus = null;
 				eventManager.fireEvent(new WorkspaceResetEvent(this));
 				backgroundCommitTask = createBackgroundCommitTask(database);
 				backgroundCommitTimer.scheduleAtFixedRate(backgroundCommitTask, 0, BACKGROUND_COMMIT_INTERVAL);

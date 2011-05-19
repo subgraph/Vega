@@ -133,7 +133,7 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		return new ISelectionChangedListener() {
 			public void selectionChanged(final SelectionChangedEvent e) {
 				final String scheme = (String)((IStructuredSelection)requestScheme.getSelection()).getFirstElement();
-				if (scheme == "https") {
+				if (scheme.equals("https")) {
 					requestPort.setText("443");
 				} else {
 					requestPort.setText("80");

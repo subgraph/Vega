@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
+
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
@@ -12,20 +15,9 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	private boolean forceIdentityEncoding = false;
 	private boolean decompressGzipEncoding = true;
 	private boolean undoURLEncoding = false;
-	private String cookieString = null;
+	private BasicCookieStore cookieStore = new BasicCookieStore(); // Me not *take* cookies, me *eat* the cookies
 	private int requestsPerMinute = DEFAULT_REQUESTS_PER_MINUTE;
-	
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
-
-	@Override
-	public String getCookieString() {
-		return cookieString;
-	}
-	
-	@Override
-	public void setCookieString(String cookieString) {
-		this.cookieString = cookieString;
-	}
 	
 	@Override
 	public void setForceIdentityEncoding(boolean value) {
@@ -80,4 +72,10 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	public int getRequestsPerMinute() {
 		return requestsPerMinute;
 	}
+
+	@Override
+	public CookieStore getCookieStore() {
+		return cookieStore;
+	}
+
 }

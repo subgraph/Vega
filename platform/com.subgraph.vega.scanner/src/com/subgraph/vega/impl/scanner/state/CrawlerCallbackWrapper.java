@@ -32,6 +32,6 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 		response.lockResponseEntity();
 		wrappedCallback.processResponse(crawler, request, response, argument);
 		if(logRequest)
-			requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost());		
+			requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());		
 	}
 }

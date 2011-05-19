@@ -21,6 +21,8 @@ Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.ui.util,
  org.apache.http;version="4.0.0",
  org.apache.http.client.utils,
+ org.apache.http.cookie,
+ org.apache.http.impl.cookie,
  org.eclipse.ui.forms,
  org.eclipse.ui.forms.widgets
 Bundle-ClassPath: .,
