@@ -13,7 +13,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	private final static int NTHREADS = 12;
 	private final ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
-	private final HttpClient client = HttpClientFactory.createHttpClient();
+	private final HttpClient client = UnencodedHttpClientFactory.createHttpClient();
 	private IHTMLParser htmlParser;
 	
 	@Override
@@ -22,8 +22,17 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	}
 
 	@Override
-	public IHttpRequestEngine createRequestEngine(
-			IHttpRequestEngineConfig config) {
+	public HttpClient createBasicClient() {
+		return BasicHttpClientFactory.createHttpClient();
+	}
+	
+	@Override
+	public IHttpRequestEngine createRequestEngine(IHttpRequestEngineConfig config) {
+		return new HttpRequestEngine(executor, client, config, htmlParser);
+	}
+
+	@Override
+	public IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config) {
 		return new HttpRequestEngine(executor, client, config, htmlParser);
 	}
 	
@@ -34,4 +43,5 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	protected void unsetHTMLParser(IHTMLParser htmlParser) {
 		this.htmlParser = null;
 	}
+
 }

@@ -1,4 +1,4 @@
-package com.subgraph.vega.internal.http.requests.unencoding;
+package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.RequestLine;
 import org.apache.http.message.BasicLineFormatter;
