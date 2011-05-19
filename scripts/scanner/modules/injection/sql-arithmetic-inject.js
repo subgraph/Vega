@@ -75,21 +75,32 @@ function process(req, res, ctx)
 		return;
 
 	if(ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(0, 2)) {
-		ctx.publishAlert("vinfo-sql-inject", "Response suggests arithmetic evaluation on server side (type 1).",
-				ctx.getSavedRequest(0), ctx.getSavedResponse(0));
+		ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(0), ctx.getSavedResponse(0), {
+                   	  output:   ctx.getSavedResponse(0).bodyAsString,
+                  	  key: "vinfo-sql-inject:" + ctx.getSavedRequest(0).requestLine.uri,
+                          resource: ctx.getSavedRequest(0).requestLine.uri
+                	});
+
 				ctx.responseChecks(0);
 				ctx.responseChecks(2);
 	}
 	if(ctx.isFingerprintMatch(1, 6) && !ctx.isFingerprintMatch(6, 7)) {
-		ctx.publishAlert("vinfo-sql-inject", "Response suggests arithmetic evaluation on server side (type 2).",
-				ctx.getSavedRequest(7), ctx.getSavedResponse(7));
+		ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(7), ctx.getSavedResponse(7), {
+			  output: ctx.getSavedResponse(7).bodyAsString,
+			  key: "vinfo-sql-inject:" + ctx.getSavedRequest(7).requestLine.uri,
+			  resource: ctx.getSavedRequest(7).requestLine.uri
+			});
 				ctx.responseChecks(6);
 				ctx.responseChecks(7);
 	}
 
 	if(!ctx.isFingerprintMatch(3, 4) && !ctx.isFingerprintMatch(3, 5)) {
-		ctx.publishAlert("vinfo-sql-inject", "Response to '\" different than to \\'\\\"", 
-				ctx.getSavedRequest(4), ctx.getSavedResponse(4));
+		ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(4), ctx.getSavedResponse(4), {
+			  output: ctx.getSavedResponse(4).bodyAsString,
+			  key: "vinfo-sql-inject:" + ctx.getSavedRequest(4).requestLine.uri,
+			  resource: ctx.getSavedRequest(4).requestLine.uri
+			});
+
 		ctx.responseChecks(3);
 		ctx.responseChecks(4);
 	}
