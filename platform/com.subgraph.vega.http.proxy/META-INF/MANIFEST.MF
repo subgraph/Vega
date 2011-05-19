@@ -28,4 +28,3 @@ Import-Package: com.subgraph.vega.api.analysis,
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0"
 Service-Component: OSGI-INF/proxy-service.xml
-Require-Bundle: org.apache.httpcomponents.httpcore
