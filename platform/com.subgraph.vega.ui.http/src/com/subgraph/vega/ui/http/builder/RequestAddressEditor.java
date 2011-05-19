@@ -21,24 +21,21 @@ import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 
-public class RequestAddressEditor implements IHttpBuilderPart {
+public class RequestAddressEditor extends Composite implements IHttpBuilderPart {
 	private String requestSchemes[] = {
 		"http",
 		"https",
 	};
 
 	private IHttpRequestBuilder requestBuilder;
-	private Composite parentComposite;
 	private ComboViewer requestScheme;
 	private Text requestHost;
 	private Text requestPort;
 
-	public RequestAddressEditor(final IHttpRequestBuilder requestBuilder) {
+	public RequestAddressEditor(Composite parent, final IHttpRequestBuilder requestBuilder) {
+		super(parent, SWT.NONE);
 		this.requestBuilder = requestBuilder;
-	}
-	
-	@Override
-	public Composite createPartControl(Composite parent) {
+
 		final GridLayout controlLayout = new GridLayout(3, false);
 		controlLayout.marginWidth = 0;
 		controlLayout.marginHeight = 0;
@@ -46,10 +43,9 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		controlLayout.marginTop = 0;
 		controlLayout.marginRight = 0;
 		controlLayout.marginBottom = 0;
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(controlLayout);
+		setLayout(controlLayout);
 
-		final Composite schemeControl = new Composite(parentComposite, SWT.NONE);
+		final Composite schemeControl = new Composite(this, SWT.NONE);
 		schemeControl.setLayout(new GridLayout(2, false));
 		schemeControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		Label label = new Label(schemeControl, SWT.NONE);
@@ -66,7 +62,7 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		requestScheme.setSelection(new StructuredSelection(requestSchemes[0]));
 		requestScheme.addSelectionChangedListener(createSelectionChangedListenerRequestScheme());
 
-		final Composite hostControl = new Composite(parentComposite, SWT.NONE);
+		final Composite hostControl = new Composite(this, SWT.NONE);
 		hostControl.setLayout(new GridLayout(2, false));
 		hostControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		label = new Label(hostControl, SWT.NONE);
@@ -75,7 +71,7 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		requestHost = new Text(hostControl, SWT.BORDER | SWT.SINGLE);
 		requestHost.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-		final Composite portControl = new Composite(parentComposite, SWT.NONE);
+		final Composite portControl = new Composite(this, SWT.NONE);
 		portControl.setLayout(new GridLayout(2, false));
 		portControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		label = new Label(portControl, SWT.NONE);
@@ -101,13 +97,18 @@ public class RequestAddressEditor implements IHttpBuilderPart {
 		});
 		
 		refresh();
-
-		return parentComposite;
+	}
+	
+	@Override
+	public Control getControl() {
+		return this;
 	}
 
 	@Override
-	public Control getControl() {
-		return parentComposite;
+	public void setEditable(boolean editable) {
+		requestScheme.getCombo().setEnabled(editable);
+		requestHost.setEditable(editable);
+		requestPort.setEditable(editable);
 	}
 
 	@Override

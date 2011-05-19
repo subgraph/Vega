@@ -50,6 +50,7 @@ public class TransactionViewer extends Composite {
 	private Composite viewerControl;
 	private StackLayout viewerLayout;
 	private Menu viewerMenu;
+	private boolean hasContent;
 	private IHttpBuilderPart builderPartCurr;
 	private Window configDialog;
 	
@@ -174,21 +175,21 @@ public class TransactionViewer extends Composite {
 		IHttpRequestBuilder requestBuilder = manager.getRequestBuilder();
 		final SelectionListener listener = createSelectionListenerMenuItem();
 
-		RequestEditor requestEditor = new RequestEditor(requestBuilder);
-		Composite childControl = requestEditor.createPartControl(viewerControl);
+		RequestEditor requestEditor = new RequestEditor(viewerControl, requestBuilder);
 	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Request");
 	    menuItem.setData(requestEditor);
 	    menuItem.addSelectionListener(listener);
-	    viewerLayout.topControl = childControl;
+	    viewerLayout.topControl = requestEditor;
 		builderPartCurr = requestEditor;
 
-	    HeaderEditor headerEditor = new HeaderEditor(requestBuilder, 0);
-	    childControl = headerEditor.createPartControl(viewerControl);
+	    HeaderEditor headerEditor = new HeaderEditor(viewerControl, requestBuilder, 0);
 	    menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Headers");
 	    menuItem.setData(headerEditor);
 	    menuItem.addSelectionListener(listener);
+
+	    builderPartCurr.setEditable(false);
 	}
 
 	private void createViewersResponse(final Composite parent) {
@@ -199,21 +200,23 @@ public class TransactionViewer extends Composite {
 		IHttpResponseBuilder responseBuilder = manager.getResponseBuilder();
 		final SelectionListener listener = createSelectionListenerMenuItem();
 
-		ResponseMessageEditor responseEditor = new ResponseMessageEditor(responseBuilder);
-		Composite childControl = responseEditor.createPartControl(viewerControl);
+		ResponseMessageEditor responseEditor = new ResponseMessageEditor(viewerControl, responseBuilder);
+		responseEditor.setEditable(false);
 	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Response");
 	    menuItem.setData(responseEditor);
 	    menuItem.addSelectionListener(listener);
-	    viewerLayout.topControl = childControl;
+	    viewerLayout.topControl = responseEditor;
 		builderPartCurr = responseEditor;
 
-	    HeaderEditor headerEditor = new HeaderEditor(responseBuilder, 0);
-	    childControl = headerEditor.createPartControl(viewerControl);
+	    HeaderEditor headerEditor = new HeaderEditor(viewerControl, responseBuilder, 0);
+	    headerEditor.setEditable(false);
 	    menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Headers");
 	    menuItem.setData(headerEditor);
 	    menuItem.addSelectionListener(listener);
+
+	    builderPartCurr.setEditable(false);
 	}
 	
 	private SelectionAdapter createSelectionListenerMenuItem() {
@@ -224,6 +227,7 @@ public class TransactionViewer extends Composite {
 				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
 				builderPartCurr.processContents();
 				builderPartCurr = builderPart;
+				builderPartCurr.setEditable(hasContent);
 				builderPartCurr.refresh();
 				viewerLayout.topControl = builderPartCurr.getControl();
 				viewerControl.layout();
@@ -254,10 +258,12 @@ public class TransactionViewer extends Composite {
 			return;
 		}
 
+		this.hasContent = hasContent;
 		statusLabel.setText(statusMessage);
 		forwardButton.setEnabled(hasContent);
 		dropButton.setEnabled(hasContent);
 		if (builderPartCurr != null) {
+			builderPartCurr.setEditable(hasContent);
 			builderPartCurr.refresh();
 		}
 	}

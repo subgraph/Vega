@@ -15,31 +15,27 @@ import com.subgraph.vega.ui.text.httpeditor.RequestRenderer;
 /**
  * Manages visual components to edit the entity body of a HTTP message.
  */
-public class BodyEditor implements IHttpBuilderPart {
+public class BodyEditor extends Composite implements IHttpBuilderPart {
 	private IHttpMessageBuilder messageBuilder;
-	private Composite parentComposite;
 	private HttpRequestViewer requestBodyViewer;
 	private final RequestRenderer requestRenderer = new RequestRenderer();	
 
-	public BodyEditor(final IHttpMessageBuilder messageBuilder) {
+	public BodyEditor(Composite parent, final IHttpMessageBuilder messageBuilder) {
+		super(parent, SWT.NONE);
 		this.messageBuilder = messageBuilder;
-	}
-
-	@Override
-	public Composite createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new FillLayout());
-
-		requestBodyViewer = new HttpRequestViewer(parentComposite);
-
+		setLayout(new FillLayout());
+		requestBodyViewer = new HttpRequestViewer(this);
 		refresh();
-
-		return parentComposite;
 	}
 
 	@Override
 	public Control getControl() {
-		return parentComposite;
+		return this;
+	}
+
+	@Override
+	public void setEditable(boolean editable) {
+		requestBodyViewer.setEditable(editable);
 	}
 
 	@Override
