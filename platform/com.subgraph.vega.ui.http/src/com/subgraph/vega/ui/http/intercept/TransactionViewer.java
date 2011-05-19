@@ -225,7 +225,9 @@ public class TransactionViewer extends Composite {
 			public void widgetSelected(SelectionEvent event) {
 				final MenuItem menuItem = (MenuItem) event.widget;
 				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
-				builderPartCurr.processContents();
+				if (hasContent != false) {
+					builderPartCurr.processContents();
+				}
 				builderPartCurr = builderPart;
 				builderPartCurr.setEditable(hasContent);
 				builderPartCurr.refresh();
