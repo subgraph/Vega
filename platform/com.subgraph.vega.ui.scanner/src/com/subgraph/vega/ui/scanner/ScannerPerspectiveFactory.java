@@ -19,5 +19,4 @@ public class ScannerPerspectiveFactory implements IPerspectiveFactory {
 		layout.addView(ScanAlertView.ID, IPageLayout.BOTTOM, 0.40f, WEBSITE_VIEW);
 		layout.setEditorAreaVisible(false);
 	}
-
 }
