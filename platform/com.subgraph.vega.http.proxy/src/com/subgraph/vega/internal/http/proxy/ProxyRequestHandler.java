@@ -10,13 +10,11 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpServerConnection;
 import org.apache.http.ProtocolException;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -67,7 +65,6 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 				return;
 			}
 
-//			HttpUriRequest uriRequest = getUriRequest(transaction, context);
 			HttpUriRequest uriRequest = transaction.getRequest();
 			BasicHttpContext ctx = new BasicHttpContext();
 			transaction.signalForward();
@@ -92,17 +89,11 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			transaction.signalForward();
 		} catch (InterruptedException e) {
 			response.setStatusCode(503);
-			e.printStackTrace();
+		} catch (ProtocolException e) {
+			response.setStatusCode(400);
 		} finally {
 			transaction.signalComplete(false);
 		}
-	}
-
-	private boolean isSslConnection(HttpContext context) throws HttpException {
-		final HttpServerConnection conn = (HttpServerConnection) context.getAttribute(ExecutionContext.HTTP_CONNECTION);
-		if(!(conn instanceof VegaHttpServerConnection))
-			throw new HttpException("HttpServerConnection is not expected type "+ conn);
-		return ((VegaHttpServerConnection) conn).isSslConnection();
 	}
 
 	private HttpEntity copyEntity(HttpEntity entity) {
