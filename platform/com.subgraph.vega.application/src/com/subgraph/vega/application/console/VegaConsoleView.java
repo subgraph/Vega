@@ -33,8 +33,8 @@ public class VegaConsoleView extends ConsoleView implements IEventHandler {
 	private IPartListener2 partListener;
 	private boolean isVisible;
 
-	private ConsoleNotifyLevel notifyLevel;
-	
+	private ConsoleNotifyLevel notifyLevel = ConsoleNotifyLevel.NOTIFY_OFF;
+
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		final IConsole console = Activator.getDefault().getConsole();
@@ -117,14 +117,14 @@ public class VegaConsoleView extends ConsoleView implements IEventHandler {
 		setLabelImage(imageCache.get(CONSOLE_ICON));
 		notifyLevel = ConsoleNotifyLevel.NOTIFY_OFF;
 	}
-	
+
 	private synchronized void setNotifyOutput() {
 		if(notifyLevel == ConsoleNotifyLevel.NOTIFY_OFF) {
 			setLabelImage(imageCache.get(CONSOLE_NOTIFY));
 			notifyLevel = ConsoleNotifyLevel.NOTIFY_OUTPUT;
 		}
 	}
-	
+
 	private synchronized void setNotifyError() {
 		if(notifyLevel != ConsoleNotifyLevel.NOTIFY_ERROR) {
 			startErrorNotify();
