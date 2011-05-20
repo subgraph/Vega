@@ -13,33 +13,32 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 /**
  * Manages visual components to edit a HTTP request line.
  */
-public class RequestLineEditor implements IHttpBuilderPart {
+public class RequestLineEditor extends Composite implements IHttpBuilderPart {
 	private IHttpRequestBuilder requestBuilder;
-	private Composite parentComposite;
 	private Text requestLine;
 
-	public RequestLineEditor(final IHttpRequestBuilder requestBuilder) {
+	public RequestLineEditor(Composite parent, final IHttpRequestBuilder requestBuilder) {
+		super(parent, SWT.NONE);
+		setLayout(new GridLayout(2, false));
 		this.requestBuilder = requestBuilder;
-	}
-	
-	public Composite createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new GridLayout(2, false));
 
-		final Label label = new Label(parentComposite, SWT.NONE);
+		final Label label = new Label(this, SWT.NONE);
 		label.setText("Request:");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		requestLine = new Text(parentComposite, SWT.BORDER | SWT.SINGLE);
+		requestLine = new Text(this, SWT.BORDER | SWT.SINGLE);
 		requestLine.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		refresh();
-
-		return parentComposite;
+	}
+	
+	@Override
+	public Control getControl() {
+		return this;
 	}
 
 	@Override
-	public Control getControl() {
-		return parentComposite;
+	public void setEditable(boolean editable) {
+		requestLine.setEditable(editable);
 	}
 
 	@Override

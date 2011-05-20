@@ -31,9 +31,8 @@ import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 /**
  * Manages visual components used to edit HTTP message headers. 
  */
-public class HeaderEditor implements IHttpBuilderPart {
+public class HeaderEditor extends Composite implements IHttpBuilderPart {
 	private IHttpMessageBuilder messageBuilder;
-	private Composite parentComposite;
 	private TableViewer tableViewerHeaders;
 	private Button buttonCreate;
 	private Button buttonRemove;
@@ -44,15 +43,11 @@ public class HeaderEditor implements IHttpBuilderPart {
 	/**
 	 * @param heightInRows Height of header table in text rows, or 0 to fill available space. 
 	 */
-	public HeaderEditor(final IHttpMessageBuilder messageBuilder, int heightInRows) {
+	public HeaderEditor(Composite parent, final IHttpMessageBuilder messageBuilder, int heightInRows) {
+		super(parent, SWT.NONE);
+		setLayout(new GridLayout(2, false));
 		this.messageBuilder = messageBuilder;
 		this.heightInRows = heightInRows;
-	}
-
-	@Override
-	public Composite createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new GridLayout(2, false));
 
 		GridData gd;
 		if (heightInRows != 0) {
@@ -60,19 +55,25 @@ public class HeaderEditor implements IHttpBuilderPart {
 		} else {
 			gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		}
-		final Composite compTable = createHeaderTable(parentComposite, gd, heightInRows);
+		final Composite compTable = createHeaderTable(this, gd, this.heightInRows);
 		compTable.setLayoutData(gd);
-		final Composite compTableButtons = createHeaderTableButtons(parentComposite);
+		final Composite compTableButtons = createHeaderTableButtons(this);
 		compTableButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		tableViewerHeaders.setInput(messageBuilder);
-
-		return parentComposite;
 	}
 
 	@Override
 	public Control getControl() {
-		return parentComposite;
+		return this;
+	}
+
+	@Override
+	public void setEditable(boolean editable) {
+		buttonCreate.setEnabled(editable);
+		buttonRemove.setEnabled(editable);
+		buttonMoveUp.setEnabled(editable);
+		buttonMoveDown.setEnabled(editable);
 	}
 
 	@Override

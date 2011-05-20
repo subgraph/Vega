@@ -3,6 +3,8 @@ package com.subgraph.vega.ui.http.builder;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -13,29 +15,32 @@ import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 /**
  * Manages visual components to edit a HTTP request message.
  */
-public class RequestMessageEditor implements IHttpBuilderPart {
+public class RequestMessageEditor extends Composite implements IHttpBuilderPart {
 	private final IHttpRequestBuilder builder;
 	private final HttpRequestParser requestParser;
 	private HttpMessageViewer messageViewer;
 
-	public RequestMessageEditor(final IHttpRequestBuilder builder) {
+	public RequestMessageEditor(Composite parent, final IHttpRequestBuilder builder) {
+		super(parent, SWT.NONE);
+		setLayout(new FillLayout());
 		this.builder = builder;
 		requestParser = new HttpRequestParser(this.builder, false);
-	}
-	
-	@Override
-	public Composite createPartControl(Composite parent) {
-		messageViewer = new HttpMessageViewer(parent);
+
+		messageViewer = new HttpMessageViewer(this);
 		messageViewer.setEditable(true);
 		messageViewer.setDisplayImages(true);
 		messageViewer.setDisplayImagesAsHex(true);
 		refresh();
-		return messageViewer;
+	}
+	
+	@Override
+	public Control getControl() {
+		return this;
 	}
 
 	@Override
-	public Control getControl() {
-		return messageViewer;
+	public void setEditable(boolean editable) {
+		messageViewer.setEditable(editable);
 	}
 
 	@Override
@@ -52,8 +57,6 @@ public class RequestMessageEditor implements IHttpBuilderPart {
 			requestParser.parseRequest(messageViewer.getContent());
 			if (messageViewer.isEntityContentDirty()) {
 				builder.setEntity(messageViewer.getEntityContent());
-//			} else {
-//				builder.setEntity(null);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
