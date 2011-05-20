@@ -7,4 +7,9 @@ public interface IHttpInterceptorEventHandler {
 	 * @param transaction Transaction.
 	 */
 	public void notifyQueue(IProxyTransaction transaction);
+
+	/**
+	 * Notification that the transaction queue is empty.
+	 */
+	public void notifyEmpty();
 }

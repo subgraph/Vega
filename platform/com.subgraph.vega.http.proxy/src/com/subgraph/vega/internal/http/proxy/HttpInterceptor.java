@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.http.proxy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 
@@ -26,7 +27,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	private static final String propertyInterceptorLevelRequest = "vega.preferences.proxy.interceptor.level.request"; 
 	private static final String propertyInterceptorLevelResponse = "vega.preferences.proxy.interceptor.level.response"; 
 	private final Object interceptorLock = new Object(); /**< Lock for contents of object */
-	private IHttpInterceptorEventHandler eventHandler;
+	private final List<IHttpInterceptorEventHandler> eventHandlerList;
 	private HttpInterceptorLevel interceptorLevelRequest = HttpInterceptorLevel.DISABLED;
 	private HttpInterceptorLevel interceptorLevelResponse = HttpInterceptorLevel.DISABLED; 
 	private IHttpConditionSet breakpointSetRequest; 
@@ -35,6 +36,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	private IWorkspace currentWorkspace;
 	
 	HttpInterceptor(IModel model) {
+		eventHandlerList = new ArrayList<IHttpInterceptorEventHandler>();
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
@@ -51,7 +53,6 @@ public class HttpInterceptor implements IHttpInterceptor {
 		loadInterceptorLevelResponse();
 		breakpointSetRequest = createConditionSet(model, true);
 		breakpointSetResponse = createConditionSet(model, false);
-		
 	}
 
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
@@ -143,10 +144,12 @@ public class HttpInterceptor implements IHttpInterceptor {
 	 */
 	public boolean handleTransaction(ProxyTransaction transaction) {
 		synchronized(interceptorLock) {
-			if (eventHandler != null && intercept(transaction) != false) {
+			if (eventHandlerList.size() != 0 && intercept(transaction) != false) {
 				transaction.setPending(this);
 				transactionQueue.add(transaction);
-				eventHandler.notifyQueue(transaction);
+				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
+					handler.notifyQueue(transaction);
+				}
 				return true;
 			}
 			return false;
@@ -154,9 +157,16 @@ public class HttpInterceptor implements IHttpInterceptor {
 	}
 
 	@Override
-	public void setEventHandler(IHttpInterceptorEventHandler eventHandler) {
+	public void addEventHandler(IHttpInterceptorEventHandler eventHandler) {
 		synchronized(interceptorLock) {
-			this.eventHandler = eventHandler;
+			eventHandlerList.add(eventHandler);
+		}
+	}
+
+	@Override
+	public void removeEventHandler(IHttpInterceptorEventHandler eventHandler) {
+		synchronized(interceptorLock) {
+			eventHandlerList.remove(eventHandler);
 		}
 	}
 
@@ -211,6 +221,11 @@ public class HttpInterceptor implements IHttpInterceptor {
 	public void notifyHandled(ProxyTransaction transaction) {
 		synchronized(interceptorLock) {
 			transactionQueue.remove(transactionQueue.indexOf(transaction));
+			if (transactionQueue.size() == 0) {
+				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
+					handler.notifyEmpty();
+				}
+			}
 		}
 	}
 
@@ -249,4 +264,5 @@ public class HttpInterceptor implements IHttpInterceptor {
 			}
 		}
 	}
+
 }

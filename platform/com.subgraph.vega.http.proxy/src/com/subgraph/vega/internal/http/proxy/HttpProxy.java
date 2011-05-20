@@ -123,6 +123,11 @@ public class HttpProxy implements IHttpInterceptProxy {
 	}
 
 	@Override
+	public int getListenPort() {
+		return listenPort;
+	}
+
+	@Override
 	public void registerEventHandler(IHttpInterceptProxyEventHandler handler) {
 		synchronized(eventHandlers) {
 			eventHandlers.add(handler);
@@ -156,4 +161,5 @@ public class HttpProxy implements IHttpInterceptProxy {
 				h.handleRequest(transaction);
 		}
 	}
+
 }
