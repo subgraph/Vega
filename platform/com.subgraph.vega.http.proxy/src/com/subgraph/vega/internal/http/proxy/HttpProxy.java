@@ -41,7 +41,8 @@ public class HttpProxy implements IHttpInterceptProxy {
 	private VegaHttpService httpService;
 	private ExecutorService executor = Executors.newCachedThreadPool();
 	private Thread proxyThread;
-	
+	private final List<ConnectionTask> connectionList;
+
 	public HttpProxy(int listenPort, ProxyTransactionManipulator transactionManipulator, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
 		this.transactionManipulator = transactionManipulator;
@@ -61,6 +62,8 @@ public class HttpProxy implements IHttpInterceptProxy {
 		registry.register("*", new ProxyRequestHandler(this, requestEngine));
 
 		httpService = new VegaHttpService(inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(), registry, params, sslContextRepository);
+		
+		connectionList = new ArrayList<ConnectionTask>();
 	}
 
 	@Override
@@ -105,7 +108,17 @@ public class HttpProxy implements IHttpInterceptProxy {
 				continue;
 			}
 
-			executor.execute(new ConnectionTask(httpService, c, HttpProxy.this));
+			final ConnectionTask task = new ConnectionTask(httpService, c, HttpProxy.this);
+			synchronized (connectionList) {
+				connectionList.add(task);
+			}
+			executor.execute(task);
+		}
+
+		synchronized (connectionList) {
+			for (ConnectionTask task: connectionList) {
+				task.shutdown();
+			}
 		}
 
 		executor.shutdownNow();
@@ -162,4 +175,10 @@ public class HttpProxy implements IHttpInterceptProxy {
 		}
 	}
 
+	public void notifyClose(ConnectionTask task) {
+		synchronized (connectionList) {
+			connectionList.remove(task);
+		}
+	}
+	
 }
