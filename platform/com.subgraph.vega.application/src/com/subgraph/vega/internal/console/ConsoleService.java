@@ -3,12 +3,16 @@ package com.subgraph.vega.internal.console;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.subgraph.vega.api.console.ConsoleOutputEvent;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.console.IConsoleDisplay;
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
 
 public class ConsoleService implements IConsole {
 	private final static int MAX_BUFFER = 8192;
 	private final List<IConsoleDisplay> displays = new ArrayList<IConsoleDisplay>();
+	private final EventListenerManager eventManager = new EventListenerManager();
 	private StringBuilder outputBuffer = null;
 	private StringBuilder errorBuffer = null;
 	
@@ -22,8 +26,10 @@ public class ConsoleService implements IConsole {
 			for(IConsoleDisplay display: displays) {
 				display.printOutput(output);
 			}
+			eventManager.fireEvent(new ConsoleOutputEvent(output, false));
 		}
 	}
+
 	@Override
 	public synchronized void error(String output) {
 		if(!output.endsWith("\n"))
@@ -34,7 +40,8 @@ public class ConsoleService implements IConsole {
 			for(IConsoleDisplay display: displays) {
 				display.printError(output);
 			}
-		}		
+			eventManager.fireEvent(new ConsoleOutputEvent(output, true));
+		}
 	}
 	
 	private void bufferOutput(String output) {
@@ -68,15 +75,24 @@ public class ConsoleService implements IConsole {
 		if(displays.size() == 1) {
 			if(errorBuffer != null) {
 				display.printError(errorBuffer.toString());
+				eventManager.fireEvent(new ConsoleOutputEvent(errorBuffer.toString(), true));
 				errorBuffer = null;
 			}
 			if(outputBuffer != null) {
 				display.printOutput(outputBuffer.toString());
+				eventManager.fireEvent(new ConsoleOutputEvent(outputBuffer.toString(), false));
 				outputBuffer = null;
 			}
-			
 		}		
 	}
-	
 
+	@Override
+	public void addConsoleOutputListener(IEventHandler listener) {
+		eventManager.addListener(listener);
+	}
+
+	@Override
+	public void removeConsoleOutputListener(IEventHandler listener) {
+		eventManager.removeListener(listener);
+	}
 }
