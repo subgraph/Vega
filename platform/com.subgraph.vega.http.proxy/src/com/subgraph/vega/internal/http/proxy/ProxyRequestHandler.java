@@ -93,6 +93,8 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			response.setStatusCode(502);
 		} catch (ProtocolException e) {
 			response.setStatusCode(400);
+		} catch (Exception e) {
+			response.setStatusCode(500);
 		} finally {
 			transaction.signalComplete(false);
 		}
