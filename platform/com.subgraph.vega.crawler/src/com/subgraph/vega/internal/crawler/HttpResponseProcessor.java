@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.util.EntityUtils;
 
 public class HttpResponseProcessor implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
@@ -73,7 +74,7 @@ public class HttpResponseProcessor implements Runnable {
 				final HttpEntity entity = task.getResponse().getRawResponse().getEntity();
 				if(entity != null)
 					try {
-						entity.consumeContent();
+						EntityUtils.consume(entity);
 					} catch (IOException e) {
 						logger.log(Level.WARNING, "I/O exception consuming request entity content for "+ req.getURI() + " : "+ e.getMessage());
 					}

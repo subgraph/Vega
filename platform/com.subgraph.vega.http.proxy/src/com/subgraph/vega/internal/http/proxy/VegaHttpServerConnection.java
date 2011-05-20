@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestFactory;
 import org.apache.http.impl.SocketHttpServerConnection;
+import org.apache.http.io.HttpMessageParser;
+import org.apache.http.io.SessionInputBuffer;
+import org.apache.http.message.BasicLineParser;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
@@ -18,8 +22,7 @@ import org.apache.http.params.HttpParams;
 public class VegaHttpServerConnection extends SocketHttpServerConnection {
 	private HttpRequest cachedRequest;
 	private final HttpParams params;
-
-	private boolean isSSL = false;
+	private HttpHost sslHost; /** Information about SSL host */
 
 	public VegaHttpServerConnection(HttpParams params) {
 		this.params = params;
@@ -30,14 +33,22 @@ public class VegaHttpServerConnection extends SocketHttpServerConnection {
 		return new VegaHttpRequestFactory();
 	}
 
+	@Override
+    protected HttpMessageParser createRequestParser(final SessionInputBuffer buffer, final HttpRequestFactory requestFactory, final HttpParams params) {
+        return new VegaHttpRequestParser(this, buffer, new BasicLineParser(), requestFactory, params);
+    }
+
 	public boolean isSslConnection() {
-		return isSSL;
+		return (sslHost != null);
 	}
 
-	public void rebindWithSSL(Socket socket) throws IOException {
-		isSSL = true;
+	public HttpHost getSslHost() {
+		return sslHost;
+	}
+	
+	public void rebindWithSSL(Socket socket, HttpHost httpHost) throws IOException {
+		sslHost = new HttpHost(httpHost);
 		bind(socket, params);
-
 	}
 
 	public void bind(final Socket socket, final HttpParams params) throws IOException {

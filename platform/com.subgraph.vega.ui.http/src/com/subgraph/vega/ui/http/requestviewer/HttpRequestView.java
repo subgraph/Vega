@@ -24,14 +24,12 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.ui.http.Activator;
 
 public class HttpRequestView extends ViewPart {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
-	private HttpViewFilter filter;
 
 	public HttpRequestView() {
 	}
@@ -86,14 +84,15 @@ public class HttpRequestView extends ViewPart {
 	}
 
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", };
+		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", "Time (ms)", };
 		final ColumnLayoutData[] layoutData = {
 				new ColumnPixelData(60, true, true),
 				new ColumnPixelData(120, true, true),
 				new ColumnPixelData(60, true, true),
 				new ColumnWeightData(100, 100, true),
 				new ColumnPixelData(50, true, true),
-				new ColumnPixelData(80, true, true)
+				new ColumnPixelData(80, true, true),
+				new ColumnPixelData(50, true, true)
 		};
 
 		for(int i = 0; i < titles.length; i++) {
@@ -106,14 +105,6 @@ public class HttpRequestView extends ViewPart {
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-	}
-
-	private void filterByEntity(IWebEntity entity) {
-		filter.setFilterEntity(entity);
-		if(tableViewer.getTable().getItemCount() == 1) {
-			Object ob = tableViewer.getElementAt(0);
-			tableViewer.setSelection(new StructuredSelection(ob), true);
-		}
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {

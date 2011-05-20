@@ -39,24 +39,15 @@ public class VegaHttpService {
 	private final SSLContextRepository sslContextRepository;
 	private final boolean sslEnabled;
 
-	public VegaHttpService(HttpProcessor proc, ConnectionReuseStrategy connStrategy, HttpResponseFactory responseFactory, SSLContextRepository sslContextRepository) {
-		this.delegatedHttpService = new HttpService(proc, connStrategy, responseFactory);
+	public VegaHttpService(HttpProcessor proc, ConnectionReuseStrategy connStrategy, HttpResponseFactory responseFactory, HttpRequestHandlerResolver handlerResolver, HttpParams params, SSLContextRepository sslContextRepository) {
+		this.delegatedHttpService = new HttpService(proc, connStrategy, responseFactory, handlerResolver, params);
 		this.sslContextRepository = sslContextRepository;
 		this.sslEnabled = (sslContextRepository != null);
 		this.responseFactory = responseFactory;
 		this.processor = proc;
 	}
 
-	public void setHandlerResolver(final HttpRequestHandlerResolver handlerResolver) {
-		delegatedHttpService.setHandlerResolver(handlerResolver);
-	}
-
-	public void setParams(final HttpParams params) {
-		delegatedHttpService.setParams(params);
-	}
-
 	public void handleRequest(final VegaHttpServerConnection conn, final HttpContext context) throws IOException, HttpException {
-
 		if(!sslEnabled) {
 			delegatedHttpService.handleRequest(conn, context);
 			return;
@@ -80,7 +71,7 @@ public class VegaHttpService {
 		final SSLSocket sslSocket = createSSLSocketForHost(host, conn.getSocket());
 
 		sendResponseOk(conn, context);
-		conn.rebindWithSSL(sslSocket);
+		conn.rebindWithSSL(sslSocket, host);
 
 		try {
 			sslSocket.startHandshake();

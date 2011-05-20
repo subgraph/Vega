@@ -1,4 +1,4 @@
-package com.subgraph.vega.internal.http.requests.unencoding;
+package com.subgraph.vega.internal.http.requests.connection;
 
 import java.io.IOException;
 
@@ -11,6 +11,7 @@ import org.apache.http.message.LineFormatter;
 import org.apache.http.params.HttpParams;
 
 import com.subgraph.vega.http.requests.custom.RawRequestLine;
+
 
 public class VegaHttpRequestWriter extends AbstractMessageWriter {
 

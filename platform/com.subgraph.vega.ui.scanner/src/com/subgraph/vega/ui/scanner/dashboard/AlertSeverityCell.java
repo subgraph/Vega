@@ -67,14 +67,19 @@ public class AlertSeverityCell extends Composite {
 	}
 
 	private void setLabelForegroundGrey(Label label) {
-		label.setData("saved-foreground", label.getForeground());
-		label.setForeground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		if(!label.isDisposed()) {
+			label.setData("saved-foreground", label.getForeground());
+			label.setForeground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		}
 	}
 	
 	private void restoreLabelForeground(Label label) {
 		final Object ob = label.getData("saved-foreground");
-		if(ob instanceof Color) 
-			label.setForeground((Color)ob);
+		if(ob instanceof Color) {
+			if(!label.isDisposed()) {
+				label.setForeground((Color)ob);
+			}
+		}
 	}
 	
 	void addAlert(IScanAlert alert) {
@@ -99,7 +104,9 @@ public class AlertSeverityCell extends Composite {
 	
 	private void incrementTotalCount() {
 		if(totalCount == 0) {
-			imageLabel.setImage(image);
+			if(!imageLabel.isDisposed()) {
+				imageLabel.setImage(image);
+			}
 			restoreLabelForeground(labelLabel);
 			restoreLabelForeground(countLabel);
 		}

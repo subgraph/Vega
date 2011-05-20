@@ -4,13 +4,15 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.cookie.Cookie;
+
 import com.subgraph.vega.api.scanner.IFormCredential;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
 	private URI baseURI;
-	private String cookieString;
+	private List<Cookie> cookieList;
 	private List<String> modulesList;
 	private List<String> exclusions;
 	private String basicUsername;
@@ -29,10 +31,10 @@ public class ScannerConfig implements IScannerConfig {
 	}
 
 	@Override
-	public void setCookieString(String cookieString) {
-		this.cookieString = cookieString;
+	public void setCookieList(List<Cookie> list) {
+		cookieList = list;
 	}
-
+	
 	@Override
 	public void setModulesList(List<String> modules) {
 		modulesList = modules;
@@ -79,8 +81,8 @@ public class ScannerConfig implements IScannerConfig {
 	}
 
 	@Override
-	public String getCookieString() {
-		return cookieString;
+	public List<Cookie> getCookieList() {
+		return cookieList;
 	}
 
 	@Override

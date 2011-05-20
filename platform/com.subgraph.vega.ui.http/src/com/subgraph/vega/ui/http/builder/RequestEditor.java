@@ -11,32 +11,30 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 /**
  * Manages RequestAddressEditor and RequestMessageEditor widgets to edit a request.
  */
-public class RequestEditor implements IHttpBuilderPart {
-	private Composite parentComposite;
+public class RequestEditor extends Composite implements IHttpBuilderPart {
 	private RequestAddressEditor requestAddressEditor;
 	private RequestMessageEditor messageEditor;
 
-	public RequestEditor(final IHttpRequestBuilder requestBuilder) {
-		requestAddressEditor = new RequestAddressEditor(requestBuilder);
-		messageEditor = new RequestMessageEditor(requestBuilder);
+	public RequestEditor(Composite parent, final IHttpRequestBuilder requestBuilder) {
+		super(parent, SWT.NONE);
+		setLayout(new GridLayout(1, false));
+		requestAddressEditor = new RequestAddressEditor(this, requestBuilder);
+		requestAddressEditor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		messageEditor = new RequestMessageEditor(this, requestBuilder);
+		messageEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 	}
 	
-	@Override
-	public Composite createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new GridLayout(1, false));
-
-		requestAddressEditor.createPartControl(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		messageEditor.createPartControl(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-
-		return parentComposite;
-	}
-
 	@Override
 	public Control getControl() {
-		return parentComposite;
+		return this;
 	}
 	
+	@Override
+	public void setEditable(boolean editable) {
+		requestAddressEditor.setEditable(editable);
+		messageEditor.setEditable(editable);
+	}
+
 	@Override
 	public void refresh() {
 		requestAddressEditor.refresh();

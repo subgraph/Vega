@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
@@ -19,13 +20,9 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
-import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
-
 
 public class HttpRequestEngine implements IHttpRequestEngine {
-	/** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
-	public final static String VEGA_SENT_REQUEST = "vega.sent-request";
-	
+	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
 	private final Logger logger = Logger.getLogger("request-engine");
 	private final ExecutorService executor;
 	private final HttpClient client;
@@ -39,12 +36,27 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.config = config;
 		this.htmlParser = htmlParser;
 		this.rateLimit = new RateLimiter(config.getRequestsPerMinute());
-		
 	}
-	
+
+	@Override
+	public IHttpRequestEngineConfig getRequestEngineConfig() {
+		return config;
+	}
+
+	@Override
+	public IHttpRequestBuilder createRequestBuilder() {
+		return new HttpRequestBuilder();
+	}
+
+	@Override
+	public IHttpResponseBuilder createResponseBuilder() {
+		return new HttpResponseBuilder();
+	}
+
 	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
+		requestContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
 		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestContext, config, htmlParser));
 		try {
 			return future.get();
@@ -58,24 +70,8 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		return null;
 	}
 
-	public IHttpResponse sendRequest(HttpUriRequest request)
-			throws IOException, ClientProtocolException {
+	public IHttpResponse sendRequest(HttpUriRequest request) throws IOException, ClientProtocolException {
 		return sendRequest(request, null);
-	}
-
-	@Override
-	public void registerResponseProcessor(IHttpResponseProcessor processor) {
-		config.registerResponseProcessor(processor);		
-	}
-
-	@Override
-	public IHttpRequestBuilder createRequestBuilder() {
-		return new HttpRequestBuilder();
-	}
-
-	@Override
-	public IHttpResponseBuilder createResponseBuilder() {
-		return new HttpResponseBuilder();
 	}
 
 }

@@ -13,11 +13,11 @@ public class NewScanWizard extends Wizard {
 	private NewScanWizardPage2 page2;
 	private NewScanWizardPage3 page3;
 	private URI scanHostURI;
-	private String cookieString;
 	private String validTargetField;
 	private boolean isDomTest;
 	private String targetField;
 	private List<IScannerModule> scannerModules;
+	private List<String> cookieStringList;
 	private List<String> exclusions;
 	private String basicUsername;
 	private String basicPassword;
@@ -53,9 +53,9 @@ public class NewScanWizard extends Wizard {
 			return true;
 		}
 		
-		exclusions = page2.getExclusions();
 		scanHostURI = createTargetURI(page1.getScanTarget());
-		cookieString = page2.getCookieString();
+		cookieStringList = page2.getCookieStringList();
+		exclusions = page2.getExclusions();
 		basicUsername = page3.getBasicUsername();
 		basicPassword = page3.getBasicPassword();
 		basicRealm = page3.getBasicRealm();
@@ -87,8 +87,8 @@ public class NewScanWizard extends Wizard {
 		return validTargetField;
 	}
 	
-	public String getCookieString() {
-		return cookieString;
+	public List<String> getCookieStringList() {
+		return cookieStringList;
 	}
 	
 	public boolean isDomTest() {

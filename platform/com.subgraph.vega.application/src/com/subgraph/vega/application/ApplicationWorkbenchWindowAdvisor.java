@@ -1,12 +1,17 @@
 package com.subgraph.vega.application;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+
+import com.subgraph.vega.application.console.VegaConsoleView;
 
 public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
@@ -39,7 +44,23 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 
     }
+  
+    @Override
+    public void postWindowOpen() {
+    	final IWorkbenchWindow window = getWindowConfigurer().getWindow();
+    	if(window == null) {
+    		return;
+    	}
 
+    	final IWorkbenchPage activePage = window.getActivePage();
+    	if(activePage == null) {
+    		return;
+    	}
 
-    
+    	final IViewReference consoleReference = activePage.findViewReference(VegaConsoleView.ID);
+    	if(consoleReference != null) {
+    		// force activation
+    		consoleReference.getView(true);
+    	}
+    }
 }

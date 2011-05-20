@@ -3,7 +3,7 @@
 <title>ColdFusion Debug Output Detected</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>		
+	<severity>Medium</severity>		
 
 	<impact>Vega has detect content that corresponds to verbose debugging output from a ColdFusion server.</impact>
 	<impact>This output can contain sensitive information which could make other attacks easier.</impact>

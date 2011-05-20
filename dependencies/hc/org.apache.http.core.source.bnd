@@ -1,0 +1,7 @@
+Include-Resource: @libs/httpcore-4.1-sources.jar 
+-output org.apache.http.core.source_4.1.vega.jar
+-classpath libs/httpcore-4.1-sources.jar
+Bundle-Version: 4.1
+Eclipse-SourceBundle: org.apache.http.core;version=4.1;roots:="."
+Private-Package: *
+

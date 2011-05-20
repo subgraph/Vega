@@ -1,4 +1,4 @@
-package com.subgraph.vega.internal.http.requests.unencoding;
+package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.conn.ClientConnectionOperator;
 import org.apache.http.conn.scheme.SchemeRegistry;

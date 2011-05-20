@@ -169,6 +169,15 @@
                   icon="icons/configure.png"
                   style="push"
                   tooltip="Configure which response processing modules are run on proxy traffic">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.proxy">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
          </toolbar>
       </menuContribution>

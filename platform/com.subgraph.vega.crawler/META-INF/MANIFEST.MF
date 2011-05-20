@@ -9,5 +9,6 @@ Import-Package: com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.http.requests,
  org.apache.http;version="4.0.0",
  org.apache.http.client,
- org.apache.http.client.methods
+ org.apache.http.client.methods,
+ org.apache.http.util;version="4.1.0"
 Service-Component: OSGI-INF/crawler-factory.xml

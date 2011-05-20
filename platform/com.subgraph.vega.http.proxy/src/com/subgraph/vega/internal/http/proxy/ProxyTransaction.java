@@ -4,7 +4,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
@@ -17,8 +16,7 @@ public class ProxyTransaction implements IProxyTransaction {
 	private final IHttpRequestEngine requestEngine;
 	private final HttpContext context;
 	private IProxyTransactionEventHandler eventHandler;
-	private HttpRequest request;
-	private HttpUriRequest uriRequest;
+	private HttpUriRequest request;
 	private IHttpResponse response;
     private HttpInterceptor interceptor; 
     private boolean isPending = false;
@@ -37,10 +35,6 @@ public class ProxyTransaction implements IProxyTransaction {
 
 	public HttpContext getContext() {
 		return context;
-	}
-
-	public synchronized void setRequest(HttpRequest request) {
-		this.request = request;
 	}
 
 	public synchronized void setResponse(IHttpResponse response) {
@@ -75,25 +69,20 @@ public class ProxyTransaction implements IProxyTransaction {
 	public synchronized void setEventHandler(IProxyTransactionEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 	}
-	
+
+	@Override
+	public synchronized void setRequest(HttpUriRequest request) {
+		this.request = request;
+	}
+
 	@Override
 	public synchronized boolean hasRequest() {
 		return (request != null);
 	}
 
 	@Override
-	public synchronized HttpRequest getRequest() {
+	public synchronized HttpUriRequest getRequest() {
 		return request;
-	}
-
-	@Override
-	public void setUriRequest(HttpUriRequest request) {
-		this.uriRequest = request;
-	}
-
-	@Override
-	public synchronized HttpUriRequest getUriRequest() {
-		return uriRequest;
 	}
 
 	@Override

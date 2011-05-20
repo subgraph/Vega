@@ -26,9 +26,10 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	private int responseCode;
 	private int responseLength;
 	private String responseHeaders;
-	
+
 	private HttpResponse response;
 	private final long timestamp;
+	private long requestTimeMs;
 
 	private transient Activator activator;
 
@@ -38,18 +39,24 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		response = null;
 		host = null;
 		timestamp = 0;
+		requestTimeMs = -1;
 		setCachedRequestFields(null, null);
 		setCachedResponseFields(null);
 	}
 
-	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host) {
+	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
 		this.requestId = requestId;
 		this.request = request;
 		this.response = response;
 		this.host = host;
 		this.timestamp = new Date().getTime();
+		this.requestTimeMs = requestTimeMs;
 		setCachedRequestFields(request, host);
 		setCachedResponseFields(response);
+	}
+
+	RequestLogRecord(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
+		this(requestId, request, null, host, requestTimeMs);
 	}
 
 	private void setCachedRequestFields(HttpRequest request, HttpHost host) {
@@ -103,10 +110,6 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		return response.getEntity().getContentLength();
 	}
 	
-	RequestLogRecord(long requestId, HttpRequest request, HttpHost host) {
-		this(requestId, request, null, host);
-	}
-
 	void setResponse(HttpResponse response) {
 		activate(ActivationPurpose.WRITE);
 		this.response = response;
@@ -131,6 +134,11 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	public long getTimestamp() {
 		activate(ActivationPurpose.READ);
 		return timestamp;
+	}
+
+	@Override
+	public long getRequestMilliseconds() {
+		return requestTimeMs;
 	}
 
 	@Override
@@ -172,4 +180,5 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 
 		this.activator = activator;
 	}
+
 }

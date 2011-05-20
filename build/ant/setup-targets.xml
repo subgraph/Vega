@@ -1,24 +1,30 @@
 <?xml version="1.0"?>
 <project name="vega.setup">
-	<target name="setup">
-		<copy todir="build/stage/features" >
-			<fileset dir="platform" >
-				<include name="**/*.feature/**" />
-				<include name="**/*.ui.product/**" /> 
-			</fileset>
-		</copy>
+  <target name="setup" depends="copy-files,set-build-id" />
 
-		<copy todir="build/stage/plugins">
-			<fileset dir="platform">
+  <target name="set-build-id" if="build.id">
+    <replace file="build/stage/plugins/com.subgraph.vega.application/src/com/subgraph/vega/application/about/AboutDialog.java" value="${build.id}" token="0xC0FFEEEE" />
+  </target>
+
+  <target name="copy-files">
+    <copy todir="build/stage/features" >
+      <fileset dir="platform" >
+        <include name="**/*.feature/**" />
+	<include name="**/*.ui.product/**" /> 
+      </fileset>
+    </copy>
+
+    <copy todir="build/stage/plugins">
+      <fileset dir="platform">
         <exclude name="**/bin/**" />
-				<exclude name="**/.metadata/**" />
-				<include name="**" />
-			</fileset>
-		</copy>
-	</target>
+        <exclude name="**/.metadata/**" />
+        <include name="**" />
+      </fileset>
+    </copy>
+  </target>
 
-	<target name="clean">
-		<delete dir="build/stage" />
-	</target>
+  <target name="clean">
+    <delete dir="build/stage" />
+  </target>
 
 </project>

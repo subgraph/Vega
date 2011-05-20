@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Java error detected</title>
+<title>Java Debug Output Detected</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>		
+	<severity>Medium</severity>		
 	
-	<impact>A Java error has been detected. This could indicate badly written code, and could disclose sensitive information.</impact>
+	<impact>Verbose Java error output has been detected.</impact>
+	<impact>Data in this output could reveal sensitive information about the application that could aid more complex attacks.</impact>
+	<impact>The error itself may be indicative of a security vulnerability.</impact>
+
+	<remediation>The administrator should configure a custom error page for production servers, with detailed error output being logged elsewhere.</remediation>
+	<remediation>The nature of the error should be investigated.</remediation>
+
+	<discussion>
+		Many application servers can send verbose error output to clients, and some do this by default. This verbose error output can include stack traces and other detailed, sensitive information. This could be used by attackers to identify patchlevels, filesystem layout,  configuration settings, or internal details about the application or database. Such output should never be sent to remote clients from production servers.</discussion>
+
+	<references>
+		<url address="https://www.owasp.org/index.php/Securing_tomcat">Securing Tomcat (OWASP)</url>
+                <url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+                <url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
+	</references>
+
 </alert>

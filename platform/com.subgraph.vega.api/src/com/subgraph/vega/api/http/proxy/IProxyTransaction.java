@@ -1,6 +1,5 @@
 package com.subgraph.vega.api.http.proxy;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -28,6 +27,14 @@ public interface IProxyTransaction {
 	void setEventHandler(IProxyTransactionEventHandler eventHandler);
 
 	/**
+	 * Set the request to be sent by the proxy, overriding the intercepted request. If none is set when the pending
+	 * request is forwarded, the intercepted request is sent as is.
+	 *
+	 * @param request HttpUriRequest to be sent by the proxy. 
+	 */
+	void setRequest(HttpUriRequest request);
+
+	/**
 	 * @return Boolean indicating whether this transaction has a HTTP request received by the proxy.
 	 */
 	boolean hasRequest();
@@ -35,21 +42,8 @@ public interface IProxyTransaction {
 	/**
 	 * @return HTTP request received by the proxy. Immutable.
 	 */
-	HttpRequest getRequest();
+	HttpUriRequest getRequest();
 
-	/**
-	 * Set the request to be sent by the proxy, overriding the intercepted request. If none is set when the pending
-	 * request is forwarded, the intercepted request is sent as is.
-	 *
-	 * @param request HttpUriRequest to be sent by the proxy. 
-	 */
-	void setUriRequest(HttpUriRequest request);
-
-	/**
-	 * @return HttpUriRequest, or null if none is set.
-	 */
-	HttpUriRequest getUriRequest();
-	
 	/**
 	 * @return Boolean indicating whether this transaction has a HTTP response received by the proxy.
 	 */
