@@ -1,0 +1,9 @@
+-classpath libs/httpcore-nio-4.1.jar
+-output org.apache.http.core.nio_4.1.vega.jar
+Bundle-Name: org.apache.http.core.nio
+Bundle-SymbolicName: org.apache.http.core.nio
+Export-Package: *
+Bundle-Version: 4.1
+Import-Package: *;resolution:=optional
+
+
