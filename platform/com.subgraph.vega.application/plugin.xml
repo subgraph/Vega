@@ -89,7 +89,7 @@
       <perspectiveExtension
             targetID="*">
          <view
-               id="org.eclipse.ui.console.ConsoleView"
+               id="com.subgraph.vega.views.VegaConsole"
                minimized="false"
                ratio="0.5"
                relationship="fast">
@@ -138,6 +138,16 @@
         </action>
      </actionSet>
 </extension>
+ <extension
+       point="org.eclipse.ui.views">
+    <view
+          class="com.subgraph.vega.application.console.VegaConsoleView"
+          icon="icons/console.png"
+          id="com.subgraph.vega.views.VegaConsole"
+          name="Console"
+          restorable="true">
+    </view>
+ </extension>
 
 
 </plugin>

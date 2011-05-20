@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.console.IConsoleDisplay;
+import com.subgraph.vega.api.events.IEventHandler;
 
 public class ConsoleService implements IConsole {
 	private final static int MAX_BUFFER = 8192;
@@ -76,5 +77,15 @@ public class ConsoleService implements IConsole {
 			}
 			
 		}		
+	}
+	@Override
+	public void addConsoleOutputListener(IEventHandler listener) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void removeConsoleOutputListener(IEventHandler listener) {
+		// TODO Auto-generated method stub
+		
 	}
 }

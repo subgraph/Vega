@@ -1,0 +1,7 @@
+-classpath libs/httpcore-4.1.jar
+-output org.apache.http.core_4.1.vega.jar
+Bundle-Name: org.apache.http.core
+Bundle-SymbolicName: org.apache.http.core
+Export-Package: *
+Bundle-Version: 4.1
+Import-Package: *;resolution:=optional

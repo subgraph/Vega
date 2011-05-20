@@ -65,7 +65,6 @@ public class WebCrawler implements IWebCrawler {
 	public synchronized void stop() throws InterruptedException {
 		for(HttpResponseProcessor responseProcessor: responseProcessors)
 			responseProcessor.stop();
-
 		for(RequestConsumer consumer: requestConsumers)
 			consumer.stop();
 		requestQueue.clear();
