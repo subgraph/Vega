@@ -36,7 +36,7 @@ public class ResponseModuleContext implements IModuleContext {
 
 	@Override
 	public void debug(String msg) {
-		logger.info(msg);
+		workspace.consoleWrite(msg);
 	}
 	
 	public void alert(String type, HttpUriRequest request, IHttpResponse response) {
