@@ -168,7 +168,7 @@ public class TransactionManager {
 	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
 		HttpUriRequest request = requestBuilder.buildRequest();
 		if (request != null) {
-			currentTransaction.setUriRequest(request);
+			currentTransaction.setRequest(request);
 			currentTransaction.doForward();
 		}
 	}
