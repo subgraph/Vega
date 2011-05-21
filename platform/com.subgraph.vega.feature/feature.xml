@@ -207,13 +207,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.subgraph.vega.http.conditions"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.http.client"
          download-size="0"
          install-size="0"
