@@ -20,9 +20,14 @@ public class InterceptView extends ViewPart {
 		final TransactionManager transactionManager = new TransactionManager(interceptor);
 		new TransactionViewer(form, model, transactionManager, TransactionDirection.DIRECTION_REQUEST);
 		new TransactionViewer(form, model, transactionManager, TransactionDirection.DIRECTION_RESPONSE);
-		transactionManager.setInactive();
+		transactionManager.setManagerActive();
 		form.setWeights(new int[] { 50, 50, });
 		form.pack();
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
 	}
 
 	@Override

@@ -25,8 +25,8 @@ import com.subgraph.vega.internal.http.proxy.ssl.ProxySSLInitializationException
 import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
 public class HttpProxyService implements IHttpProxyService {
-
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
+	private boolean isRunning;
 	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
 	private IHttpRequestEngineFactory requestEngineFactory;
@@ -44,13 +44,13 @@ public class HttpProxyService implements IHttpProxyService {
 	private SSLContextRepository sslContextRepository;
 
 	public HttpProxyService() {
+		isRunning = false;
 		eventHandler = new IHttpInterceptProxyEventHandler() {
 			@Override
 			public void handleRequest(IProxyTransaction transaction) {
 				processTransaction(transaction);
 			}
 		};
-
 		transactionManipulator = new ProxyTransactionManipulator(); 
 	}
 
@@ -63,6 +63,11 @@ public class HttpProxyService implements IHttpProxyService {
 			sslContextRepository = null;
 			logger.warning("Failed to initialize SSL support in proxy.  SSL interception will be disabled. ("+ e.getMessage() + ")");
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return isRunning;
 	}
 
 	@Override
@@ -106,10 +111,19 @@ public class HttpProxyService implements IHttpProxyService {
 	public void stop() {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
+		isRunning = false;
 		proxy.unregisterEventHandler(eventHandler);
 		proxy.stopProxy();
 		contentAnalyzer = null;
 		currentWorkspace.unlock();
+	}
+
+	@Override
+	public int getListenPort() {
+		if (isRunning) {
+			return proxy.getListenPort();
+		}
+		return -1;
 	}
 
 	@Override
@@ -171,4 +185,5 @@ public class HttpProxyService implements IHttpProxyService {
 			return responseProcessingModules;
 		}
 	}
+
 }

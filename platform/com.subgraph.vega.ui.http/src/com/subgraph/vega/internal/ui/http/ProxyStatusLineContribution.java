@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.ui.http.Activator;
 
 public class ProxyStatusLineContribution extends ContributionItem {
@@ -50,34 +49,28 @@ public class ProxyStatusLineContribution extends ContributionItem {
 				}
 			}
 		});
-		
-		hookInterceptionEvent();
 	}
 
 	public void setProxyRunning(int port) {
 		runningMessage = "Proxy running on port " + port;
 		setLabelImageAndText(proxyRunning, runningMessage);
-		setInterceptionQueueSize(3);
+	}
+
+	public void setProxyPending(int size) {
+		setInterceptionQueueSize(size);
 	}
 	
 	public void setProxyStopped() {
 		stopAlert();
 		setLabelImageAndText(proxyStopped, "Proxy is not running");
 	}
-
-	private void hookInterceptionEvent() {
-		@SuppressWarnings("unused")
-		final IHttpInterceptor interceptor = Activator.getDefault().getProxyService().getInterceptor();
-		// XXX Do something here which results in setInterceptionQueueSize() being called when
-		// state of interception queue changes.
-	}
-
+	
 	private void setInterceptionQueueSize(int size) {
 		if(size > 0) {
 			if(!alertEnabled) {
 				startAlert();
 			}
-			final String msg = "("+ size + ") messages intercepted.";
+			final String msg = "("+ size + ") messages intercepted";
 			setLabelText(msg);
 		} else {
 			if(alertEnabled) {
@@ -133,7 +126,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 	}
 
 	private void setLabelImageAndText(final Image image, final String text) {
-		if(label.isDisposed()) {
+		if(label == null || label.isDisposed()) {
 			return;
 		}
 		label.getDisplay().syncExec(new Runnable() {

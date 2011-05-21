@@ -27,6 +27,7 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 	
 	private ServiceTracker modelTracker;
+	private ProxyServiceTrackerCustomizer proxyServiceTrackerCustomizer;
 	private ServiceTracker proxyServiceTracker;
 	private ServiceTracker httpRequestEngineFactoryServiceTracker;
 	private ServiceTracker contentAnalyzerFactoryTracker;
@@ -51,7 +52,8 @@ public class Activator extends AbstractUIPlugin {
 		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
 		modelTracker.open();
 		
-		proxyServiceTracker = new ServiceTracker(context, IHttpProxyService.class.getName(), null);
+		proxyServiceTrackerCustomizer = new ProxyServiceTrackerCustomizer(context, statusLineContribution);
+		proxyServiceTracker = new ServiceTracker(context, IHttpProxyService.class.getName(), proxyServiceTrackerCustomizer);
 		proxyServiceTracker.open();
 		setProxyTransactionManipulator();
 		

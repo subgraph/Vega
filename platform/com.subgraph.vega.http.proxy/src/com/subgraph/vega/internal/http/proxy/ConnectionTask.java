@@ -22,6 +22,17 @@ public class ConnectionTask implements Runnable {
 		this.proxy = proxy;
 	}
 
+	/**
+	 * Shutdown the connection by forcing it to close. This will break the connection out from any blocking operations
+	 * involving the socket.
+	 */
+	public synchronized void shutdown() {
+		try {
+			connection.shutdown();
+		} catch (IOException e) {
+		}
+	}
+	
 	@Override
 	public void run() {
 		try {
@@ -35,9 +46,13 @@ public class ConnectionTask implements Runnable {
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Unexpected exception processing client request in proxy", e);
 		} finally {
-			try {
-				connection.shutdown();
-			} catch (IOException e) { }
+			proxy.notifyClose(this);
+			if (connection.isOpen()) {
+				try {
+					connection.shutdown();
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 

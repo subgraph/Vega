@@ -39,6 +39,10 @@ public class TransactionManager {
 					handleTransactionResponse(transaction);
 				}
 			}
+
+			@Override
+			public void notifyEmpty() {
+			}
 		};
 		transactionEventHandler = new IProxyTransactionEventHandler() {
 			@Override
@@ -52,7 +56,6 @@ public class TransactionManager {
 			}
 		};
 		
-		interceptor.setEventHandler(interceptorEventHandler);	
 		this.interceptor = interceptor;
 
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
@@ -69,6 +72,13 @@ public class TransactionManager {
 		responseViewer = viewer;
 	}
 
+	public void setManagerActive() {
+		interceptor.addEventHandler(interceptorEventHandler);
+		synchronized(this) {
+			getNextTransaction();
+		}
+	}
+	
 	void setInactive() {
 		setRequestInactive();
 		setResponseInactive();
@@ -88,6 +98,7 @@ public class TransactionManager {
 		synchronized(this) {
 			if (currentTransaction == null || currentTransaction == transaction) {
 				currentTransaction = transaction;
+				currentTransaction.setEventHandler(transactionEventHandler);
 				setResponsePending();
 			}
 		}
