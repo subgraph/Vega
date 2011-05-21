@@ -21,4 +21,6 @@ public interface IHttpResponse {
 	IPageFingerprint getPageFingerprint();
 	void lockResponseEntity();
 	long getRequestMilliseconds();
+	void setRequestId(long requestId);
+	long getRequestId();
 }

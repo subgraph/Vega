@@ -34,6 +34,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private IHTMLParseResult htmlParseResult;
 	private boolean isMostlyAsciiTestDone;
 	private boolean isMostlyAscii;
+	private long requestId;
 
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
@@ -42,6 +43,7 @@ public class EngineHttpResponse implements IHttpResponse {
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
+		requestId = -1;
 	}
 
 	@Override
@@ -175,4 +177,15 @@ public class EngineHttpResponse implements IHttpResponse {
 			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
 		}		
 	}
+
+	@Override
+	public void setRequestId(long requestId) {
+		this.requestId = requestId;
+	}
+
+	@Override
+	public long getRequestId() {
+		return requestId;
+	}
+
 }
