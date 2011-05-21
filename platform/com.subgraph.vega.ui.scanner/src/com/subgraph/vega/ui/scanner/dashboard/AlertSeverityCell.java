@@ -111,6 +111,8 @@ public class AlertSeverityCell extends Composite {
 			restoreLabelForeground(countLabel);
 		}
 		totalCount += 1;
-		countLabel.setText("("+ Integer.toString(totalCount) +" found)");
+		if(!countLabel.isDisposed()) {
+			countLabel.setText("("+ Integer.toString(totalCount) +" found)");
+		}
 	}
 }

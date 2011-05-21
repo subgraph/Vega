@@ -14,6 +14,9 @@ public class WorkspaceEntry implements IWorkspaceEntry {
 	private static final Logger logger = Logger.getLogger("model");
 	
 	static WorkspaceEntry createFromPath(File path) {
+		if(!Character.isDigit(path.getName().charAt(0))) {
+			return null;
+		}
 		final int index = pathToIndex(path);
 		if(index == -1)
 			return null;

@@ -7,6 +7,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.paths.IPathFinder;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -21,6 +22,7 @@ public class Activator extends AbstractUIPlugin {
 	
 	private ServiceTracker modelTracker;
 	private ServiceTracker consoleTracker;
+	private ServiceTracker pathFinderTracker;
 	
 	/**
 	 * The constructor
@@ -41,6 +43,9 @@ public class Activator extends AbstractUIPlugin {
 		
 		consoleTracker = new ServiceTracker(context, IConsole.class.getName(), null);
 		consoleTracker.open();
+		
+		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
+		pathFinderTracker.open();
 	}
 
 	/*
@@ -78,5 +83,9 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IConsole getConsole() {
 		return (IConsole) consoleTracker.getService();
+	}
+	
+	public IPathFinder getPathFinder() {
+		return (IPathFinder) pathFinderTracker.getService();
 	}
 }
