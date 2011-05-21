@@ -9,6 +9,7 @@ import org.apache.http.HttpRequest;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
+import com.subgraph.vega.api.analysis.MimeType;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
@@ -70,7 +71,7 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		
 		if(scrapePage)
 			runExtractUrls(result, response, workspace.getWebModel());
-		runResponseProcessingModules(response.getOriginalRequest(), response, workspace);
+		runResponseProcessingModules(response.getOriginalRequest(), response, result.getDeclaredMimeType(), result.getSniffedMimeType(), workspace);
 		return result;
 	}
 
@@ -88,9 +89,14 @@ public class ContentAnalyzer implements IContentAnalyzer {
 			}
 		}
 	}
-	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, IWorkspace workspace) {
-		if(responseProcessingModules == null || !response.isMostlyAscii())
+	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, MimeType declaredMime, MimeType sniffedMime, IWorkspace workspace) {
+		if(responseProcessingModules == null || !response.isMostlyAscii()) {
 			return;
+		}
+
+		if(!(isDefaultResponseProcessingMimetype(declaredMime) || isDefaultResponseProcessingMimetype(sniffedMime))) {
+			return;
+		}
 		
 		synchronized (responseProcessingLock) {
 			for(IResponseProcessingModule m: responseProcessingModules) {
@@ -99,6 +105,11 @@ public class ContentAnalyzer implements IContentAnalyzer {
 				}
 			}
 		}
+	}
+
+	private boolean isDefaultResponseProcessingMimetype(MimeType mime) {
+		final String name = mime.getCanonicalName();
+		return (name.contains("text") || name.contains("javascript") || name.contains("xml"));
 	}
 
 	@Override
