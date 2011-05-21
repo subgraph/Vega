@@ -83,6 +83,7 @@ public class CertificateStore {
 			keyStore.setKeyEntry(STORE_KEY, privateKey, password, chain);
 			final OutputStream output = new FileOutputStream(storeFile);
 			writeKeyStore(output);
+			storeFile.setWritable(false, false);
 			storeFile.setReadable(false, false);
 			storeFile.setReadable(true, true);
 			caCertificate = certificate;
