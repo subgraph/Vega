@@ -1,6 +1,9 @@
 package com.subgraph.vega.ui.web.views;
 
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
@@ -16,7 +19,7 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.ui.web.Activator;
 
-public class WebsiteView extends ViewPart {
+public class WebsiteView extends ViewPart implements IDoubleClickListener {
 	
 	private TreeViewer viewer;
 	private DrillDownAdapter drillDown;
@@ -45,6 +48,7 @@ public class WebsiteView extends ViewPart {
 		}
 
 		viewer.setSorter(new Sorter());
+		viewer.addDoubleClickListener(this);
 		getSite().setSelectionProvider(viewer);
 		drillDown = new DrillDownAdapter(viewer);
 		contributeToActionBars();		
@@ -76,6 +80,13 @@ public class WebsiteView extends ViewPart {
 	private void fillToolBar(IToolBarManager manager) {
 		drillDown.addNavigationActions(manager);
 	}
-	
 
+	@Override
+	public void doubleClick(DoubleClickEvent event) {
+		final IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+		final Object element = selection.getFirstElement();
+		if(viewer.isExpandable(element)) {
+			viewer.setExpandedState(element, !viewer.getExpandedState(element));
+		}
+	}
 }
