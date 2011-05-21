@@ -78,6 +78,22 @@ public class TransactionManager {
 			getNextTransaction();
 		}
 	}
+
+	/**
+	 * Close this transaction manager prior to the interceptor view being closed. Unregisters the manager as an event
+	 * handler in the interceptor and the current transaction, if one exists. 
+	 */
+	public void close() {
+		if (interceptor != null) {
+			interceptor.removeEventHandler(interceptorEventHandler);
+			if (currentTransaction != null) {
+				currentTransaction.setEventHandler(null);
+				currentTransaction = null;
+				currentRequestTransaction = null;
+			}
+			interceptor = null;
+		}
+	}
 	
 	void setInactive() {
 		setRequestInactive();
