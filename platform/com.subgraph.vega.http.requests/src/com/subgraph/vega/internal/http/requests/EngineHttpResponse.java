@@ -12,7 +12,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.util.EntityUtils;
-import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
@@ -99,16 +98,6 @@ public class EngineHttpResponse implements IHttpResponse {
 			if(htmlParseResult == null) 
 				htmlParseFailed = true;
 			return htmlParseResult;
-		}
-	}
-
-	@Override
-	public HTMLDocument getDocument() {
-		final IHTMLParseResult htmlResult = getParsedHTML();
-		if(htmlResult == null) {
-			return null;
-		} else {
-			return htmlParseResult.getDOMDocument();
 		}
 	}
 
