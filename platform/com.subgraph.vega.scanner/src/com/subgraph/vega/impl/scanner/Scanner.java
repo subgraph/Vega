@@ -132,6 +132,10 @@ public class Scanner implements IScanner {
 			}
 		}
 		
+		if(config.getMaxRequestsPerSecond() > 0) {
+			requestEngineConfig.setRequestsPerMinute(config.getMaxRequestsPerSecond() * 60);
+		}
+		
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
 		reloadModules();
 		resetModuleTimestamps();

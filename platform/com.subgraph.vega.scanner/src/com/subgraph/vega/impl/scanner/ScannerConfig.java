@@ -23,6 +23,7 @@ public class ScannerConfig implements IScannerConfig {
 	private String ntlmPassword;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
+	private int maxRequestsPerSecond;
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
 	@Override
@@ -166,5 +167,14 @@ public class ScannerConfig implements IScannerConfig {
 		return formCredentials;
 	}
 
+	@Override
+	public void setMaxRequestsPerSecond(int rps) {
+		maxRequestsPerSecond = rps;
+	}
+
+	@Override
+	public int getMaxRequestsPerSecond() {
+		return maxRequestsPerSecond;
+	}
 }
 
