@@ -34,21 +34,25 @@ public class ResponseModuleContext implements IModuleContext {
 		logger.warning("Error running module: "+ message + " (request logged with id="+ requestId +")");
 	}
 
+	public void error(HttpUriRequest request, ResponseJS response, String message) {
+		error(request, response.getResponse(), message);
+	}
+
 	@Override
 	public void debug(String msg) {
 		workspace.consoleWrite(msg);
 	}
 	
-	public void alert(String type, HttpUriRequest request, IHttpResponse response) {
+	public void alert(String type, HttpUriRequest request, ResponseJS response) {
 		alert(type, request, response, null);
 	}
 	
-	public void alert(String type, HttpRequest request, IHttpResponse response, Scriptable ob) {
+	public void alert(String type, HttpRequest request, ResponseJS response, Scriptable ob) {
 		List<Object> properties = new ArrayList<Object>();
 		String keyValue = null;
 		String messageValue = null;
 		if(ob == null) {
-			publishAlert(type, null, request, response);
+			publishAlert(type, null, request, response.getResponse());
 			return;
 		}
 		
@@ -69,7 +73,7 @@ public class ResponseModuleContext implements IModuleContext {
 				}
 			}
 		}
-		publishAlert(type, keyValue, messageValue, request, response, properties.toArray());
+		publishAlert(type, keyValue, messageValue, request, response.getResponse(), properties.toArray());
 		
 	}
 	
