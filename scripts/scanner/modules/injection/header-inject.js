@@ -3,14 +3,15 @@ var module = {
   category: "Injection Modules"
 };
 
-function initialize(ctx)
-{
-	ctx.submitMultipleAlteredRequests(process, ["bogus\nVega-Inject:bogus", "bogus\rVega-Inject:bogus"], true);
+function initialize(ctx) {
+  ctx.submitMultipleAlteredRequests(process, ["bogus\nVega-Inject:bogus", "bogus\rVega-Inject:bogus"], true);
 }
 
-function process(req, res, ctx)
-{
-	if(res.getRawResponse().containsHeader("Vega-Inject")) {
-		ctx.publishAlert("vinfo-header-inject", "Injected Vega-Inject header into response", request, response);
-	}
+function process(req, res, ctx) {
+  if (res.hasHeader("Vega-Inject")) {
+    ctx.alert("vinfo-header-inject", request, response, {
+      message: "Injected Vega-Inject header into response",
+      resource: request.requestLine.uri
+    });
+  }
 }

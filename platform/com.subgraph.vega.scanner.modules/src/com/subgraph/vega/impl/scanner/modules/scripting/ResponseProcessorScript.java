@@ -45,20 +45,27 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 			IWorkspace workspace) {
 		final ResponseModuleContext ctx = new ResponseModuleContext(workspace, scanInstance);
 		try {
-			final Object[] args = new Object[] { request, response, ctx	};
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
+			final Object[] arguments = new Object[] { request, createResponse(response, cx, instance), ctx };
 			final long startTS = System.currentTimeMillis();
-			module.runModule(cx, instance, args);
+			module.runModule(cx, instance, arguments);
 			final long endTS = System.currentTimeMillis();
 			runningTime.addTimestamp((int) (endTS - startTS), request.getRequestLine().getUri());
 		} catch (WrappedException e) {
-			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
+			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script: "+ module.getModuleName(), e).toString());
 		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Exception running module script.", e).toString());
+			e.printStackTrace();
+			logger.warning(new RhinoExceptionFormatter("Exception running module script: "+ module.getModuleName(), e).toString());
 		} finally {
 			Context.exit();
 		}
+	}
+
+	private Scriptable createResponse(IHttpResponse response, Context cx, Scriptable scope) {
+		Object responseOb = Context.javaToJS(response, scope);
+		Object[] args = { responseOb };
+		return cx.newObject(scope, "Response", args);
 	}
 
 	@Override

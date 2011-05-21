@@ -1,5 +1,5 @@
 var module = {
-  name : "Version Control String Detection",
+  name: "Version Control String Detection",
   type: "response-processor"
 };
 
@@ -9,10 +9,10 @@ function run(request, response, ctx) {
 
   res = regexp.test(response.bodyAsString);
   if (res) {
-    ctx.alert("vvcs-users",request, response, {
-    	"output": response.bodyAsString, 
-    	"resource": request.requestLine.uri, 
-    	key: "vvcs-users"+request.requestLine.uri,
-    	response: response} );
+    ctx.alert("vvcs-users", request, response, {
+      "output": response.bodyAsString,
+      "resource": request.requestLine.uri,
+      key: "vvcs-users" + request.requestLine.uri
+    });
   }
 }

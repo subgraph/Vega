@@ -49,9 +49,9 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 			final long endTS = System.currentTimeMillis();
 			runningTime.addTimestamp((int) (endTS - startTS), pathState.toString());
 		} catch (WrappedException e) {
-			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());
+			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script: "+ module.getModuleName(), e).toString());
 		} catch (RhinoException e) {
-			logger.warning(new RhinoExceptionFormatter("Exception running module script.", e).toString());
+			logger.warning(new RhinoExceptionFormatter("Exception running module script: "+ module.getModuleName(), e).toString());
 		} finally {
 			Context.exit();
 		}

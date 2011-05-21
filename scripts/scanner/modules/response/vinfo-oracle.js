@@ -1,7 +1,7 @@
 importPackage(java.net);
 
 var module = {
-  name : "Oracle Application Server Fingerprint Module",
+  name: "Oracle Application Server Fingerprint Module",
   type: "response-processor"
 };
 
@@ -29,21 +29,16 @@ function run(request, response, ctx) {
 "Oracle9iAS/9.0.2 Oracle HTTP Server",
 "Oracle9iAS/9.0.3.1 Oracle HTTP Server"];
 */
-// Maybe we should not match these exact strings?  Will have to investigate.
+  // Maybe we should not match these exact strings?  Will have to investigate.
+  // var oraclefingerprints = ["Oracle"];
 
-// var oraclefingerprints = ["Oracle"];
-
-
- // IBM fingerprint IBM_HTTP_SERVER
- // Sun-ONE-Web-Server/6.1
- 
- if (response.bodyAsString.indexOf("<!-- Created by Oracle ") >= 0)
- {
-	 ctx.alert("vinfo-oracle", request, response,{ 
-		 "output": "<!-- Created by Oracle..", 
-		 "resource": request.requestLine.uri , 
-		 response: response,
-		 key: vinfo-oracle + request.requestLine.uri
-		 });
+  // IBM fingerprint IBM_HTTP_SERVER
+  // Sun-ONE-Web-Server/6.1
+  if (response.bodyAsString.indexOf("<!-- Created by Oracle ") >= 0) {
+    ctx.alert("vinfo-oracle", request, response, {
+      "output": "<!-- Created by Oracle..",
+      "resource": request.requestLine.uri,
+      key: "vinfo-oracle" + request.requestLine.uri
+    });
   }
 }
