@@ -11,7 +11,7 @@ import com.subgraph.vega.api.scanner.modules.IScannerModule;
 public class NewScanWizard extends Wizard {
 	private NewScanWizardPage page1;
 	private NewScanWizardPage2 page2;
-	private NewScanWizardPage3 page3;
+//	private NewScanWizardPage3 page3;
 	private URI scanHostURI;
 	private String validTargetField;
 	private boolean isDomTest;
@@ -32,8 +32,8 @@ public class NewScanWizard extends Wizard {
 		addPage(page1);
 		page2 = new NewScanWizardPage2();
 		addPage(page2);
-		page3 = new NewScanWizardPage3();
-		addPage(page3);
+//		page3 = new NewScanWizardPage3();
+//		addPage(page3);
 	}
 	
 	@Override 
@@ -56,12 +56,12 @@ public class NewScanWizard extends Wizard {
 		scanHostURI = createTargetURI(page1.getScanTarget());
 		cookieStringList = page2.getCookieStringList();
 		exclusions = page2.getExclusions();
-		basicUsername = page3.getBasicUsername();
-		basicPassword = page3.getBasicPassword();
-		basicRealm = page3.getBasicRealm();
-		basicDomain = page3.getBasicRealm();
-		ntlmUsername = page3.getNtlmUsername();
-		ntlmPassword = page3.getNtlmPassword();
+//		basicUsername = page3.getBasicUsername();
+//		basicPassword = page3.getBasicPassword();
+//		basicRealm = page3.getBasicRealm();
+//		basicDomain = page3.getBasicRealm();
+//		ntlmUsername = page3.getNtlmUsername();
+//		ntlmPassword = page3.getNtlmPassword();
 		
 		for(String s: exclusions) {
 			System.out.print(s);
