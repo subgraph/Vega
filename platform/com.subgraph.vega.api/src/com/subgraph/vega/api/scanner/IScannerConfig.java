@@ -18,6 +18,7 @@ public interface IScannerConfig {
 	void setExclusions(List<String> exclusions);
 	void setLogAllRequests(boolean flag);
 	void setDisplayDebugOutput(boolean flag);
+	void setMaxRequestsPerSecond(int rps);
 	List<Cookie> getCookieList();
 	String getBasicUsername();
 	String getBasicPassword();
@@ -34,4 +35,5 @@ public interface IScannerConfig {
 	boolean getDisplayDebugOutput();
 	boolean getDirectoryInjectionChecksFlag();
 	boolean getNonParameterFileInjectionChecksFlag();
+	int getMaxRequestsPerSecond();
 }
