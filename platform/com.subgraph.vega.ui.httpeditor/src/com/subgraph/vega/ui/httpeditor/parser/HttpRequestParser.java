@@ -16,7 +16,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 /**
- * Class to parse a request created by a user in an editor.
+ * Parser to parse user-entered requests into an IHttpRequestBuilder.
  */
 public class HttpRequestParser extends ParserBase {
 	private final IHttpRequestBuilder builder;
@@ -36,7 +36,7 @@ public class HttpRequestParser extends ParserBase {
 	}
 
 	/**
-	 * Parse a manually-entered HTTP request.
+	 * Parse a manually-entered HTTP request into the IHttpRequestBuilder.
 	 * 
 	 * @param content Manually-entered HTTP request.
 	 */
@@ -49,6 +49,7 @@ public class HttpRequestParser extends ParserBase {
 		if (parseRequestLine(parser, builder, buf, bufCursor) < 0) {
 			return;
 		}
+		builder.clearHeaders();
 		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd() && parseInlineEntities) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));
@@ -85,7 +86,7 @@ public class HttpRequestParser extends ParserBase {
 				try {
 					version = parser.parseProtocolVersion(lnBuf, lnCursor);
 				} catch (ParseException e) {
-					// treat the version as HTTP/1.1
+					// treat the unparseable version as HTTP/1.1
 					version = new ProtocolVersion("HTTP", 1, 1); 
 				};
 			} else {

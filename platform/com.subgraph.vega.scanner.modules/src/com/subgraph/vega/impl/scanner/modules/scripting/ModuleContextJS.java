@@ -47,38 +47,38 @@ public class ModuleContextJS {
 	}
 
 	public void addRequestResponse(HttpUriRequest request,
-			IHttpResponse response) {
-		context.addRequestResponse(request, response);
+			ResponseJS response) {
+		context.addRequestResponse(request, response.getResponse());
 	}
 
 	public void addRequestResponse(int index, HttpUriRequest request,
-			IHttpResponse response) {
-		context.addRequestResponse(index, request, response);
+			ResponseJS response) {
+		context.addRequestResponse(index, request, response.getResponse());
 	}
 
 	public HttpUriRequest getSavedRequest(int index) {
 		return context.getSavedRequest(index);
 	}
 
-	public IHttpResponse getSavedResponse(int index) {
-		return context.getSavedResponse(index);
+	public ResponseJS getSavedResponse(int index) {
+		return new ResponseJS(context.getSavedResponse(index));
 	}
 
 	public IPageFingerprint getSavedFingerprint(int index) {
 		return context.getSavedFingerprint(index);
 	}
 
-	public void error(HttpUriRequest request, IHttpResponse response,
+	public void error(HttpUriRequest request, ResponseJS response,
 			String message) {
-		context.error(request, response, message);
+		context.error(request, response.getResponse(), message);
 	}
 
 	public void debug(String msg) {
 		context.debug(msg);
 	}
 
-	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
-		context.analyzePage(request, response);
+	public void analyzePage(HttpUriRequest request, ResponseJS response) {
+		context.analyzePage(request, response.getResponse());
 	}
 
 	public boolean isFingerprintMatch(int idx1, int idx2) {
@@ -131,36 +131,36 @@ public class ModuleContextJS {
 		context.submitMultipleAlteredRequests(wrap(callback), injectables, append);
 	}
 	
-	public void responseChecks(HttpUriRequest request, IHttpResponse response) {
-		context.responseChecks(request, response);
+	public void responseChecks(HttpUriRequest request, ResponseJS response) {
+		context.responseChecks(request, response.getResponse());
 	}
 	
-	public void contentChecks(HttpUriRequest request, IHttpResponse response) {
-		context.contentChecks(request, response);
+	public void contentChecks(HttpUriRequest request, ResponseJS response) {
+		context.contentChecks(request, response.getResponse());
 	}
 	
 	public void responseChecks(int idx) {
 		context.responseChecks(idx);
 	}
 	
-	public void pivotChecks(HttpUriRequest request, IHttpResponse response) {
-		context.pivotChecks(request, response);
+	public void pivotChecks(HttpUriRequest request, ResponseJS response) {
+		context.pivotChecks(request, response.getResponse());
 	}
 
 	private CrawlerCallbackWrapper wrap(Function callback) {
 		return new CrawlerCallbackWrapper(callback);
 	}
 	
-	public void alert(String type, HttpUriRequest request, IHttpResponse response) {
+	public void alert(String type, HttpUriRequest request, ResponseJS response) {
 		alert(type, request, response, null);
 	}
 	
-	public void alert(String type, HttpRequest request, IHttpResponse response, Scriptable ob) {
+	public void alert(String type, HttpRequest request, ResponseJS response, Scriptable ob) {
 		List<Object> properties = new ArrayList<Object>();
 		String keyValue = null;
 		String messageValue = null;
 		if(ob == null) {
-			publishAlert(type, null, request, response);
+			publishAlert(type, null, request, response.getResponse());
 			return;
 		}
 
@@ -180,7 +180,7 @@ public class ModuleContextJS {
 				}
 			}
 		}
-		context.publishAlert(type, keyValue, messageValue, request, response, properties.toArray());		
+		context.publishAlert(type, keyValue, messageValue, request, response.getResponse(), properties.toArray());		
 	}
 
 	private String lookup(String key, Scriptable ob) {

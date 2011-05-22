@@ -2,6 +2,9 @@ package com.subgraph.vega.ui.scanner.alerts;
 
 import java.util.logging.Logger;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -20,7 +23,7 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 
-public class ScanAlertView extends ViewPart {
+public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	public final static String ID = "com.subgraph.vega.views.alert";
 
 	private final Logger logger = Logger.getLogger("scan-alert-view");
@@ -32,6 +35,7 @@ public class ScanAlertView extends ViewPart {
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new AlertTreeContentProvider());
 		viewer.setLabelProvider(new AlertTreeLabelProvider());
+		viewer.addDoubleClickListener(this);
 		viewer.setSorter(new ViewerSorter() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -102,5 +106,14 @@ public class ScanAlertView extends ViewPart {
 	@Override
 	public void setFocus() {
 		viewer.getTree().setFocus();
+	}
+
+	@Override
+	public void doubleClick(DoubleClickEvent event) {
+		final IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+		final Object element = selection.getFirstElement();
+		if(viewer.isExpandable(element)) {
+			viewer.setExpandedState(element, !viewer.getExpandedState(element));
+		}
 	}
 }

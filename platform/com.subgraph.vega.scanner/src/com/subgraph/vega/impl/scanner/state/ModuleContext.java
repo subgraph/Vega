@@ -196,7 +196,7 @@ public class ModuleContext implements IInjectionModuleContext {
 	@Override
 	public void error(HttpUriRequest request, IHttpResponse response,
 			String message) {
-		final long requestId = scanState.getRequestLog().addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());
+		final long requestId = scanState.getRequestLog().addRequestResponse(response);
 		logger.warning("Error running module: "+ message + " (request logged with id="+ requestId +")");
 	}
 
@@ -249,7 +249,7 @@ public class ModuleContext implements IInjectionModuleContext {
 			scan.lock();
 			if(key != null && scan.hasAlertKey(key))
 				return;
-			final long requestId = requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());
+			final long requestId = requestLog.addRequestResponse(response);
 			final IScanAlert alert = scan.createAlert(type, key, requestId);
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {

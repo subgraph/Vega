@@ -130,13 +130,10 @@ public class AlertRenderer {
 			out.flush();
 			return out.toString();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return "I/O error reading alert template file alerts/"+ alert.getName() + ".xml :<br><br>"+ e.getMessage();
 		} catch (TemplateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return "Error processing alert template file alerts/"+ alert.getName() +".xml :<br><br>"+ e.getMessage();
 		}
-		return null;
 	}
 	
 	private String renderEntityEnclosingRequest(HttpEntityEnclosingRequest request) {

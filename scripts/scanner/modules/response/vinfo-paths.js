@@ -1,20 +1,12 @@
 var module = {
-  name : "Path Disclosure",
+  name: "Path Disclosure",
   type: "response-processor"
 };
 
 function run(request, response, ctx) {
-  var pathlinux = new Array("/bin/","/boot/","/cdrom/","/dev/","/etc/",
-                            "/home/","/initrd/","/lib/","/media/","/mnt/",
-                            "/opt/","/proc/","/root/","/sbin/","/sys/",
-                            "/srv/","/tmp/","/usr/","/var/","/htdocs/",
-                            "/apache/");
+  var pathlinux = new Array("/bin/", "/boot/", "/cdrom/", "/dev/", "/etc/", "/home/", "/initrd/", "/lib/", "/media/", "/mnt/", "/opt/", "/proc/", "/root/", "/sbin/", "/sys/", "/srv/", "/tmp/", "/usr/", "/var/", "/htdocs/", "/apache/");
 
-  var pathwindows = new Array("C:\\","D:\\","E:\\","Z:\\","C:\\windows",
-                              "C:\\winnt\\","C:\\win32\\","C:\\win\\system\\",
-                              "C:\\windows\\system\\","C:\\win32\\system\\",
-                              "C:\\winnt\\system\\","C:\\Program Files\\",
-                              "C:\\Documents and Settings\\");
+  var pathwindows = new Array("C:\\", "D:\\", "E:\\", "Z:\\", "C:\\windows", "C:\\winnt\\", "C:\\win32\\", "C:\\win\\system\\", "C:\\windows\\system\\", "C:\\win32\\system\\", "C:\\winnt\\system\\", "C:\\Program Files\\", "C:\\Documents and Settings\\");
 
   var paths = [];
   var i = 0;
@@ -28,53 +20,42 @@ function run(request, response, ctx) {
   paths = paths.concat(pathlinux).concat(pathwindows);
 
   // first do a more efficient indexOf linear search //
-
-  for(i = 0; i< paths.length; i++)
-  {
-    if (body.indexOf(paths[i]) >= 0)
-    {
-      matches.push(paths[i]);  
+  for (i = 0; i < paths.length; i++) {
+    if (body.indexOf(paths[i]) >= 0) {
+      matches.push(paths[i]);
     }
   }
 
   // if there was a match, use regexp // 
-
-  if (matches.length)
-  {
-    for(i = 0; i < matches.length; i++)
-    {
+  if (matches.length) {
+    for (i = 0; i < matches.length; i++) {
       var s = matches[i].replace(/\\/g, "\\\\");
       var r = "(" + s + "[A-Z\\._\\\-\\\\/\+~]*)";
-      var regexp = new RegExp(r,"ig");
+      var regexp = new RegExp(r, "ig");
       var res = regexp.exec(body);
       var j = 0;
-      if (res)
-      {
-        for (j = 0; j < res.length; j++)
-        {
-         if (output.indexOf(res[j]) < 0) {
-          //print("match "+j+": *" + res[j] + "* regex: " + r);
-          output.push(res[j]);
-         }
+      if (res) {
+        for (j = 0; j < res.length; j++) {
+          if (output.indexOf(res[j]) < 0) {
+            //print("match "+j+": *" + res[j] + "* regex: " + r);
+            output.push(res[j]);
+          }
         }
-      }
-      else
-      {
+      } else {
         //print("did not match: "+r);
       }
     }
   }
-      
 
-  
+
+
   if (matches.length) {
-		var key = output.join(" ");
-		
-    ctx.alert("vinfo-paths", request, response,{
-    	"output": output.join(" "), 
-    	"resource": request.requestLine.uri, 
-    	key: "vinfo-paths" + key, 
-    	response: response
-    	} );
+    var key = output.join(" ");
+
+    ctx.alert("vinfo-paths", request, response, {
+      "output": output.join(" "),
+      "resource": request.requestLine.uri,
+      key: "vinfo-paths" + key
+    });
   }
 }

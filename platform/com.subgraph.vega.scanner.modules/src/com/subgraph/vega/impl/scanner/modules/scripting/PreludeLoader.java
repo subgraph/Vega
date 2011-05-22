@@ -74,7 +74,7 @@ public class PreludeLoader {
 			defineHostObject(scope, OptionJS.class);
 			defineHostObject(scope, SelectJS.class);
 			defineHostObject(scope, NodeListJS.class);
-
+			defineHostObject(scope, ResponseJS.class);
 			preludeScope = scope;
 			return true;
 			

@@ -24,7 +24,7 @@
             icon="icons/requestEdit.png"
             id="com.subgraph.vega.views.requestEdit"
             name="Request Editor"
-            restorable="true">
+            restorable="false">
       </view>
    </extension>
    <extension

@@ -45,6 +45,15 @@ public class ProxyTransaction implements IProxyTransaction {
  		lock.lock();
 		try {
 			cv.await();
+		} catch (InterruptedException e) {
+			if (interceptor != null) {
+				interceptor.notifyHandled(this);
+				interceptor = null;
+			}
+
+			isPending = false;
+			doForward = false;
+			throw e;
 		}
 		finally {
 			lock.unlock();

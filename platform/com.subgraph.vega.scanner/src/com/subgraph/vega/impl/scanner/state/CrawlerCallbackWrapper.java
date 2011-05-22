@@ -29,9 +29,12 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request, IHttpResponse response, Object argument) {
-		response.lockResponseEntity();
+		if(!response.lockResponseEntity()) {
+			return;
+		}
 		wrappedCallback.processResponse(crawler, request, response, argument);
-		if(logRequest)
-			requestLog.addRequestResponse(response.getOriginalRequest(), response.getRawResponse(), response.getHost(), response.getRequestMilliseconds());		
+		if(logRequest) {
+			requestLog.addRequestResponse(response);
+		}
 	}
 }

@@ -48,17 +48,14 @@ public class ResponseMessageEditor extends Composite implements IHttpBuilderPart
 	}
 
 	@Override
-	public void processContents() {
-		// REVISIT: the parser should be clearing these 
-		builder.clearHeaders();
-
+	public void processContents() throws BuilderParseException {
 		try {
 			responseParser.parseResponse(messageViewer.getContent());
 			if (messageViewer.isEntityContentDirty()) {
 				builder.setEntity(messageViewer.getEntityContent());
 			}
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException(e.getMessage()); // REVISIT: do we really want to throw this?
+			throw new BuilderParseException("Error getting entity", e);
 		}
 	}
 

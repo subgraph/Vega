@@ -17,7 +17,7 @@
 	<discussion>
 	Vega has found patterns that resemble e-mail addresses in scanned content. These may be user the addresses of system users, addresses inserted in user-supplied content, or third-party addresses embedded in components of the application (such as Javascript libraries). Automatically scraping websites is one way that spammers and phishers collect e-mail addresses for their distribution lists. It is recommended that e-mail addresses not be displayed on exposed parts of the web application, directly or indirectly.
 	</discussion>
-	
+
 	<references>
 		<url address="http://en.wikipedia.org/wiki/E-mail_address_harvesting">E-mail address harvesting (Wikipedia)</url>
 		<url address="http://techblog.tilllate.com/2008/07/20/ten-methods-to-obfuscate-e-mail-addresses-compared/">Nine ways to obfuscate your e-mail address (Tilllate TechBlog)</url>

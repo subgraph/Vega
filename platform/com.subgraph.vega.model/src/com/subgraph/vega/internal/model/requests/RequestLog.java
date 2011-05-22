@@ -17,6 +17,7 @@ import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
 import com.db4o.query.Predicate;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
@@ -75,56 +76,75 @@ public class RequestLog implements IRequestLog {
 	}
 
 
-	@Override
-	public long addRequest(HttpRequest request, HttpHost host, long requestTimeMs) {
-		final long id = allocateRequestId();
-		addRequest(id, request, host, requestTimeMs);
-		return id;
-	}
+//	@Override
+//	public long addRequest(HttpRequest request, HttpHost host, long requestTimeMs) {
+//		final long id = allocateRequestId();
+//		addRequest(id, request, host, requestTimeMs);
+//		return id;
+//	}
+//
+//	@Override
+//	public void addRequest(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
+//		final HttpRequest newRequest = cloner.copyRequest(request);
+//		database.store(newRequest);
+//		final RequestLogRecord record = new RequestLogRecord(requestId, newRequest, host, requestTimeMs);
+//		synchronized (lock) {
+//			database.store(record);
+//			filterNewRecord(record);
+//		}
+//	}
+
+//	@Override
+//	public long addRequestResponse(HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
+//		final long id = allocateRequestId();
+//		final HttpRequest newRequest = cloner.copyRequest(request);
+//		final HttpResponse newResponse = cloner.copyResponse(response);
+//		database.store(newRequest);
+//		database.store(newResponse);
+//		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, host, requestTimeMs);
+//		synchronized(lock){
+//			database.store(record);
+//			filterNewRecord(record);
+//		}
+//		return id;
+//	}
 
 	@Override
-	public void addRequest(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
-		final HttpRequest newRequest = cloner.copyRequest(request);
-		database.store(newRequest);
-		final RequestLogRecord record = new RequestLogRecord(requestId, newRequest, host, requestTimeMs);
-		synchronized (lock) {
-			database.store(record);
-			filterNewRecord(record);
+	public long addRequestResponse(IHttpResponse response) {
+		if (response.getRequestId() != -1) {
+			return response.getRequestId();
 		}
-	}
-
-	@Override
-	public long addRequestResponse(HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
 		final long id = allocateRequestId();
-		final HttpRequest newRequest = cloner.copyRequest(request);
-		final HttpResponse newResponse = cloner.copyResponse(response);
+		final HttpRequest newRequest = cloner.copyRequest(response.getOriginalRequest());
+		final HttpResponse newResponse = cloner.copyResponse(response.getRawResponse());
 		database.store(newRequest);
 		database.store(newResponse);
-		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, host, requestTimeMs);
+		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, response.getHost(), response.getRequestMilliseconds());
 		synchronized(lock){
 			database.store(record);
 			filterNewRecord(record);
 		}
+		response.setRequestId(id);
 		return id;
 	}
-
+	
 	private void filterNewRecord(IRequestLogRecord record) {
 		for(RequestLogListener listener: listenerList) {
 			listener.filterRecord(record);
 		}
 	}
 
-	@Override
-	public void addResponse(long requestId, HttpResponse response) {
-		final RequestLogRecord record = lookupRecord(requestId);
-		if(record == null) {
-			logger.warning("Could not find request log record for requestId "+ requestId);
-			return;
-		}
-		final HttpResponse newResponse = cloner.copyResponse(response);
-		database.store(response);
-		record.setResponse(newResponse);
-	}
+//	@Override
+//	public void addResponse(long requestId, HttpResponse response) {
+//		final RequestLogRecord record = lookupRecord(requestId);
+//		if(record == null) {
+//			logger.warning("Could not find request log record for requestId "+ requestId);
+//			return;
+//		}
+//		final HttpResponse newResponse = cloner.copyResponse(response);
+//		database.store(response);
+//		record.setResponse(newResponse);
+//	}
 
 	@Override
 	public RequestLogRecord lookupRecord(final long requestId) {

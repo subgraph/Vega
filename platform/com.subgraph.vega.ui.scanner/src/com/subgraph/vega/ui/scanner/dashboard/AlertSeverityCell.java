@@ -83,6 +83,9 @@ public class AlertSeverityCell extends Composite {
 	}
 	
 	void addAlert(IScanAlert alert) {
+		if(isDisposed()) {
+			return;
+		}
 		incrementTotalCount();
 		final String title = alert.getTitle();
 		if(!alertTitleToItem.containsKey(title)) {
@@ -111,6 +114,8 @@ public class AlertSeverityCell extends Composite {
 			restoreLabelForeground(countLabel);
 		}
 		totalCount += 1;
-		countLabel.setText("("+ Integer.toString(totalCount) +" found)");
+		if(!countLabel.isDisposed()) {
+			countLabel.setText("("+ Integer.toString(totalCount) +" found)");
+		}
 	}
 }

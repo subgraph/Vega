@@ -71,7 +71,7 @@ public class HttpResponseProcessor implements Runnable {
 				synchronized (requestLock) {
 					activeRequest = null;
 				}
-				final HttpEntity entity = task.getResponse().getRawResponse().getEntity();
+				final HttpEntity entity = (task.getResponse() == null) ? (null) : task.getResponse().getRawResponse().getEntity();
 				if(entity != null)
 					try {
 						EntityUtils.consume(entity);
@@ -83,6 +83,9 @@ public class HttpResponseProcessor implements Runnable {
 			synchronized(counter) {
 				counter.addCompletedTask();
 				crawler.updateProgress();
+			}
+			if(task.causedException()) {
+				crawler.notifyException(req, task.getException());
 			}
 
 			if(task.finishTask()) {

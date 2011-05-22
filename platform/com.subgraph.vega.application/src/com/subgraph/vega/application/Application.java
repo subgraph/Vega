@@ -1,18 +1,25 @@
 package com.subgraph.vega.application;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.application.console.ConsoleHandler;
 import com.subgraph.vega.application.logging.LogFormatter;
 import com.subgraph.vega.application.logging.LogHandler;
@@ -29,6 +36,11 @@ public class Application implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {
 		Display display = PlatformUI.createDisplay();
 		setupLogging();
+		
+		if(!lockInstance()) {
+			MessageDialog.openError(null, "Vega already running", "An instance of the Vega application is already running.");
+			return IApplication.EXIT_OK;
+		}
 		if(!setupWorkspace()) {
 			return IApplication.EXIT_OK;
 		}
@@ -46,6 +58,37 @@ public class Application implements IApplication {
 		
 	}
 
+	private boolean lockInstance() {
+		final URL url = getLockLocationURL();
+		if(url != null) {
+			final Location loc = Platform.getInstanceLocation();
+			try {
+				if(!loc.isSet()) {
+					loc.set(url, false);
+				}
+				if(loc.isLocked()) {
+					return false;
+				}
+				loc.lock();
+				return true;
+			} catch (IllegalStateException e) {
+				MessageDialog.openWarning(null, "Warning", "Exception trying to lock Vega instance: "+ e.getMessage());
+			} catch (IOException e) {
+				MessageDialog.openWarning(null, "Warning", "I/O Exception trying to lock Vega instance: "+ e.getMessage());
+			}
+		}
+		return true;
+	}
+	
+	private URL getLockLocationURL() {
+		final IPathFinder pathFinder = Activator.getDefault().getPathFinder();
+		final File path = pathFinder.getWorkspaceDirectory();
+		try {
+			return new URL("file:"+ path.getPath());
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
 	private void setupLogging() {
 		Logger rootLogger = Logger.getLogger("");
 
@@ -61,7 +104,7 @@ public class Application implements IApplication {
 		
 		rootLogger.setLevel(Level.WARNING);
 	}
-	
+
 	private boolean setupWorkspace() {
 		final IModel model = Activator.getDefault().getModel();
 		if(model == null) {

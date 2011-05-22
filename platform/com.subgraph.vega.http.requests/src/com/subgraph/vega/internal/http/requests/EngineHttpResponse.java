@@ -12,7 +12,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.util.EntityUtils;
-import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
@@ -35,6 +34,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private IHTMLParseResult htmlParseResult;
 	private boolean isMostlyAsciiTestDone;
 	private boolean isMostlyAscii;
+	private long requestId;
 
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
@@ -43,6 +43,7 @@ public class EngineHttpResponse implements IHttpResponse {
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
+		requestId = -1;
 	}
 
 	@Override
@@ -99,16 +100,6 @@ public class EngineHttpResponse implements IHttpResponse {
 			if(htmlParseResult == null) 
 				htmlParseFailed = true;
 			return htmlParseResult;
-		}
-	}
-
-	@Override
-	public HTMLDocument getDocument() {
-		final IHTMLParseResult htmlResult = getParsedHTML();
-		if(htmlResult == null) {
-			return null;
-		} else {
-			return htmlParseResult.getDOMDocument();
 		}
 	}
 
@@ -172,18 +163,31 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
-	public void lockResponseEntity() {
+	public boolean lockResponseEntity() {
 		final HttpEntity entity = rawResponse.getEntity();
 		if(entity == null)
-			return;
+			return false;
 		try {
 			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
 			newEntity.setContentType(entity.getContentType());
 			newEntity.setContentEncoding(entity.getContentEncoding());
 			rawResponse.setEntity(newEntity);
 			EntityUtils.consume(entity);
+			return true;
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
+			logger.log(Level.INFO, "I/O error while loading HTTP entity", e);
+			return false;
 		}		
 	}
+
+	@Override
+	public void setRequestId(long requestId) {
+		this.requestId = requestId;
+	}
+
+	@Override
+	public long getRequestId() {
+		return requestId;
+	}
+
 }

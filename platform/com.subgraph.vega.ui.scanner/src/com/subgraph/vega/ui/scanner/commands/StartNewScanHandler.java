@@ -59,6 +59,7 @@ public class StartNewScanHandler extends AbstractHandler {
 					final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 					scannerConfig.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
 					scannerConfig.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
+					scannerConfig.setMaxRequestsPerSecond(preferences.getInt("MaxRequestsPerSecond"));
 					scanner.setScannerConfig(scannerConfig);
 					scanner.startScanner(scannerConfig);
 				}

@@ -22,7 +22,7 @@ public class RequestConsumer implements Runnable {
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
-	
+
 	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
 		this.requestEngine = requestEngine;
 		this.crawlerRequestQueue = requestQueue;
@@ -60,38 +60,41 @@ public class RequestConsumer implements Runnable {
 				crawlerRequestQueue.add(task);
 				return;
 			}
-			
-			logger.info("Retrieving: " + task.getRequest().getRequestLine().getUri());			
-			IHttpResponse response = sendRequest(task.getRequest());
 
-			if(response == null && !stop) {
-				logger.log(Level.WARNING, "No response was received for request to "+ task.getRequest().getURI());
+			logger.info("Retrieving: " + task.getRequest().getRequestLine().getUri());
+
+			if(!sendRequest(task)) {
+				if(!stop && !task.causedException()) {
+					logger.log(Level.WARNING, "No response was receiven for request to "+ task.getRequest().getURI());					
+				}
 			}
-			task.setResponse(response);
-			crawlerResponseQueue.put(task);	
+			crawlerResponseQueue.put(task);
 		}
 	}
-	
-	private IHttpResponse sendRequest(HttpUriRequest request) {		
+
+	private boolean sendRequest(CrawlerTask task) {
 		try {
-			activeRequest = request;
-			return requestEngine.sendRequest(request);
+			activeRequest = task.getRequest();
+			final IHttpResponse response = requestEngine.sendRequest(task.getRequest());
+			task.setResponse(response);
+			return response != null;
 		} catch (InterruptedIOException e) {
 			stop = true;
-			return null;
+			return false;
 		} catch (ClientProtocolException e) {
-			logger.log(Level.WARNING, "Protocol error processing request "+ request.getURI(), e);
-			return null;
+			logger.log(Level.WARNING, "Protocol error processing request "+ activeRequest.getURI(), e);
+			task.setException(e);
+			return false;
 		} catch (IOException e) {
 			if(!e.getMessage().contains("abort")) {
-				logger.log(Level.WARNING, "IO error processing request "+ request.getURI(), e);
+				task.setException(e);
+				logger.log(Level.WARNING, "IO error processing request "+ activeRequest.getURI(), e);
 			}
-			return null;
+			return false;
 		} finally {
 			synchronized(requestLock) {
 				activeRequest = null;
 			}
 		}
 	}
-
 }

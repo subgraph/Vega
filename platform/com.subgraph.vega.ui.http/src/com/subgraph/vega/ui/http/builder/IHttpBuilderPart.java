@@ -6,5 +6,5 @@ public interface IHttpBuilderPart {
 	Control getControl();
 	void setEditable(boolean editable);
 	void refresh();
-	void processContents();
+	void processContents() throws BuilderParseException;
 }
