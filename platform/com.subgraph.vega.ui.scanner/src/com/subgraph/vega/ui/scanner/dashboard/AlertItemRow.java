@@ -37,6 +37,8 @@ public class AlertItemRow extends Composite {
 	
 	void incrementCount() {
 		count += 1;
-		countLabel.setText(Integer.toString(count));
+		if(!countLabel.isDisposed()) {
+			countLabel.setText(Integer.toString(count));
+		}
 	}
 }
