@@ -43,6 +43,7 @@ public class RequestEditView extends ViewPart {
 	private TabFolder requestTabFolder;
 	private TabItem requestTabItem;
 	private TabItem requestHeaderTabItem;
+	private TabItem requestTabFolderItem;
 	private HttpMessageViewer responseViewer;
 
 	public RequestEditView() {
@@ -97,22 +98,35 @@ public class RequestEditView extends ViewPart {
 		MessageBox messageDialog = new MessageBox(parentComposite.getShell(), SWT.ICON_WARNING | SWT.OK);
 		messageDialog.setText("Error");
 		if (text == null) {
-			text = "Unexpected error occurred"; // REVISIT this should always be set
+			text = "Unexpected error occurred";
 		}
 		messageDialog.setMessage(text);
 		messageDialog.open();
 	}
 	
+	private void displayExceptionError(Exception e) {
+		if (e.getMessage() != null) {
+			displayError(e.getMessage());
+		} else {
+			displayError(e.getCause().getMessage());
+		}
+	}
+
 	public void sendRequest() {
 		if (requestBuilderPartCurr != null) {
-			requestBuilderPartCurr.processContents();
+			try {
+				requestBuilderPartCurr.processContents();
+			} catch (Exception e) {
+				displayExceptionError(e);
+				return;
+			}
 		}
 
 		HttpUriRequest uriRequest;
 		try {
 			uriRequest = requestBuilder.buildRequest();
 		} catch (Exception e) {
-			displayError(e.getMessage());
+			displayExceptionError(e);
 			return;
 		}
 
@@ -122,11 +136,7 @@ public class RequestEditView extends ViewPart {
 			response = requestEngine.sendRequest(uriRequest, ctx);
 			responseViewer.displayHttpResponse(response.getRawResponse());
 		} catch (Exception e) {
-			if (e.getMessage() != null) {
-				displayError(e.getMessage());
-			} else {
-				displayError(e.getCause().getMessage());
-			}
+			displayExceptionError(e);
 			return;
 		}
 		if(contentAnalyzer != null) {
@@ -153,7 +163,8 @@ public class RequestEditView extends ViewPart {
 		requestHeaderTabItem.setData(requestHeaderEditor);
 
 		requestTabFolder.addSelectionListener(createRequestTabFolderSelectionListener());
-		requestBuilderPartCurr = (IHttpBuilderPart) requestTabFolder.getSelection()[0].getData();
+		requestTabFolderItem = requestTabFolder.getSelection()[0];
+		requestBuilderPartCurr = (IHttpBuilderPart) requestTabFolderItem.getData();
 		
 		return rootControl;
 	}
@@ -165,10 +176,17 @@ public class RequestEditView extends ViewPart {
 				TabItem[] selection = requestTabFolder.getSelection();
 				if (selection != null) {
 					if (requestBuilderPartCurr != null) {
-						requestBuilderPartCurr.processContents();
+						try {
+							requestBuilderPartCurr.processContents();
+						} catch (Exception ex) {
+							requestTabFolder.setSelection(requestTabFolderItem);
+							displayExceptionError(ex);
+							return;
+						}
 					}
 
-					requestBuilderPartCurr = (IHttpBuilderPart) selection[0].getData();
+					requestTabFolderItem = selection[0];
+					requestBuilderPartCurr = (IHttpBuilderPart) requestTabFolderItem.getData();
 					requestBuilderPartCurr.refresh();
 				}
 			}

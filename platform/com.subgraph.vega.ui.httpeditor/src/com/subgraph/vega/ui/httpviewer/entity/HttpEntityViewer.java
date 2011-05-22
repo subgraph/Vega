@@ -43,6 +43,10 @@ public class HttpEntityViewer extends Composite {
 		displayEmptyViewer();
 	}
 
+	public void clearContent() {
+		displayEmptyViewer();
+	}
+
 	public void displayHttpEntity(HttpEntity entity) {
 
 		currentlyDisplayedEntity = entity;

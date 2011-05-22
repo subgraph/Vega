@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
@@ -17,6 +19,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.ErrorDisplay;
 
 public class TransactionManager {
 	private IHttpInterceptor interceptor;
@@ -76,6 +79,22 @@ public class TransactionManager {
 		interceptor.addEventHandler(interceptorEventHandler);
 		synchronized(this) {
 			getNextTransaction();
+		}
+	}
+
+	/**
+	 * Close this transaction manager prior to the interceptor view being closed. Unregisters the manager as an event
+	 * handler in the interceptor and the current transaction, if one exists. 
+	 */
+	public void close() {
+		if (interceptor != null) {
+			interceptor.removeEventHandler(interceptorEventHandler);
+			if (currentTransaction != null) {
+				currentTransaction.setEventHandler(null);
+				currentTransaction = null;
+				currentRequestTransaction = null;
+			}
+			interceptor = null;
 		}
 	}
 	

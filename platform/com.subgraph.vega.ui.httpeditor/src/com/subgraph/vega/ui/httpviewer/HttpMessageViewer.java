@@ -56,10 +56,16 @@ public class HttpMessageViewer extends Composite {
 	public void clearContent() {
 		if (rawDocument != null) {
 			rawDocument.set("");
+			isRawDocumentDirty = false;
 		}
 		if (decodedDocument != null) {
 			decodedDocument.set("");
+			isDecodedDocumentDirty = false;
+			
 		}
+		isDecodedDocumentDirty = false;
+		entityViewer.clearContent();
+		viewer.refresh();
 	}
 
 	public String getContent() {
@@ -121,7 +127,7 @@ public class HttpMessageViewer extends Composite {
 			}
 			@Override
 			public void documentChanged(DocumentEvent event) {
-				isDecodedDocumentDirty = false;
+				isDecodedDocumentDirty = true;
 			}			
 		});	
 	}
