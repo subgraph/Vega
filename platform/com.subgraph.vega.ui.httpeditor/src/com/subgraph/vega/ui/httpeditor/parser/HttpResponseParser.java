@@ -13,7 +13,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
 /**
- * Parse a HTTP response created within an editor to generate a HttpResponse.
+ * Parser to parse user-entered responsesinto an IHttpResponseBuilder.
  */
 public class HttpResponseParser extends ParserBase {
 	final private IHttpResponseBuilder builder;
@@ -44,6 +44,7 @@ public class HttpResponseParser extends ParserBase {
 		if (parseStatusLine(parser, builder, buf, bufCursor) < 0) {
 			return;
 		}
+		builder.clearHeaders();
 		parseHeaders(parser, builder, buf, bufCursor);
 		if (!bufCursor.atEnd() && parseInlineEntities) {
 			StringEntity entity = new StringEntity(buf.substring(bufCursor.getPos(), bufCursor.getUpperBound()));

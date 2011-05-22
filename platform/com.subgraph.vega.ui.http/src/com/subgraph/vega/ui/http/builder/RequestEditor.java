@@ -42,7 +42,7 @@ public class RequestEditor extends Composite implements IHttpBuilderPart {
 	}
 
 	@Override
-	public void processContents() {
+	public void processContents() throws BuilderParseException {
 		requestAddressEditor.processContents();
 		messageEditor.processContents();
 	}
