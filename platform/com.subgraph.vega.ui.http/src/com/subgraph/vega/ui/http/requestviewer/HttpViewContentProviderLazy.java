@@ -183,7 +183,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		filterCondition = conditionSet;
 		requestLog.removeUpdateListener(callback);
 		requestLog.addUpdateListener(callback, conditionSet);
-		reloadRecords();		
+		reloadRecords();
 	}
 	
 	private void resetTable() {
