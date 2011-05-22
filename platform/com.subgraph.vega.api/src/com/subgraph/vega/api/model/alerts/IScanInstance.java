@@ -3,6 +3,8 @@ package com.subgraph.vega.api.model.alerts;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.http.client.methods.HttpUriRequest;
+
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModelProperties;
 
@@ -28,6 +30,7 @@ public interface IScanInstance extends IModelProperties {
 	int getScanTotalCount();
 	void updateScanProgress(int completedCount, int totalCount);
 	void updateScanStatus(int status);
+	void notifyScanException(HttpUriRequest request, Throwable exception);
 	
 	void addScanEventListenerAndPopulate(IEventHandler listener);
 	void removeScanEventListener(IEventHandler listener);

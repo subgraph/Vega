@@ -19,7 +19,7 @@ public interface IHttpResponse {
 	IHTMLParseResult getParsedHTML();
 	boolean isMostlyAscii();
 	IPageFingerprint getPageFingerprint();
-	void lockResponseEntity();
+	boolean lockResponseEntity();
 	long getRequestMilliseconds();
 	void setRequestId(long requestId);
 	long getRequestId();

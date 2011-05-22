@@ -106,4 +106,10 @@ public class WebCrawler implements IWebCrawler {
 				pt.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
 		}
 	}
+	
+	void notifyException(HttpUriRequest request, Throwable exception) {
+		for(ICrawlerProgressTracker pt: eventHandlers) {
+			pt.exceptionThrown(request, exception);
+		}
+	}
 }

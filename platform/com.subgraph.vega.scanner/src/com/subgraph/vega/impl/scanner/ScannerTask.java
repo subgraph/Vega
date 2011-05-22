@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.methods.HttpUriRequest;
+
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
@@ -112,5 +114,10 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	@Override
 	public void progressUpdate(int completed, int total) {
 		scanInstance.updateScanProgress(completed, total);
+	}
+
+	@Override
+	public void exceptionThrown(HttpUriRequest request, Throwable exception) {
+		scanInstance.notifyScanException(request, exception);
 	}
 }
