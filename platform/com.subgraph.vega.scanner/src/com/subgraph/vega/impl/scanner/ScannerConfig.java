@@ -148,7 +148,7 @@ public class ScannerConfig implements IScannerConfig {
 
 	@Override
 	public boolean getDirectoryInjectionChecksFlag() {
-		return false;
+		return true;
 	}
 
 	@Override
