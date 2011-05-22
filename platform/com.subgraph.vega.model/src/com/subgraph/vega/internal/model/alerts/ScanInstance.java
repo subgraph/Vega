@@ -6,6 +6,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import org.apache.http.client.methods.HttpUriRequest;
+
 import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
@@ -16,6 +18,7 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.api.model.alerts.ScanExceptionEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.internal.model.ModelProperties;
 
@@ -183,6 +186,11 @@ public class ScanInstance implements IScanInstance, Activatable {
 		activate(ActivationPurpose.WRITE);
 		this.scanStatus = status;
 		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	}
+
+	@Override
+	public void notifyScanException(HttpUriRequest request, Throwable exception) {
+		eventManager.fireEvent(new ScanExceptionEvent(request, exception));
 	}
 
 	@Override

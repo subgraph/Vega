@@ -84,6 +84,9 @@ public class HttpResponseProcessor implements Runnable {
 				counter.addCompletedTask();
 				crawler.updateProgress();
 			}
+			if(task.causedException()) {
+				crawler.notifyException(req, task.getException());
+			}
 
 			if(task.finishTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
