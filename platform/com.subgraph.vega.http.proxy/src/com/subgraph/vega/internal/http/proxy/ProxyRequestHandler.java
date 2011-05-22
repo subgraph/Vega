@@ -121,6 +121,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		} catch (URISyntaxException e) {
     		throw new ProtocolException("Invalid URI: " + request.getRequestLine().getUri(), e);
 		}
+		// ensuring we have scheme and host also prevents the proxy from connecting back to itself
 		if (uri.getScheme() == null) {
 			throw new ProtocolException("No scheme in proxy request URI");
 		}

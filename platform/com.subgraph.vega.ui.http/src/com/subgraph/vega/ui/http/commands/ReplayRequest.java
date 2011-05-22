@@ -15,11 +15,13 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.subgraph.vega.ui.http.ErrorDisplay;
 import com.subgraph.vega.ui.http.requesteditviewer.RequestEditView;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class ReplayRequest extends AbstractHandler {
-
+	private static final int MAX_OPEN_EDITORS = 3; /** Maximum number of editors to allow to open at once before prompting the user */
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -28,12 +30,11 @@ public class ReplayRequest extends AbstractHandler {
 		if (selection != null & selection instanceof IStructuredSelection) {
 			IStructuredSelection strucSelection = (IStructuredSelection) selection;
 
-			if (strucSelection.size() > 3) { // REVISIT: constant, also need icon
+			if (strucSelection.size() > MAX_OPEN_EDITORS) {
 				Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
 				MessageBox messageDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
 				messageDialog.setText("Warning");
 				messageDialog.setMessage(strucSelection.size() + " replay editors will be opened. Proceed?");
-
 				if (messageDialog.open() == SWT.CANCEL) {
 					return null;
 				}
@@ -45,18 +46,19 @@ public class ReplayRequest extends AbstractHandler {
 				RequestEditView view;
 
 				try {
-					view = (RequestEditView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(RequestEditView.VIEW_ID, element.toString(), viewMode); // REVISIT: pick a better view ID?
+					view = (RequestEditView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(RequestEditView.VIEW_ID, element.toString(), viewMode);
 				} catch (PartInitException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
+					ErrorDisplay.displayExceptionError(shell, e);
 					return null;
 				}
 
 				try {
 					view.setRequest((IRequestLogRecord) element);
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
+					ErrorDisplay.displayExceptionError(shell, e);
+					return null;
 				}
 				viewMode = IWorkbenchPage.VIEW_VISIBLE;
 			}

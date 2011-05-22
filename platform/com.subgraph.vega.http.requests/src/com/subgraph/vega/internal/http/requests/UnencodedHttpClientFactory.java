@@ -26,8 +26,6 @@ public class UnencodedHttpClientFactory extends AbstractHttpClientFactory {
 		final DefaultHttpClient client = new DefaultHttpClient(ccm, params);
 		
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-//		client.removeRequestInterceptorByClass(RequestContent.class);
-//		client.addRequestInterceptor(new RequestContentCustom()); // REVISIT: put at list position that RequestContent was at? 
 		client.addRequestInterceptor(new RequestCopyHeadersInterceptor());
 		return client;
 	}

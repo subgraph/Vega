@@ -28,6 +28,8 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.ErrorDisplay;
+import com.subgraph.vega.ui.http.builder.BuilderParseException;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
@@ -88,11 +90,11 @@ public class TransactionViewer extends Composite {
 		statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		return statusLabel;
 	}
-	
+
 	private ToolBar createToolbar() {
 		final ToolBar toolBar = new ToolBar(this, SWT.FLAT);
 
-		viewerMenu = new Menu(this.getParent().getShell(), SWT.POP_UP);
+		viewerMenu = new Menu(getShell(), SWT.POP_UP);
 	    final ToolItem item = new ToolItem(toolBar, SWT.DROP_DOWN);
 	    item.setText("View");
 	    item.addSelectionListener(new SelectionAdapter() {
@@ -132,23 +134,25 @@ public class TransactionViewer extends Composite {
 	private SelectionListener createForwordButtonListener() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				builderPartCurr.processContents();
+				try {
+					builderPartCurr.processContents();
+				} catch (Exception ex) {
+					ErrorDisplay.displayExceptionError(getShell(), ex);
+					return;
+				}
 				if(direction == TransactionDirection.DIRECTION_REQUEST) {
 					try {
 						manager.forwardRequest();
-					} catch (URISyntaxException e1) {
-						// XXX
-						e1.printStackTrace();
-					} catch (UnsupportedEncodingException e2) {
-						// XXX
-						e2.printStackTrace();
+					} catch (Exception ex) {
+						ErrorDisplay.displayExceptionError(getShell(), ex);
+						return;
 					}
 				} else {
 					try {
 						manager.forwardResponse();
-					} catch (UnsupportedEncodingException e1) {
-						// XXX
-						e1.printStackTrace();
+					} catch (Exception ex) {
+						ErrorDisplay.displayExceptionError(getShell(), ex);
+						return;
 					}
 				}
 			}
@@ -226,7 +230,12 @@ public class TransactionViewer extends Composite {
 				final MenuItem menuItem = (MenuItem) event.widget;
 				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
 				if (hasContent != false) {
-					builderPartCurr.processContents();
+					try {
+						builderPartCurr.processContents();
+					} catch (Exception e) {
+						ErrorDisplay.displayExceptionError(getShell(), e);
+						return;
+					}
 				}
 				builderPartCurr = builderPart;
 				builderPartCurr.setEditable(hasContent);
