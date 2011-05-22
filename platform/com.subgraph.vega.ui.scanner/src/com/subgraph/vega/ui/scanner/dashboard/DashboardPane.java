@@ -106,7 +106,6 @@ public class DashboardPane extends Composite implements IEventHandler {
 	
 	private static ScrolledForm createForm(Composite parent, FormToolkit toolkit) {
 		final ScrolledForm form = toolkit.createScrolledForm(parent);
-		form.setText("Scan Information");
 		form.getBody().setLayout(new FillLayout());
 		return form;
 	}
