@@ -63,8 +63,6 @@ public  interface IHttpRequestBuilder extends IHttpMessageBuilder {
 	void setPath(String path);
 	String getPath();
 
-	void setRawRequestLine(String line);
-	String getRawRequestLine();
 	String getRequestLine();
 
 	HttpUriRequest buildRequest() throws URISyntaxException;

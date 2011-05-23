@@ -110,7 +110,10 @@ public class UriParser {
 		path.setPathType(PathType.PATH_FILE);
 		List<NameValuePair> plist = URLEncodedUtils.parse(uri, "UTF-8");
 		synchronized(pathStateManager) {
-			getPathStateForFile(path).maybeAddParameters(plist);
+			final PathState ps = getPathStateForFile(path);
+			if(ps != null) {
+				ps.maybeAddParameters(plist);
+			}
 		}
 	}
 

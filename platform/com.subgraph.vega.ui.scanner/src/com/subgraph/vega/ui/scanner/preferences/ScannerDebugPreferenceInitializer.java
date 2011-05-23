@@ -12,14 +12,9 @@ public class ScannerDebugPreferenceInitializer extends AbstractPreferenceInitial
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault("LogAllRequests", false);
 		store.setDefault("DisplayDebugOutput", false);
-		store.setDefault("MaxRequestsPerSecond", 25);
-		store.setDefault("MaxAlertString", 400);
 	}
 
 	@Override
 	public void initializeDefaultPreferences() {
-		// TODO Auto-generated method stub
-		
 	}
-
 }

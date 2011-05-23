@@ -4,7 +4,6 @@ import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -29,13 +28,12 @@ public class BasicHttpClientFactory extends AbstractHttpClientFactory {
 
 	private static ClientConnectionManager createConnectionManager(HttpParams params) {
 		final SchemeRegistry sr = createSchemeRegistry();
-		return new BasicThreadSafeClientConnectionManager(params, sr);
+		return new BasicThreadSafeClientConnectionManager(sr);
 	}
 
 	private static HttpParams createHttpParams() {
 		final HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		ConnManagerParams.setMaxTotalConnections(params, 10);
 		return params;
 	}
 
