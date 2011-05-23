@@ -169,10 +169,19 @@ public class RequestLog implements IRequestLog {
 	
 	@Override
 	public List<IRequestLogRecord> getAllRecords() {
+		if(!hasRecords()) {
+			return Collections.emptyList();
+		}
 		final Query query = database.query();
 		query.constrain(IRequestLogRecord.class);
 		query.descend("requestId").orderAscending();
 		return query.execute();
+	}
+	
+	private boolean hasRecords() {
+		final Query query = database.query();
+		query.constrain(IRequestLogRecord.class);
+		return query.execute().size() > 0;
 	}
 
 	public List<IRequestLogRecord> getRecordsByConditionSet(IHttpConditionSet conditionFilter) {

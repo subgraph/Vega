@@ -70,7 +70,7 @@ public class PathStateManager {
 		if(!modelToScanState.containsKey(parentPath)) {
 			if(parentPath.getPathType() != PathType.PATH_DIRECTORY)
 				parentPath.setPathType(PathType.PATH_DIRECTORY);
-			final PathState parentState = createStateForPath(parentPath, directoryFetchCallback);
+			final PathState parentState = createStateForPathNoChecks(parentPath, directoryFetchCallback);
 			modelToScanState.put(parentPath, parentState);
 			return parentState;
 		}
@@ -78,7 +78,41 @@ public class PathStateManager {
 
 
 	}
+
 	public PathState createStateForPath(IWebPath path, ICrawlerResponseProcessor fetchCallback) {
+		final PathState parent = getParentDirectoryState(path);
+		if(parent != null) {
+			if(parent.getDepth() > config.getMaxDepth()) {
+				logger.warning("Maximum path depth of "+ config.getMaxDepth() + " exceeded adding " + path.getUri().toString());
+				return null;
+			} else if(parent.getChildCount() > config.getMaxChildren()) {
+				logger.warning("Maximum child path count of "+ config.getMaxChildren() + " exceeded adding "+ path.getUri().toString());
+				return null;
+			} else if(parent.getDescendantCount() > config.getMaxDescendants()) {
+				logger.warning("Maximum total descendant count of "+ config.getMaxDescendants() + " exceeded adding "+ path.getUri().toString());
+				return null;
+			} else if(exceedsDuplicatePathLimit(path.getPathComponent(), parent)) {
+				logger.warning("Maximum duplicate path limit of "+ config.getMaxDuplicatePaths() + " exceeded adding "+ path.getUri().toString());
+				return null;
+			}
+		}
+		return createStateForPathNoChecks(path, fetchCallback);
+	}
+	
+	private boolean exceedsDuplicatePathLimit(String name, PathState parent) {
+		int count = 0;
+		PathState ps = parent;
+		while(ps != null) {
+			if(!ps.getPath().getPathComponent().equalsIgnoreCase(name)) {
+				return false;
+			}
+			count += 1;
+			ps = ps.getParentState();
+		}
+		return count > config.getMaxDuplicatePaths();
+	}
+
+	private PathState createStateForPathNoChecks(IWebPath path, ICrawlerResponseProcessor fetchCallback) {
 		synchronized(modelToScanState) {
 			if(path == null)
 				throw new NullPointerException();
@@ -90,7 +124,6 @@ public class PathStateManager {
 			return st;
 		}
 	}
-
 
 	public PathState getStateForPath(IWebPath path) {
 		if(path == null)

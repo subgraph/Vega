@@ -14,8 +14,8 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="com.subgraph.vega.ui.command.crawl"
-            name="Crawl">
+            id="com.subgraph.vega.ui.command.scanFrom"
+            name="Scan From">
       </command>
    </extension>
    <extension
@@ -24,9 +24,9 @@
             allPopups="false"
             locationURI="toolbar:com.subgraph.vega.views.website">
          <command
-               commandId="com.subgraph.vega.ui.command.crawl"
+               commandId="com.subgraph.vega.ui.command.scanFrom"
                icon="icons/start_crawling2.png"
-               label="Start Crawling"
+               label="Scan from selected path"
                style="push">
          </command>
       </menuContribution>
@@ -46,8 +46,8 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="com.subgraph.vega.ui.web.commands.StartCrawlHandler"
-            commandId="com.subgraph.vega.ui.command.crawl">
+            class="com.subgraph.vega.ui.web.commands.ScanFromHandler"
+            commandId="com.subgraph.vega.ui.command.scanFrom">
          <activeWhen>
             <reference
                   definitionId="oneElementSelected">
