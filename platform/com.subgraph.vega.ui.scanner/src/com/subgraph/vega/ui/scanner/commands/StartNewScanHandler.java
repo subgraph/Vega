@@ -60,6 +60,10 @@ public class StartNewScanHandler extends AbstractHandler {
 					scannerConfig.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
 					scannerConfig.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
 					scannerConfig.setMaxRequestsPerSecond(preferences.getInt("MaxRequestsPerSecond"));
+					scannerConfig.setMaxDescendants(preferences.getInt("MaxScanDescendants"));
+					scannerConfig.setMaxChildren(preferences.getInt("MaxScanChildren"));
+					scannerConfig.setMaxDepth(preferences.getInt("MaxScanDepth"));
+					scannerConfig.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
 					scanner.setScannerConfig(scannerConfig);
 					scanner.startScanner(scannerConfig);
 				}

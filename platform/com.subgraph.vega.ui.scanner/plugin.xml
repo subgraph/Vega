@@ -160,6 +160,9 @@
       <initializer
             class="com.subgraph.vega.ui.scanner.preferences.ScannerDebugPreferenceInitializer">
       </initializer>
+      <initializer
+            class="com.subgraph.vega.ui.scanner.preferences.ScannerOptionsPreferenceInitializer">
+      </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
@@ -167,6 +170,11 @@
             class="com.subgraph.vega.ui.scanner.preferences.ScannerDebugPreferencePage"
             id="com.subgraph.vega.preferences.scandebug"
             name="Scanner Debugging">
+      </page>
+      <page
+            class="com.subgraph.vega.ui.scanner.preferences.ScannerOptionsPreferencePage"
+            id="com.subgraph.vega.preferences.scandebug"
+            name="Scanner Options">
       </page>
    </extension>
 
