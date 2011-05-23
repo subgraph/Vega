@@ -1,11 +1,13 @@
 package com.subgraph.vega.internal.http.requests;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
 import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
@@ -60,10 +62,33 @@ public class HttpMessageBuilder implements IHttpMessageBuilder {
 	}
 
 	@Override
+	public HttpHeaderBuilder setHeader(String name, String value) {
+        for (int i = 0; i < headerList.size(); i++) {
+        	HttpHeaderBuilder h = headerList.get(i);
+            if (name.equalsIgnoreCase(h.getName())) {
+            	h.setName(name);
+            	h.setValue(value);
+            	return h;
+            }
+        }
+        return addHeader(name, value);
+	}
+
+	@Override
 	public void removeHeader(IHttpHeaderBuilder header) {
 		headerList.remove(header);
 	}
 
+	@Override
+	public void removeHeaders(final String name) {
+        for (Iterator<HttpHeaderBuilder> i = headerList.iterator(); i.hasNext(); ) {
+        	IHttpHeaderBuilder header = i.next();
+            if (name.equalsIgnoreCase(header.getName())) {
+                i.remove();
+            }
+        }
+	}
+	
 	@Override
 	public void clearHeaders() {
 		headerList.clear();
@@ -100,11 +125,37 @@ public class HttpMessageBuilder implements IHttpMessageBuilder {
 	@Override
 	public void setEntity(HttpEntity entity) {
 		this.entity = entity;
+		setHeadersEntity();
 	}
 
 	@Override
 	public HttpEntity getEntity() {
 		return entity;
+	}
+
+	protected void setHeadersEntity() {
+		if (entity != null) {
+	        if (entity.isChunked() || entity.getContentLength() < 0) {
+                setHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
+                removeHeaders(HTTP.CONTENT_LEN);
+	        } else {
+                setHeader(HTTP.CONTENT_LEN, Long.toString(entity.getContentLength()));
+                removeHeaders(HTTP.TRANSFER_ENCODING);
+	        }
+
+            if (entity.getContentType() != null) {
+            	final Header h = entity.getContentType();  
+                setHeader(h.getName(), h.getValue());
+            }
+
+            if (entity.getContentEncoding() != null) {
+            	final Header h = entity.getContentEncoding();  
+                setHeader(h.getName(), h.getValue());
+            }
+		} else {
+            removeHeaders(HTTP.CONTENT_LEN);
+            removeHeaders(HTTP.TRANSFER_ENCODING);
+		}
 	}
 
 }

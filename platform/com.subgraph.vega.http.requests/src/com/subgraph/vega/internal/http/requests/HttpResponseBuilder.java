@@ -55,6 +55,7 @@ public class HttpResponseBuilder extends HttpMessageBuilder implements IHttpResp
 		for (IHttpHeaderBuilder h: headers) {
 			response.addHeader(h.buildHeader());
 		}
+		setHeadersEntity();
 
 		response.setEntity(getEntity());
 		

@@ -91,18 +91,17 @@ public class HttpRequestParser extends ParserBase {
 				};
 			} else {
 				uri = "";
-				version = new ProtocolVersion("HTTP", 0, 9);
+				version = null;//new ProtocolVersion("HTTP", 0, 9);
 			}
 		} else {
 			method = lnBuf.toString();
 			uri = "";
-			version = new ProtocolVersion("HTTP", 0, 9);
+			version = null;//new ProtocolVersion("HTTP", 0, 9);
 		}
 
 		builder.setMethod(method);
 		builder.setFromUri(new URI(uri));
 		builder.setProtocolVersion(version);
-		builder.setRawRequestLine(lnBuf.toString());
 		
 		return 0;
 	}

@@ -22,8 +22,8 @@ import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
-import com.subgraph.vega.http.requests.custom.HttpRawRequest;
+import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
+import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
@@ -131,11 +131,11 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		
 		final HttpUriRequest uriRequest;
 		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRawRequest tmp = new HttpEntityEnclosingRawRequest(null, request.getRequestLine().getMethod(), uri);
+			HttpEntityEnclosingMutableRequest tmp = new HttpEntityEnclosingMutableRequest(request.getRequestLine().getMethod(), uri);
 			tmp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
 			uriRequest = tmp;
 		} else {
-			uriRequest = new HttpRawRequest(null, request.getRequestLine().getMethod(), uri);
+			uriRequest = new HttpMutableRequest(request.getRequestLine().getMethod(), uri);
 		}
 		uriRequest.setParams(request.getParams());
 		uriRequest.setHeaders(request.getAllHeaders());

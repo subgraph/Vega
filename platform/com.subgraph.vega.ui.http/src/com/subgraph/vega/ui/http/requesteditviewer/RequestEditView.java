@@ -2,6 +2,7 @@ package com.subgraph.vega.ui.http.requesteditviewer;
 
 import java.net.URISyntaxException;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.eclipse.swt.SWT;
@@ -48,10 +49,10 @@ public class RequestEditView extends ViewPart {
 
 	public RequestEditView() {
 		super();
-
 		if (requestEngine == null) {
 			IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
-			requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+			final HttpClient httpClient = requestEngineFactory.createBasicClient();
+			requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
 		}
 		requestBuilder = requestEngine.createRequestBuilder();
 	}
@@ -141,6 +142,10 @@ public class RequestEditView extends ViewPart {
 		}
 		if(contentAnalyzer != null) {
 			contentAnalyzer.processResponse(response);
+		}
+
+		if (requestBuilderPartCurr != null) {
+			requestBuilderPartCurr.refresh();
 		}
 	}
 
