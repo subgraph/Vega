@@ -3,10 +3,10 @@ package com.subgraph.vega.api.model.alerts;
 import com.subgraph.vega.api.events.IEvent;
 
 public class ScanStatusChangeEvent implements IEvent {
-	final int scanStatus;
-	final int scanCompletedCount;
-	final int scanTotalCount;
-	
+	private final int scanStatus;
+	private final int scanCompletedCount;
+	private final int scanTotalCount;
+
 	public ScanStatusChangeEvent(int status, int completed, int total) {
 		this.scanStatus = status;
 		this.scanCompletedCount = completed;

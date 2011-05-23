@@ -3,7 +3,6 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import com.subgraph.vega.api.scanner.modules.ModuleScriptType;
 import com.subgraph.vega.impl.scanner.modules.scripting.ModuleValidator.ModuleValidationException;
 import com.subgraph.vega.impl.scanner.modules.scripting.ScriptFile.CompileStatus;
 
@@ -80,48 +80,50 @@ public class ScriptLoader {
 		}
 	}
 	
-	public List<ScriptedModule> getAllModules() {
+	public List<ScriptedModule> getAllModulesByType(ModuleScriptType type) {
 		final List<ScriptedModule> result = new ArrayList<ScriptedModule>();
 		synchronized(modulePathMap) {
-			for(ScriptedModule m : modulePathMap.values()) {
-				if(!m.isDisabled())
+			for(ScriptedModule m: modulePathMap.values()) {
+				if(!m.isDisabled() && (type == null || type == m.getModuleType())) {
 					result.add(m);
+				}
 			}
 		}
 		return result;
+	}
+
+	public List<ScriptedModule> getAllModules() {
+		return getAllModulesByType(null);
 	}
 	
 	public Scriptable getPreludeScope() {
 		return preludeLoader.getPreludeScope();
 	}
 
-	private ScriptedModule compileModule(ScriptFile scriptFile) {
-		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
-			logger.warning(scriptFile.getCompileFailureMessage());
+	private ScriptedModule compileModuleScript(ScriptFile scriptFile) {
+		final ModuleValidator validator = compileAndValidate(scriptFile);
+		if(validator == null) {
 			return null;
 		}
-		
-		final ModuleValidator validator = validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
-		if(validator == null)
-			return null;
-		
 		return new ScriptedModule(scriptFile, validator);
 	}
 	
-	private ScriptedModule compileModule(ScriptedModule module) {
-		final ScriptFile scriptFile = module.getScriptFile();
+	private boolean recompileModule(ScriptedModule module) {
+		final ModuleValidator validator = compileAndValidate(module.getScriptFile());
+		if(validator == null)
+			return false;
+		module.updateFromValidator(validator);
+		return true;
+	}
+	
+	private ModuleValidator compileAndValidate(ScriptFile scriptFile) {
 		if(!moduleCompiler.compile(scriptFile) || scriptFile.getCompileStatus() != CompileStatus.COMPILE_SUCCEEDED) {
 			logger.warning(scriptFile.getCompileFailureMessage());
 			return null;
 		}
-		
-		final ModuleValidator validator = validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
-		if(validator == null)
-			return null;
-		module.updateFromValidator(validator);
-		return module;
+		return validateModule(scriptFile.getCompiledScript(), scriptFile.getPath());
 	}
-	
+
 	private ModuleValidator validateModule(Scriptable module, String modulePath) {
 		final ModuleValidator validator = new ModuleValidator(module);
 		try {
@@ -141,16 +143,20 @@ public class ScriptLoader {
 	}
 	
 	private void crawlDirectory(File dir, List<File> files) {
-		for(File f: dir.listFiles(scriptFilter))
+		for(File f: dir.listFiles(scriptFilter)) {
 			files.add(f);
-		for(File d: dir.listFiles(directoryFilter))
+		}
+		
+		for(File d: dir.listFiles(directoryFilter)) {
 			crawlDirectory(d, files);
+		}
 	}
 	
 	public boolean reloadModules() {
 		boolean somethingChanged = false;
-		if(preludeLoadFailed)
+		if(preludeLoadFailed) {
 			return false;
+		}
 
 		synchronized(modulePathMap) {
 			synchronizeScriptPaths();
@@ -162,18 +168,18 @@ public class ScriptLoader {
 		}
 		return somethingChanged;
 	}
-	
+
 	private void synchronizeScriptPaths() {
 		final Set<File> pathSet = new HashSet<File>();
-		
+
 		for(File path: allScriptPaths()) {
 			pathSet.add(path);
-			if(!scriptPathMap.containsKey(path)) 
+			if(!scriptPathMap.containsKey(path)) { 
 				scriptPathMap.put(path, new ScriptFile(path));
+			}
 		}
-		
-		Collection<File> keys = scriptPathMap.keySet();
-		
+
+		final List<File> keys = new ArrayList<File>(scriptPathMap.keySet());
 		for(File path: keys) {
 			if(!pathSet.contains(path)) {
 				modulePathMap.remove(path);
@@ -181,21 +187,25 @@ public class ScriptLoader {
 			}
 		}
 	}
-		
+
 	private boolean compileScriptFileIfNeeded(File path, ScriptFile scriptFile) {
-		if(!isCompileNeeded(scriptFile))
+		if(!isCompileNeeded(scriptFile)) {
 			return false;
-		
+		}
+
 		if(modulePathMap.containsKey(path)) {
-			compileModule(modulePathMap.get(path));
+			if(!recompileModule(modulePathMap.get(path))) {
+				modulePathMap.remove(path);
+			}
 		} else {
-			final ScriptedModule module = compileModule(scriptFile);
-			if(module != null)
+			final ScriptedModule module = compileModuleScript(scriptFile);
+			if(module != null) {
 				modulePathMap.put(path, module);
+			}
 		}
 		return true;
 	}
-	
+
 	private boolean isCompileNeeded(ScriptFile scriptFile) {
 		return ((scriptFile.getCompileStatus() == CompileStatus.NOT_COMPILED) || scriptFile.hasFileChanged());
 	}

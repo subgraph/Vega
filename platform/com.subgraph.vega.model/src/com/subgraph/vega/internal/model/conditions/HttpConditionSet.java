@@ -114,11 +114,9 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
 		activate(ActivationPurpose.READ);
-		if(conditionList.isEmpty())
-			return db.query(IRequestLogRecord.class);
-		
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
+		query.descend("requestId").orderAscending();
 		for(IHttpCondition c: conditionList) {
 			((AbstractCondition) c).filterRequestLogQuery(query);
 		}

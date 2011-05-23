@@ -25,6 +25,7 @@ public class CrawlerTask {
 	private final ICrawlerResponseProcessor responseProcessor;
 	private final Object argument;
 	private IHttpResponse response;
+	private Throwable exception;
 	private final boolean isExitTask;
 	
 	
@@ -56,6 +57,18 @@ public class CrawlerTask {
 		this.response = response;
 	}
 	
+	void setException(Throwable exception) {
+		this.exception = exception;
+	}
+	
+	Throwable getException() {
+		return exception;
+	}
+	
+	boolean causedException() {
+		return exception != null;
+	}
+
 	boolean finishTask() {
 		synchronized (taskCountLock) {
 			outstandingTasks--;

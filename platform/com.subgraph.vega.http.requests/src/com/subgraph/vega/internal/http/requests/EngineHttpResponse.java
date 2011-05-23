@@ -163,18 +163,20 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
-	public void lockResponseEntity() {
+	public boolean lockResponseEntity() {
 		final HttpEntity entity = rawResponse.getEntity();
 		if(entity == null)
-			return;
+			return false;
 		try {
 			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
 			newEntity.setContentType(entity.getContentType());
 			newEntity.setContentEncoding(entity.getContentEncoding());
 			rawResponse.setEntity(newEntity);
 			EntityUtils.consume(entity);
+			return true;
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "I/O error while loading HTTP entity", e);
+			logger.log(Level.INFO, "I/O error while loading HTTP entity", e);
+			return false;
 		}		
 	}
 

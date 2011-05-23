@@ -183,7 +183,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			}
 		}
 		
-		for(ScriptedModule sm: scriptLoader.getAllModules()) {
+		for(ScriptedModule sm: scriptLoader.getAllModulesByType(ModuleScriptType.RESPONSE_PROCESSOR)) {
 			String path = sm.getScriptFile().getPath();
 			if(pathMap.containsKey(path)) {
 				ResponseProcessorScript old = pathMap.get(path);
@@ -211,7 +211,7 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			}
 		}
 		
-		for(ScriptedModule sm: scriptLoader.getAllModules()) {
+		for(ScriptedModule sm: scriptLoader.getAllModulesByType(ModuleScriptType.BASIC_MODULE)) {
 			String path = sm.getScriptFile().getPath();
 			if(pathMap.containsKey(path)) {
 				BasicModuleScript old = pathMap.get(path);

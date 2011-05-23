@@ -9,9 +9,10 @@ function run(request, response, ctx) {
 
     var i = 0;
     var found = 0;
+    var headers = response.allHeaders
 
-    for (i = 0; i < response.allHeaders.length; i++) {
-      if (response.allHeaders[i].name.toLowerCase() == "location") found = 1;
+    for (i = 0; i < headers.length; i++) {
+      if (headers[i].name.toLowerCase() == "location") found = 1;
     }
     if (!found) {
       if ((response.code != 401) && (response.code != 304)) {

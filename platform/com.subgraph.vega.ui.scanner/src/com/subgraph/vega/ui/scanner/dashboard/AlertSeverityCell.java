@@ -83,6 +83,9 @@ public class AlertSeverityCell extends Composite {
 	}
 	
 	void addAlert(IScanAlert alert) {
+		if(isDisposed()) {
+			return;
+		}
 		incrementTotalCount();
 		final String title = alert.getTitle();
 		if(!alertTitleToItem.containsKey(title)) {

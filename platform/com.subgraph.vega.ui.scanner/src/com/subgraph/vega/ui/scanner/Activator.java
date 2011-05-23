@@ -26,7 +26,8 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceTracker modelTracker;
 	private ServiceTracker xmlRepositoryTracker;
 	private ServiceTracker moduleRegistryTracker;
-	
+
+	private ScanExceptionNotifier exceptionNotifier;
 	/**
 	 * The constructor
 	 */
@@ -40,21 +41,23 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+
 		scannerTracker = new ServiceTracker(context, IScanner.class.getName(), null);
 		scannerTracker.open();
-		
+
 		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
-		
+
 		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
 		modelTracker.open();
-		
+
 		xmlRepositoryTracker = new ServiceTracker(context, IXmlRepository.class.getName(), null);
 		xmlRepositoryTracker.open();
-		
+
 		moduleRegistryTracker = new ServiceTracker(context, IScannerModuleRegistry.class.getName(), null);
 		moduleRegistryTracker.open();
+		
+		exceptionNotifier = new ScanExceptionNotifier();
 	}
 
 	/*
@@ -63,6 +66,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		exceptionNotifier.stop();
 		super.stop(context);
 	}
 

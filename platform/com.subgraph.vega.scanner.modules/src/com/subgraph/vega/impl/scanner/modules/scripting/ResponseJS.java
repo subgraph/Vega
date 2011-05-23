@@ -71,12 +71,12 @@ public class ResponseJS extends ScriptableObject {
 
 	private Object headersToJS(Header[] headers) {
 		final Scriptable scope = ScriptableObject.getTopLevelScope(this);
-		final Object[] hdrObjects = new Scriptable[headers.length];
 		final Context cx = Context.getCurrentContext();
+		final Scriptable array = cx.newArray(scope, headers.length);
 		for(int i = 0; i < headers.length; i++) {
-			hdrObjects[i] = Context.javaToJS(headers[i], scope);
+			array.put(i, array, Context.javaToJS(headers[i], scope));
 		}
-		return cx.newArray(scope, hdrObjects);		
+		return array;
 	}
 
 	public boolean jsGet_fetchFail() {
