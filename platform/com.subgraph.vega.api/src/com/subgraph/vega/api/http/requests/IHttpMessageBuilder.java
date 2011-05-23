@@ -30,7 +30,9 @@ public interface IHttpMessageBuilder {
 	
 	void setHeaders(Header[] headers);
 	IHttpHeaderBuilder addHeader(String name, String value);
+	IHttpHeaderBuilder setHeader(String name, String value);
 	void removeHeader(IHttpHeaderBuilder header);
+	void removeHeaders(String name);
 	void clearHeaders();
 	void swapHeader(int idx1, int idx2);
 	int getHeaderIdxOf(IHttpHeaderBuilder next);

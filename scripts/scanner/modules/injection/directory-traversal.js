@@ -37,11 +37,11 @@ function handler(req, res, ctx) {
   var fp = ps.getPathFingerprint();
 
   if (!ps.isParametric()) {
-    if (ctx.getSavedResponse(0).getResponseCode() < 300 && !ctx.isFingerprintMatch(0, fp) && !ctx.isFingerprintMatch(0, 1)) {
+    if (ctx.getSavedResponse(0).code < 300 && !ctx.isFingerprintMatch(0, fp) && !ctx.isFingerprintMatch(0, 1)) {
       publishAlert(ctx, "Unique response for /./", 0, req, res);
       ctx.responseChecks(ps.createRequest(), ctx.getSavedResponse(0));
     }
-    if (ctx.getSavedResponse(2).getResponseCode() < 300 && !ctx.isFingerprintMatch(2, fp) && !ctx.isFingerprintMatch(2, 3)) {
+    if (ctx.getSavedResponse(2).code < 300 && !ctx.isFingerprintMatch(2, fp) && !ctx.isFingerprintMatch(2, 3)) {
       publishAlert(ctx, "Unique response for \\.\\", 2, req, res);
       ctx.responseChecks(2);
     }
@@ -64,5 +64,4 @@ function publishAlert(ctx, msg, idx) {
     key: "vinfo-1918:" + ctx.getSavedRequest(idx).requestLine.uri,
     resource: ctx.getSavedRequest(idx).requestLine.uri
   });
-
 }

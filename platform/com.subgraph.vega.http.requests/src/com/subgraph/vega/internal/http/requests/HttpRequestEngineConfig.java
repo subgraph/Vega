@@ -17,6 +17,8 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	private boolean undoURLEncoding = false;
 	private BasicCookieStore cookieStore = new BasicCookieStore(); // Me not *take* cookies, me *eat* the cookies
 	private int requestsPerMinute = DEFAULT_REQUESTS_PER_MINUTE;
+	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
+	private int maxConnectionsPerRoute = DEFAULT_MAX_CONNECTIONS_PER_ROUTE;
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
 	
 	@Override
@@ -78,4 +80,23 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 		return cookieStore;
 	}
 
+	@Override
+	public void setMaxConnections(int value) {
+		maxConnections = value;
+	}
+
+	@Override
+	public int getMaxConnections() {
+		return maxConnections;
+	}
+
+	@Override
+	public void setMaxConnectionsPerRoute(int value) {
+		maxConnectionsPerRoute = value;
+	}
+
+	@Override
+	public int getMaxConnectionsPerRoute() {
+		return maxConnectionsPerRoute;
+	}
 }

@@ -17,7 +17,7 @@ public abstract class AbstractHttpClientFactory {
 
 	protected static SchemeRegistry createSchemeRegistry() {
 		final SchemeRegistry sr = new SchemeRegistry();
-		sr.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		sr.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
 		SSLContext ctx;
 		try {
@@ -34,9 +34,8 @@ public abstract class AbstractHttpClientFactory {
 				}
 			};
 			ctx.init(null, new X509TrustManager[]{tm}, null);
-			SSLSocketFactory ssf = new SSLSocketFactory(ctx);
-			ssf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-			sr.register(new Scheme("https", ssf, 443));
+			SSLSocketFactory ssf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			sr.register(new Scheme("https", 443, ssf));
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

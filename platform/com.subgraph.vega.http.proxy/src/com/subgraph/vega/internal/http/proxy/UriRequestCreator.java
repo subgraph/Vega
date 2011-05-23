@@ -10,8 +10,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HTTP;
 
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
-import com.subgraph.vega.http.requests.custom.HttpRawRequest;
+import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
+import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
 
 public class UriRequestCreator {
 	private final static String HTTP_SCHEME = "http://";
@@ -27,11 +27,11 @@ public class UriRequestCreator {
 		final URI uri = getUriForRequest(request, isSSL);
 		final HttpUriRequest uriRequest;
 		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRawRequest tmp = new HttpEntityEnclosingRawRequest(null, request.getRequestLine().getMethod(), uri);
+			HttpEntityEnclosingMutableRequest tmp = new HttpEntityEnclosingMutableRequest(request.getRequestLine().getMethod(), uri);
 			tmp.setEntity(((HttpEntityEnclosingRequest) request).getEntity());
 			uriRequest = tmp;
 		} else {
-			uriRequest = new HttpRawRequest(null, request.getRequestLine().getMethod(), uri);
+			uriRequest = new HttpMutableRequest(request.getRequestLine().getMethod(), uri);
 		}
 		uriRequest.setParams(request.getParams());
 		uriRequest.setHeaders(request.getAllHeaders());

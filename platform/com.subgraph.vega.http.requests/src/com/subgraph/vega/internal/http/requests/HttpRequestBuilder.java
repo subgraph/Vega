@@ -15,12 +15,11 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
-import com.subgraph.vega.api.http.requests.IHttpRawRequest;
+import com.subgraph.vega.api.http.requests.IHttpMutableRequest;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingRawRequest;
-import com.subgraph.vega.http.requests.custom.HttpRawRequest;
-import com.subgraph.vega.http.requests.custom.RawRequestLine;
+import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
+import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
 
 public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpRequestBuilder {
 	private String scheme = "http";
@@ -28,7 +27,6 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	private int hostPort = 80;
 	private String method = "";
 	private String path = "";
-	private String rawRequestLine;
 
 	@Override
 	public synchronized void clear() {
@@ -38,7 +36,6 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		hostPort = 80;
 		method = "";
 		path = "";
-		rawRequestLine = null;
 	}
 
 	@Override
@@ -65,7 +62,6 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		method = requestLine.getMethod();
 
 		final URI requestUri = new URI(requestLine.getUri());
-
 		scheme = requestUri.getScheme();
 		if (scheme == null) {
 			scheme = "http";
@@ -81,21 +77,8 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			}
 		}
 
-		path = requestUri.getRawPath();
-		if (requestUri.getRawQuery() != null) {
-			path += "?" + requestUri.getRawQuery();
-		}
-		if (requestUri.getRawFragment() != null) {
-			path += "#" + requestUri.getRawFragment();
-		}
-
+		setPathFromUri(requestUri);
 		setProtocolVersion(requestLine.getProtocolVersion());
-
-		if (requestLine instanceof RawRequestLine) {
-			rawRequestLine = ((RawRequestLine)requestLine).toString();
-		} else {
-			rawRequestLine = null;
-		}
 	}
 
 	@Override
@@ -104,27 +87,33 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 			scheme = uri.getScheme();
 			if (uri.getHost() != null) {
 				host = uri.getHost();
-				if (uri.getPort() != -1) {
-					hostPort = uri.getPort();
-				} else {
-					if (scheme.equals("https")) {
-						hostPort = 443;
-					} else {
-						hostPort = 80;
-					}
+				hostPort = uri.getPort();
+				if (hostPort == -1) {
+					hostPort = getSchemeDefaultPort(scheme);
 				}
 			}
 		}
 
-		path = uri.getRawPath();
-		if (uri.getRawQuery() != null) {
-			path += "?" + uri.getRawQuery();
-		}
-		if (uri.getRawFragment() != null) {
-			path += "#" + uri.getRawFragment();
-		}
+		setPathFromUri(uri);
 	}
 
+	private void setPathFromUri(URI uri) {
+		path = uri.getRawPath();
+		if (path != null) {
+			if (path.length() == 0 || path.charAt(0) != '/') {
+				path = '/' + path;
+			}
+		} else {
+			path = "";
+		}
+		if (uri.getRawQuery() != null) {
+			path += '?' + uri.getRawQuery();
+		}
+		if (uri.getRawFragment() != null) {
+			path += '#' + uri.getRawFragment();
+		}		
+	}
+	
 	@Override
 	public synchronized void setFromHttpHost(HttpHost host) {
 		scheme = host.getSchemeName();
@@ -135,17 +124,38 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		this.host = host.getHostName();
 		hostPort = host.getPort();
 		if (hostPort == -1) {
-			if (scheme.equals("https")) {
-				hostPort = 443;
-			} else {
-				hostPort = 80;
-			}
+			hostPort = getSchemeDefaultPort(scheme);
 		}
 	}
 	
+	private int getSchemeDefaultPort(final String scheme) {
+		if (scheme.equals("https")) {
+			return 443;
+		} else {
+			return 80;
+		}
+	}
+	
+	private boolean isSchemeDefaultPort(final String scheme, int port) {
+		if (scheme.equals("https")) {
+			if (port == 443) {
+				return true;
+			}
+		} else {
+			if (port == 80) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public synchronized void setScheme(String scheme) {
-		this.scheme = scheme;
+		if (scheme != null) {
+			this.scheme = scheme.trim();
+		} else {
+			this.scheme = "http";
+		}
 	}
 
 	@Override
@@ -155,7 +165,11 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setHost(String host) {
-		this.host = host;
+		if (host != null) {
+			this.host = host.trim();
+		} else {
+			this.host = null;
+		}
 	}
 
 	@Override
@@ -175,7 +189,11 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setMethod(String method) {
-		this.method = method;
+		if (method != null) {
+			this.method = method.trim();
+		} else {
+			this.method = null;
+		}
 	}
 
 	@Override
@@ -190,31 +208,37 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setPath(String path) {
-		this.path = path;
+		if (path != null) {
+			String tmp = path.trim();
+			if (tmp.length() == 0 || tmp.charAt(0) != '/') {
+				tmp = '/' + tmp;
+			}
+			this.path = tmp;
+		} else {
+			this.path = null;
+		}
 	}
 
-	@Override
-	public synchronized void setRawRequestLine(String line) {
-		this.rawRequestLine = line;
-	}
-
-	@Override
-	public synchronized String getRawRequestLine() {
-		return rawRequestLine;
-	}
-	
 	@Override
 	public synchronized String getRequestLine() {
-		if (rawRequestLine != null) {
-			return rawRequestLine;
-		} else {
-			String requestLine = method + " " + path;
-			ProtocolVersion protocolVersion = getProtocolVersion();
-			if (protocolVersion != null) {
-				requestLine += " " + protocolVersion.toString();
-			}
-			return requestLine;
+		final StringBuilder buf = new StringBuilder();
+		if (method != null) {
+			buf.append(method);
 		}
+		if (path != null) {
+			if (buf.length() != 0) {
+				buf.append(' ');
+			}
+			buf.append(path);
+		}
+		ProtocolVersion protocolVersion = getProtocolVersion();
+		if (protocolVersion != null) {
+			if (buf.length() != 0) {
+				buf.append(' ');
+			}
+			buf.append(protocolVersion.toString());
+		}
+		return buf.toString();
 	}
 
 	@Override
@@ -222,17 +246,27 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		if (host == null || host.length() == 0) {
 			throw new IllegalArgumentException("Invalid host");
 		}
-		
-		final URI requestUri = new URI(scheme + "://" + host + ":" + Integer.toString(hostPort) + path);
-		IHttpRawRequest request;
-		HttpEntity entity = getEntity();
-		
+
+		final StringBuilder buf = new StringBuilder();
+		buf.append(scheme);
+		buf.append("://");
+		buf.append(host);
+		if (isSchemeDefaultPort(scheme, hostPort) == false) {
+			buf.append(":");
+			buf.append(Integer.toString(hostPort));
+		}
+		if (path != null) {
+			buf.append(path);
+		}
+		final URI requestUri = new URI(buf.toString());		
+		IHttpMutableRequest request;
+		HttpEntity entity = getEntity();		
 		if (entity != null) {
-			HttpEntityEnclosingRawRequest entityRequest = new HttpEntityEnclosingRawRequest(rawRequestLine, method, requestUri);
+			HttpEntityEnclosingMutableRequest entityRequest = new HttpEntityEnclosingMutableRequest(method, requestUri);
 			entityRequest.setEntity(entity);
 			request = entityRequest;
 		} else {
-			request = new HttpRawRequest(rawRequestLine, method, requestUri);
+			request = new HttpMutableRequest(method, requestUri);
 		}
 
 		HttpParams params = getParams();
@@ -245,11 +279,15 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		}
 		request.setParams(params);
 
+		setHeadersEntity();
 		IHttpHeaderBuilder[] headers = getHeaders();
 		for (IHttpHeaderBuilder h: headers) {
 			request.addHeader(h.buildHeader());
 		}
+
 		return request;
 	}
 
+
+	
 }

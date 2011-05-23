@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
@@ -17,6 +16,7 @@ import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
 import com.db4o.query.Predicate;
+import com.db4o.query.Query;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
@@ -169,7 +169,10 @@ public class RequestLog implements IRequestLog {
 	
 	@Override
 	public List<IRequestLogRecord> getAllRecords() {
-		return database.query(IRequestLogRecord.class);
+		final Query query = database.query();
+		query.constrain(IRequestLogRecord.class);
+		query.descend("requestId").orderAscending();
+		return query.execute();
 	}
 
 	public List<IRequestLogRecord> getRecordsByConditionSet(IHttpConditionSet conditionFilter) {

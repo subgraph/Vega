@@ -78,6 +78,10 @@ public class PathState implements IPathState {
 	private boolean responseVaries;
 	private boolean lockedFlag;
 	private PathStateParameterManager parameterManager;
+	
+	private final Object childCountLock = new Object();
+	private int descendantCount = 0;
+	private int childCount = 0;
 
 	private PathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path, IRequestBuilder requestBuilder) {
 		this.initialFetchProcessor = fetchProcessor;
@@ -93,7 +97,7 @@ public class PathState implements IPathState {
 		return parentState;
 	}
 
-	public void addChildState(PathState state) {
+	private void addChildState(PathState state) {
 		synchronized(childStates) {
 			for(IPathState cs: childStates) {
 				if(cs.getPath().equals(state))
@@ -104,6 +108,36 @@ public class PathState implements IPathState {
 				state.setLocked();
 			else
 				state.performInitialFetch();
+			
+			synchronized(childCountLock) {
+				childCount += 1;
+				incrementDescendants();
+			}
+		}
+	}
+
+	private void incrementDescendants() {
+		synchronized(childCountLock) {
+			descendantCount += 1;
+			if(parentState != null) {
+				parentState.incrementDescendants();
+			}
+		}
+	}
+
+	public int getDescendantCount() {
+		return descendantCount;
+	}
+	
+	public int getChildCount() {
+		return childCount;
+	}
+
+	public synchronized int getDepth() {
+		if(parentState == null) {
+			return 1;
+		} else {
+			return 1 + parentState.getDepth();
 		}
 	}
 

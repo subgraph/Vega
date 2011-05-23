@@ -11,6 +11,7 @@ import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
+	
 	private URI baseURI;
 	private List<Cookie> cookieList;
 	private List<String> modulesList;
@@ -23,7 +24,12 @@ public class ScannerConfig implements IScannerConfig {
 	private String ntlmPassword;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
-	private int maxRequestsPerSecond;
+	private int maxRequestsPerSecond = DEFAULT_MAX_REQUEST_PER_SECOND;
+	private int maxDescendants = DEFAULT_MAX_DESCENDANTS;
+	private int maxChildren = DEFAULT_MAX_CHILDREN;
+	private int maxDepth = DEFAULT_MAX_DEPTH;
+	private int maxDuplicatePaths = DEFAULT_MAX_DUPLICATE_PATHS;
+	
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
 	@Override
@@ -148,7 +154,7 @@ public class ScannerConfig implements IScannerConfig {
 
 	@Override
 	public boolean getDirectoryInjectionChecksFlag() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -175,6 +181,46 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public int getMaxRequestsPerSecond() {
 		return maxRequestsPerSecond;
+	}
+
+	@Override
+	public int getMaxDescendants() {
+		return maxDescendants;
+	}
+
+	@Override
+	public int getMaxChildren() {
+		return maxChildren;
+	}
+
+	@Override
+	public int getMaxDepth() {
+		return maxDepth;
+	}
+
+	@Override
+	public void setMaxDescendants(int value) {
+		maxDescendants = value;
+	}
+
+	@Override
+	public void setMaxChildren(int value) {
+		maxChildren = value;
+	}
+
+	@Override
+	public void setMaxDepth(int value) {
+		maxDepth = value;
+	}
+
+	@Override
+	public int getMaxDuplicatePaths() {
+		return maxDuplicatePaths;
+	}
+
+	@Override
+	public void setMaxDuplicatePaths(int value) {
+		maxDuplicatePaths = value;
 	}
 }
 
