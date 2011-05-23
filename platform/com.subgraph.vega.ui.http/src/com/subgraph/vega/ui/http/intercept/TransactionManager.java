@@ -7,8 +7,6 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
@@ -19,7 +17,6 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.ErrorDisplay;
 
 public class TransactionManager {
 	private IHttpInterceptor interceptor;
@@ -35,12 +32,16 @@ public class TransactionManager {
 	TransactionManager(IHttpInterceptor interceptor) {
 		interceptorEventHandler = new IHttpInterceptorEventHandler() {
 			@Override
-			public void notifyQueue(IProxyTransaction transaction) {
+			public void notifyQueue(IProxyTransaction transaction, int idx) {
 				if (transaction.hasResponse() == false) {
 					handleTransactionRequest(transaction);
 				} else {
 					handleTransactionResponse(transaction);
 				}
+			}
+
+			@Override
+			public void notifyRemove(int idx) {
 			}
 
 			@Override

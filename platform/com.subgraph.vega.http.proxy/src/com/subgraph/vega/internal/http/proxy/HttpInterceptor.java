@@ -147,8 +147,9 @@ public class HttpInterceptor implements IHttpInterceptor {
 			if (eventHandlerList.size() != 0 && intercept(transaction) != false) {
 				transaction.setPending(this);
 				transactionQueue.add(transaction);
+				int idx = transactionQueue.size() - 1;
 				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
-					handler.notifyQueue(transaction);
+					handler.notifyQueue(transaction, idx);
 				}
 				return true;
 			}
@@ -203,6 +204,11 @@ public class HttpInterceptor implements IHttpInterceptor {
 	}
 
 	@Override
+	public IProxyTransaction[] getTransactions() {
+		return transactionQueue.toArray(new IProxyTransaction[transactionQueue.size()]);
+	}
+
+	@Override
 	public IProxyTransaction transactionQueueGet(int idx) {
 		synchronized(interceptorLock) {
 			if (transactionQueue.size() <= idx) {
@@ -220,7 +226,11 @@ public class HttpInterceptor implements IHttpInterceptor {
 	 */
 	public void notifyHandled(ProxyTransaction transaction) {
 		synchronized(interceptorLock) {
-			transactionQueue.remove(transactionQueue.indexOf(transaction));
+			final int idx = transactionQueue.indexOf(transaction);
+			transactionQueue.remove(idx);
+			for (IHttpInterceptorEventHandler handler: eventHandlerList) {
+				handler.notifyRemove(idx);
+			}
 			if (transactionQueue.size() == 0) {
 				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
 					handler.notifyEmpty();

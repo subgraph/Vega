@@ -51,11 +51,11 @@ public class HttpResponseBuilder extends HttpMessageBuilder implements IHttpResp
 	public synchronized HttpResponse buildResponse() {
 		BasicHttpResponse response = new BasicHttpResponse(getProtocolVersion(), statusCode, reasonPhrase);
 		
+		setHeadersEntity();
 		IHttpHeaderBuilder[] headers = getHeaders();
 		for (IHttpHeaderBuilder h: headers) {
 			response.addHeader(h.buildHeader());
 		}
-		setHeadersEntity();
 
 		response.setEntity(getEntity());
 		

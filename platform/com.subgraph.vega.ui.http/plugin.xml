@@ -19,6 +19,13 @@
             restorable="true">
       </view>
       <view
+            allowMultiple="false"
+            class="com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView"
+            id="com.subgraph.vega.views.intercept.queue"
+            name="Intercept Queue"
+            restorable="true">
+      </view>
+      <view
             allowMultiple="true"
             class="com.subgraph.vega.ui.http.requesteditviewer.RequestEditView"
             icon="icons/requestEdit.png"
