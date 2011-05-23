@@ -83,6 +83,22 @@ public class TransactionManager {
 		}
 	}
 
+	public void openTransaction(IProxyTransaction transaction) {
+		synchronized(this) {
+			if (currentTransaction != null) {
+				currentTransaction.setEventHandler(null);
+			}
+			currentTransaction = transaction;
+			currentTransaction.setEventHandler(transactionEventHandler);
+			if(!currentTransaction.hasResponse()) {
+				setRequestPending();
+				setResponseInactive();
+			} else {
+				setResponsePending();
+			}
+		}
+	}
+
 	/**
 	 * Close this transaction manager prior to the interceptor view being closed. Unregisters the manager as an event
 	 * handler in the interceptor and the current transaction, if one exists. 

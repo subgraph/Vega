@@ -7,6 +7,9 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -14,11 +17,15 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.ErrorDisplay;
+import com.subgraph.vega.ui.http.intercept.InterceptView;
 
 public class InterceptQueueView extends ViewPart {
 	private IHttpInterceptor interceptor;
@@ -39,6 +46,7 @@ public class InterceptQueueView extends ViewPart {
 
 	@Override
 	public void setFocus() {
+		tableViewerTransactions.getTable().setFocus();
 	}
 
 	private Composite createTable(Composite parent) {
@@ -52,6 +60,7 @@ public class InterceptQueueView extends ViewPart {
 		final Table table = tableViewerTransactions.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
+		tableViewerTransactions.addDoubleClickListener(createDoubleClickListener());
 
 		return rootControl;
 	}
@@ -117,5 +126,22 @@ public class InterceptQueueView extends ViewPart {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 	}
-	
+
+	private IDoubleClickListener createDoubleClickListener() {
+		return new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				final Object element = ((IStructuredSelection) event.getSelection()).getFirstElement();
+				final InterceptView view;
+				try {
+					view = (InterceptView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(InterceptView.VIEW_ID);
+				} catch (PartInitException e) {
+					ErrorDisplay.displayExceptionError(parentComposite.getShell(), e);
+					return;
+				}
+				view.openTransaction((IProxyTransaction) element);
+			}
+		};
+	}
+
 }
