@@ -28,3 +28,4 @@ Import-Package: com.subgraph.vega.api.events,
  org.eclipse.ui.forms.widgets
 Bundle-ClassPath: .,
  lib/freemarker.jar
+Export-Package: com.subgraph.vega.ui.scanner
