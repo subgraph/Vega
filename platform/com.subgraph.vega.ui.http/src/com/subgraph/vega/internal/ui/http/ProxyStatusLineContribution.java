@@ -130,7 +130,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		if(label == null || label.isDisposed()) {
 			return;
 		}
-		label.getDisplay().syncExec(new Runnable() {
+		label.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if(image != null) {

@@ -205,7 +205,9 @@ public class HttpInterceptor implements IHttpInterceptor {
 
 	@Override
 	public IProxyTransaction[] getTransactions() {
-		return transactionQueue.toArray(new IProxyTransaction[transactionQueue.size()]);
+		synchronized(interceptorLock) {
+			return transactionQueue.toArray(new IProxyTransaction[transactionQueue.size()]);
+		}
 	}
 
 	@Override
@@ -249,6 +251,10 @@ public class HttpInterceptor implements IHttpInterceptor {
 		}
 	}
 
+	/**
+	 * Release transactions that no longer match interception criteria following a configuration change. Must be invoked
+	 * with interceptorLock synchronized.
+	 */
 	private void releaseOnChange(TransactionDirection direction) {
 		final HttpInterceptorLevel level = getInterceptLevel(direction);
 		if (level != HttpInterceptorLevel.ENABLED_ALL) {

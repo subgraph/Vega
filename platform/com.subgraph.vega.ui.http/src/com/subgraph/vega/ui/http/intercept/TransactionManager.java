@@ -213,18 +213,22 @@ public class TransactionManager {
 	}
 
 	synchronized void forwardRequest() throws URISyntaxException, UnsupportedEncodingException {
-		HttpUriRequest request = requestBuilder.buildRequest();
-		if (request != null) {
-			currentTransaction.setRequest(request);
-			currentTransaction.doForward();
+		if (currentTransaction != null) {
+			HttpUriRequest request = requestBuilder.buildRequest();
+			if (request != null) {
+				currentTransaction.setRequest(request);
+				currentTransaction.doForward();
+			}
 		}
 	}
 
 	synchronized void forwardResponse() throws UnsupportedEncodingException {
-		HttpResponse response = responseBuilder.buildResponse();
-		if (response != null) {
-			currentTransaction.getResponse().setRawResponse(response);
-			currentTransaction.doForward();
+		if (currentTransaction != null) {
+			HttpResponse response = responseBuilder.buildResponse();
+			if (response != null) {
+				currentTransaction.getResponse().setRawResponse(response);
+				currentTransaction.doForward();
+			}
 		}
 	}
 	
