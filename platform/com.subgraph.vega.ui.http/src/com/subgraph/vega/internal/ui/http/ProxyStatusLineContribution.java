@@ -19,6 +19,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.intercept.InterceptView;
 
 public class ProxyStatusLineContribution extends ContributionItem {
 	private final static int BLINK_INTERVAL = 500;
@@ -129,7 +130,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		if(label == null || label.isDisposed()) {
 			return;
 		}
-		label.getDisplay().syncExec(new Runnable() {
+		label.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if(image != null) {
@@ -147,7 +148,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 	private void handleAlertClick() {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		try {
-			window.getActivePage().showView("com.subgraph.vega.views.intercept");
+			window.getActivePage().showView(InterceptView.VIEW_ID);
 			stopAlert();
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Failed to open interception view", e);

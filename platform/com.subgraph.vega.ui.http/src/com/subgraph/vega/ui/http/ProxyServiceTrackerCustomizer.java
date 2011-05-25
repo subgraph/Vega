@@ -21,8 +21,12 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 		this.statusLineContribution = statusLineContribution;
 		eventHandler = new IHttpInterceptorEventHandler() {
 			@Override
-			public void notifyQueue(IProxyTransaction transaction) {
+			public void notifyQueue(IProxyTransaction transaction, int idx) {
 				handleNotifyQueue(transaction);
+			}
+
+			@Override
+			public void notifyRemove(int idx) {
 			}
 
 			@Override

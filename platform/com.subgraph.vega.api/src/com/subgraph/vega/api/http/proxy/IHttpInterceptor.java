@@ -12,5 +12,6 @@ public interface IHttpInterceptor {
 	void setInterceptLevel(TransactionDirection direction, HttpInterceptorLevel level);
 	HttpInterceptorLevel getInterceptLevel(TransactionDirection direction);
 	int transactionQueueSize();
-	IProxyTransaction transactionQueueGet(int idx);
+	IProxyTransaction[] getTransactions();
+	IProxyTransaction transactionQueueGet(int idx);	
 }

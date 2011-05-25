@@ -1,8 +1,5 @@
 package com.subgraph.vega.ui.http.intercept;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -29,7 +26,6 @@ import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.ErrorDisplay;
-import com.subgraph.vega.ui.http.builder.BuilderParseException;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
