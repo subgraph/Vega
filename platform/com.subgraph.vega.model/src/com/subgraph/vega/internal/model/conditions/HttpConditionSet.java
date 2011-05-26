@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.model.conditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpRequest;
@@ -114,6 +115,9 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
 		activate(ActivationPurpose.READ);
+		if(!hasRecords(db)) {
+			return Collections.emptyList();
+		}
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
 		query.descend("requestId").orderAscending();
@@ -121,6 +125,12 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 			((AbstractCondition) c).filterRequestLogQuery(query);
 		}
 		return query.execute();		
+	}
+
+	private boolean hasRecords(ObjectContainer db) {
+		final Query query = db.query();
+		query.constrain(IRequestLogRecord.class);
+		return query.execute().size() > 0;
 	}
 
 	@Override
