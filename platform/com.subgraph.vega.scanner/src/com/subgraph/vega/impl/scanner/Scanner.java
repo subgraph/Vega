@@ -136,9 +136,9 @@ public class Scanner implements IScanner {
 			requestEngineConfig.setRequestsPerMinute(config.getMaxRequestsPerSecond() * 60);
 		}
 		
-		requestEngineConfig.setMaxConnections(12);
-		requestEngineConfig.setMaxConnectionsPerRoute(12);
-		
+		requestEngineConfig.setMaxConnections(config.getMaxConnections());
+		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
+
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
 		reloadModules();
 		resetModuleTimestamps();
