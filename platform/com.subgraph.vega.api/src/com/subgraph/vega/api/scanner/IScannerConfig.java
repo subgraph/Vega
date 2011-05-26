@@ -10,6 +10,7 @@ public interface IScannerConfig {
 	final static int DEFAULT_MAX_CHILDREN = 512;
 	final static int DEFAULT_MAX_DEPTH = 16;
 	final static int DEFAULT_MAX_DUPLICATE_PATHS = 3;
+	final static int DEFAULT_MAX_PARAMETER_COUNT = 16;
 	final static int DEFAULT_MAX_REQUEST_PER_SECOND = 25;
 
 	void setBaseURI(URI baseURI);
@@ -29,6 +30,7 @@ public interface IScannerConfig {
 	void setMaxChildren(int value);
 	void setMaxDepth(int value);
 	void setMaxDuplicatePaths(int value);
+	void setMaxParameterCount(int value);
 	
 	List<Cookie> getCookieList();
 	String getBasicUsername();
@@ -51,4 +53,5 @@ public interface IScannerConfig {
 	int getMaxChildren();
 	int getMaxDepth();
 	int getMaxDuplicatePaths();
+	int getMaxParameterCount();
 }
