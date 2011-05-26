@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.db4o.ObjectContainer;
-import com.db4o.events.CancellableObjectEventArgs;
 import com.db4o.events.Event4;
 import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
+import com.db4o.events.ObjectInfoEventArgs;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -26,7 +25,6 @@ import com.subgraph.vega.internal.model.conditions.HttpConditionSet;
 
 
 public class RequestLog implements IRequestLog {
-	private final Logger logger = Logger.getLogger("requests");
 	private final ObjectContainer database;
 	private final RequestLogId requestLogId;
 	private final HttpMessageCloner cloner;
@@ -38,10 +36,11 @@ public class RequestLog implements IRequestLog {
 		this.requestLogId = getRequestLogId(database);
 		this.cloner = new HttpMessageCloner(database);
 		final EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
-		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
+		
+		registry.activated().addListener(new EventListener4<ObjectInfoEventArgs> () {
 
 			@Override
-			public void onEvent(Event4<CancellableObjectEventArgs> e, CancellableObjectEventArgs args) {
+			public void onEvent(Event4<ObjectInfoEventArgs> arg0,  ObjectInfoEventArgs args) {
 				final Object ob = args.object();
 				if(ob instanceof RequestLogResponse) {
 					final RequestLogResponse r = (RequestLogResponse) ob;
@@ -49,8 +48,7 @@ public class RequestLog implements IRequestLog {
 				} else if(ob instanceof RequestLogEntityEnclosingRequest) {
 					final RequestLogEntityEnclosingRequest r = (RequestLogEntityEnclosingRequest) ob;
 					r.setDatabase(database);
-				}
-
+				} 
 			}
 		});
 	}
@@ -74,40 +72,6 @@ public class RequestLog implements IRequestLog {
 		database.store(requestLogId);
 		return id;
 	}
-
-
-//	@Override
-//	public long addRequest(HttpRequest request, HttpHost host, long requestTimeMs) {
-//		final long id = allocateRequestId();
-//		addRequest(id, request, host, requestTimeMs);
-//		return id;
-//	}
-//
-//	@Override
-//	public void addRequest(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
-//		final HttpRequest newRequest = cloner.copyRequest(request);
-//		database.store(newRequest);
-//		final RequestLogRecord record = new RequestLogRecord(requestId, newRequest, host, requestTimeMs);
-//		synchronized (lock) {
-//			database.store(record);
-//			filterNewRecord(record);
-//		}
-//	}
-
-//	@Override
-//	public long addRequestResponse(HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
-//		final long id = allocateRequestId();
-//		final HttpRequest newRequest = cloner.copyRequest(request);
-//		final HttpResponse newResponse = cloner.copyResponse(response);
-//		database.store(newRequest);
-//		database.store(newResponse);
-//		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, host, requestTimeMs);
-//		synchronized(lock){
-//			database.store(record);
-//			filterNewRecord(record);
-//		}
-//		return id;
-//	}
 
 	@Override
 	public long addRequestResponse(IHttpResponse response) {
@@ -134,18 +98,6 @@ public class RequestLog implements IRequestLog {
 		}
 	}
 
-//	@Override
-//	public void addResponse(long requestId, HttpResponse response) {
-//		final RequestLogRecord record = lookupRecord(requestId);
-//		if(record == null) {
-//			logger.warning("Could not find request log record for requestId "+ requestId);
-//			return;
-//		}
-//		final HttpResponse newResponse = cloner.copyResponse(response);
-//		database.store(response);
-//		record.setResponse(newResponse);
-//	}
-
 	@Override
 	public RequestLogRecord lookupRecord(final long requestId) {
 		synchronized(this) {
@@ -166,7 +118,6 @@ public class RequestLog implements IRequestLog {
 		}
 	}
 
-	
 	@Override
 	public List<IRequestLogRecord> getAllRecords() {
 		if(!hasRecords()) {
