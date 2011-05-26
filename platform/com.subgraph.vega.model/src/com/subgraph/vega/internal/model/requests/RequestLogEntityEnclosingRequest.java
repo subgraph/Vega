@@ -9,25 +9,22 @@ import com.db4o.ObjectContainer;
 public class RequestLogEntityEnclosingRequest extends BasicHttpEntityEnclosingRequest {
 
 	private final long entityId;
-	private transient ObjectContainer database;
+
+	private transient LazyEntityLoader loader;
 
 	public RequestLogEntityEnclosingRequest(ObjectContainer database, RequestLine requestline, long entityId) {
 		super(requestline);
 		this.entityId = entityId;
-		this.database = database;
+		setDatabase(database);
 	}
 
 	void setDatabase(ObjectContainer database) {
-		this.database = database;
+		this.loader = new LazyEntityLoader(entityId, database);
 	}
 
 	@Override
 	public HttpEntity getEntity() {
-		if(entityId == 0)
-			return null;
-		final HttpEntity e = database.ext().getByID(entityId);
-		database.ext().activate(e);
-		return e;
+		return loader.getEntity();
 	}
 
 	@Override
