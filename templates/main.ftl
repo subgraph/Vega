@@ -1,12 +1,14 @@
 <#include "header.ftl">
 <#include "macros.ftl">
 
-<@topsection 
-  doc.alert.title ! "No title set." 
-  vars.imageURL ! ""
+<@vegabanner
+	vars.bannerLogoURL ! ""
 />
 
-<hr>
+<@topsection 
+  doc.alert.title ! "No title set." 
+/>
+
 
 <@infobox 
   doc.alert.class ! "No class set." 
@@ -36,9 +38,11 @@
 />
 
 <#if vars.requestText??> 
-<h2>Request</h2>
 <div class="section" id="requestlink">
+<h2>Request</h2>
+<div class="content" id="sectioncontent">
 <a href="#" onclick="linkClick('${vars.requestId}');"> ${vars.requestText} </a>
+</div>
 </div>
 </#if>
 
@@ -51,6 +55,7 @@
 <div class="section" id="remrefsection">
 
 <h2>External Remediation Guidelines</h2>
+<div class="content" id="sectioncontent">
 Below are some links to third-party guidelines, tutorials and other documentation that may be useful in understanding and/or addressing this finding.
 
 <br>
@@ -59,7 +64,7 @@ Below are some links to third-party guidelines, tutorials and other documentatio
 <#list doc.alert.external.url as u>
 <p><a class="reflink" href="${u.@address?html}">${u?html}</a></p>
 </#list>
-
+</div>
 </div>
 
 </#if>
@@ -69,17 +74,19 @@ Below are some links to third-party guidelines, tutorials and other documentatio
 
 <h2>References</h2>
 
+<div class="content" id="sectioncontent">
 Some additional links with relevant information published by third-parties:
 
 <br>
 <br>
 
 <#list doc.alert.references.url as u>
-<p><a class="reflink" href="${u.@address?html}">${u?html}</a></p>
+<ul><li><a class="reflink" href="${u.@address?html}">${u?html}</a></li></ul>
 </#list>
 
 </div>
+</div>
 </#if>
 
-
+<br>
 <#include "footer.ftl" parse=false>
