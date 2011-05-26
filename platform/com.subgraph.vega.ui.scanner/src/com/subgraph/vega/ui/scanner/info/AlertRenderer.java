@@ -43,11 +43,26 @@ public class AlertRenderer {
 	private final Logger logger = Logger.getLogger("alert-render");
 	private Configuration configuration;
 	private final String imageURL;
+	private final String bulletPointURL;
+	private final String bannerPatternURL;
+	private final String bannerLogoURL;
+	private final String titlePatternURL;
+	private final String redArrowURL;
+	private final String sectionGradientURL;
+	private final String linkArrowURL;
 	private final Map<String, Document> alertDocumentCache = new HashMap<String, Document>();
 	private IRequestLog requestLog;
 	
 	AlertRenderer(TemplateLoader templateLoader) {
-		imageURL = findImage();
+		imageURL = findImage("icons/vega_logo.png");
+		bulletPointURL = findImage("icons/doubleArrow.png");
+		bannerPatternURL = findImage("icons/bannerPattern.png");
+		bannerLogoURL = findImage("icons/bannerLogo.png");
+		titlePatternURL = findImage("icons/titlePattern.png");
+		redArrowURL = findImage("icons/redArrow.png");
+		sectionGradientURL = findImage("icons/sectionGradient.png");
+		linkArrowURL = findImage("icons/linkArrow.png");
+		
 		configuration = new Configuration();
 		configuration.setTemplateLoader(templateLoader);
 		configuration.setObjectWrapper(new DefaultObjectWrapper());
@@ -111,6 +126,20 @@ public class AlertRenderer {
 			}
 			if(imageURL != null)
 				vars.put("imageURL", imageURL);
+			if(bulletPointURL != null)
+				vars.put("bulletPointURL", bulletPointURL);
+			if(bannerPatternURL != null)
+				vars.put("bannerPatternURL", bannerPatternURL);
+			if(bannerLogoURL != null)
+				vars.put("bannerLogoURL", bannerLogoURL);
+			if(titlePatternURL != null)
+				vars.put("titlePatternURL", titlePatternURL);
+			if(redArrowURL != null)
+				vars.put("redArrowURL", redArrowURL);
+			if(redArrowURL != null)
+				vars.put("sectionGradientURL", sectionGradientURL);
+			if(linkArrowURL != null)
+				vars.put("linkArrowURL", linkArrowURL);
 			
 			if(alert.getRequestId() >= 0 && requestLog != null) {
 				final IRequestLogRecord record = requestLog.lookupRecord(alert.getRequestId());
@@ -185,9 +214,9 @@ public class AlertRenderer {
 		alertDocumentCache.put(name, alertDocument);
 		return alertDocument;
 	}
-	private String findImage() {
+	private String findImage(String imagePath) {
 		Bundle b = Activator.getDefault().getBundle();
-		IPath relativePagePath = new Path("icons/vega_logo.png");
+		IPath relativePagePath = new Path(imagePath);
 		URL fileInPlugin = FileLocator.find(b, relativePagePath, null);
 		try {
 			URL pageUrl = FileLocator.toFileURL(fileInPlugin);

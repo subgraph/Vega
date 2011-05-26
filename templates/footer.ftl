@@ -1,6 +1,6 @@
 <hr>
 
-<div class="section" id="footer">
+<div class="footer" id="footer">
 
 <a class="innerlinksmall" href="#titlesection">Top</a>
 
