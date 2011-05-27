@@ -5,11 +5,11 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import com.db4o.ObjectContainer;
-import com.db4o.events.CancellableObjectEventArgs;
 import com.db4o.events.Event4;
 import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
 import com.db4o.events.EventRegistryFactory;
+import com.db4o.events.ObjectInfoEventArgs;
 import com.db4o.query.Predicate;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
@@ -33,22 +33,21 @@ public class ScanAlertRepository implements IScanAlertRepository {
 		this.alertFactory = new ScanAlertFactory(xmlRepository);
 		this.scanInstanceEventManager = new EventListenerManager();
 		final EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
-		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
+		registry.activated().addListener(new EventListener4<ObjectInfoEventArgs>() {
 			@Override
-			public void onEvent(Event4<CancellableObjectEventArgs> e,
-					CancellableObjectEventArgs args) {
+			public void onEvent(Event4<ObjectInfoEventArgs> e, ObjectInfoEventArgs args) {
 				final Object ob = args.object();
 				if(ob instanceof ScanInstance) {
-					
 					final ScanInstance scan = (ScanInstance) ob;
 					scan.setTransientState(database, alertFactory);
 					final int status = scan.getScanStatus();
 					if(status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
 						scan.updateScanStatus(IScanInstance.SCAN_CANCELLED);
 					}
-				}				
+				}
 			}
 		});
+		getProxyScanInstance();
 	}
 
 	@Override

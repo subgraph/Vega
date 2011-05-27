@@ -119,6 +119,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 	
 	private void resetState() {
 		browser.setText("");
+		dashboard.displayScanInstance(null);
 		showDashboard();
 	}
 
@@ -196,12 +197,14 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 		if(currentWorkspace != null) {
 			currentWorkspace.getScanAlertRepository().removeActiveScanInstanceListener(this);
 		}
-		if(workspace != null) {
-			final IScanInstance activeScanInstance = workspace.getScanAlertRepository().addActiveScanInstanceListener(this);
-			if(activeScanInstance != null) {
-				setActiveScanInstance(activeScanInstance);
-			}
+		if(workspace == null) {
+			setActiveScanInstance(null);
+			currentWorkspace = null;
+			return;
 		}
+		
+		final IScanInstance activeScanInstance = workspace.getScanAlertRepository().addActiveScanInstanceListener(this);
+		setActiveScanInstance(activeScanInstance);
 		currentWorkspace = workspace;
 	}
 	

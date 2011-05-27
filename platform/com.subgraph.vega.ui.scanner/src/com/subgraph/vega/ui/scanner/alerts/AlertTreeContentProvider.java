@@ -29,6 +29,7 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	private TreeViewer viewer;
 	private IWorkspace workspace;
 	private IScanInstance activeScan;
+	private IScanInstance proxyInstance;
 	private int lastStatus;
 	
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
@@ -56,6 +57,9 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 			if(workspace != null) {
 				workspace.getScanAlertRepository().removeActiveScanInstanceListener(this);
 			}
+			if(proxyInstance != null) {
+				proxyInstance.removeScanEventListener(this);
+			}
 
 			workspace = newWorkspace;
 			if(newWorkspace == null) {
@@ -71,6 +75,8 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 				}
 			}
 			setActiveScan(workspace.getScanAlertRepository().addActiveScanInstanceListener(this));
+			proxyInstance = workspace.getScanAlertRepository().getProxyScanInstance();
+			proxyInstance.addScanEventListenerAndPopulate(this);
 		}
 	}
 
