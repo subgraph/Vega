@@ -23,7 +23,7 @@ public class PopupConfigDialog extends PopupDialog {
 	private Control dialogArea;
 	
 	public PopupConfigDialog(Shell parentShell, Point origin, IConfigDialogContent content) {
-		super(parentShell, PopupDialog.INFOPOPUP_SHELLSTYLE | SWT.ON_TOP, true, false, false, false, false, content.getTitle(), "Press 'ESC' to close");
+		super(parentShell, PopupDialog.INFOPOPUP_SHELLSTYLE, true, false, false, false, false, content.getTitle(), "Press 'ESC' to close");
 		this.origin = origin;
 		this.content = content;
 	}
@@ -51,15 +51,15 @@ public class PopupConfigDialog extends PopupDialog {
 	protected Control createDialogArea(Composite parent) {
 		return content.createContents(parent);
 	}
+
 	@Override
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		POPUP_LAYOUT_FACTORY.applyTo(composite);
 		
 		//LAYOUTDATA_GRAB_BOTH.applyTo(composite);
-		final GridData gd = LAYOUTDATA_GRAB_BOTH.create();
-		gd.widthHint = content.getSize().x;
-		gd.heightHint = content.getSize().y;
+		GridData gd = LAYOUTDATA_GRAB_BOTH.create();
+		
 		composite.setLayoutData(gd);
 		if(hasTitleArea()) {
 			createTitleMenuArea(composite);
@@ -68,6 +68,12 @@ public class PopupConfigDialog extends PopupDialog {
 		dialogArea = createDialogArea(composite);
 		if(dialogArea.getLayoutData() == null)
 			LAYOUTDATA_GRAB_BOTH.applyTo(composite);
+		
+		gd = LAYOUTDATA_GRAB_BOTH.create();
+		dialogArea.pack();
+		gd.widthHint = dialogArea.getSize().x;
+		gd.heightHint = dialogArea.getSize().y;
+		dialogArea.setLayoutData(gd);
 		
 		if(hasInfoArea()) {
 			createHorizontalSeparator(composite);

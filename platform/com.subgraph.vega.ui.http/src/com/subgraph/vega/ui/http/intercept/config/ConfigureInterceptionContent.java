@@ -20,7 +20,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -102,11 +101,6 @@ public class ConfigureInterceptionContent implements IConfigDialogContent {
 	@Override
 	public Control getFocusControl() {
 		return composite;
-	}
-
-	@Override
-	public Point getSize() {
-		return new Point(600, 400);
 	}
 
 	@Override
