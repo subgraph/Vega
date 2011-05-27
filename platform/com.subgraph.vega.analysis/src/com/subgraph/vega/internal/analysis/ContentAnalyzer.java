@@ -14,6 +14,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.internal.analysis.urls.UrlExtractor;
 
@@ -63,9 +64,13 @@ public class ContentAnalyzer implements IContentAnalyzer {
 			return result;
 		}
 		
-		if(addToRequestLog) 
+		if(addToRequestLog) { 
 			workspace.getRequestLog().addRequestResponse(response);
+		}
 
+		IWebPath path = workspace.getWebModel().getWebPathByUri(response.getRequestUri());
+		path.setVisited(true);
+		
 		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
 		result.setSniffedMimeType(mimeDetector.getSniffedMimeType(response));
 		

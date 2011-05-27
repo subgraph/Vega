@@ -8,7 +8,6 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.util.EntityUtils;
@@ -24,10 +23,11 @@ public class HttpMessageCloner {
 	}
 
 	HttpRequest copyRequest(HttpRequest request) {
-		if(request instanceof HttpEntityEnclosingRequest)
+		if(request instanceof HttpEntityEnclosingRequest) {
 			return copyEntityEnclosingRequest((HttpEntityEnclosingRequest) request);
-		else
+		} else {
 			return copyBasicRequest(request);
+		}
 	}
 
 	HttpResponse copyResponse(HttpResponse response) {
@@ -45,34 +45,35 @@ public class HttpMessageCloner {
 	}
 
 	private HttpRequest copyBasicRequest(HttpRequest request) {
-		if(request == null)
+		if(request == null) {
 			return null;
+		}
 		final HttpRequest r = new BasicHttpRequest(request.getRequestLine());
 		copyHeaders(request, r);
 		return r;
 	}
 
 	private static void copyHeaders(HttpMessage from, HttpMessage to) {
-		for(Header h: from.getAllHeaders())
+		for(Header h: from.getAllHeaders()) {
 			to.addHeader(new BasicHeader(h.getName(), h.getValue()));
+		}
 	}
 
 	private long entityToDatabaseId(HttpEntity entity) {
-		if(entity == null)
+		if(entity == null) {
 			return 0;
+		}
 		database.ext().store(entity);
-		database.ext().deactivate(entity);
 		return database.ext().getID(entity);
 	}
 
 	private HttpEntity copyEntity(HttpEntity entity) {
 		try {
-			if(entity == null)
+			if(entity == null) {
 				return null;
-			final ByteArrayEntity newEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
-			newEntity.setContentEncoding(entity.getContentEncoding());
-			newEntity.setContentType(entity.getContentType());
-			return newEntity;
+			}
+			final byte[] content = EntityUtils.toByteArray(entity);
+			return new RequestLogEntity(content, entity.getContentType(), entity.getContentEncoding());
 		} catch (IOException e) {
 			return null;
 		}

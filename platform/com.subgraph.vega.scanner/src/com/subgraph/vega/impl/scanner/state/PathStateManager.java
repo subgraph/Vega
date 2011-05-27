@@ -205,4 +205,8 @@ public class PathStateManager {
 	public boolean getNonParameterFileInjectionChecksFlag() {
 		return config.getNonParameterFileInjectionChecksFlag();
 	}
+	
+	public int getMaxParameterCount() {
+		return config.getMaxParameterCount();
+	}
 }

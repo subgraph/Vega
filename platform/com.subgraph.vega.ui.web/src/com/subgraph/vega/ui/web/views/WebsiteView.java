@@ -5,6 +5,8 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.DrillDownAdapter;
@@ -17,10 +19,22 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.ui.web.Activator;
 
 public class WebsiteView extends ViewPart implements IDoubleClickListener {
-	
+
+	private static class UnvisitedFilter extends ViewerFilter {
+
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if(element instanceof IWebEntity) {
+				final IWebEntity entity = (IWebEntity) element;
+				return entity.isVisited();
+			}
+			return false;
+		}
+	}
 	private TreeViewer viewer;
 	private DrillDownAdapter drillDown;
 
@@ -54,6 +68,13 @@ public class WebsiteView extends ViewPart implements IDoubleClickListener {
 		contributeToActionBars();		
 	}
 
+	public void setHideUnvisitedSites(boolean value) {
+		if(value) {
+			viewer.setFilters(new ViewerFilter[] { new UnvisitedFilter() });
+		} else {
+			viewer.setFilters(new ViewerFilter[0]);
+		}
+	}
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
 		viewer.setInput(event.getWorkspace());
 	}

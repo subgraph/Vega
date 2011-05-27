@@ -16,17 +16,15 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 public class WebCrawler implements IWebCrawler {
-	private final static int REQUEST_THREAD_COUNT = 5;
-	private final static int RESPONSE_THREAD_COUNT = 3;
-
 	private final IHttpRequestEngine requestEngine;
-
-	private final Executor executor = Executors.newFixedThreadPool(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
+	private final Executor executor;
 	private final BlockingQueue<CrawlerTask> requestQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final BlockingQueue<CrawlerTask> responseQueue = new LinkedBlockingQueue<CrawlerTask>();
-	private final List<RequestConsumer> requestConsumers = new ArrayList<RequestConsumer>(REQUEST_THREAD_COUNT);
-	private final List<HttpResponseProcessor> responseProcessors = new ArrayList<HttpResponseProcessor>(RESPONSE_THREAD_COUNT);
+	private final List<RequestConsumer> requestConsumers;
+	private final List<HttpResponseProcessor> responseProcessors;
 	private final List<ICrawlerProgressTracker> eventHandlers;
+	private final int requestThreadCount;
+	private final int responseThreadCount;
 
 	volatile private CountDownLatch latch;
 	
@@ -34,8 +32,13 @@ public class WebCrawler implements IWebCrawler {
 	
 	private TaskCounter counter = new TaskCounter();
 	
-	WebCrawler(IHttpRequestEngine requestEngine) {
+	WebCrawler(IHttpRequestEngine requestEngine, int requestThreadCount, int responseThreadCount) {
 		this.requestEngine = requestEngine;
+		this.requestThreadCount = requestThreadCount;
+		this.responseThreadCount = responseThreadCount;
+		this.executor = Executors.newFixedThreadPool(requestThreadCount + responseThreadCount);
+		this.requestConsumers = new ArrayList<RequestConsumer>(requestThreadCount);
+		this.responseProcessors = new ArrayList<HttpResponseProcessor>(responseThreadCount);
 		this.eventHandlers = new ArrayList<ICrawlerProgressTracker>();
 	}
 	
@@ -44,17 +47,17 @@ public class WebCrawler implements IWebCrawler {
 		if(crawlerRunning)
 			throw new IllegalStateException("Cannot call start() on running crawler instance");
 	
-		latch = new CountDownLatch(REQUEST_THREAD_COUNT + RESPONSE_THREAD_COUNT);
+		latch = new CountDownLatch(requestThreadCount + responseThreadCount);
 		
 		updateProgress();
 		
-		for(int i = 0; i < RESPONSE_THREAD_COUNT; i++) {
+		for(int i = 0; i < responseThreadCount; i++) {
 			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
 			responseProcessors.add(responseProcessor);
 			executor.execute(responseProcessor);
 		}
 		
-		for(int i = 0; i < REQUEST_THREAD_COUNT; i++) {
+		for(int i = 0; i < requestThreadCount; i++) {
 			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
 			requestConsumers.add(consumer);
 			executor.execute(consumer);

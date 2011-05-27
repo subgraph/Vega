@@ -401,6 +401,9 @@ public class PathState implements IPathState {
 	public void maybeAddParameters(List<NameValuePair> parameters) {
 		final PathStateParameterManager pm = getParameterManager();
 		synchronized(pm) {
+			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
+				return;
+			}
 			if(!pm.hasParameterList(parameters))
 				pm.addParameterList(parameters);
 		}
@@ -410,6 +413,9 @@ public class PathState implements IPathState {
 	public void maybeAddPostParameters(List<NameValuePair> parameters) {
 		final PathStateParameterManager pm = getParameterManager();
 		synchronized(pm) {
+			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
+				return;
+			}
 			if(!pm.hasPostParameterList(parameters))
 				pm.addPostParameterList(parameters);
 		}

@@ -13,8 +13,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 
 public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
-	private final static int NTHREADS = 25;
-	private final ExecutorService executor = Executors.newFixedThreadPool(NTHREADS);
+	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private final HttpClient client = UnencodedHttpClientFactory.createHttpClient();
 	private IHTMLParser htmlParser;
 	

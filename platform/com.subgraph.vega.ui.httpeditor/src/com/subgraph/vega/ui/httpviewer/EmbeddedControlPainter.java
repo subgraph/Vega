@@ -27,7 +27,7 @@ public class EmbeddedControlPainter implements IPainter, PaintListener, ControlL
 	/* zero width no-break space */
 	private final static char TAG_CHARACTER = '\uFEFF';
 	private final static int ARBITRARY_TAG_CHARACTER_WIDTH = 10;
-	private final static int HORIZONTAL_MARGIN = 5;
+	private final static int HORIZONTAL_MARGIN = 2;
 	private final static int VERTICAL_MARGIN = 8;
 	private final TextViewer textViewer;
 	private final StyledText textWidget;
