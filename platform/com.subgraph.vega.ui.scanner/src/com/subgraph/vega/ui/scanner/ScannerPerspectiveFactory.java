@@ -15,8 +15,11 @@ public class ScannerPerspectiveFactory implements IPerspectiveFactory {
 		final IFolderLayout folder = layout.createFolder("main", IPageLayout.TOP, 0, layout.getEditorArea());
 		folder.addView(ScanInfoView.ID);
 		folder.addPlaceholder("*:*");
-		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, ScanInfoView.ID);
-		layout.addView(ScanAlertView.ID, IPageLayout.BOTTOM, 0.40f, WEBSITE_VIEW);
+		layout.addStandaloneView(WEBSITE_VIEW, true, IPageLayout.LEFT, 0.25f, ScanInfoView.ID);
+		layout.addStandaloneView(ScanAlertView.ID, true, IPageLayout.BOTTOM, 0.40f, WEBSITE_VIEW);
 		layout.setEditorAreaVisible(false);
+		layout.getViewLayout(ScanInfoView.ID).setCloseable(false);
+		layout.getViewLayout(WEBSITE_VIEW).setCloseable(false);
+		layout.getViewLayout(ScanAlertView.ID).setCloseable(false);
 	}
 }
