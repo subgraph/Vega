@@ -37,6 +37,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 				IWorkbenchPreferenceConstants.SHOW_MEMORY_MONITOR, true);
 		PlatformUI.getPreferenceStore().setValue(
 				IWorkbenchPreferenceConstants.PERSPECTIVE_BAR_EXTRAS, "com.subgraph.vega.perspectives.scanner, com.subgraph.vega.perspectives.proxy");
+		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.DISABLE_NEW_FAST_VIEW, true);
 
 		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.SHOW_OPEN_ON_PERSPECTIVE_BAR, false);
 		// For some reason this seems to do nothing

@@ -8,7 +8,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +37,7 @@ public class HttpEntityTextViewer extends Composite {
 	}
 	
 	private SourceViewer createSourceViewer() {
-		return new SourceViewer(this, new VerticalRuler(0), SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		return new SourceViewer(this, null, SWT.V_SCROLL | SWT.H_SCROLL);
 	}
 
 	public void setInput(String text, String contentType, String contentEncoding) {

@@ -53,7 +53,7 @@ public class HttpMessageDocumentFactory {
 		return createDocumentForText((uriDecode) ? (decodeContent(text)) : (text));
 	}
 
-	private IDocument createDocumentForText(String text) {
+	public IDocument createDocumentForText(String text) {
 		final IDocument document = createDocument();
 		document.set(text);
 		return document;
