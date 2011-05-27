@@ -190,4 +190,8 @@ public class EngineHttpResponse implements IHttpResponse {
 		return requestId;
 	}
 
+	@Override
+	public URI getRequestUri() {
+		return requestUri;
+	}
 }

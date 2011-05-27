@@ -17,6 +17,10 @@
             id="com.subgraph.vega.ui.command.scanFrom"
             name="Scan From">
       </command>
+      <command
+            id="com.subgraph.vega.ui.command.hideUnvisited"
+            name="Hide Unvisited Sites">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -28,6 +32,17 @@
                icon="icons/start_crawling2.png"
                label="Scan from selected path"
                style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.website">
+         <command
+               commandId="com.subgraph.vega.ui.command.hideUnvisited"
+               icon="icons/hide_unvisited.png"
+               label="Hide Unvisited Sites"
+               style="toggle"
+               tooltip="Hide unvisited websites and paths">
          </command>
       </menuContribution>
    </extension>
@@ -53,6 +68,10 @@
                   definitionId="oneElementSelected">
             </reference>
          </activeWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.web.commands.HideUnvisitedHandler"
+            commandId="com.subgraph.vega.ui.command.hideUnvisited">
       </handler>
    </extension>
 

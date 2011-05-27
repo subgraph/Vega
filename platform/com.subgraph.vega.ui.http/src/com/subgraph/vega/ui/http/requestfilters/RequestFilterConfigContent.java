@@ -1,12 +1,12 @@
 package com.subgraph.vega.ui.http.requestfilters;
 
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -45,11 +45,6 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 	}
 
 	@Override
-	public Point getSize() {
-		return new Point(600, 400);
-	}
-
-	@Override
 	public void onClose() {
 	}
 	
@@ -76,7 +71,8 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 		
 		Composite treePanel = new Composite(composite, SWT.NONE);
 		treePanel.setLayout(new GridLayout(2, false));
-		treePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		treePanel.setLayoutData(gd);
 		
 		createTreeViewer(treePanel);
 		createTreeViewerButtons(treePanel);
@@ -99,7 +95,9 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 		treeViewer.setContentProvider(new ConditionTreeContentProvider());
 		treeViewer.setLabelProvider(new ConditionTreeLabelProvider());
 		treeViewer.setAutoExpandLevel(2);
-		treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3));
+		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3);
+		gd.heightHint = 300;
+		treeViewer.getTree().setLayoutData(gd);
 	}
 
 	private void createTreeViewerButtons(Composite parent) {
@@ -149,7 +147,7 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 		if(conditionSet == null || conditionManager == null)
 			return;
 		
-		ConditionCreateDialog dialog = new ConditionCreateDialog(composite.getShell(), conditionManager);
+		ConditionCreateDialog dialog = new ConditionCreateDialog(null, conditionManager);
 		dialog.setBlockOnOpen(true);
 		if (dialog.open() == ConditionCreateDialog.OK) {
 			final IHttpCondition condition = dialog.getNewCondition();
@@ -161,5 +159,4 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 			}
 		}
 	}
-
 }

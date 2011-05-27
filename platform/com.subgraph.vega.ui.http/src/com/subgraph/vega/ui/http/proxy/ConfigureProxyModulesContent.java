@@ -9,7 +9,6 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -70,11 +69,6 @@ public class ConfigureProxyModulesContent implements IConfigDialogContent, IChec
 	@Override
 	public Control getFocusControl() {
 		return composite;
-	}
-
-	@Override
-	public Point getSize() {
-		return new Point(600, 400);
 	}
 
 	@Override

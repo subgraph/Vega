@@ -2,6 +2,7 @@ package com.subgraph.vega.ui.scanner.alerts.tree;
 
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 
 public class AlertTree extends AbstractAlertTreeNode {
@@ -13,11 +14,12 @@ public class AlertTree extends AbstractAlertTreeNode {
 	}
 	
 	public synchronized void addScan(IScanInstance scan) {
-		final String key = Long.toString(scan.getScanId());
-		if(!nodeMap.containsKey(key)) {
-			nodeMap.put(key, new AlertScanNode(scan.getScanId(), workspace));
+		if(scan.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
+			if(scan.getAllAlerts().size() == 0) {
+				return;
+			}
 		}
-		final AlertScanNode scanNode = (AlertScanNode) nodeMap.get(key);
+		final AlertScanNode scanNode = getScanNode(scan.getScanId());
 		if(scanNode.getScanInstance() == null) {
 			scanNode.setScanInstance(scan);
 		}
@@ -26,7 +28,11 @@ public class AlertTree extends AbstractAlertTreeNode {
 	public synchronized AlertScanNode getScanNode(long scanId) {
 		final String key = Long.toString(scanId);
 		if(!nodeMap.containsKey(key)) {
-			nodeMap.put(key, new AlertScanNode(scanId, workspace));
+			final AlertScanNode scanNode = new AlertScanNode(scanId, workspace);
+			if(scanId == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
+				scanNode.setScanInstance(workspace.getScanAlertRepository().getProxyScanInstance());
+			}
+			nodeMap.put(key, scanNode);
 		}
 		return (AlertScanNode) nodeMap.get(key);
 	}
@@ -38,7 +44,7 @@ public class AlertTree extends AbstractAlertTreeNode {
 
 	@Override
 	protected AbstractAlertTreeNode createNodeForAlert(IScanAlert alert) {
-		return new AlertScanNode(alert.getScanId(), workspace);
+		return getScanNode(alert.getScanId());
 	}
 
 	@Override
