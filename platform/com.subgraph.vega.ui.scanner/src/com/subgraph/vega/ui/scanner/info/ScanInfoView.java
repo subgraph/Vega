@@ -79,7 +79,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 		browser = new Browser(contentPanel, SWT.NONE);
 		// Some day I will regret this, but it's currently the only way to have clickable links in the alert viewer
 		browser.setJavascriptEnabled(true);
-		linkClick = new LinkHandler(browser);
+		linkClick = new LinkHandler(browser, getSite());
 		
 		getSite().getPage().addSelectionListener(new ISelectionListener() {
 
