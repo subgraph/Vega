@@ -9,8 +9,9 @@
 	<div class="vegabanner" id="vegabanner">
 	<#if defined (bannerLogo)>
 		<img src="${bannerLogo}" width=173px height=24px>
-		<p> Open Source Web Security Platform </p>
+		<span> Open Source Web Security Platform </span>
 	</#if>
+	</div>
 </#macro>
 
 
@@ -79,91 +80,91 @@
 </#macro>
 
 <#macro impactsection impact>
-<#if defined(impact)>
-<div class="section" id = "impactsection">
-  <h2>Impact</h2>
-  <div class="content" id="sectioncontent">
-  <ul>
-  <#list impact as item>
-    <li>${item}</li>
-  </#list>
-  </ul>
-  </div>
-</div>
-</#if>
+  <#if defined(impact)>
+	<div class="section" id = "impactsection">
+      <h2>Impact</h2>
+        <div class="content" id="sectioncontent">
+          <ul>
+            <#list impact as item>
+              <li>${item}</li>
+            </#list>
+    	  </ul>
+        </div>
+    </div>
+  </#if>
 </#macro>
 
 <#macro remediationsection remediation>
-<#if defined(remediation)>
-<div class="section" id="remediationsection">
-<h2>Remediation</h2>
-<div class="content" id="sectioncontent">
-<ul>
-  <#list remediation as item>
-    <li>${item}</li>
-  </#list>
-</ul>
-</div>
-</div>
-</#if>
+  <#if defined(remediation)>
+	<div class="section" id="remediationsection">
+	  <h2>Remediation</h2>
+		<div class="content" id="sectioncontent">
+		  <ul>
+  			<#list remediation as item>
+    		  <li>${item}</li>
+  			</#list>
+		  </ul>
+		</div>
+	</div>
+  </#if>
 </#macro>
 
 <#macro detailsection resource methods parameter attackstring>
-<#if defined(resource) || defined(methods) || defined(parameter) || defined(attackstring)>
-<div class="section" id="detailsection">
-<h2>Detailed Findings</h2>
-<div class="content" id="sectioncontent">
-<table>
-<#if defined(resource)>
-<tr>
-	<td><div class="tablefield">Resource</div></td><td><a class="resourcelink" href="#">${resource}</a></td>
-</tr>
-</#if>
-<#if defined(methods)>
-<tr>
-	<td><div class="tablefield">Methods</div></td><td>${methods}</td>
-</tr>
-</#if>
-<#if defined(parameter)>
-<tr>
-	<td><div class="tablefield">Parameter</div></td><td><span class="parameter">${parameter}</span></td>
-</tr>
-</#if>
-<#if defined(attackstring)>
-<tr>
-	<td><div class="tablefield">Attack string</div></td><td><span class="attackstring">${attackstring}</span></td>
-</tr>
-</#if>
-</table>
-</div>
-</div>
-</#if>
+  <#if defined(resource) || defined(methods) || defined(parameter) || defined(attackstring)>
+	<div class="section" id="detailsection">
+	  <h2>Detailed Findings</h2>
+		<div class="content" id="sectioncontent">
+		  <table>
+			<#if defined(resource)>
+		  	  <tr>
+		  	    <td><div class="tablefield">Resource</div></td><td><a class="resourcelink" href="#">${resource}</a></td>
+		      </tr>
+  			</#if>
+  			<#if defined(methods)>
+			  <tr>
+	  			<td><div class="tablefield">Methods</div></td><td>${methods}</td>
+			  </tr>
+  			</#if>
+  			<#if defined(parameter)>
+  			  <tr>
+	  			<td><div class="tablefield">Parameter</div></td><td><span class="parameter">${parameter}</span></td>
+			  </tr>
+  			</#if>
+  			<#if defined(attackstring)>
+    		  <tr>
+	  			<td><div class="tablefield">Attack string</div></td><td><span class="attackstring">${attackstring}</span></td>
+    		  </tr>
+  			</#if>
+		  </table>
+		</div>
+	</div>
+  </#if>
 </#macro>
 
 <#macro outputsection text>
-<#if defined(text)>
-<div class="section" id="resourcecontentsection">
-<h2>Resource Content</h2>
-<div class="content" id="sectioncontent">
-<table>
-<tr>
-	<td><span class="resourcecontent"><pre>${text}</pre></span></td>	
-</tr>
-</table>
-</div>
-</div>
-</#if>
+  <#if defined(text)>
+	<div class="section" id="resourcecontentsection">
+	  <h2>Resource Content</h2>
+		<div class="content" id="sectioncontent">
+		  <table>
+			<tr>
+			  <td><span class="resourcecontent"><pre>${text}</pre></span></td>	
+			</tr>
+		  </table>
+		</div>
+	</div>
+  </#if>
 </#macro>
 
 <#macro discussion text>
-<#if defined(text)>
-<div class="section" id="description">
-<h2>Discussion</h2>
-<div class="content" id="sectioncontent">
-${text}
-</div>
-</div>
-</#if>
+  <#if defined(text)>
+	<div class="section" id="description">
+	  <h2>Discussion</h2>
+		<div class="content" id="sectioncontent">
+		  ${text}
+		</div>
+	</div>
+  </#if>
 </#macro>
 
 <#macro bullet bulletPoint>
