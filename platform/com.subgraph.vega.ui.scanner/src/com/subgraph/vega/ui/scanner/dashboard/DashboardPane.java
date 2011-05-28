@@ -1,6 +1,5 @@
 package com.subgraph.vega.ui.scanner.dashboard;
 
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,6 +17,7 @@ import org.eclipse.ui.forms.widgets.ScrolledFormText;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
@@ -35,7 +35,10 @@ public class DashboardPane extends Composite implements IEventHandler {
 	private CrawlerPane crawlerPane;
 	private AlertPane alertPane;
 	private IScanInstance scanInstance;
-	private volatile boolean renderNeeded;
+	private volatile boolean outputRenderNeeded;
+	private volatile boolean crawlerRenderNeeded;
+	private volatile boolean disableRenderTaskStart;
+	private volatile boolean isProgressPaneVisible;
 	private FormToolkit toolkit;
 	private ScrolledForm scrolledForm;
 	private ScrolledFormText scrolledFormText;
@@ -43,6 +46,8 @@ public class DashboardPane extends Composite implements IEventHandler {
 	private int lastStatus;
 	private int lastCompletedCount;
 	private int lastTotalCount;
+	
+	private boolean isProxyInstance;
 	
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 
@@ -58,12 +63,19 @@ public class DashboardPane extends Composite implements IEventHandler {
 	}
 	
 	public void displayScanInstance(IScanInstance scanInstance) {
+		if(this.scanInstance == scanInstance) {
+			return;
+		}
+		cancelRenderTask();
+		disableRenderTaskStart = true;
 		
 		if(this.scanInstance != null) {
 			this.scanInstance.removeScanEventListener(this);
 		}
+		
 		this.scanInstance = scanInstance;
 		alertPane.reset();
+		isProxyInstance = (scanInstance == null) ? (false) : (scanInstance.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID);
 		if(scanInstance != null) {
 			this.scanInstance.addScanEventListenerAndPopulate(this);
 			lastStatus = 0;
@@ -72,7 +84,28 @@ public class DashboardPane extends Composite implements IEventHandler {
 			maybeUpdateCrawler(scanInstance.getScanStatus(), scanInstance.getScanCompletedCount(), scanInstance.getScanTotalCount());
 			maybeUpdateStatus(scanInstance.getScanStatus());
 		}
+		final boolean progressPaneVisible = (!isProxyInstance && (scanInstance != null && scanInstance.getScanStatus() == IScanInstance.SCAN_AUDITING));
+		setProgressPaneVisible(progressPaneVisible);
+		renderOutput();
+		disableRenderTaskStart = false;
 	}
+	
+	private void setProgressPaneVisible(final boolean flag) {
+		if(isProgressPaneVisible == flag) {
+			return;
+		}
+		display.asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				crawlerPane.setVisible(flag);
+				isProgressPaneVisible = flag;
+				layout();
+				crawlerPane.redraw();
+				
+			}
+		});
+	}
+
 	private void createDashboardForm() {
 		if(scrolledForm != null)
 			scrolledForm.dispose();
@@ -140,15 +173,41 @@ public class DashboardPane extends Composite implements IEventHandler {
 					if(!scrolledFormText.isDisposed()) {
 						scrolledFormText.setText(buffer.toString());
 					}
-					if(!crawlerPane.isDisposed()) {
-						crawlerPane.layout(true);
-					}
+					outputRenderNeeded = false;
 				}
 			});
 		}
 	}
 	
+	private void renderCrawlerOutput() {
+		if(!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					if(!crawlerPane.isDisposed()) {
+						crawlerPane.renderChanges();
+					}
+					crawlerRenderNeeded = false;
+				}
+			});
+		}
+	}
+
 	private void renderCrawlerSection(StringBuilder sb) {
+		if(isProxyInstance) {
+			return;
+		}
+		if(scanInstance == null || scanInstance.getScanStatus() != IScanInstance.SCAN_AUDITING) {
+			if(isProgressPaneVisible) {
+				setProgressPaneVisible(false);
+			}
+			return;
+		}
+
+		if(!isProgressPaneVisible) {
+			setProgressPaneVisible(true);
+		}
+
 		addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
@@ -157,7 +216,8 @@ public class DashboardPane extends Composite implements IEventHandler {
 	
 	private void renderAlertSummary(StringBuilder sb) {
 		addVSpaces(sb, 2);
-		addIndented(sb, 10, "<span font='header'>Scan Alert Summary</span>");
+		final String title = isProxyInstance ? "Proxy Alert Summary" : "Scan Alert Summary";
+		addIndented(sb, 10, "<span font='header'>" + title +"</span>");
 		addVSpaces(sb, 2);
 		addIndented(sb, 20, "<control width='400' href='alerts'/>");
 		addVSpaces(sb, 2);
@@ -186,7 +246,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 	
 	private void processAlert(IScanAlert alert) {
 		alertPane.addAlert(alert);
-		renderNeeded = true;
+		outputRenderNeeded = true;
 	}
 	
 	private void handleScannerStatusChanged(ScanStatusChangeEvent event) {
@@ -199,7 +259,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 			lastCompletedCount = completed;
 			lastTotalCount = total;
 			crawlerPane.updateCrawlerProgress(status, total, completed);
-			renderNeeded = true;
+			crawlerRenderNeeded = true;
 		}
 	}
 
@@ -208,32 +268,19 @@ public class DashboardPane extends Composite implements IEventHandler {
 			return;
 		}
 		lastStatus = status;
-		startRenderTask();
-		switch(status) {
-		case IScanInstance.SCAN_IDLE:
-			return;
-		case IScanInstance.SCAN_STARTING:
-			break;
-		case IScanInstance.SCAN_AUDITING:
-			renderNeeded = true;
-			break;			
-		case IScanInstance.SCAN_CANCELLED:
-			cancelRenderTask();
-			renderOutput();
-			break;
-		case IScanInstance.SCAN_COMPLETED:
-			cancelRenderTask();
-			renderOutput();
-			break;
-		}
+		outputRenderNeeded = true;
 	}
 		
 	private TimerTask createTimerTask() {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				if(renderNeeded)
+				if(outputRenderNeeded) {
 					renderOutput();
+				}
+				if(crawlerRenderNeeded) {
+					renderCrawlerOutput();
+				}
 			}			
 		};
 	}
@@ -258,6 +305,12 @@ public class DashboardPane extends Composite implements IEventHandler {
 
 	@Override
 	public void handleEvent(IEvent event) {
+		synchronized(renderTimer) {
+			if(!disableRenderTaskStart && renderTask == null) {
+				startRenderTask();
+			}
+		}
+
 		if (event instanceof ScanStatusChangeEvent) {
 			handleScannerStatusChanged((ScanStatusChangeEvent) event);
 		} else if (event instanceof NewScanAlertEvent) {

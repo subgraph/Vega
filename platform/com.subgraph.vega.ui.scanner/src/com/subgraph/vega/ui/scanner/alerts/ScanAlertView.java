@@ -1,5 +1,6 @@
 package com.subgraph.vega.ui.scanner.alerts;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -20,6 +21,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 
@@ -39,11 +41,24 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		viewer.setSorter(new ViewerSorter() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				if(!(e1 instanceof AlertScanNode && e2 instanceof AlertScanNode)) {
+				final int cat1 = category(e1);
+				final int cat2 = category(e2);
+				if(cat1 != cat2) {
+					return cat1 - cat2;
+				}
+				
+				if(!((e1 instanceof AlertScanNode) && (e2 instanceof AlertScanNode))) {
 					return super.compare(viewer, e1, e2);
 				} else {
 					return compareAlertNodes((AlertScanNode)e1, (AlertScanNode)e2);
 				}
+			}
+			@Override
+			public int category(Object element) {
+				if(element instanceof AlertScanNode) {
+					return (((AlertScanNode) element).getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) ? (0) : (1); 
+				}
+				return 0;
 			}
 		});
 		getSite().setSelectionProvider(viewer);
@@ -72,12 +87,15 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	}
 
 	private int compareAlertNodes(AlertScanNode n1, AlertScanNode n2) {
-		if(n1.getScanInstance() == null || n2.getScanInstance() == null) {
+		if((n1.getScanInstance() == null) || (n2.getScanInstance() == null)) {
 			return (int) (n1.getScanId() - n2.getScanId());
 		} else {
-			long t1 = n1.getScanInstance().getStartTime().getTime();
-			long t2 = n2.getScanInstance().getStartTime().getTime();
-			return (t1 < t2) ? (1) : (-1);
+			final Date d1 = n1.getScanInstance().getStartTime();
+			final Date d2 = n2.getScanInstance().getStartTime();
+			if(d1 == null || d2 == null) {
+				return 0;
+			}
+			return (d1.getTime() < d2.getTime()) ? (1) : (-1);
 		}
 	}
 	
@@ -85,7 +103,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		if(viewer.getTree().getItemCount() > 0) {
 			final TreeItem item = viewer.getTree().getItem(0);
 			viewer.setSelection(new StructuredSelection(item.getData()));
-		}
+		} 
 	}
 
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {

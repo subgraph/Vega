@@ -19,6 +19,10 @@ public class ProxyPerspectiveFactory implements IPerspectiveFactory {
 		proxyFolder.addView(INTERCEPT_QUEUE_VIEW);
 		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, PROXY_FOLDER);
 		layout.setEditorAreaVisible(false);
+		layout.getViewLayout(HTTP_VIEW).setCloseable(false);
+		layout.getViewLayout(INTERCEPT_VIEW).setCloseable(false);
+		layout.getViewLayout(INTERCEPT_QUEUE_VIEW).setCloseable(false);
+		layout.getViewLayout(WEBSITE_VIEW).setCloseable(false);
 	}
 
 }

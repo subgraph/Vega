@@ -9,17 +9,26 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.ui.httpviewer.entity.HttpEntityViewer;
 
 public class HttpMessageViewer extends Composite {
+	private final static String COLLAPSED_ICON = "icons/collapsed.png";
+	private final static String EXPANDED_ICON = "icons/expanded.png";
 	private final Colors colors;
+	private final ImageCache imageCache = new ImageCache("com.subgraph.vega.ui.httpeditor");
+	private final Composite rootComposite;
+	private final Label collapseButton;
 	private final SourceViewer viewer;
 	private final HttpMessageDocumentFactory documentFactory;
 	private final HttpEntityViewer entityViewer;
@@ -30,11 +39,18 @@ public class HttpMessageViewer extends Composite {
 	private IDocument decodedDocument;
 	private boolean isDecodedDocumentDirty;
 	private boolean isDecodingEnabled;
+	private boolean isCollapsed;
+	private boolean isEmpty;
+	private boolean isEditable;
 
 	public HttpMessageViewer(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new FillLayout());
-		viewer = createSourceViewer();
+		setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		rootComposite = createRootComposite();
+		collapseButton = createCollapseHeaders(rootComposite);
+
+		viewer = createSourceViewer(rootComposite);
 		viewer.getTextWidget().setWrapIndent(20);
 		entityViewer = new HttpEntityViewer(viewer.getTextWidget());
 		painter = new EmbeddedControlPainter(viewer, entityViewer, 200);
@@ -42,6 +58,67 @@ public class HttpMessageViewer extends Composite {
 		colors = new Colors(getDisplay());
 		viewer.configure(new Configuration(colors));
 		documentFactory = new HttpMessageDocumentFactory();
+		layout(true);
+		rootComposite.layout(true, true);
+	}
+
+	private Composite createRootComposite() {
+		final Composite c = new Composite(this, SWT.NONE);
+		final GridLayout layout = new GridLayout(2, false);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.horizontalSpacing = 0;
+		c.setLayout(layout);
+		c.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		return c;
+	}
+
+	private Label createCollapseHeaders(Composite parent) {
+		final Label button = new Label(parent, SWT.NONE);
+		final GridData gd = new GridData(SWT.FILL, SWT.TOP, false, false);
+		gd.widthHint = 16;
+		gd.heightHint = 16;
+		button.setLayoutData(gd);
+		button.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				toggleCollapseState();
+			}
+		});
+		return button;
+	}
+
+	private void toggleCollapseState() {
+		if(isEmpty) {
+			return;
+		}
+		
+		if(isCollapsed) {
+			expandHeaders();
+		} else {
+			collapseHeaders();
+		}
+	}
+
+	public void expandHeaders() {
+		if(!isCollapsed || isEmpty) {
+			return;
+		}
+		isCollapsed = false;
+		collapseButton.setImage(imageCache.get(EXPANDED_ICON));
+		viewer.setEditable(isEditable);
+		displayDocumentForDecodeState();
+	}
+	
+	public void collapseHeaders() {
+		if(isCollapsed || isEmpty) {
+			return;
+		}
+		isCollapsed = true;
+		collapseButton.setImage(imageCache.get(COLLAPSED_ICON));
+		viewer.setEditable(false);
+		displayDocumentForDecodeState();
 	}
 
 	public void dispose() {
@@ -50,6 +127,7 @@ public class HttpMessageViewer extends Composite {
 	}
 
 	public void setEditable(boolean flag) {
+		isEditable = flag;
 		viewer.setEditable(flag);
 	}
 
@@ -64,12 +142,18 @@ public class HttpMessageViewer extends Composite {
 			
 		}
 		isDecodedDocumentDirty = false;
+		isEmpty = true;
 		entityViewer.clearContent();
+		collapseButton.setImage(null);
 		viewer.refresh();
 	}
 
 	public String getContent() {
-		return EmbeddedControlPainter.getDocumentContent(viewer.getDocument());
+		if(isDecodingEnabled) {
+			return EmbeddedControlPainter.getDocumentContent(decodedDocument);
+		} else {
+			return EmbeddedControlPainter.getDocumentContent(rawDocument);
+		}
 	}
 
 	public boolean isHeaderContentDirty() {
@@ -89,15 +173,18 @@ public class HttpMessageViewer extends Composite {
 	}
 
 	public void setDecodeUrlEncoding(boolean flag) {
-		if(flag == isDecodingEnabled)
+		if(flag == isDecodingEnabled) {
 			return;
+		}
 	
 		isDecodingEnabled = flag;
 		displayDocumentForDecodeState();
 	}
 
 	private void displayDocumentForDecodeState() {
-		if(isDecodingEnabled) {
+		if(isCollapsed) {
+			viewer.setDocument(createCollapsedDocument());
+		} else if(isDecodingEnabled) {
 			viewer.setDocument(decodedDocument);
 		} else {
 			viewer.setDocument(rawDocument);
@@ -105,7 +192,39 @@ public class HttpMessageViewer extends Composite {
 		viewer.refresh();
 	}
 
+	private IDocument createCollapsedDocument() {
+		if(isDecodingEnabled) {
+			return createCollapsedDocument(decodedDocument);
+		} else {
+			return createCollapsedDocument(rawDocument);
+		}
+	}
+
+	private IDocument createCollapsedDocument(IDocument current) {
+		final String content = current.get();
+		final String[] lines = content.split("\n");
+		if(lines.length == 0) {
+			return documentFactory.createDocumentForText("");
+		} else {
+			return documentFactory.createDocumentForText(lines[0] + " ...");
+		}
+	}
+
+	private boolean isDocumentEmpty() {
+		return rawDocument.get().trim().isEmpty();
+	}
+
 	private void displayNewDocument() {
+		isEmpty = isDocumentEmpty();
+		viewer.setEditable(isEditable);
+		if(isEmpty) {
+			collapseButton.setImage(null);
+		} else if (isCollapsed) {
+			collapseButton.setImage(imageCache.get(COLLAPSED_ICON));
+		} else {
+			collapseButton.setImage(imageCache.get(EXPANDED_ICON));
+		}
+		
 		displayDocumentForDecodeState();
 
 		isRawDocumentDirty = false;
@@ -131,6 +250,7 @@ public class HttpMessageViewer extends Composite {
 			}			
 		});	
 	}
+
 	public void setDisplayImages(boolean flag) {
 		entityViewer.setDisplayImages(flag);
 	}
@@ -175,8 +295,10 @@ public class HttpMessageViewer extends Composite {
 		entityViewer.displayHttpEntity(builder.getEntity());
 	}
 
-	private SourceViewer createSourceViewer() {
-		final SourceViewer sv = new SourceViewer(this, new VerticalRuler(0), SWT.BORDER | SWT.MULTI | SWT.WRAP);
+	private SourceViewer createSourceViewer(Composite parent) {
+		final SourceViewer sv = new SourceViewer(parent, null, SWT.MULTI | SWT.WRAP);
+		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		sv.getControl().setLayoutData(gd);
 		return sv;
 	}	
 }

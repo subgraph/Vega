@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Display;
 public class HexEditFonts {
 	private final static String HEX_ELEMENT_FONT = "hex-element";
 	private final static String HEX_ASCII_FONT = "hex-ascii";
-	private final static int FONT_PADDING = 6;
+	private final static int FONT_PADDING = 10;
 	private final FontRegistry fontRegistry;
 
 	private final int offsetColumnWidth;
@@ -21,10 +21,10 @@ public class HexEditFonts {
 	
 	HexEditFonts(Composite parent) {
 		fontRegistry = new FontRegistry();
+		addFonts(parent.getDisplay());
 		offsetColumnWidth = calculateOffsetColumnWidth(parent);
 		dataColumnWidth = calculateDataColumnWidth(parent);
 		asciiColumnWordWidth = calculateAsciiColumnWordWidth(parent);
-		addFonts(parent.getDisplay());
 	}
 	
 	private void addFonts(Display display) {

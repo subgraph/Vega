@@ -1,7 +1,6 @@
 package com.subgraph.vega.ui.http.dialogs;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -15,11 +14,6 @@ public class TitleAreaConfigDialog extends TitleAreaDialog {
 		this.content = content;
 	}
 	
-	@Override 
-	protected Point getInitialSize() {
-		return content.getSize();
-	}
-
 	@Override
 	protected boolean isResizable() {
 		return true;

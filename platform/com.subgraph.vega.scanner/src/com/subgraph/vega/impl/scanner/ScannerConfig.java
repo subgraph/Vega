@@ -29,6 +29,8 @@ public class ScannerConfig implements IScannerConfig {
 	private int maxChildren = DEFAULT_MAX_CHILDREN;
 	private int maxDepth = DEFAULT_MAX_DEPTH;
 	private int maxDuplicatePaths = DEFAULT_MAX_DUPLICATE_PATHS;
+	private int maxParameterCount = DEFAULT_MAX_PARAMETER_COUNT;
+	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
 	
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
@@ -221,6 +223,26 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public void setMaxDuplicatePaths(int value) {
 		maxDuplicatePaths = value;
+	}
+
+	@Override
+	public void setMaxParameterCount(int value) {
+		this.maxParameterCount = value;
+	}
+
+	@Override
+	public int getMaxParameterCount() {
+		return maxParameterCount;
+	}
+
+	@Override
+	public void setMaxConnections(int value) {
+		maxConnections = value;
+	}
+
+	@Override
+	public int getMaxConnections() {
+		return maxConnections;
 	}
 }
 

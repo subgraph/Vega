@@ -6,7 +6,9 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {
-
+	private final static int DEFAULT_RESPONSE_THREAD_COUNT = 10;
+	private final static int MIN_REQUEST_THREAD_COUNT = 5;
+	private final static int MAX_REQUEST_THREAD_COUNT = 100;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	
 	@Override
@@ -17,7 +19,7 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 
 	@Override
 	public IWebCrawler create(IHttpRequestEngine requestEngine) {
-		return new WebCrawler(requestEngine);
+		return new WebCrawler(requestEngine, getRequestThreadCount(requestEngine), DEFAULT_RESPONSE_THREAD_COUNT);
 	}
 
 	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
@@ -26,5 +28,16 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 	
 	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
 		this.requestEngineFactory = null;
+	}
+	
+	private int getRequestThreadCount(IHttpRequestEngine requestEngine) {
+		int connectLimit = requestEngine.getRequestEngineConfig().getMaxConnections();
+		if(connectLimit < MIN_REQUEST_THREAD_COUNT) {
+			return MIN_REQUEST_THREAD_COUNT;
+		} else if(connectLimit > MAX_REQUEST_THREAD_COUNT) {
+			return MAX_REQUEST_THREAD_COUNT;
+		} else {
+			return connectLimit;
+		}
 	}
 }
