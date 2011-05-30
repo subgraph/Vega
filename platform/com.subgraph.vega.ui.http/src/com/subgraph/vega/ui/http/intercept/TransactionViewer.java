@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -20,6 +21,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
@@ -38,37 +40,46 @@ public class TransactionViewer extends Composite {
 	private static final Image IMAGE_FORWARD = Activator.getImageDescriptor("icons/start_16x16.png").createImage();
 	private static final Image IMAGE_DROP = Activator.getImageDescriptor("icons/stop_16x16.png").createImage();
 	private final IModel model;
+	private final IHttpInterceptor interceptor;
 	private final TransactionDirection direction;
 	private final TransactionManager manager;
+	private final TransactionInfo transactionInfo;
 	private Label statusLabel;
 	private ToolItem forwardButton;
 	private ToolItem dropButton;
 	private ToolItem configureButton;
-
 	private Composite viewerControl;
 	private StackLayout viewerLayout;
+	private Composite viewerEmpty;
 	private Menu viewerMenu;
-	private boolean hasContent;
+	private boolean isPending = false;
 	private IHttpBuilderPart builderPartCurr;
 	private Window configDialog;
-	
-	public TransactionViewer(Composite parent, IModel model, TransactionManager manager, TransactionDirection direction) {
+
+	public TransactionViewer(Composite parent, IModel model, IHttpInterceptor interceptor, TransactionManager manager, TransactionInfo transactionInfo, TransactionDirection direction) {
 		super(parent, SWT.NONE);
+
 		this.model = model;
+		this.interceptor = interceptor;
 		this.direction = direction;
 		this.manager = manager;
+		this.transactionInfo = transactionInfo;
+
 		setLayout(createLayout());
+
 		createStatusLabel();
 		createToolbar();
+
 		final Group viewerGroup = new Group(this, SWT.NONE);
 		viewerGroup.setLayout(new FillLayout());
 		viewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		if(direction == TransactionDirection.DIRECTION_REQUEST) { 
+
+		if (direction == TransactionDirection.DIRECTION_REQUEST) { 
 			createViewersRequest(viewerGroup);
-			manager.setRequestViewer(this);
+			updateViewerRequest();
 		} else {
 			createViewersResponse(viewerGroup);
-			manager.setResponseViewer(this);
+			updateViewerResponse();
 		}
 	}
 	
@@ -106,7 +117,9 @@ public class TransactionViewer extends Composite {
 	    
 		configureButton = createToolbarButton(toolBar, IMAGE_CONFIGURE, "Configure interception rules", createConfigureButtonListener());
 		forwardButton = createToolbarButton(toolBar, IMAGE_FORWARD, "Forward", createForwordButtonListener());
+		forwardButton.setEnabled(false);
 		dropButton = createToolbarButton(toolBar, IMAGE_DROP, "Drop", createDropButtonListener());
+		dropButton.setEnabled(false);
 		
 		return toolBar;
 	}
@@ -136,16 +149,19 @@ public class TransactionViewer extends Composite {
 					ErrorDisplay.displayExceptionError(getShell(), ex);
 					return;
 				}
+
+				forwardButton.setEnabled(false);
+				dropButton.setEnabled(false);
 				if(direction == TransactionDirection.DIRECTION_REQUEST) {
 					try {
-						manager.forwardRequest();
+						manager.forwardRequest(transactionInfo);
 					} catch (Exception ex) {
 						ErrorDisplay.displayExceptionError(getShell(), ex);
 						return;
 					}
 				} else {
 					try {
-						manager.forwardResponse();
+						manager.forwardResponse(transactionInfo);
 					} catch (Exception ex) {
 						ErrorDisplay.displayExceptionError(getShell(), ex);
 						return;
@@ -159,10 +175,11 @@ public class TransactionViewer extends Composite {
 	private SelectionListener createDropButtonListener() {
 		return new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if(direction == TransactionDirection.DIRECTION_REQUEST)
-					manager.dropRequest();
-				else
-					manager.dropResponse();
+				if(direction == TransactionDirection.DIRECTION_REQUEST) {
+					manager.dropRequest(transactionInfo);
+				} else {
+					manager.dropResponse(transactionInfo);
+				}
 			}
 		};
 	}
@@ -172,15 +189,17 @@ public class TransactionViewer extends Composite {
 		viewerLayout = new StackLayout();
 		viewerControl.setLayout(viewerLayout);
 		
-		IHttpRequestBuilder requestBuilder = manager.getRequestBuilder();
+		IHttpRequestBuilder requestBuilder = transactionInfo.getRequestBuilder();
 		final SelectionListener listener = createSelectionListenerMenuItem();
 
+	    viewerEmpty = new Composite(viewerControl, SWT.NONE);
+	    viewerEmpty.setLayout(new FillLayout());
+		
 		RequestEditor requestEditor = new RequestEditor(viewerControl, requestBuilder);
 	    MenuItem menuItem = new MenuItem(viewerMenu, SWT.NONE);
 	    menuItem.setText("Request");
 	    menuItem.setData(requestEditor);
 	    menuItem.addSelectionListener(listener);
-	    viewerLayout.topControl = requestEditor;
 		builderPartCurr = requestEditor;
 
 	    HeaderEditor headerEditor = new HeaderEditor(viewerControl, requestBuilder, 0);
@@ -188,8 +207,6 @@ public class TransactionViewer extends Composite {
 	    menuItem.setText("Headers");
 	    menuItem.setData(headerEditor);
 	    menuItem.addSelectionListener(listener);
-
-	    builderPartCurr.setEditable(false);
 	}
 
 	private void createViewersResponse(final Composite parent) {
@@ -197,8 +214,11 @@ public class TransactionViewer extends Composite {
 		viewerLayout = new StackLayout();
 		viewerControl.setLayout(viewerLayout);
 
-		IHttpResponseBuilder responseBuilder = manager.getResponseBuilder();
+		IHttpResponseBuilder responseBuilder = transactionInfo.getResponseBuilder();
 		final SelectionListener listener = createSelectionListenerMenuItem();
+
+	    viewerEmpty = new Composite(viewerControl, SWT.NONE);
+	    viewerEmpty.setLayout(new FillLayout());
 
 		ResponseMessageEditor responseEditor = new ResponseMessageEditor(viewerControl, responseBuilder);
 		responseEditor.setEditable(false);
@@ -206,7 +226,6 @@ public class TransactionViewer extends Composite {
 	    menuItem.setText("Response");
 	    menuItem.setData(responseEditor);
 	    menuItem.addSelectionListener(listener);
-	    viewerLayout.topControl = responseEditor;
 		builderPartCurr = responseEditor;
 
 	    HeaderEditor headerEditor = new HeaderEditor(viewerControl, responseBuilder, 0);
@@ -215,8 +234,6 @@ public class TransactionViewer extends Composite {
 	    menuItem.setText("Headers");
 	    menuItem.setData(headerEditor);
 	    menuItem.addSelectionListener(listener);
-
-	    builderPartCurr.setEditable(false);
 	}
 	
 	private SelectionAdapter createSelectionListenerMenuItem() {
@@ -225,7 +242,7 @@ public class TransactionViewer extends Composite {
 			public void widgetSelected(SelectionEvent event) {
 				final MenuItem menuItem = (MenuItem) event.widget;
 				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
-				if (hasContent != false) {
+				if (isPending != false) {
 					try {
 						builderPartCurr.processContents();
 					} catch (Exception e) {
@@ -234,7 +251,7 @@ public class TransactionViewer extends Composite {
 					}
 				}
 				builderPartCurr = builderPart;
-				builderPartCurr.setEditable(hasContent);
+				builderPartCurr.setEditable(isPending);
 				builderPartCurr.refresh();
 				viewerLayout.topControl = builderPartCurr.getControl();
 				viewerControl.layout();
@@ -252,26 +269,84 @@ public class TransactionViewer extends Composite {
 		configDialog.open();
 	}
 
-	public void notifyUpdate(final String statusMessage, final boolean hasContent) {
-		getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				doUpdate(statusMessage, hasContent);
-			}
-		});
+	private void updateViewerRequest() {
+		final TransactionManager.TransactionStatus status = transactionInfo.getRequestStatus();
+		final Control topControl;
+		String statusMessage = transactionInfo.getRequestStatusMessage();
+		if (status == TransactionManager.TransactionStatus.STATUS_INACTIVE) {
+			isPending = false;
+			topControl = viewerEmpty;
+//			HttpInterceptorLevel level = interceptor.getInterceptLevel(TransactionDirection.DIRECTION_REQUEST);
+//			switch (level) {
+//			case DISABLED:
+//				statusMessage += ". Request interception disabled";
+//				break;
+//			case ENABLED_ALL:
+//				statusMessage += ". Request interception enabled for all requests";
+//				break;
+//			case ENABLED_BREAKPOINTS:
+//				statusMessage += ". Request interception enabled for breakpoints";
+//				break;
+//			}
+		} else {
+			isPending = (status == TransactionManager.TransactionStatus.STATUS_PENDING);
+			topControl = builderPartCurr.getControl();
+			builderPartCurr.setEditable(isPending);
+			builderPartCurr.refresh();
+		}
+		statusLabel.setText(statusMessage);
+		if (viewerLayout.topControl != topControl) {
+			viewerLayout.topControl = topControl;
+			viewerControl.layout();
+		}
+		viewerMenu.setEnabled(isPending);
+		forwardButton.setEnabled(isPending);
+		dropButton.setEnabled(isPending);
 	}
 	
-	private void doUpdate(String statusMessage, boolean hasContent) {
-		if (isDisposed()) {
-			return;
-		}
-
-		this.hasContent = hasContent;
-		statusLabel.setText(statusMessage);
-		forwardButton.setEnabled(hasContent);
-		dropButton.setEnabled(hasContent);
-		if (builderPartCurr != null) {
-			builderPartCurr.setEditable(hasContent);
+	private void updateViewerResponse() {
+		final TransactionManager.TransactionStatus status = transactionInfo.getResponseStatus();
+		final Control topControl;
+		String statusMessage = transactionInfo.getResponseStatusMessage();
+		if (status == TransactionManager.TransactionStatus.STATUS_INACTIVE) {
+			isPending = false;
+			topControl = viewerEmpty;
+//			HttpInterceptorLevel level = interceptor.getInterceptLevel(TransactionDirection.DIRECTION_RESPONSE);
+//			switch (level) {
+//			case DISABLED:
+//				statusMessage += ". Response interception disabled";
+//				break;
+//			case ENABLED_ALL:
+//				statusMessage += ". Response interception enabled for all respnses";
+//				break;
+//			case ENABLED_BREAKPOINTS:
+//				statusMessage += ". Response interception enabled for breakpoints";
+//				break;
+//			}
+		} else {
+			isPending = (status == TransactionManager.TransactionStatus.STATUS_PENDING);
+			topControl = builderPartCurr.getControl();
+			builderPartCurr.setEditable(isPending);
 			builderPartCurr.refresh();
+		}
+		statusLabel.setText(statusMessage);
+		if (viewerLayout.topControl != topControl) {
+			viewerLayout.topControl = topControl;
+			viewerControl.layout();
+		}
+		viewerMenu.setEnabled(isPending);
+		forwardButton.setEnabled(isPending);
+		dropButton.setEnabled(isPending);
+	}
+
+	/**
+	 * Notification from InterceptView when transactionInfo has been updated.
+	 */
+	public void notifyUpdate() {
+		if (direction == TransactionDirection.DIRECTION_REQUEST) {
+			updateViewerRequest();
+		} else {
+			updateViewerResponse();
 		}
 	}
 

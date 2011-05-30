@@ -8,24 +8,36 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
 
 public class InterceptView extends ViewPart {
 	public final static String VIEW_ID = "com.subgraph.vega.views.intercept";
+	private SashForm parentComposite;
 	private TransactionManager transactionManager;
+	private TransactionInfo transactionInfo;
+	private TransactionViewer transactionViewerRequest;
+	private TransactionViewer transactionViewerResponse;
 
 	@Override
 	public void createPartControl(Composite parent) {
 		final IHttpInterceptor interceptor = Activator.getDefault().getProxyService().getInterceptor();
 		final IModel model = Activator.getDefault().getModel();
-		final SashForm form = new SashForm(parent, SWT.VERTICAL);
-		transactionManager = new TransactionManager(interceptor);
-		new TransactionViewer(form, model, transactionManager, TransactionDirection.DIRECTION_REQUEST);
-		new TransactionViewer(form, model, transactionManager, TransactionDirection.DIRECTION_RESPONSE);
+		parentComposite = new SashForm(parent, SWT.VERTICAL);
+		transactionManager = new TransactionManager(this, interceptor);
+
+		// REVISIT: shouldn't need to instantiate a request engine to get builders
+		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+		transactionInfo = new TransactionInfo(requestEngine);
+		
+		transactionViewerRequest = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
+		transactionViewerResponse = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_RESPONSE);
 		transactionManager.setManagerActive();
-		form.setWeights(new int[] { 50, 50, });
-		form.pack();
+		parentComposite.setWeights(new int[] { 50, 50, });
+		parentComposite.pack();
 	}
 
 	@Override
@@ -42,6 +54,20 @@ public class InterceptView extends ViewPart {
 
 	public void openTransaction(IProxyTransaction transaction) {
 		transactionManager.openTransaction(transaction);
+	}
+
+	public void notifyUpdate() {
+		parentComposite.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				doUpdate();
+			}
+		});
+	}
+	
+	private void doUpdate() {
+		transactionManager.updateTransactionInfo(transactionInfo);
+		transactionViewerRequest.notifyUpdate();
+		transactionViewerResponse.notifyUpdate();
 	}
 	
 }

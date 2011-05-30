@@ -265,7 +265,6 @@ public class HttpInterceptor implements IHttpInterceptor {
 					if (transaction.hasResponse() == (direction == TransactionDirection.DIRECTION_RESPONSE)) {
 						if (interceptOnBreakpointSet(breakpointSet, transaction) == false) {
 							transaction.doForward();
-							idx--;
 						}
 					}
 				}
@@ -274,7 +273,6 @@ public class HttpInterceptor implements IHttpInterceptor {
 					ProxyTransaction transaction = transactionQueue.get(idx);
 					if (transaction.hasResponse() == (direction == TransactionDirection.DIRECTION_RESPONSE)) {
 						transaction.doForward();
-						idx--;
 					}
 				}
 			}

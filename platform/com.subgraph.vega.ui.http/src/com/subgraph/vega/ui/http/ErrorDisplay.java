@@ -20,9 +20,15 @@ public class ErrorDisplay {
 	static public void displayExceptionError(Shell shell, Exception e) {
 		if (e.getMessage() != null) {
 			displayError(shell, e.getMessage());
-		} else {
+		} if (e.getCause() != null) {
 			displayError(shell, e.getCause().getMessage());
+		} else {
+			displayError(shell, e.toString());
 		}
 	}
 
+	static public void displayExceptionError(Shell shell, NullPointerException e) {
+		displayError(shell, "Unexpected error encountered");
+	}
+	
 }

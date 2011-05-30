@@ -3,6 +3,8 @@ package com.subgraph.vega.internal.http.proxy;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -45,11 +47,13 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		"Proxy-Connection",
 	};
 
+	private final Logger logger;
 	private final HttpProxy httpProxy;
 	private final IHttpRequestEngine requestEngine;
 
-	ProxyRequestHandler(HttpProxy httpProxy, IHttpRequestEngine requestEngine) {
+	ProxyRequestHandler(HttpProxy httpProxy, Logger logger, IHttpRequestEngine requestEngine) {
 		this.httpProxy = httpProxy;
+		this.logger = logger;
 		this.requestEngine = requestEngine;
 	}
 
@@ -88,12 +92,16 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			response.setEntity(httpResponse.getEntity());
 			transaction.signalForward();
 		} catch (InterruptedException e) {
+			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
 			response.setStatusCode(503);
 		} catch (IOException e) {
+			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
 			response.setStatusCode(502);
 		} catch (ProtocolException e) {
+			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
 			response.setStatusCode(400);
 		} catch (Exception e) {
+			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
 			response.setStatusCode(500);
 		} finally {
 			transaction.signalComplete(false);
