@@ -12,5 +12,11 @@
 
 	<remediation>The developers should investigate the flagged link and manually confirm the presence of comments containing sensitive information. Any such comments should be removed.</remediation>
 	
-	<discussion>Programming and markup languages allow for arbitrary text or segments of code to be marked as comments, meaning that they are in the source code file but excluded from parsing and execution or rendering. Some comments, including HTML comments, are transmitted to the client. Comments written by developers containing sensitive information can constitute a vulnerability. Additionally, developers sometimes comment out server-side code that would never otherwise be seen by clients as HTML comments, resulting in it beign transmitted to clients as part of the web application output. *need external refs</discussion>
+	<discussion>Programming and markup languages allow for arbitrary text or segments of code to be marked as comments, meaning that they are in the source code file but excluded from parsing and execution or rendering. HTML supports comments, and though they aren't rendered as part of a web page, they are transmitted with the rest of the document to remote clients. Developers sometimes comment out server-side application code that would never otherwise be seen by clients, as HTML comments. These cases, and others, where sensitive information is included in HTML comments, can result in security vulnerabilities.</discussion>
+
+	<references>
+		<url address="http://cwe.mitre.org/data/definitions/615.html">CWE-615: Information Exposure through Comments (Mitre)</url>
+                <url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+                <url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
+	</references>
 </alert>

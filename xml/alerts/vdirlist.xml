@@ -20,6 +20,7 @@
 
 	<references>
 		<url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+		<url address="http://cwe.mitre.org/data/definitions/548.html">CWE-548: Information Exposure through Directory Listing (Mitre)</url>
 		<url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
 	</references>
 
