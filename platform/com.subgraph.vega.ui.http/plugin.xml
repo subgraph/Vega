@@ -80,6 +80,14 @@
             class="com.subgraph.vega.ui.http.commands.ConfigureProxyModules"
             commandId="com.subgraph.vega.commands.proxyConfigureModules">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ForwardTransaction"
+            commandId="com.subgraph.vega.commands.popup.forwardTransaction">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.DropTransaction"
+            commandId="com.subgraph.vega.commands.popup.dropTransaction">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -133,6 +141,14 @@
             description="Configure Proxy Response Processing Modules"
             id="com.subgraph.vega.commands.proxyConfigureModules"
             name="Configure Proxy Response Processing Modules">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.popup.forwardTransaction"
+            name="Forward pending transaction">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.popup.dropTransaction"
+            name="Drop pending transaction">
       </command>
    </extension>
    <extension
@@ -234,6 +250,38 @@
                icon="icons/reset_filter.png"
                label="Reset Request Filter"
                style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions">
+         <command
+               commandId="com.subgraph.vega.commands.popup.forwardTransaction"
+               label="Forward Transaction"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="+">
+                  </count>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.popup.dropTransaction"
+               label="Drop Transaction"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="+">
+                  </count>
+               </with>
+            </visibleWhen>
          </command>
       </menuContribution>
     

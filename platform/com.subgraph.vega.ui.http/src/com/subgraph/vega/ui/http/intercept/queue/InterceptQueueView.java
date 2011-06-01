@@ -2,6 +2,7 @@ package com.subgraph.vega.ui.http.intercept.queue;
 
 import java.net.URI;
 
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
@@ -15,6 +16,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PartInitException;
@@ -28,6 +30,7 @@ import com.subgraph.vega.ui.http.ErrorDisplay;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 
 public class InterceptQueueView extends ViewPart {
+	public final static String POPUP_TRANSACTIONS_TABLE = "com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions";
 	private IHttpInterceptor interceptor;
 	private Composite parentComposite;
 	private TableViewer tableViewerTransactions;
@@ -61,7 +64,12 @@ public class InterceptQueueView extends ViewPart {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		tableViewerTransactions.addDoubleClickListener(createDoubleClickListener());
-
+		MenuManager menuManager = new MenuManager();
+		Menu menu = menuManager.createContextMenu(tableViewerTransactions.getTable());
+		tableViewerTransactions.getTable().setMenu(menu);
+		getSite().registerContextMenu(POPUP_TRANSACTIONS_TABLE, menuManager, tableViewerTransactions);
+		getSite().setSelectionProvider(tableViewerTransactions);
+		
 		return rootControl;
 	}
 	
