@@ -134,7 +134,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	private boolean interceptOnBreakpointSet(IHttpConditionSet breakpointSet, ProxyTransaction transaction) {
 		final HttpResponse response = (transaction.hasResponse()) ? (transaction.getResponse().getRawResponse()) : (null);
 		synchronized(interceptorLock) {
-			return (breakpointSet == null) ? (false) : (breakpointSet.matches(transaction.getRequest(), response));
+			return (breakpointSet == null) ? (false) : (breakpointSet.matchesAny(transaction.getRequest(), response));
 		}
 	}
 
