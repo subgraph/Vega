@@ -8,7 +8,7 @@ public class StopProxyHandler extends AbstractProxyCommandHandler {
 	protected void executeCommand(IHttpProxyService proxyService,
 			ProxyStateSourceProvider proxyState) {
 		proxyService.stop();
-		proxyState.setProxyStopped();
+		proxyState.setProxyRunning(false);
 		Activator.getDefault().setStatusLineProxyStopped();
 	}
 
