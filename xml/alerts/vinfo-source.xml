@@ -2,29 +2,26 @@
 <alert>
 <title>Possible source code disclosure</title>
 	
-	<class>Information</class>
+  <class>Information</class>
 
-	<severity>Medium</severity>
+  <severity>Medium</severity>
 
-  <impact> Could result in disclosure of sensitive information to attackers.</impact>
-  <impact> This includes passwords, etc.</impact>
+  <impact>Could result in disclosure of sensitive information to attackers.</impact>
+  <impact>Source code fragments can include information about the design/structure of the application, including use of third-party components.</impact>
+  <impact>This information may not otherwise be easily known by an adversary.</impact>
+  <impact>Sometimes source code also contains highly sensitive information, such as passwords (database connection strings).</impact>
 
-  <remediation>
-    There is currently no solution for this vulnerability.  Contact your vendor.
-  </remediation>
+  <remediation>The developer should verify that the output detected by Vega is in fact application source code.</remediation>
+  <remediation>The cause should be determined, and the material removed or prevented from being output.</remediation>
 
+  <discussion>
+    Vega has detected fragments of text that match signatures of application source code. Application source code unintentedly visible to remote clients can be a security vulnerability. This can occur in applications using technologies such as PHP and JSP, which allow for code to be mixed with static presentation content. For an attacker, source code can reveal information about the nature of the application, such as its design or the use of third-party components. Sometimes sensitive information, such as a database connection string, can be included in source code.
+  </discussion>
 
-	<discussion>
-    Possible source code disclosure.
-	</discussion>
-
-  <external>
-    <url address="http://subgraph.com">Subgraph security.</url>
-  </external>
-           
   <references>
-    <url address="http://minecraft.net">Minecraft is a good game.</url>
-    <url address="http://en.wikipedia.com">Learn stuff here</url>
+    <url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
+    <url address="http://cwe.mitre.org/data/definitions/540.html">CWE-540: Information Exposure through Source Code (Mitre)</url>
+    <url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
   </references>
 
 	

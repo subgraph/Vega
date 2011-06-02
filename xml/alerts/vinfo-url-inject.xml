@@ -2,20 +2,19 @@
 <alert>
 <title>URL Injection</title>
 	
-	<class>Information</class>
-	<severity>Info</severity>
+	<class>Input Validation</class>
+	<severity>Medium</severity>
+
+	<impact>An externally supplied link has been used as an attribute (e.g. src, href, value) in a HTML tag.</impact>
+	<impact>This can have have a variety of possible consequences, from benign, to serious, depending on the tag.</impact>
+	<impact>Impacts can include automatic client fetching of remote malicious content.</impact>
+	<impact>These could be used for phishing or, possibly, cross-domain attacks.</impact>
+
+	<remediation>The developer should examine the tag and determine the possible security implications of the use of a remotely supplied URI.</remediation>
 
 	<discussion>
-		Discuss issue here.
+	Vega has determined that a HTML tag in the target page has an attribute (such as src, href, or value) that is a URI supplied by the scanner. There are a variety of security implications, depending on the tag. The most serious consequences include phishing attacks or possible cross-domain risks that can occur if the browser of the target user automatically fetches malicious content from these links. 
 	</discussion>
-
-  <impact>
-		Explain impact here.
-  </impact>
-
-  <remediation>
-    Investigate further.
-  </remediation>
 
 </alert>
 

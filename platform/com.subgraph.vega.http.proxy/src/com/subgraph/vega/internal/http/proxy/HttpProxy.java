@@ -59,7 +59,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		inProcessor.addInterceptor(new ResponseContentCustom());
 		
 		HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
-		registry.register("*", new ProxyRequestHandler(this, requestEngine));
+		registry.register("*", new ProxyRequestHandler(this, logger, requestEngine));
 
 		httpService = new VegaHttpService(inProcessor, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(), registry, params, sslContextRepository);
 		

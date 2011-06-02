@@ -12,7 +12,7 @@
 	<impact>The error itself may indicate a vulnerability.</impact> 
 
 	<remediation>ColdFusion can and should be configured to limit the output of debug data when errors occur.</remediation>
-	<remediation>This is managed in the ColdFusion Administrator, the "Debugging & Logging" section.</remediation>
+	<remediation>This is managed in the ColdFusion Administrator, the "Debugging and Logging" section.</remediation>
 	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "Robust Exception Information".</remediation>
 	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "AJAX Debug Log Window".</remediation>
 	<remediation>For production servers, the ColdFusion 9 Lockdown Guide recommends disabling "Request Debugging Output".</remediation>
@@ -26,7 +26,7 @@
 
 	<references>
 		<url address="http://www.adobe.com/products/coldfusion/whitepapers/pdf/91025512_cf9_lockdownguide_wp_ue.pdf">ColdFusion 9 Lockdown Guide (Adobe)</url>
-		<url address="http://help.adobe.com/en_US/ColdFusion/9.0/Admin/WSc3ff6d0ea77859461172e0811cbf3638e6-7fe0.html">Using the ColdFusion Administrator: Debugging & Logging section</url>
+		<url address="http://help.adobe.com/en_US/ColdFusion/9.0/Admin/WSc3ff6d0ea77859461172e0811cbf3638e6-7fe0.html">Using the ColdFusion Administrator: Debugging and Logging section</url>
                 <url address="https://www.owasp.org/index.php/Information_Leakage">Information Leakage (OWASP)</url>
                 <url address="http://projects.webappsec.org/w/page/13246936/Information-Leakage">Information Leakage (WASC)</url>
 	</references>

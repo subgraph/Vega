@@ -9,13 +9,11 @@
 	    Vega has detected that this URI returned a blank body response.  
 	</discussion>
 
-  <impact>
-    This may be indicative of an error condition and should be manually investigated further.
-  </impact>
+	<impact>This may be indicative of an error condition and should be manually investigated further.</impact>
 
-  <remediation>
-    Investigate further.
-  </remediation>
+	<remediation>
+ 	The developer should investigate why this occurred and if there are any security implications. 
+	</remediation>
 
 </alert>
 
