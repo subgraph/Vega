@@ -1,7 +1,7 @@
 <#include "macros.ftl">
 
 ::selection {
-	background: #d93131;
+	background: #f46f5d;
 }
 
 body {
@@ -55,6 +55,7 @@ table {
    /* border-color: #6c0f0f; */
    font-size: 13px;
    font-family: Helvetica, Verdana, Arial, sans-serif;
+   
 }
 
 tr {
