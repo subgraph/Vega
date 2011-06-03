@@ -34,6 +34,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	private IHttpConditionSet breakpointSetResponse; 
 	private final ArrayList<ProxyTransaction> transactionQueue = new ArrayList<ProxyTransaction>(); /**< Queue of intercepted transactions pending processing */
 	private IWorkspace currentWorkspace;
+	private boolean isEnabled = true;
 	
 	HttpInterceptor(IModel model) {
 		eventHandlerList = new ArrayList<IHttpInterceptorEventHandler>();
@@ -134,7 +135,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	private boolean interceptOnBreakpointSet(IHttpConditionSet breakpointSet, ProxyTransaction transaction) {
 		final HttpResponse response = (transaction.hasResponse()) ? (transaction.getResponse().getRawResponse()) : (null);
 		synchronized(interceptorLock) {
-			return (breakpointSet == null) ? (false) : (breakpointSet.matches(transaction.getRequest(), response));
+			return (breakpointSet == null) ? (false) : (breakpointSet.matchesAny(transaction.getRequest(), response));
 		}
 	}
 
@@ -144,7 +145,7 @@ public class HttpInterceptor implements IHttpInterceptor {
 	 */
 	public boolean handleTransaction(ProxyTransaction transaction) {
 		synchronized(interceptorLock) {
-			if (eventHandlerList.size() != 0 && intercept(transaction) != false) {
+			if (isEnabled == true && eventHandlerList.size() != 0 && intercept(transaction) != false) {
 				transaction.setPending(this);
 				transactionQueue.add(transaction);
 				int idx = transactionQueue.size() - 1;
@@ -154,6 +155,25 @@ public class HttpInterceptor implements IHttpInterceptor {
 				return true;
 			}
 			return false;
+		}
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		synchronized(interceptorLock) {
+			if (isEnabled != enabled) {
+				isEnabled = enabled;
+				if (isEnabled == false) {
+					forwardAll();
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isEnabled() {
+		synchronized(interceptorLock) {
+			return isEnabled;
 		}
 	}
 
@@ -279,4 +299,14 @@ public class HttpInterceptor implements IHttpInterceptor {
 		}
 	}
 
+	/**
+	 * Forward all pending transactions. Must be invoked with interceptorLock synchronized.
+	 */
+	private void forwardAll() {
+		for (int idx = 0; idx < transactionQueue.size(); idx++) {
+			ProxyTransaction transaction = transactionQueue.get(idx);
+			transaction.doDrop();
+		}
+	}
+	
 }

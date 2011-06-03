@@ -15,7 +15,7 @@ public class StartProxyHandler extends AbstractProxyCommandHandler {
 		int proxyPort = Activator.getDefault().getPreferenceStore()
 		.getInt("ProxyPort");
 		proxyService.start(proxyPort);
-		proxyState.setProxyStarted();
+		proxyState.setProxyRunning(true);
 		Activator.getDefault().setStatusLineProxyRunning(proxyPort);
 	}
 }

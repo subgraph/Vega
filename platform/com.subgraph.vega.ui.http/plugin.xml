@@ -43,7 +43,7 @@
             <with
                   variable="vega.proxyState">
                <equals
-                     value="stopped">
+                     value="disabled">
                </equals>
             </with>
          </enabledWhen>
@@ -55,7 +55,7 @@
             <with
                   variable="vega.proxyState">
                <equals
-                     value="started">
+                     value="enabled">
                </equals>
             </with>
          </enabledWhen>
@@ -88,6 +88,10 @@
             class="com.subgraph.vega.ui.http.commands.DropTransaction"
             commandId="com.subgraph.vega.commands.popup.dropTransaction">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ProxyPassthrough"
+            commandId="com.subgraph.vega.commands.proxyPassthrough">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -107,6 +111,17 @@
             description="Stop the HTTP Proxy"
             id="com.subgraph.vega.commands.stopProxy"
             name="Stop HTTP Proxy">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            description="Configure Proxy Response Processing Modules"
+            id="com.subgraph.vega.commands.proxyConfigureModules"
+            name="Configure Proxy Response Processing Modules">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            id="com.subgraph.vega.commands.proxyPassthrough"
+            name="Toggle HTTP proxy passthrough">
       </command>
       <category
             id="com.subgraph.vega.commands.httpRequestViewPopupCategory"
@@ -136,17 +151,17 @@
             id="com.subgraph.vega.commands.resetRequestFilter"
             name="Reset Request View Filter">
       </command>
+      <category
+            id="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
+            name="Interception Queue View Popup">
+      </category>
       <command
-            categoryId="com.subgraph.vega.commands.proxyCategory"
-            description="Configure Proxy Response Processing Modules"
-            id="com.subgraph.vega.commands.proxyConfigureModules"
-            name="Configure Proxy Response Processing Modules">
-      </command>
-      <command
+            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
             id="com.subgraph.vega.commands.popup.forwardTransaction"
             name="Forward pending transaction">
       </command>
       <command
+            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
             id="com.subgraph.vega.commands.popup.dropTransaction"
             name="Drop pending transaction">
       </command>
@@ -192,6 +207,21 @@
                   icon="icons/configure.png"
                   style="push"
                   tooltip="Configure which response processing modules are run on proxy traffic">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.proxy">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.subgraph.vega.commands.proxyPassthrough"
+                  icon="icons/unchecked.png"
+                  style="toggle"
+                  tooltip="Make proxy forward all transactions without processing or interception">
                <visibleWhen
                      checkEnabled="false">
                   <with

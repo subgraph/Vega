@@ -7,6 +7,8 @@ import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
  * are removed from the queue by either forwarding or dropping them individually. 
  */
 public interface IHttpInterceptor {
+	void setEnabled(boolean enabled);
+	boolean isEnabled();
 	void addEventHandler(IHttpInterceptorEventHandler eventHandler);
 	void removeEventHandler(IHttpInterceptorEventHandler eventHandler);
 	void setInterceptLevel(TransactionDirection direction, HttpInterceptorLevel level);
