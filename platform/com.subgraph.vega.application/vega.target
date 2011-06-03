@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="vega">
+<target name="vega" sequenceNumber="4">
 <locations>
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.rcp.sdk.id" version="3.6.0.I20100608-0911"/>
-<repository location="http://download.eclipse.org/releases/helios"/>
-</location>
 <location path="${project_loc}/extra-bundles" type="Directory"/>
+<location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.rcp.sdk.id" version="3.7.0.I20110519-1138"/>
+<repository location="http://download.eclipse.org/releases/indigo"/>
+</location>
 </locations>
 </target>
