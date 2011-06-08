@@ -250,12 +250,13 @@ public class HttpInterceptor implements IHttpInterceptor {
 		synchronized(interceptorLock) {
 			final int idx = transactionQueue.indexOf(transaction);
 			transactionQueue.remove(idx);
-			for (IHttpInterceptorEventHandler handler: eventHandlerList) {
-				handler.notifyRemove(idx);
-			}
 			if (transactionQueue.size() == 0) {
 				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
 					handler.notifyEmpty();
+				}
+			} else {
+				for (IHttpInterceptorEventHandler handler: eventHandlerList) {
+					handler.notifyRemove(idx);
 				}
 			}
 		}
