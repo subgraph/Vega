@@ -62,8 +62,10 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		label.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				if(alertEnabled) {
-					handleAlertClick();
+				synchronized(alertBlinkTimer) {
+					if(queueCnt != 0) {
+						handleAlertClick();
+					}
 				}
 			}
 		});
