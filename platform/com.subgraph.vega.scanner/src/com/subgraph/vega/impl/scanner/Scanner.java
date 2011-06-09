@@ -1,5 +1,6 @@
 package com.subgraph.vega.impl.scanner;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.scanner.IScanProbeResult;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
@@ -115,6 +117,13 @@ public class Scanner implements IScanner {
 		persistentConfig = config;
 	}	
 	
+	@Override
+	public IScanProbeResult probeTargetURI(URI uri) {
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine( requestEngineFactory.createConfig() );
+		final ScanProbe probe = new ScanProbe(uri, requestEngine);
+		return probe.runProbe();
+	}
+
 	@Override
 	public synchronized void startScanner(IScannerConfig config) {
 		if(currentScan != null && currentScan.getScanStatus() != IScanInstance.SCAN_COMPLETED && currentScan.getScanStatus() != IScanInstance.SCAN_CANCELLED) {

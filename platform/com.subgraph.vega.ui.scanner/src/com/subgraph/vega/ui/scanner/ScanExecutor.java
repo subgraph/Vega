@@ -9,10 +9,13 @@ import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.subgraph.vega.api.scanner.IScanProbeResult;
+import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
@@ -21,49 +24,71 @@ import com.subgraph.vega.ui.scanner.wizards.NewWizardDialog;
 public class ScanExecutor {
 	
 	public String runScan(Shell shell, String target) {
-		IScanner scanner = Activator.getDefault().getScanner();
+		final IScanner scanner = Activator.getDefault().getScanner();
 
 		NewScanWizard wizard = new NewScanWizard();
-		if(target != null)
+		if(target != null) {
 			wizard.setTargetField(target);
+		}
 		wizard.setScannerModules(scanner.getAllModules());
 		
-		if(scanner != null) {
-			IScannerConfig scannerConfig = scanner.createScannerConfig();
-		
-			WizardDialog dialog = new NewWizardDialog(shell, wizard);
-			if(dialog.open() == IDialogConstants.OK_ID) {
-				if(wizard.isDomTest()) {
-					runDomTest();
-					return null;
-				}
-				
-				URI uri = wizard.getScanHostURI();
-				if(uri != null) {
-					scannerConfig.setBaseURI(uri);
-					scannerConfig.setCookieList(getCookieList(wizard.getCookieStringList(), uri));
-					scannerConfig.setBasicUsername(wizard.getBasicUsername());
-					scannerConfig.setBasicPassword(wizard.getBasicPassword());
-					scannerConfig.setBasicRealm(wizard.getBasicRealm());
-					scannerConfig.setBasicDomain(wizard.getBasicDomain());
-					scannerConfig.setExclusions(wizard.getExclusions());
-					scannerConfig.setNtlmUsername(wizard.getNtlmUsername());
-					scannerConfig.setNtlmPassword(wizard.getNtlmPassword());
-					final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
-					scannerConfig.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
-					scannerConfig.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
-					scannerConfig.setMaxRequestsPerSecond(preferences.getInt("MaxRequestsPerSecond"));
-					scannerConfig.setMaxDescendants(preferences.getInt("MaxScanDescendants"));
-					scannerConfig.setMaxChildren(preferences.getInt("MaxScanChildren"));
-					scannerConfig.setMaxDepth(preferences.getInt("MaxScanDepth"));
-					scannerConfig.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
-					scanner.setScannerConfig(scannerConfig);
-					scanner.startScanner(scannerConfig);
-					return wizard.getTargetField();
-				}
+		WizardDialog dialog = new NewWizardDialog(shell, wizard);
+		if(dialog.open() == IDialogConstants.OK_ID) {
+			if(wizard.isDomTest()) {
+				runDomTest();
+				return null;
 			}
+			return maybeLaunchScanFromWizard(shell, wizard, scanner);
 		}
 		return null;
+	}
+
+	
+	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner) {
+		URI targetURI = wizard.getScanHostURI();
+		if(targetURI == null) {
+			return null;
+		}
+		IScanProbeResult probeResult = scanner.probeTargetURI(targetURI);
+		if(probeResult.getProbeResultType() == ProbeResultType.PROBE_CONNECT_FAILED) {
+			MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
+			return null;
+		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
+			final URI redirectURI = probeResult.getRedirectTarget();
+			String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
+					"Would you like to scan "+ redirectURI +" instead?";
+			boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
+			if(!doit) {
+				return null;
+			}
+			targetURI = probeResult.getRedirectTarget();
+		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
+			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
+			return null;
+		}
+		
+		final IScannerConfig config = scanner.createScannerConfig();
+		
+		config.setBaseURI(targetURI);
+		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetURI));
+		config.setBasicUsername(wizard.getBasicUsername());
+		config.setBasicPassword(wizard.getBasicPassword());
+		config.setBasicRealm(wizard.getBasicRealm());
+		config.setBasicDomain(wizard.getBasicDomain());
+		config.setExclusions(wizard.getExclusions());
+		config.setNtlmUsername(wizard.getNtlmUsername());
+		config.setNtlmPassword(wizard.getNtlmPassword());
+		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
+		config.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
+		config.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
+		config.setMaxRequestsPerSecond(preferences.getInt("MaxRequestsPerSecond"));
+		config.setMaxDescendants(preferences.getInt("MaxScanDescendants"));
+		config.setMaxChildren(preferences.getInt("MaxScanChildren"));
+		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
+		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
+		scanner.setScannerConfig(config);
+		scanner.startScanner(config);
+		return wizard.getTargetField();
 	}
 
 	// gross hack
@@ -104,5 +129,4 @@ public class ScanExecutor {
 			scanner.runDomTests();
 		}
 	}
-
 }
