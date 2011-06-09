@@ -36,7 +36,7 @@ import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionContent;
 
 public class TransactionViewer extends Composite {
-	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/filter.gif").createImage();
+	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/interception_rules.png").createImage();
 	private static final Image IMAGE_FORWARD = Activator.getImageDescriptor("icons/start_16x16.png").createImage();
 	private static final Image IMAGE_DROP = Activator.getImageDescriptor("icons/stop_16x16.png").createImage();
 	private final IModel model;
