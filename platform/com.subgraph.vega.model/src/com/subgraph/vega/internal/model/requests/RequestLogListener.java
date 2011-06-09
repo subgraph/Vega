@@ -34,7 +34,7 @@ public class RequestLogListener {
 
 	private boolean matchesRecord(IRequestLogRecord record) {
 		if(filterCondition != null)
-			return filterCondition.matches(record.getRequest(), record.getResponse());
+			return filterCondition.matchesAll(record.getRequest(), record.getResponse());
 		else
 			return true;
 	}

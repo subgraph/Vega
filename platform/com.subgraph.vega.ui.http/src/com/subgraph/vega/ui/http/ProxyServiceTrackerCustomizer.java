@@ -27,6 +27,7 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
 			@Override
 			public void notifyRemove(int idx) {
+				handleNotifyRemove();
 			}
 
 			@Override
@@ -64,6 +65,10 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 		statusLineContribution.setProxyPending(interceptor.transactionQueueSize());
 	}
 	
+	private void handleNotifyRemove() {
+		statusLineContribution.setProxyPending(interceptor.transactionQueueSize());
+	}
+
 	private void handleNotifyEmpty() {
 		statusLineContribution.setProxyPending(0);
 	}

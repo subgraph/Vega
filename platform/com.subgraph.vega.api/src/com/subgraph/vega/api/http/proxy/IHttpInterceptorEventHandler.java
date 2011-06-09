@@ -10,7 +10,8 @@ public interface IHttpInterceptorEventHandler {
 	public void notifyQueue(IProxyTransaction transaction, int idx);
 
 	/**
-	 * Notification that a transaction was removed from the queue.
+	 * Notification that a transaction was removed from the queue. Not invoked when the last item is removed form the
+	 * queue, notifyEmpty() is invoked instead.
 	 * 
 	 * @param idx Array index of transaction that was removed. 
 	 */

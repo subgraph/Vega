@@ -26,7 +26,8 @@ import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
 public class HttpProxyService implements IHttpProxyService {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
-	private boolean isRunning;
+	private boolean isRunning = false;
+	private boolean isPassthrough = false;
 	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
 	private IHttpRequestEngineFactory requestEngineFactory;
@@ -44,7 +45,6 @@ public class HttpProxyService implements IHttpProxyService {
 	private SSLContextRepository sslContextRepository;
 
 	public HttpProxyService() {
-		isRunning = false;
 		eventHandler = new IHttpInterceptProxyEventHandler() {
 			@Override
 			public void handleRequest(IProxyTransaction transaction) {
@@ -68,6 +68,13 @@ public class HttpProxyService implements IHttpProxyService {
 	@Override
 	public boolean isRunning() {
 		return isRunning;
+	}
+
+	@Override
+	public boolean isPassthrough() {
+		synchronized(this) {
+			return isPassthrough;
+		}
 	}
 
 	@Override
@@ -98,7 +105,7 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void processTransaction(IProxyTransaction transaction) {
-		if(transaction.getResponse() == null || contentAnalyzer == null)
+		if(transaction.getResponse() == null || contentAnalyzer == null || isPassthrough)
 			return;
 		try {
 			contentAnalyzer.processResponse(transaction.getResponse());
@@ -116,6 +123,14 @@ public class HttpProxyService implements IHttpProxyService {
 		proxy.stopProxy();
 		contentAnalyzer = null;
 		currentWorkspace.unlock();
+	}
+
+	@Override
+	public void setPassthrough(boolean enabled) {
+		synchronized(this) {
+			isPassthrough = enabled;
+			interceptor.setEnabled(!enabled);
+		}
 	}
 
 	@Override

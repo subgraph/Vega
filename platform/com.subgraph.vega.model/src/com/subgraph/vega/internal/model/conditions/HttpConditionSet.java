@@ -45,11 +45,17 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	@Override
-	public boolean matches(HttpRequest request, HttpResponse response) {
+	public boolean matchesAll(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		return matchesAllConditions(request, response);
 	}
 
+	@Override
+	public boolean matchesAny(HttpRequest request, HttpResponse response) {
+		activate(ActivationPurpose.READ);
+		return matchesAnyCondition(request, response);
+	}
+	
 	private boolean matchesAllConditions(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
@@ -64,13 +70,17 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private boolean matchesAnyCondition(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {
-			for(IHttpCondition c: conditionList)
-				if(c.isEnabled() && c.matches(request, response))
+			if (conditionList.size() == 0) {
+				return matchOnEmptySet;
+			}
+			for(IHttpCondition c: conditionList) {
+				if(c.isEnabled() && c.matches(request, response)) {
 					return true;
+				}
+			}
 			return false;
 		}
 		
