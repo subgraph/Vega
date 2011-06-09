@@ -28,6 +28,7 @@ public class TransactionTableContentProvider implements IStructuredContentProvid
 
 			@Override
 			public void notifyEmpty() {
+				handleUpdate();
 			}
 		};
 	}
