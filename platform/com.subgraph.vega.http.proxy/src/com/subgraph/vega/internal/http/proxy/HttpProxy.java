@@ -51,7 +51,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 		this.params = new BasicHttpParams();
 		this.params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0)
 		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
-		.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
+//		.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
 		.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
 
 		BasicHttpProcessor inProcessor = new BasicHttpProcessor();
