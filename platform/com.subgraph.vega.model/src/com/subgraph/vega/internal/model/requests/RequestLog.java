@@ -125,7 +125,6 @@ public class RequestLog implements IRequestLog {
 		}
 		final Query query = database.query();
 		query.constrain(IRequestLogRecord.class);
-		query.descend("requestId").orderAscending();
 		return query.execute();
 	}
 	
