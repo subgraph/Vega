@@ -27,6 +27,9 @@ public class DatabaseConfigurationFactory {
 		configuration.common().objectClass(RequestLogRecord.class).objectField("responseHeaders").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("key").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("resource").indexed(true);
+		
+		configuration.common().weakReferences(false);
+		
 		if(DIAGNOSTICS_ENABLED) {
 			configuration.common().diagnostic().addListener(new DiagnosticToConsole());
 		}

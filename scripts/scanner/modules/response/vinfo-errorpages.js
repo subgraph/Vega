@@ -16,7 +16,7 @@ function run(request, response, ctx) {
 
   var html = ["400", "401", "402", "500", "501"];
 
-  var php = ["unexpected T_STRING", "unexpected T-STRING", "Parse Error", "Parse error", "Fatal error", "Call to undefined function", "Notice: Undefined index", "T_VARIABLE", "T_DOLLAR_OPEN_CURLY_BRACES", "T_CURLY_OPEN", "unexpected $end, expecting", "syntax error, unexpected", "No row with the given identifier", "open_basedir restriction in effect", "Cannot execute a blank command in", "Fatal error</b>:  preg_replace", "thrown in <b>", "Stack trace:", ];
+  var php = ["unexpected T_STRING", "unexpected T-STRING", "Parse Error", "Fatal error", "Call to undefined function", "Notice: Undefined index", "T_VARIABLE", "T_DOLLAR_OPEN_CURLY_BRACES", "T_CURLY_OPEN", "unexpected $end, expecting", "syntax error, unexpected", "No row with the given identifier", "open_basedir restriction in effect", "Cannot execute a blank command in", "Fatal error</b>:  preg_replace", "thrown in <b>", "Stack trace:", ];
 
   var cf = ["Invalid list index", "The string is not closed", "an exception occured", "There is no column", "Session is Invalid", "Cannot invoke method", "Image type must be RGB, ARGB", "A License exception has occured", '<li>Search the <a href="http://www.macromedia.com/support/coldfusion/"', ];
 

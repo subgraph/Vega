@@ -130,11 +130,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		}
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
-		query.descend("requestId").orderAscending();
+
 		for(IHttpCondition c: conditionList) {
 			((AbstractCondition) c).filterRequestLogQuery(query);
 		}
-		return query.execute();		
+		return query.execute();
 	}
 
 	private boolean hasRecords(ObjectContainer db) {

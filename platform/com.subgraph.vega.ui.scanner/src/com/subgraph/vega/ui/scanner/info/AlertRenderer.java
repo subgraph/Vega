@@ -167,7 +167,7 @@ public class AlertRenderer {
 	
 	private String renderEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
 		final HttpEntity entity = request.getEntity();
-		if(!URLEncodedUtils.isEncoded(entity)) {
+		if(entity == null || !URLEncodedUtils.isEncoded(entity)) {
 			return renderBasicRequest(request);
 		}
 		
