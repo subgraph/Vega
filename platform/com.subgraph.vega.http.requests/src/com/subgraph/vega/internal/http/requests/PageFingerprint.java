@@ -1,5 +1,7 @@
 package com.subgraph.vega.internal.http.requests;
 
+import java.util.Arrays;
+
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 
 public class PageFingerprint implements IPageFingerprint {
@@ -104,8 +106,6 @@ public class PageFingerprint implements IPageFingerprint {
 	
 	@Override
 	public boolean equals(Object other) {
-		throw new RuntimeException();
-		/* XXX this is temporary to make sure nobody is calling equals() instead of isSame() by mistake
 		if(this == other) {
 			return true;
 		} else if(other instanceof PageFingerprint) {
@@ -114,13 +114,10 @@ public class PageFingerprint implements IPageFingerprint {
 		} else {
 			return false;
 		}
-		*/
 	}
 	
 	@Override
 	public int hashCode() {
-		return fpCode * 47 + fpData.hashCode();
+		return fpCode * 47 + Arrays.hashCode(fpData);
 	}
-	
-	
 }
