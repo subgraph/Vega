@@ -100,7 +100,7 @@ public class PathState implements IPathState {
 	private void addChildState(PathState state) {
 		synchronized(childStates) {
 			for(IPathState cs: childStates) {
-				if(cs.getPath().equals(state))
+				if(cs.getPath().equals(state.getPath()))
 					return;
 			}
 			childStates.add(state);
@@ -301,9 +301,10 @@ public class PathState implements IPathState {
 		this.response = response;
 		if(response != null) {
 			this.pathFingerprint = response.getPageFingerprint();
-		}
-		else
+		} else {
 			this.pathFingerprint = null;
+			return;
+		}
 
 		if(response.getResponseCode() == 200) {
 			addWebResponseToPath(response);
@@ -403,9 +404,13 @@ public class PathState implements IPathState {
 		synchronized(pm) {
 			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
 				return;
-			}
-			if(!pm.hasParameterList(parameters))
+			} else if(pm.hasParameterList(parameters)) {
+				return;
+			} else if(pathStateManager.hasExceededLimits(this)) {
+				return;
+			} else {
 				pm.addParameterList(parameters);
+			}
 		}
 	}
 
