@@ -28,7 +28,7 @@ public class FormCredential implements IFormCredential {
 
 	@Override
 	public void setPasswordFieldName(String name) {
-		this.targetName = name;
+		this.passwordField = name;
 	}
 
 	@Override
