@@ -44,7 +44,7 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 			else
 				return uri.getRawPath();
 		case 4:
-			return new Integer(record.getResponse().getStatusLine().getStatusCode()).toString();
+			return Integer.valueOf(record.getResponse().getStatusLine().getStatusCode()).toString();
 		case 5:
 			return getResponseLength(record.getResponse());
 		case 6:

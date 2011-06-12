@@ -35,7 +35,7 @@ public abstract class ConditionType implements IHttpConditionType {
 		return false;
 	}
 	
-	public int HashCode() {
+	public int hashCode() {
 		return name.hashCode();
 	}
 }

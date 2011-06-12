@@ -17,10 +17,11 @@ public class HTMLInputElementImpl extends HTMLElementImpl implements HTMLInputEl
 	@Override
 	public String getDefaultValue() {
 		String type = getType();
-		if(type != null && type.equals("text") || type.equals("file") || type.equals("password"))
+		if(type != null && (type.equals("text") || type.equals("file") || type.equals("password"))) {
 			return jsoupElement.attr("value");
-		else
+		} else {
 			return null;
+		}
 	}
 
 	@Override
@@ -30,10 +31,11 @@ public class HTMLInputElementImpl extends HTMLElementImpl implements HTMLInputEl
 	@Override
 	public boolean getDefaultChecked() {
 		String type = getType();
-		if(type != null && type.equals("checkbox") || type.equals("radio"))
+		if(type != null && (type.equals("checkbox") || type.equals("radio"))) {
 			return hasAttribute("checked");
-		else
+		} else {
 			return false;
+		}
 	}
 
 	@Override

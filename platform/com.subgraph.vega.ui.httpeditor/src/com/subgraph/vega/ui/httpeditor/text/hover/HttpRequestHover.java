@@ -30,17 +30,11 @@ public class HttpRequestHover implements ITextHover, ITextHoverExtension2 {
 
 	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-		RequestModel model = viewer.getRequestModel();
-		if(model != null) {
-			Element e = model.findElementAtOffset(offset);
-			System.out.println("Element is "+ e);
-		}
 		return new Region(offset, 0);
 	}
 
 	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
-		System.out.println("get info at "+ hoverRegion);
 		IAnnotationModelExtension2 model = (IAnnotationModelExtension2) viewer.getAnnotationModel();
 		Iterator<?> it = model.getAnnotationIterator(hoverRegion.getOffset(), 0, true, true);
 		while(it.hasNext()) {

@@ -30,7 +30,7 @@ public class DateRule extends AbstractSyntaxRule {
 		matchDigits(scanner, 2) &&
 		matchSingleChar(scanner, ':') &&
 		matchDigits(scanner, 2) &&
-		matchSingleChar(scanner, ':') &
+		matchSingleChar(scanner, ':') &&
 		matchDigits(scanner, 2) &&
 		matchWhitespace(scanner) &&
 		matchGMT(scanner);  

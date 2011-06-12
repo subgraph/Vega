@@ -178,7 +178,7 @@ public class AlertRenderer {
 			sb.append("\n[");
 			for(NameValuePair nvp: args) {
 				sb.append(nvp.getName());
-				if(nvp != null) {
+				if(nvp.getValue() != null) {
 					sb.append("=");
 					sb.append(nvp.getValue());
 				}

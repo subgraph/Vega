@@ -37,9 +37,7 @@ public class RequestConsumer implements Runnable {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
-			synchronized(latch) {
-				latch.countDown();
-			}
+			latch.countDown();
 		}		
 	}
 	

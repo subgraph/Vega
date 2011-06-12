@@ -82,14 +82,8 @@ public class PathStateManager {
 	public PathState createStateForPath(IWebPath path, ICrawlerResponseProcessor fetchCallback) {
 		final PathState parent = getParentDirectoryState(path);
 		if(parent != null) {
-			if(parent.getDepth() > config.getMaxDepth()) {
-				logger.warning("Maximum path depth of "+ config.getMaxDepth() + " exceeded adding " + path.getUri().toString());
-				return null;
-			} else if(parent.getChildCount() > config.getMaxChildren()) {
-				logger.warning("Maximum child path count of "+ config.getMaxChildren() + " exceeded adding "+ path.getUri().toString());
-				return null;
-			} else if(parent.getDescendantCount() > config.getMaxDescendants()) {
-				logger.warning("Maximum total descendant count of "+ config.getMaxDescendants() + " exceeded adding "+ path.getUri().toString());
+			if(hasExceededLimits(parent)) {
+				logger.warning("Failed to add "+ path.getUri().toString() + " due to exceeded limits");
 				return null;
 			} else if(exceedsDuplicatePathLimit(path.getPathComponent(), parent)) {
 				logger.warning("Maximum duplicate path limit of "+ config.getMaxDuplicatePaths() + " exceeded adding "+ path.getUri().toString());
@@ -98,7 +92,21 @@ public class PathStateManager {
 		}
 		return createStateForPathNoChecks(path, fetchCallback);
 	}
-	
+
+	boolean hasExceededLimits(PathState ps) {
+		if(ps.getDepth() > config.getMaxDepth()) {
+			logger.warning("Maximum path depth of "+ config.getMaxDepth() + " exceeded at "+ ps.getPath().getUri().toString());
+			return true;
+		} else if(ps.getChildCount() > config.getMaxChildren()) {
+			logger.warning("Maximum child path count of "+ config.getMaxChildren() + " exceeded at "+ ps.getPath().getUri().toString());
+			return true;
+		} else if(ps.getDescendantCount() > config.getMaxDescendants()) {
+			logger.warning("Maximum total descendant count of "+ config.getMaxDescendants() + " exceeded at "+ ps.getPath().getUri().toString());
+			return true;
+		}
+		return false;
+	}
+
 	private boolean exceedsDuplicatePathLimit(String name, PathState parent) {
 		int count = 0;
 		PathState ps = parent;

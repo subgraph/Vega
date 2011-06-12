@@ -25,12 +25,6 @@ public class HttpRequestImageHover implements ITextHover, ITextHoverExtension2 {
 
 	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-		RequestModel model = requestViewer.getRequestModel();
-		if(model != null) {
-			Element e = model.findElementAtOffset(offset);
-			System.out.println("Element is "+ e);
-		}
-		
 		return new Region(offset, 0);
 	}
 

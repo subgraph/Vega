@@ -52,7 +52,7 @@ public class WorkspaceEntry implements IWorkspaceEntry {
 		
 		try {
 			final String name = reader.readLine();
-			if(name.isEmpty()) {
+			if(name == null || name.isEmpty()) {
 				logger.warning("Could not read workpace because name file is empty "+ nameFile);
 				return null;
 			}

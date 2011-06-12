@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -33,6 +35,7 @@ import com.subgraph.vega.impl.scanner.modules.scripting.tests.DomTestModule;
 import com.subgraph.vega.impl.scanner.modules.scripting.tests.TestScriptLoader;
 
 public class ScannerModuleRepository implements IScannerModuleRegistry {
+	private final Logger logger = Logger.getLogger("modules");
 	private IPathFinder pathFinder;
 	private IHTMLParser htmlParser;
 	private IModel model;
@@ -73,19 +76,28 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 	}
 
 	private File getScriptDirectoryFromConfig(File configFile) {
+		Reader configReader = null;
 		try {
-			if(!(configFile.exists() && configFile.canRead()))
+			if(!(configFile.exists() && configFile.canRead())) {
 				return null;
-			Reader configReader = new FileReader(configFile);
+			}
+			configReader = new FileReader(configFile);
 			Properties configProperties = new Properties();
 			configProperties.load(configReader);
 			String pathProp = configProperties.getProperty("vega.scanner.datapath");
 
-			if(pathProp != null)
+			if(pathProp != null) {
 				return new File(pathProp, "scripts" + File.separator + "scanner");
+			}
 
 		} catch (IOException e) {
-			return null;
+			logger.log(Level.WARNING, "I/O error opening config file "+ configFile.getAbsolutePath(), e);
+		} finally {
+			try {
+				configReader.close();
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "I/O error closing config file "+ configFile.getAbsolutePath(), e);
+			}
 		}
 		return null;
 	}
