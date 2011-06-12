@@ -5,11 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.subgraph.vega.api.paths.IPathFinder;
 
 public class PathFinder implements IPathFinder {
-
+	private final Logger logger = Logger.getLogger("paths");
 	private final Properties configProperties = new Properties();
 	
 	@Override
@@ -73,14 +75,24 @@ public class PathFinder implements IPathFinder {
 	
 	private void loadConfigProperties() {
 		final File configFile = getConfigFilePath();
-		if(!configFile.exists() || !configFile.canRead())
+		if(!configFile.exists() || !configFile.canRead()) {
 			return;
+		}
+		Reader r = null;
 		try {
-			final Reader r = new FileReader(configFile);
+			r = new FileReader(configFile);
 			configProperties.clear();
 			configProperties.load(r);
 		} catch (IOException e) {
-			
+			logger.log(Level.WARNING, "Error opening config file: "+ e.getMessage(), e);
+		} finally {
+			if(r != null) {
+				try {
+					r.close();
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "Error closing config file: "+ e.getMessage(), e);
+				}
+			}
 		}
 	}
 }
