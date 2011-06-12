@@ -94,7 +94,9 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 			logger.log(Level.WARNING, "I/O error opening config file "+ configFile.getAbsolutePath(), e);
 		} finally {
 			try {
-				configReader.close();
+				if(configReader != null) {
+					configReader.close();
+				}
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "I/O error closing config file "+ configFile.getAbsolutePath(), e);
 			}
