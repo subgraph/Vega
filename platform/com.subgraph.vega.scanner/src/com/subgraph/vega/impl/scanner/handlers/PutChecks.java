@@ -32,8 +32,8 @@ public class PutChecks extends CrawlerModule {
 		} else {
 			final int rc = response.getResponseCode();
 			final IPageFingerprint fp = response.getPageFingerprint();
-
-			if(rc >= 200 && rc < 300 && !ps.matchesPathFingerprint(fp)) {
+			
+			if(rc >= 200 && rc < 300 && !ps.matchesPathFingerprint(fp) && !ps.has404FingerprintMatching(fp)) {
 				final String resource = request.getURI().toString();
 				final String key = "vinfo-http-put:" + resource;
 				ctx.publishAlert("vinfo-http-put", key, "HTTP PUT succeeded", request, response, "resource", resource);
