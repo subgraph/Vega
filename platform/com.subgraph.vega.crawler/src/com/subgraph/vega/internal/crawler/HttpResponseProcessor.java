@@ -36,15 +36,15 @@ public class HttpResponseProcessor implements Runnable {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
-			synchronized(latch) {
-				latch.countDown();
-			}
+			latch.countDown();
 		}
 	}
 
 	void stop() {
 		stop = true;
-		crawlerResponseQueue.offer(CrawlerTask.createExitTask());
+		if(!crawlerResponseQueue.offer(CrawlerTask.createExitTask())) {
+			logger.warning("Failed to add STOP sentinel to crawler response queue");
+		}
 		synchronized(requestLock) {
 			if(activeRequest != null)
 				activeRequest.abort();
