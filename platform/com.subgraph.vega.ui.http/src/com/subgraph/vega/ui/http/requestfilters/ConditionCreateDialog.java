@@ -18,8 +18,6 @@ public class ConditionCreateDialog extends TitleAreaDialog {
 	private final ConditionInput conditionInput;
 	private Composite parentComposite;
 	private IHttpCondition newCondition;
-	
-	String comparisonTypeSelected;
 
 	public ConditionCreateDialog(Shell parent, IHttpConditionManager conditionManager) {
 		super(parent);
