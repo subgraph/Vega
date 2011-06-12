@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
@@ -225,7 +224,6 @@ public class ScanConfigDialog extends Dialog {
 		button.setText("Save");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				saveConfig();
 				okPressed();
 
 			}
@@ -238,14 +236,6 @@ public class ScanConfigDialog extends Dialog {
 		}
 		setButtonLayoutData(button);
 		return button;
-	}
-	
-	protected void saveConfig() {
-		Object checked[] = viewer.getCheckedElements();
-		for (Object e: checked) {
-			if (e instanceof IScannerModule) 
-				System.out.print(((IScannerModule)e).getModuleName());
-		}
 	}
 
 	protected void configureShell(Shell newShell) {
