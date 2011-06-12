@@ -63,9 +63,6 @@ public class NewScanWizard extends Wizard {
 //		ntlmUsername = page3.getNtlmUsername();
 //		ntlmPassword = page3.getNtlmPassword();
 		
-		for(String s: exclusions) {
-			System.out.print(s);
-		}
 		if(scanHostURI != null)
 			validTargetField = target;
 		return (scanHostURI != null);		

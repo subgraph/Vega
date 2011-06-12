@@ -225,7 +225,6 @@ public class ScanConfigDialog extends Dialog {
 		button.setText("Save");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				System.out.print("Button pressed!\n");
 				saveConfig();
 				okPressed();
 
@@ -247,10 +246,6 @@ public class ScanConfigDialog extends Dialog {
 			if (e instanceof IScannerModule) 
 				System.out.print(((IScannerModule)e).getModuleName());
 		}
-		System.out.print(cookieString.getText());
-
-		
-		
 	}
 
 	protected void configureShell(Shell newShell) {
