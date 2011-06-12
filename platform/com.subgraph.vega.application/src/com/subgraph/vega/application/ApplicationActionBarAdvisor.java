@@ -15,7 +15,7 @@ import org.eclipse.ui.application.IActionBarConfigurer;
 public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
 	private IWorkbenchAction preferenceAction;
-	IWorkbenchAction aboutAction;
+	//IWorkbenchAction aboutAction;
 	private IWorkbenchAction resetPerspectiveAction;
 		
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
