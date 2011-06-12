@@ -80,7 +80,7 @@ public class ResponseAnalyzer {
 				String v = ((Attr)item).getValue().toLowerCase();
 				if(match(tag, "script") && match(n, "src"))
 					remoteScript = true;
-				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && match(tag, "input")))) {
+				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && !match(tag, "input")))) {
 					if(v.startsWith("vega://"))
 						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
 
