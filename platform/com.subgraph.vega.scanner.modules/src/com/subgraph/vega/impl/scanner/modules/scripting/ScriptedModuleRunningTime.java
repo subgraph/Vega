@@ -17,7 +17,7 @@ public class ScriptedModuleRunningTime implements IScannerModuleRunningTime {
 	
 	
 	@Override
-	public void reset() {
+	public synchronized void reset() {
 		invocationCount = 0;
 		totalMilliseconds = 0;
 		worstTime = -1;
