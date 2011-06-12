@@ -27,7 +27,7 @@ public class ReplayRequest extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
 
-		if (selection != null & selection instanceof IStructuredSelection) {
+		if (selection != null && selection instanceof IStructuredSelection) {
 			IStructuredSelection strucSelection = (IStructuredSelection) selection;
 
 			if (strucSelection.size() > MAX_OPEN_EDITORS) {

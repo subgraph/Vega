@@ -16,10 +16,10 @@ public class DropTransaction extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
 
-		if (selection != null & selection instanceof IStructuredSelection) {
+		if (selection != null && selection instanceof IStructuredSelection) {
 			IStructuredSelection strucSelection = (IStructuredSelection) selection;
 
-			for (@SuppressWarnings("unchecked") Iterator<Object> iterator = strucSelection.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = strucSelection.iterator(); iterator.hasNext();) {
 				IProxyTransaction transaction = (IProxyTransaction) iterator.next();
 				transaction.doDrop();
 			}			
