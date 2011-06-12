@@ -29,7 +29,7 @@ public class PathState implements IPathState {
 		final IRequestBuilder rb = new BasicRequestBuilder(path);
 		final PathState st = new PathState(fetchProcessor, stateManager, parentState, path, rb);
 		if(parentState != null)
-			parentState.addChildState(st);
+			parentState.addChildState(st, true);
 		else {
 			st.setLocked();
 			st.performInitialFetch();
@@ -42,7 +42,7 @@ public class PathState implements IPathState {
 			throw new IllegalArgumentException("Parent of parameter path cannot be null");
 		final IRequestBuilder rb = new GetParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
 		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
-		parentState.addChildState(st);
+		parentState.addChildState(st, false);
 		return st;
 	}
 
@@ -51,7 +51,7 @@ public class PathState implements IPathState {
 			throw new IllegalArgumentException("Parent of parameter path cannot be null");
 		final IRequestBuilder rb = new PostParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
 		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
-		parentState.addChildState(st);
+		parentState.addChildState(st, false);
 		return st;
 	}
 
@@ -97,11 +97,13 @@ public class PathState implements IPathState {
 		return parentState;
 	}
 
-	private void addChildState(PathState state) {
+	private void addChildState(PathState state, boolean checkDup) {
 		synchronized(childStates) {
-			for(IPathState cs: childStates) {
-				if(cs.getPath().equals(state.getPath()))
-					return;
+			if(checkDup) {
+				for(IPathState cs: childStates) {
+					if(cs.getPath().equals(state.getPath()))
+						return;
+				}
 			}
 			childStates.add(state);
 			if(lockedFlag)
