@@ -110,7 +110,7 @@ public class PageFingerprint implements IPageFingerprint {
 			return true;
 		} else if(other instanceof PageFingerprint) {
 			final PageFingerprint that = (PageFingerprint) other;
-			return that.fpCode == this.fpCode && that.fpData.equals(this.fpData);
+			return that.fpCode == this.fpCode && Arrays.equals(that.fpData, this.fpData);
 		} else {
 			return false;
 		}
