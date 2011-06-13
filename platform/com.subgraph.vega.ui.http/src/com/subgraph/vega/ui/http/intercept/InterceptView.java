@@ -1,5 +1,6 @@
 package com.subgraph.vega.ui.http.intercept;
 
+import org.apache.http.client.HttpClient;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
@@ -30,7 +31,8 @@ public class InterceptView extends ViewPart {
 
 		// REVISIT: shouldn't need to instantiate a request engine to get builders
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
-		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineFactory.createConfig());
+		HttpClient client = requestEngineFactory.createBasicClient();
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig());
 		transactionInfo = new TransactionInfo(requestEngine);
 		
 		transactionViewerRequest = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
