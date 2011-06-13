@@ -5,6 +5,6 @@ import org.apache.http.client.HttpClient;
 public interface IHttpRequestEngineFactory {
 	IHttpRequestEngineConfig createConfig();
 	HttpClient createBasicClient();
-	IHttpRequestEngine createRequestEngine(IHttpRequestEngineConfig config);
+	HttpClient createUnencodingClient();
 	IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config);
 }
