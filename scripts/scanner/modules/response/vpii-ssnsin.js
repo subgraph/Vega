@@ -1,6 +1,7 @@
 var module = {
   name: "Social Security/Social Insurance Number Detector",
-  type: "response-processor"
+  type: "response-processor",
+  defaultDisabled: true
 };
 
 var resssn;

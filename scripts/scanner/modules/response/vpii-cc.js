@@ -1,10 +1,8 @@
 var module = {
   name: "Credit Card Identification",
-  type: "response-processor"
+  type: "response-processor",
+  defaultDisabled: true
 };
-
-// algorithm implementation borrowed from wikipedia
-// todo: be more original
 
 function luhncheck(str) {
   str = (str + '').replace(/\D+/g, '').split('').reverse();
