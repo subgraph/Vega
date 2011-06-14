@@ -83,6 +83,14 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="com.subgraph.vega.application.about.AboutHandler"
+            commandId="org.eclipse.ui.help.aboutAction">
+         <activeWhen>
+            <count
+                  value="*">
+            </count></activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -100,16 +108,11 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu">
-         <menu
-               id="file"
-               label="File">
-            <command
-                  commandId="com.subgraph.vega.commands.resetWorkspace"
-                  label="Reset Current Workspace"
-                  style="push">
-            </command>
-         </menu>
+            locationURI="menu:file?before=vega.quit">
+         <command
+               commandId="com.subgraph.vega.commands.resetWorkspace"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -122,22 +125,6 @@
          </variable>
       </sourceProvider>
    </extension>
- <extension
-        point="org.eclipse.ui.actionSets">
-     <actionSet
-           id="com.subgraph.vega.aboutactionset"
-           label="About Subgraph Vega"
-           visible="true">
-        <action
-              class="com.subgraph.vega.application.about.AboutDialogAction"
-              id="com.subgraph.vega.aboutaction"
-              label="About Subgraph Vega"
-              menubarPath="help/"
-              state="true"
-              style="push">
-        </action>
-     </actionSet>
-</extension>
  <extension
        point="org.eclipse.ui.views">
     <view
