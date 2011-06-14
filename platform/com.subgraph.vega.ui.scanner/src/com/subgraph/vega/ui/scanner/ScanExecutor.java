@@ -55,11 +55,13 @@ public class ScanExecutor {
 			return null;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
 			final URI redirectURI = probeResult.getRedirectTarget();
-			String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
-					"Would you like to scan "+ redirectURI +" instead?";
-			boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
-			if(!doit) {
-				return null;
+			if(!isTrivialRedirect(targetURI, redirectURI)) {
+				String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
+						"Would you like to scan "+ redirectURI +" instead?";
+				boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
+				if(!doit) {
+					return null;
+				}
 			}
 			targetURI = probeResult.getRedirectTarget();
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
@@ -89,6 +91,14 @@ public class ScanExecutor {
 		scanner.setScannerConfig(config);
 		scanner.startScanner(config);
 		return wizard.getTargetField();
+	}
+
+	private boolean isTrivialRedirect(URI original, URI redirect) {
+		final String originalStr = original.toString();
+		if(originalStr.endsWith("/")) {
+			return false;
+		}
+		return (redirect.toString().equals(originalStr + "/"));
 	}
 
 	// gross hack

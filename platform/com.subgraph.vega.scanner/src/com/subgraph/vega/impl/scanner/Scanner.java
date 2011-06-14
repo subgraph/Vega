@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
@@ -119,7 +120,8 @@ public class Scanner implements IScanner {
 	
 	@Override
 	public IScanProbeResult probeTargetURI(URI uri) {
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine( requestEngineFactory.createConfig() );
+		final HttpClient client = requestEngineFactory.createUnencodingClient();
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig() );
 		final ScanProbe probe = new ScanProbe(uri, requestEngine);
 		return probe.runProbe();
 	}
@@ -148,7 +150,8 @@ public class Scanner implements IScanner {
 		requestEngineConfig.setMaxConnections(config.getMaxConnections());
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
 
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(requestEngineConfig);
+		final HttpClient client = requestEngineFactory.createUnencodingClient();
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig);
 		reloadModules();
 		resetModuleTimestamps();
 		currentWorkspace.lock();
