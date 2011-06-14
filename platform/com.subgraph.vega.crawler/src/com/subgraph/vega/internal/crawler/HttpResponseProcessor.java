@@ -3,6 +3,7 @@ package com.subgraph.vega.internal.crawler;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,16 +18,18 @@ public class HttpResponseProcessor implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
 	private final TaskCounter counter;
+	private final AtomicInteger outstandingTasks;
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
 
-	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter) {
+	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter, AtomicInteger outstandingTasks) {
 		this.crawler = crawler;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.latch = latch;
 		this.counter = counter;
+		this.outstandingTasks = outstandingTasks;
 	}
 
 	@Override
@@ -88,7 +91,7 @@ public class HttpResponseProcessor implements Runnable {
 				crawler.notifyException(req, task.getException());
 			}
 
-			if(task.finishTask()) {
+			if(outstandingTasks.decrementAndGet() <= 0) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());
 				crawlerResponseQueue.add(CrawlerTask.createExitTask());
 				return;

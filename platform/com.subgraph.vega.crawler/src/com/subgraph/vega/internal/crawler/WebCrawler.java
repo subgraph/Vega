@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
@@ -31,6 +32,7 @@ public class WebCrawler implements IWebCrawler {
 	volatile private boolean crawlerRunning;
 	
 	private TaskCounter counter = new TaskCounter();
+	private AtomicInteger outstandingTasks = new AtomicInteger();
 	
 	WebCrawler(IHttpRequestEngine requestEngine, int requestThreadCount, int responseThreadCount) {
 		this.requestEngine = requestEngine;
@@ -52,7 +54,7 @@ public class WebCrawler implements IWebCrawler {
 		updateProgress();
 		
 		for(int i = 0; i < responseThreadCount; i++) {
-			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter);
+			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks);
 			responseProcessors.add(responseProcessor);
 			executor.execute(responseProcessor);
 		}
@@ -90,6 +92,7 @@ public class WebCrawler implements IWebCrawler {
 	public void submitTask(HttpUriRequest request,
 			ICrawlerResponseProcessor callback, Object argument) {
 		CrawlerTask task = CrawlerTask.createTask(request, callback, argument);
+		outstandingTasks.incrementAndGet();
 		synchronized(counter) {
 			counter.addNewTask();
 			requestQueue.add(task);
