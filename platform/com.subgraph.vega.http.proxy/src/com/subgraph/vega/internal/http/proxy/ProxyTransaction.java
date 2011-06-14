@@ -44,24 +44,32 @@ public class ProxyTransaction implements IProxyTransaction {
 	public void await() throws InterruptedException {
  		lock.lock();
 		try {
-			cv.await();
-		} catch (InterruptedException e) {
-			if (interceptor != null) {
-				interceptor.notifyHandled(this);
-				interceptor = null;
+			while (isPending == true) {
+				cv.await();
 			}
-
-			isPending = false;
-			doForward = false;
+		} catch (InterruptedException e) {
+			try {
+				if (interceptor != null) {
+					interceptor.notifyHandled(this);
+					interceptor = null;
+				}
+			}
+			finally {
+				isPending = false;
+				doForward = false;
+			}
 			throw e;
 		}
 		finally {
-			if (interceptor != null) {
-				interceptor.notifyHandled(this);
-				interceptor = null;
+			try {
+				if (interceptor != null) {
+					interceptor.notifyHandled(this);
+					interceptor = null;
+				}
 			}
-			
-			lock.unlock();
+			finally {
+				lock.unlock();
+			}
 		}
 	}
 

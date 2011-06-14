@@ -105,8 +105,11 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	private void processTransaction(IProxyTransaction transaction) {
-		if(transaction.getResponse() == null || contentAnalyzer == null || isPassthrough)
-			return;
+		synchronized(this) {
+			if(transaction.getResponse() == null || contentAnalyzer == null || isPassthrough) {
+				return;
+			}
+		}
 		try {
 			contentAnalyzer.processResponse(transaction.getResponse());
 		} catch (RuntimeException e) {
