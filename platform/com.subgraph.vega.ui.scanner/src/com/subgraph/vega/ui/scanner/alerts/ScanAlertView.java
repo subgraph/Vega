@@ -24,6 +24,8 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
+
 
 public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	public final static String ID = "com.subgraph.vega.views.alert";
@@ -46,11 +48,16 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 				if(cat1 != cat2) {
 					return cat1 - cat2;
 				}
-				
-				if(!((e1 instanceof AlertScanNode) && (e2 instanceof AlertScanNode))) {
-					return super.compare(viewer, e1, e2);
-				} else {
+
+				if((e1 instanceof AlertScanNode) && (e2 instanceof AlertScanNode)) {
 					return compareAlertNodes((AlertScanNode)e1, (AlertScanNode)e2);
+				} else if((e1 instanceof AlertSeverityNode) && (e2 instanceof AlertSeverityNode)) {
+					final AlertSeverityNode asn1 = (AlertSeverityNode) e1;
+					final AlertSeverityNode asn2 = (AlertSeverityNode) e2;
+					return asn2.getSeverityIndex() - asn1.getSeverityIndex();
+					
+				} else {
+					return super.compare(viewer, e1, e2);
 				}
 			}
 			@Override
@@ -60,6 +67,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 				}
 				return 0;
 			}
+			
 		});
 		getSite().setSelectionProvider(viewer);
 
