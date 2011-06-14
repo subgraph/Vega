@@ -111,10 +111,9 @@ public class PathStateManager {
 		int count = 0;
 		PathState ps = parent;
 		while(ps != null) {
-			if(!ps.getPath().getPathComponent().equalsIgnoreCase(name)) {
-				return false;
+			if(ps.getPath().getPathComponent().equalsIgnoreCase(name)) {
+				count += 1;
 			}
-			count += 1;
 			ps = ps.getParentState();
 		}
 		return count > config.getMaxDuplicatePaths();
