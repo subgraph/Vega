@@ -113,24 +113,9 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		IWorkbenchPage workbenchPages[] = window.getPages();
 		for (int idx = 0; idx < workbenchPages.length; idx++) {
 			createPartListener(workbenchPages[idx]);
-			viewCnt += countPageViewsVisible(workbenchPages[idx]);
 		}
 	}
-	
-	private int countPageViewsVisible(IWorkbenchPage page) {
-		int cnt = 0;
-		IViewReference references[] = page.getViewReferences();
-		for (int idx = 0; idx < references.length; idx++) {
-			IViewPart part = references[idx].getView(false);
-			if (part instanceof InterceptView || part instanceof InterceptQueueView) {
-				if (page.isPartVisible(part) == true) {
-					cnt++;
-				}
-			}
-		}
-		return cnt;
-	}
-	
+
 	private void createPartListener(IWorkbenchPage page) {
 		IPartListener2 listener = new IPartListener2() {
 			@Override
@@ -160,9 +145,6 @@ public class ProxyStatusLineContribution extends ContributionItem {
 					synchronized (alertBlinkTimer) {
 						lastViewChange = new Date();
 						viewCnt--;
-						if (queueCnt != 0 && viewCnt == 0 && !alertEnabled) {
-							startAlert();
-						}
 					}
 				}
 			}
@@ -200,20 +182,57 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		setLabelImageAndText(proxyStopped, "Proxy is not running");
 	}
 	
-	private void setInterceptionQueueSize(int size) {
-		synchronized(alertBlinkTimer) {
-			queueCnt = size;
-			if (size > 0) {
-				if (!alertEnabled && viewCnt == 0) {
-					startAlert();
+	/**
+	 * Determine how many InterceptView and InterceptQueueView views are visible to the user.
+	 */
+	private int countViewsVisible() {
+		int cnt = 0;
+		IWorkbench wb = PlatformUI.getWorkbench();
+		if (wb != null) {
+			IWorkbenchWindow windows[] = wb.getWorkbenchWindows();
+			for (int windowIdx = 0; windowIdx < windows.length; windowIdx++) {
+				IWorkbenchPage pages[] = windows[windowIdx].getPages();
+				for (int pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+					IViewReference references[] = pages[pageIdx].getViewReferences();
+					for (int referenceIdx = 0; referenceIdx < references.length; referenceIdx++) {
+						IViewPart part = references[referenceIdx].getView(false);
+						if (part instanceof InterceptView || part instanceof InterceptQueueView) {
+							if (pages[pageIdx].isPartVisible(part) == true) {
+								cnt++;
+							}
+						}
+					}
 				}
-				final String msg = "("+ size + ") messages intercepted";
-				setLabelImageAndText(proxyAlert, msg);
-			} else {
-				stopAlert();
-				setLabelImageAndText(proxyRunning, runningMessage);
 			}
 		}
+		return cnt;
+	}
+
+	private void setInterceptionQueueSize(final int size) {
+		label.getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				synchronized(alertBlinkTimer) {
+					queueCnt = size;
+					if (size > 0) {
+						if (!alertEnabled) {
+							// views are counted each time due to a problem with Eclipse. when the application is opened
+							// out of focus, IPartListener2.partVisible callbacks are invoked when focus is gained,
+							// invalidating the initial view count. for now we have to count every time here.
+							viewCnt = countViewsVisible();
+							if (viewCnt == 0) {
+								startAlert();
+							}
+						}
+						final String msg = "("+ size + ") messages intercepted";
+						setLabelImageAndTextFromUiThread(proxyAlert, msg);
+					} else {
+						stopAlert();
+						setLabelImageAndTextFromUiThread(proxyRunning, runningMessage);
+					}
+				}
+			}
+		});
 	}
 
 	/** Must be invoked in a synchronized block */
@@ -233,7 +252,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 			alertBlinkTask = null;
 		}
 	}
-	
+
 	private TimerTask createAlertTask() {
 		return new TimerTask() {
 			private boolean state = true;
@@ -266,30 +285,29 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		setLabelImageAndText(image, null);
 	}
 	
-//	private void setLabelText(String text) {
-//		setLabelImageAndText(null, text);
-//	}
-
 	private void setLabelImageAndText(final Image image, final String text) {
 		if(label == null || label.isDisposed()) {
 			return;
 		}
-
 		label.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				if(image != null) {
-					label.setImage(image);
-				}
-				if(text != null) {
-					label.setText(text);
-				}
-				label.pack(true);
-				label.getParent().layout();
+				setLabelImageAndTextFromUiThread(image, text);
 			}
 		});
 	}
 
+	private void setLabelImageAndTextFromUiThread(final Image image, final String text) {
+		if(image != null) {
+			label.setImage(image);
+		}
+		if(text != null) {
+			label.setText(text);
+		}
+		label.pack(true);
+		label.getParent().layout();
+	}
+	
 	private void handleAlertClick() {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		try {
