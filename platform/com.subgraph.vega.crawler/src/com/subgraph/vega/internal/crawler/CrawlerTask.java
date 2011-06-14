@@ -6,14 +6,8 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class CrawlerTask {
-	
-	private static int outstandingTasks = 0;
-	private static Object taskCountLock = new Object();
-	
+
 	static CrawlerTask createTask(HttpUriRequest request, ICrawlerResponseProcessor responseProcessor, Object argument) {
-		synchronized(taskCountLock) {
-			outstandingTasks++;
-		}
 		return new CrawlerTask(request, responseProcessor, argument, false);
 	}
 	
@@ -67,13 +61,6 @@ public class CrawlerTask {
 	
 	boolean causedException() {
 		return exception != null;
-	}
-
-	boolean finishTask() {
-		synchronized (taskCountLock) {
-			outstandingTasks--;
-			return (outstandingTasks == 0);
-		}
 	}
 
 	public ICrawlerResponseProcessor getResponseProcessor() {
