@@ -1,17 +1,16 @@
 package com.subgraph.vega.internal.crawler;
 
-import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.RequestEngineException;
 
 public class RequestConsumer implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
@@ -76,18 +75,16 @@ public class RequestConsumer implements Runnable {
 			final IHttpResponse response = requestEngine.sendRequest(task.getRequest());
 			task.setResponse(response);
 			return response != null;
-		} catch (InterruptedIOException e) {
-			stop = true;
-			return false;
-		} catch (ClientProtocolException e) {
-			logger.log(Level.WARNING, "Protocol error processing request "+ activeRequest.getURI(), e);
-			task.setException(e);
-			return false;
-		} catch (IOException e) {
-			if(!e.getMessage().contains("abort")) {
-				task.setException(e);
-				logger.log(Level.WARNING, "IO error processing request "+ activeRequest.getURI(), e);
+		} catch (RequestEngineException e) {
+			if(e.getCause() instanceof InterruptedIOException) {
+				stop = true;
+				return false;
 			}
+			if(e.getMessage().contains("abort")) {
+				return false;
+			}
+			task.setException(e);
+			logger.log(Level.WARNING, e.getMessage());
 			return false;
 		} finally {
 			synchronized(requestLock) {

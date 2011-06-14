@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
+import org.apache.http.HttpException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
@@ -20,6 +19,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.api.http.requests.RequestEngineException;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
@@ -54,7 +54,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
-	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws IOException {
+	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
 		requestContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
 		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestContext, config, htmlParser));
@@ -63,15 +63,30 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		} catch (InterruptedException e) {
 			logger.info("Request "+ request.getURI() +" was interrupted before completion");
 		} catch (ExecutionException e) {
-			if(e.getCause() instanceof IOException) 
-				throw ((IOException)e.getCause());
-			logger.log(Level.WARNING, "Unexpected exception processing request "+ request.getURI() +" : "+ e.getCause().getMessage(), e.getCause());
+			throw translateException(request, e.getCause());
 		}
 		return null;
 	}
 
-	public IHttpResponse sendRequest(HttpUriRequest request) throws IOException, ClientProtocolException {
+	public IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException {
 		return sendRequest(request, null);
 	}
 
+	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {
+		final StringBuilder sb = new StringBuilder();
+
+		if(ex instanceof IOException) {
+			sb.append("Network problem");
+		} else if(ex instanceof HttpException) {
+			sb.append("Protocol problem");
+		} else {
+			sb.append("Unknown problem");
+		}
+		sb.append(" while retrieving URI ");
+		sb.append(request.getURI().toString());
+		sb.append(" [");
+		sb.append(ex.getMessage());
+		sb.append("]");
+		return new RequestEngineException(sb.toString(), ex);
+	}
 }
