@@ -49,25 +49,6 @@ public class ScanExecutor {
 		if(targetURI == null) {
 			return null;
 		}
-		IScanProbeResult probeResult = scanner.probeTargetURI(targetURI);
-		if(probeResult.getProbeResultType() == ProbeResultType.PROBE_CONNECT_FAILED) {
-			MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
-			return null;
-		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
-			final URI redirectURI = probeResult.getRedirectTarget();
-			if(!isTrivialRedirect(targetURI, redirectURI)) {
-				String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
-						"Would you like to scan "+ redirectURI +" instead?";
-				boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
-				if(!doit) {
-					return null;
-				}
-			}
-			targetURI = probeResult.getRedirectTarget();
-		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
-			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
-			return null;
-		}
 		
 		final IScannerConfig config = scanner.createScannerConfig();
 		
@@ -88,17 +69,10 @@ public class ScanExecutor {
 		config.setMaxChildren(preferences.getInt("MaxScanChildren"));
 		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
 		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
-		scanner.setScannerConfig(config);
-		scanner.startScanner(config);
+		
+		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetURI, scanner, config));
+		probeThread.start();
 		return wizard.getTargetField();
-	}
-
-	private boolean isTrivialRedirect(URI original, URI redirect) {
-		final String originalStr = original.toString();
-		if(originalStr.endsWith("/")) {
-			return false;
-		}
-		return (redirect.toString().equals(originalStr + "/"));
 	}
 
 	// gross hack
