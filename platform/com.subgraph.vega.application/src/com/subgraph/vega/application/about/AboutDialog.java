@@ -1,9 +1,11 @@
 package com.subgraph.vega.application.about;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -11,8 +13,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.subgraph.vega.application.Activator;
+
 public class AboutDialog extends TitleAreaDialog {
 
+	private final static String LOGO_IMAGE = "icons/subgraph.png";
+	
 	private String aboutText = "Vega, the Open Source Web Application Security Platform.\n\n" +
 								"Version: Beta 1\n" +
 								"Build id: 0xC0FFEEEE\n" +
@@ -45,8 +51,19 @@ public class AboutDialog extends TitleAreaDialog {
 	
 	public AboutDialog(Shell parentShell) {
 		super(parentShell);
+		setTitle("About Vega");
+		setTitleImage(createLogoImage());
 	}
 	
+	private Image createLogoImage() {
+		final ImageDescriptor descriptor = Activator.getImageDescriptor(LOGO_IMAGE);
+		if(descriptor != null) {
+			return descriptor.createImage();
+		} else {
+			return null;
+		}
+	}
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea (parent); 
@@ -75,5 +92,4 @@ public class AboutDialog extends TitleAreaDialog {
 		      }
 		    });
 	}
-	
 }
