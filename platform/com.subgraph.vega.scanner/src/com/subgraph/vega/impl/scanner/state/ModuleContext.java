@@ -242,7 +242,7 @@ public class ModuleContext implements IInjectionModuleContext {
 	}
 
 	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties) {
-		debug("Publishing Alert: ("+ type + ") ["+ request.getRequestLine().getUri() + "] " + message);
+		debug("Publishing Alert: ("+ type + ") ["+ request.getRequestLine().getUri() + "] ");
 		final IScanInstance scan = scanState.getScanInstance();
 		final IRequestLog requestLog = scanState.getRequestLog();
 		try {
