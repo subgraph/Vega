@@ -103,7 +103,7 @@ public class ResponseModuleContext implements IModuleContext {
 	public void publishAlert(String type, String key, String message,
 			HttpRequest request, IHttpResponse response,
 			Object... properties) {
-		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] "+ message);
+		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] ");
 		final IRequestLog requestLog = workspace.getRequestLog();
 		
 		try {

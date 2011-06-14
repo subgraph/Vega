@@ -16,6 +16,21 @@ public class AlertSeverityNode extends AbstractAlertTreeNode {
 		this.severity = severity;
 	}
 
+	public int getSeverityIndex() {
+		switch(severity) {
+		case HIGH:
+			return 5;
+		case MEDIUM:
+			return 4;
+		case LOW:
+			return 3;
+		case INFO:
+			return 2;
+		default:
+			return 1;
+		}
+	}
+
 	@Override
 	public String getLabel() {
 		switch(severity) {

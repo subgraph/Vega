@@ -9,13 +9,10 @@ import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
-import com.subgraph.vega.api.scanner.IScanProbeResult;
-import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
@@ -49,25 +46,6 @@ public class ScanExecutor {
 		if(targetURI == null) {
 			return null;
 		}
-		IScanProbeResult probeResult = scanner.probeTargetURI(targetURI);
-		if(probeResult.getProbeResultType() == ProbeResultType.PROBE_CONNECT_FAILED) {
-			MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
-			return null;
-		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
-			final URI redirectURI = probeResult.getRedirectTarget();
-			if(!isTrivialRedirect(targetURI, redirectURI)) {
-				String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
-						"Would you like to scan "+ redirectURI +" instead?";
-				boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
-				if(!doit) {
-					return null;
-				}
-			}
-			targetURI = probeResult.getRedirectTarget();
-		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
-			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
-			return null;
-		}
 		
 		final IScannerConfig config = scanner.createScannerConfig();
 		
@@ -88,17 +66,10 @@ public class ScanExecutor {
 		config.setMaxChildren(preferences.getInt("MaxScanChildren"));
 		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
 		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
-		scanner.setScannerConfig(config);
-		scanner.startScanner(config);
+		
+		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetURI, scanner, config));
+		probeThread.start();
 		return wizard.getTargetField();
-	}
-
-	private boolean isTrivialRedirect(URI original, URI redirect) {
-		final String originalStr = original.toString();
-		if(originalStr.endsWith("/")) {
-			return false;
-		}
-		return (redirect.toString().equals(originalStr + "/"));
 	}
 
 	// gross hack
