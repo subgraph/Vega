@@ -1,15 +1,14 @@
 package com.subgraph.vega.impl.scanner;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.Header;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 
 public class ScanProbe {
@@ -27,22 +26,11 @@ public class ScanProbe {
 		try {
 			IHttpResponse response = requestEngine.sendRequest(request);
 			return processFirstProbeResponse(targetURI, response);
-		} catch (ClientProtocolException e) {
-			return ScanProbeResult.createConnectFailedResult(createExceptionMessage(targetURI, e));
-		} catch (IOException e) {
-			return ScanProbeResult.createConnectFailedResult(createExceptionMessage(targetURI, e));
+		} catch (RequestEngineException e) {
+			return ScanProbeResult.createConnectFailedResult(e.getMessage());
 		}
 	}
-	
-	private String createExceptionMessage(URI targetURI, Exception e) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append("Problem connecting to ");
-		sb.append(targetURI.toString());
-		sb.append("\n\n");
-		sb.append(e.getMessage());
-		return sb.toString();
-	}
-	
+		
 	private IScanProbeResult processFirstProbeResponse(URI targetURI, IHttpResponse response) {
 		if(isResponseRedirect(response)) {
 			return processRedirect(targetURI, response);
@@ -70,9 +58,7 @@ public class ScanProbe {
 				if(!isResponseRedirect(response)) {
 					return ScanProbeResult.createRedirectResult(location);
 				}
-			} catch (ClientProtocolException e) {
-				return ScanProbeResult.createRedirectFailedResult(createRedirectExceptionMessage(originalTarget, location, e));
-			} catch (IOException e) {
+			} catch (RequestEngineException e) {
 				return ScanProbeResult.createRedirectFailedResult(createRedirectExceptionMessage(originalTarget, location, e));
 			}
 			redirectCount += 1;

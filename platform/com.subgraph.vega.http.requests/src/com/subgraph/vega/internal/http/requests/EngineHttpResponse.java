@@ -29,7 +29,6 @@ public class EngineHttpResponse implements IHttpResponse {
 	
 	private String cachedString;
 	private PageFingerprint cachedFingerprint;
-	private boolean stringExtractFailed;
 	private boolean htmlParseFailed;
 	private IHTMLParseResult htmlParseResult;
 	private boolean isMostlyAsciiTestDone;
@@ -65,22 +64,25 @@ public class EngineHttpResponse implements IHttpResponse {
 	public String getBodyAsString() {
 		synchronized (rawResponse) {
 			
-			if(cachedString != null)
+			if(cachedString != null) {
 				return cachedString;
-			if(stringExtractFailed || rawResponse.getEntity() == null)
-				return null;
+			}
+			
+			if(rawResponse.getEntity() == null) {
+				cachedString = "";
+				return cachedString;
+			}
+
 			try {
 				cachedString = EntityUtils.toString(rawResponse.getEntity());
-				return cachedString;
 			} catch (ParseException e) {
 				logger.log(Level.WARNING, "Error parsing response headers: "+ e.getMessage(), e);
-				stringExtractFailed = true;
-				return null;
+				cachedString = "";
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error extracting response entity for request "+ originalRequest.getRequestLine().getUri() +" : "+ e.getMessage(), e);
-				stringExtractFailed = true;
-				return null;
+				cachedString = "";
 			}
+			return cachedString;
 		}
 	}
 
@@ -121,16 +123,18 @@ public class EngineHttpResponse implements IHttpResponse {
 
 	@Override
 	public boolean isMostlyAscii() {
-		if(isMostlyAsciiTestDone)
+		if(isMostlyAsciiTestDone) {
 			return isMostlyAscii;
-		
-		final String body = getBodyAsString();
-		if(body == null || body.isEmpty()) {
-			isMostlyAscii = false;
-			isMostlyAsciiTestDone = true;
-			return false;
 		}
 		
+		final String body = getBodyAsString();
+
+		if(body == null || body.isEmpty()) {
+			isMostlyAscii = true;
+			isMostlyAsciiTestDone = true;
+			return true;
+		}
+
 		int total = (body.length() > 200) ? (200) : (body.length());
 		int printable = 0;
 		

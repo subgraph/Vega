@@ -24,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
 import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
 
@@ -94,8 +95,8 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 		} catch (InterruptedException e) {
 			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
 			response.setStatusCode(503);
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
+		} catch (RequestEngineException e) {
+			logger.log(Level.WARNING, "Error processing request: " + e.getMessage());
 			response.setStatusCode(502);
 		} catch (ProtocolException e) {
 			logger.log(Level.WARNING, "Error processing request: " + e.getMessage(), e);
