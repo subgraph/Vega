@@ -9,13 +9,10 @@ import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
-import com.subgraph.vega.api.scanner.IScanProbeResult;
-import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
