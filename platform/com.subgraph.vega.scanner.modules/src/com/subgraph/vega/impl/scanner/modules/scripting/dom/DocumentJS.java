@@ -29,6 +29,7 @@ public class DocumentJS extends NodeJS {
 	public DocumentJS(Document document) {
 		super(document, null);
 		this.document = document;
+		setDocumentJS(this);
 	}
 	
 	public void jsConstructor(Object ob) {
