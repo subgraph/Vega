@@ -22,6 +22,10 @@ function t(a,b,c) {
 	same(f, q.apply(q,c), a + " ("+ b + ")");
 }
 
+function print(msg) {
+    java.lang.System.out.println(msg);
+}
+
 function run() {
 	print("Running dom test");
 	
