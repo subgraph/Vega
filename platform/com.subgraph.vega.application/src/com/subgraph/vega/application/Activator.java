@@ -1,6 +1,9 @@
 package com.subgraph.vega.application;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -8,6 +11,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
+import com.subgraph.vega.application.preferences.IVegaSocksPreferenceConstants;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -46,8 +50,30 @@ public class Activator extends AbstractUIPlugin {
 		
 		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
+		
+		getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				configureSocks();
+			}
+		});
+		configureSocks();
 	}
 
+	private void configureSocks() {
+		final IPreferenceStore store = getPreferenceStore();
+		if(!store.getBoolean(IVegaSocksPreferenceConstants.P_SOCKS_ENABLED)) {
+			System.getProperties().remove("socksProxyHost");
+			System.getProperties().remove("socksProxyPort");
+			System.getProperties().remove("socksEnabled");
+			return;
+		}
+		
+		System.setProperty("socksProxyHost", store.getString(IVegaSocksPreferenceConstants.P_SOCKS_ADDRESS));
+		System.setProperty("socksProxyPort", store.getString(IVegaSocksPreferenceConstants.P_SOCKS_PORT));
+		System.setProperty("socksEnabled", "true");
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
