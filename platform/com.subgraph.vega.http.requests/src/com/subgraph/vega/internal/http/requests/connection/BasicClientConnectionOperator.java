@@ -2,9 +2,8 @@ package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.conn.OperatedClientConnection;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.conn.DefaultClientConnectionOperator;
 
-public class BasicClientConnectionOperator extends DefaultClientConnectionOperator {
+public class BasicClientConnectionOperator extends SocksModeClientConnectionOperator {
 
 	public BasicClientConnectionOperator(SchemeRegistry sr) {
 		super(sr);
@@ -14,5 +13,4 @@ public class BasicClientConnectionOperator extends DefaultClientConnectionOperat
 	public OperatedClientConnection createConnection() {
 		return new BasicClientConnection();
 	}
-
 }
