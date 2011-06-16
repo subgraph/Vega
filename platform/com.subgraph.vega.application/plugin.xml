@@ -135,6 +135,20 @@
           restorable="true">
     </view>
  </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="com.subgraph.vega.application.preferences.VegaSocksPreferencePage"
+          id="com.subgraph.vega.preferences.socks"
+          name="SOCKS Proxy">
+    </page>
+ </extension>
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer
+          class="com.subgraph.vega.application.preferences.VegaSocksPreferenceInitializer">
+    </initializer>
+ </extension>
 
 
 </plugin>

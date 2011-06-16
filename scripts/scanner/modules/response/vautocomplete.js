@@ -4,15 +4,12 @@ var module = {
 };
 
 function run(request, response, ctx) {
-
   var found = 0;
 
   if (response.document) {
 
     var form = jQuery("form", response.document);
-
     form.children().each(function() {
-
       if ((this.getAttribute("type") != null) && (this.getAttribute("type") == "password")) {
         if ((this.getAttribute("autocomplete") == null) || (this.getAttribute("autocomplete").toLowerCase() != "off")) {
           // print("match password");
@@ -28,8 +25,8 @@ function run(request, response, ctx) {
     (found > 1) ? match = "instances" : match = "instance";
     ctx.alert("vautocomplete", request, response, {
       "output": found + " " + match + " discovered.",
-      "resource": httpRequest.requestLine.uri,
-      key: "vautocomplete" + httpRequest.requestLine.uri + found + " " + match
+      "resource": request.requestLine.uri,
+      key: "vautocomplete" + request.requestLine.uri + found + " " + match
     });
 
   }

@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Subgraph.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Subgraph - initial API and implementation
+ ******************************************************************************/
 package com.subgraph.vega.impl.scanner.modules.scripting;
-
 
 import org.apache.http.Header;
 import org.mozilla.javascript.Context;
@@ -9,7 +18,6 @@ import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.impl.scanner.modules.scripting.dom.HTMLDocumentJS;
 
 public class ResponseJS extends ScriptableObject {
 
@@ -24,7 +32,6 @@ public class ResponseJS extends ScriptableObject {
 	
 	public ResponseJS(Object response) {
 		this.response = (IHttpResponse) Context.jsToJava(response, IHttpResponse.class);
-		this.cachedDocument = createCachedDocument();
 	}
 	
 	
@@ -33,11 +40,12 @@ public class ResponseJS extends ScriptableObject {
 		if(htmlResult == null) {
 			return null;
 		}
+		final Context cx = Context.getCurrentContext();
 		final HTMLDocument domDocument = htmlResult.getDOMDocument();
-		final HTMLDocumentJS jsDocument = new HTMLDocumentJS(domDocument);
-		jsDocument.setParentScope(getParentScope());
-		jsDocument.setPrototype(getPrototype());
-		return jsDocument;
+		final Scriptable scope = ScriptableObject.getTopLevelScope(this);
+		final Object docOb = Context.javaToJS(domDocument, scope);
+		final Object[] args = { docOb };
+		return cx.newObject(scope, "HTMLDocument", args);
 	}
 
 	IHttpResponse getResponse() {
@@ -84,6 +92,9 @@ public class ResponseJS extends ScriptableObject {
 	}
 
 	public Scriptable jsGet_document() {
+		if(cachedDocument == null) {
+			cachedDocument = createCachedDocument();
+		}
 		return cachedDocument;
 	}
 

@@ -1,10 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Subgraph.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Subgraph - initial API and implementation
+ ******************************************************************************/
 package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.conn.OperatedClientConnection;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.conn.DefaultClientConnectionOperator;
 
-public class BasicClientConnectionOperator extends DefaultClientConnectionOperator {
+public class BasicClientConnectionOperator extends SocksModeClientConnectionOperator {
 
 	public BasicClientConnectionOperator(SchemeRegistry sr) {
 		super(sr);
@@ -14,5 +23,4 @@ public class BasicClientConnectionOperator extends DefaultClientConnectionOperat
 	public OperatedClientConnection createConnection() {
 		return new BasicClientConnection();
 	}
-
 }
