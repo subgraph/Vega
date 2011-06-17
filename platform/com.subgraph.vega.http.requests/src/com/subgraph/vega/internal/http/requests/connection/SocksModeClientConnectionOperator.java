@@ -33,10 +33,8 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 	public SocksModeClientConnectionOperator(SchemeRegistry sr) {
 		super(sr);
 		isSocksMode = System.getProperty("socksEnabled") != null;
-		System.out.println("isSocksMode: "+ isSocksMode);
 	}
-	
-	
+
 	@Override
 	public void openConnection(OperatedClientConnection conn, HttpHost target, InetAddress local, HttpContext context, HttpParams params) throws IOException {
 		if(!isSocksMode) {

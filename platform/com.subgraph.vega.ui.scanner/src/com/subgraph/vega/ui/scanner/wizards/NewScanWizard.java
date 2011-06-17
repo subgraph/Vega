@@ -48,11 +48,20 @@ public class NewScanWizard extends Wizard {
 	
 	@Override 
 	public boolean canFinish() {
-		final String scanHostText = page1.getScanTarget();
-		if(scanHostText.isEmpty())
+		final String scanHostText = page1.getScanTarget().trim();
+		if(scanHostText.isEmpty()) {
+			page1.setErrorMessage(null);
 			return false;
-		
-		return (createTargetURI(scanHostText) != null);
+		}
+
+		final URI target = createTargetURI(scanHostText);
+		if(target == null) {
+			page1.setErrorMessage("Target entered is not a valid host or URL");
+			return false;
+		} else {
+			page1.setErrorMessage(null);
+			return true;
+		}
 	}
 	
 	@Override

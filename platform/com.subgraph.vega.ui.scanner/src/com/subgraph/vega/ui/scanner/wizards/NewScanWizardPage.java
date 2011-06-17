@@ -16,8 +16,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -65,19 +65,12 @@ public class NewScanWizardPage extends WizardPage {
 		} else {
 			scanTarget.setText("");
 		}
-		scanTarget.addKeyListener(new KeyListener() {
-			@Override 
-			public void keyPressed(KeyEvent e) {
-			}
+
+		scanTarget.addModifyListener(new ModifyListener() {
 			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!scanTarget.getText().isEmpty()) {
-					setPageComplete(true);
-				} else {
-					setPageComplete(false);
-				}
-			}		  
-		  
+			public void modifyText(ModifyEvent e) {
+				setPageComplete(!scanTarget.getText().trim().isEmpty());
+			}
 		});
 		
 		modulesLabel = new Label(container, SWT.NULL);
@@ -98,7 +91,7 @@ public class NewScanWizardPage extends WizardPage {
 		scanTarget.setLayoutData(gd);
 
 		setControl(container);
-		setPageComplete(false);		
+		setPageComplete(!scanTarget.getText().isEmpty());		
 	}
 		
 	public String getScanTarget() {
