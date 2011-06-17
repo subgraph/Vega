@@ -62,7 +62,9 @@ public class ResponseAnalyzer {
 
 	public void analyzeContent(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		analyzeHtml(ctx, req, res);
-		contentAnalyzer.processResponse(res, false, false);
+		if(!filterInjectedPath(res.getRequestUri().getPath())) {
+			contentAnalyzer.processResponse(res, false, false);
+		}
 	}
 
 	private void analyzeHtml(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
@@ -77,6 +79,18 @@ public class ResponseAnalyzer {
 				analyzeHtmlElement(ctx, req, res, (Element) node);
 			}
 		}
+	}
+
+	private boolean filterInjectedPath(String path) {
+		return path.contains("vega://") || path.contains("//vega.invalid") || pathContainsXssTag(path); 
+	}
+
+	private boolean pathContainsXssTag(String path) {
+		final int idx = path.indexOf("vvv");
+		if(idx == -1) {
+			return false;
+		}
+		return extractXssTag(path, idx) != null;
 	}
 
 	private void analyzeHtmlElement(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, Element elem) {
