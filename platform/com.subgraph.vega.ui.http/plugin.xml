@@ -220,7 +220,7 @@
             </command>
             <command
                   commandId="com.subgraph.vega.commands.proxyPassthrough"
-                  icon="icons/unchecked.png"
+                  icon="icons/passthrough.png"
                   style="toggle"
                   tooltip="Make proxy forward all transactions without processing or interception">
                <visibleWhen
