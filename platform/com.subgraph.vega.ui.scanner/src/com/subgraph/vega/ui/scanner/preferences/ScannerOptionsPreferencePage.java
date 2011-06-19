@@ -12,6 +12,7 @@ package com.subgraph.vega.ui.scanner.preferences;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -32,12 +33,19 @@ public class ScannerOptionsPreferencePage extends FieldEditorPreferencePage impl
 
 	@Override
 	protected void createFieldEditors() {
-		addField(new IntegerFieldEditor("MaxScanDescendants", "Maximum number of total path descendants", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxScanChildren", "Maximum number child paths for a single node", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxScanDepth", "Maximum path depth", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxScanDuplicatePaths", "Maximum number of duplicate path elements", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxAlertString", "Maximum length of strings to display in alert reports", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxRequestsPerSecond", "Maximum number of requests per second to send", getFieldEditorParent()));
-		addField(new IntegerFieldEditor("MaxResponseLength", "Maximum response size to process in kilobytes (0 for unlimited)", getFieldEditorParent()));
+		addIntegerField("MaxScanDescendants", "Maximum number of total path descendants", 10, 100000);
+		addIntegerField("MaxScanChildren", "Maximum number child paths for a single node", 10, 100000);
+		addIntegerField("MaxScanDepth", "Maximum path depth", 1, 10000);
+		addIntegerField("MaxScanDuplicatePaths", "Maximum number of duplicate path elements", 2, 100);
+		addIntegerField("MaxAlertString", "Maximum length of strings to display in alert reports", 10, 100000);
+		addIntegerField("MaxRequestsPerSecond", "Maximum number of requests per second to send", 1, 10000);
+		addIntegerField("MaxResponseLength", "Maximum response size to process in kilobytes (0 for unlimited)", 0, 100000);
+	}
+	
+	private void addIntegerField(String var, String description, int min, int max) {
+		final Composite parent = getFieldEditorParent();
+		final IntegerFieldEditor editor = new IntegerFieldEditor(var, description, parent);
+		editor.setValidRange(min, max);
+		addField(editor);
 	}
 }
