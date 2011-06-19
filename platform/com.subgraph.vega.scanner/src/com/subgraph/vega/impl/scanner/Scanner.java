@@ -159,7 +159,7 @@ public class Scanner implements IScanner {
 		
 		requestEngineConfig.setMaxConnections(config.getMaxConnections());
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
-
+		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig);
 		reloadModules();

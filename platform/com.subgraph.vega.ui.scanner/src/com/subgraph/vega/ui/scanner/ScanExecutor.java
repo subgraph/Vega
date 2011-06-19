@@ -76,6 +76,7 @@ public class ScanExecutor {
 		config.setMaxChildren(preferences.getInt("MaxScanChildren"));
 		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
 		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
+		config.setMaxResponseKilobytes(preferences.getInt("MaxResponseLength"));
 		
 		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetURI, scanner, config));
 		probeThread.start();

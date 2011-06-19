@@ -38,5 +38,6 @@ public class ScannerOptionsPreferencePage extends FieldEditorPreferencePage impl
 		addField(new IntegerFieldEditor("MaxScanDuplicatePaths", "Maximum number of duplicate path elements", getFieldEditorParent()));
 		addField(new IntegerFieldEditor("MaxAlertString", "Maximum length of strings to display in alert reports", getFieldEditorParent()));
 		addField(new IntegerFieldEditor("MaxRequestsPerSecond", "Maximum number of requests per second to send", getFieldEditorParent()));
+		addField(new IntegerFieldEditor("MaxResponseLength", "Maximum response size to process in kilobytes (0 for unlimited)", getFieldEditorParent()));
 	}
 }
