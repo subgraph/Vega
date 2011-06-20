@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP error detected</title>
+	
+	<class>Information</class>
+	<severity>Info</severity>		
+	
+  <impact>An HTTP error has been detected. This could indicate faulty server configuration.</impact>
+
+  <remediation>The developer should investigate how or why this error occurred and ensure that there is no vulnerability present.</remediation>
+
+  <discussion>A request that Vega has sent has resulted in a HTTP response with an error status code. This should be investigated by inspecting both the request and response.</discussion>
+
+  <references>
+    <url address="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4">RFC 2616: Section 10.4 (IETF)</url>
+  </references>
+</alert>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<alert>
-<title>HTTP error detected</title>
-	
-	<class>Information</class>
-	<severity>Info</severity>		
-	
-	<impact>An HTTP error has been detected. This could indicate faulty server configuration.</impact>
-</alert>
