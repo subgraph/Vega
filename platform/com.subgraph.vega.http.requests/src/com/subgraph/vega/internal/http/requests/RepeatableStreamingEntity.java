@@ -30,6 +30,7 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 	private final static int BUFFER_SIZE = 8192;
 	private boolean isStreaming = true;
 	private long length;
+	private long maximumInputKilobytes = 0; // 0 = no maximum length
 	private HttpEntity bufferEntity;
 	private volatile InputStream input;
 
@@ -53,6 +54,10 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 			setActiveInputStream(originalEntity.getContent(), originalEntity.getContentLength());
 		else 
 			setActiveByteArrayEntity(EntityUtils.toByteArray(originalEntity));
+	}
+
+	void setMaximumInputKilobytes(int kb) {
+		maximumInputKilobytes = kb;
 	}
 
 	private void copyEntityProperties(HttpEntity e) {
@@ -171,7 +176,7 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 
 	private class CachingInputStream extends InputStream {
 		private final InputStream wrappedInput;
-		private final ByteArrayBuffer buffer;
+		private ByteArrayBuffer buffer;
 		private boolean eof;
 
 		CachingInputStream(InputStream input, int bufferSize) {
@@ -181,32 +186,50 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 
 		@Override
 		public int read() throws IOException {
-			if(eof)
+			if(eof) {
 				return -1;
+			}
 
 			final int b = wrappedInput.read();
-			if(b == -1) 
+			if(b == -1) { 
 				processEOF();
-			else
+			} else {
 				buffer.append(b);
+			}
+			checkMaximumLength();
 			return b;
 		}
 		
 		public int read(byte[] b, int off, int len) throws IOException {
-			if(eof)
+			if(eof) {
 				return -1;
+			}
+			
 			final int n = wrappedInput.read(b, off, len);
-			if(n == -1)
+			if(n == -1) {
 				processEOF();
-			else
+			} else {
 				buffer.append(b, off, n);
+			}
+			checkMaximumLength();
 			return n;
+		}
+
+		private void checkMaximumLength() throws IOException {
+			if(maximumInputKilobytes > 0 && buffer.length() > (maximumInputKilobytes * 1024)) {
+				wrappedInput.close();
+				eof = true;
+				buffer = null;
+				setActiveByteArrayEntity(new byte[0]);
+				throw new IOException("Maximum length of "+ maximumInputKilobytes +" kb exceeded while streaming http entity.");
+			}
 		}
 
 		public void close() throws IOException {
 			wrappedInput.close();
-			if(!eof)
+			if(!eof) {
 				setActiveByteArrayEntity(buffer.toByteArray());
+			}
 		}
 
 		private void processEOF() throws IOException {
@@ -214,6 +237,5 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 			eof = true;
 			setActiveByteArrayEntity(buffer.toByteArray());
 		}
-		
 	}
 }

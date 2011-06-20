@@ -20,6 +20,7 @@ import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
+import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -33,6 +34,7 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.LockStatusEvent;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
@@ -54,6 +56,12 @@ public class Scanner implements IScanner {
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private List<IBasicModuleScript> basicModules;
 	private List<IScannerModule> allModules;
+	
+	private volatile ScanProbe currentProbe;
+	
+	private final Object lock = new Object();
+	private final EventListenerManager lockStatusEventManager = new EventListenerManager();
+	private boolean isLocked = false;
 	
 	protected void activate() {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
@@ -130,14 +138,33 @@ public class Scanner implements IScanner {
 	
 	@Override
 	public IScanProbeResult probeTargetURI(URI uri) {
+		synchronized(lock) {
+			if(!isLocked) {
+				throw new IllegalStateException("Scanner must be locked before sending probe requests");
+			}
+		}
+		
+		if(currentProbe != null) {
+			throw new IllegalStateException("Another target probe is already in progress");
+		}
+
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig() );
-		final ScanProbe probe = new ScanProbe(uri, requestEngine);
-		return probe.runProbe();
+		
+		currentProbe = new ScanProbe(uri, requestEngine);
+		final IScanProbeResult probeResult = currentProbe.runProbe();
+		currentProbe = null;
+		return probeResult;
 	}
 
 	@Override
 	public synchronized void startScanner(IScannerConfig config) {
+		synchronized(lock) {
+			if(!isLocked) {
+				throw new IllegalStateException("Scanner must be locked before starting scan.");
+			}
+		}
+
 		if(currentScan != null && currentScan.getScanStatus() != IScanInstance.SCAN_COMPLETED && currentScan.getScanStatus() != IScanInstance.SCAN_CANCELLED) {
 			throw new IllegalStateException("Scanner is already running.  Verify scanner is not running with getScannerStatus() before trying to start.");
 		}
@@ -159,7 +186,7 @@ public class Scanner implements IScanner {
 		
 		requestEngineConfig.setMaxConnections(config.getMaxConnections());
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
-
+		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
 		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig);
 		reloadModules();
@@ -178,15 +205,57 @@ public class Scanner implements IScanner {
 
 	@Override
 	public void stopScanner() {
-		if(scannerTask != null)
+		if(scannerTask != null) {
 			scannerTask.stop();
+		}
+
+		ScanProbe probe = currentProbe;
+		if(probe != null) {
+			probe.abort();
+		}
 	}
 
 	@Override
 	public void runDomTests() {
 		moduleRegistry.runDomTests();
 	}
+
 	
+	@Override
+	public void addLockStatusListener(IEventHandler listener) {
+		synchronized (lock) {
+			lockStatusEventManager.addListener(listener);
+			listener.handleEvent(new LockStatusEvent(isLocked));
+		}
+	}
+
+	@Override
+	public void removeLockStatusListener(IEventHandler listener) {
+		synchronized (lock) {
+			lockStatusEventManager.removeListener(listener);	
+		}
+	}
+
+	@Override
+	public boolean lock() {
+		synchronized (lock) {
+			if(isLocked) {
+				return false;
+			}
+			isLocked = true;
+			lockStatusEventManager.fireEvent(new LockStatusEvent(true));
+			return true;
+		}
+	}
+
+	@Override
+	public synchronized void unlock() {
+		synchronized(lock) {
+			isLocked = false;
+			lockStatusEventManager.fireEvent(new LockStatusEvent(false));
+		}
+	}
+
 	protected void setCrawlerFactory(IWebCrawlerFactory crawlerFactory) {
 		this.crawlerFactory = crawlerFactory;
 	}

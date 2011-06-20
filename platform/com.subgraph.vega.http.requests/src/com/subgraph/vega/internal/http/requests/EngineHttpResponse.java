@@ -189,7 +189,7 @@ public class EngineHttpResponse implements IHttpResponse {
 			EntityUtils.consume(entity);
 			return true;
 		} catch (IOException e) {
-			logger.log(Level.INFO, "I/O error while loading HTTP entity", e);
+			logger.warning("Error loading entity for "+ getRequestUri().toString() +" : "+ e.getMessage());
 			return false;
 		}		
 	}

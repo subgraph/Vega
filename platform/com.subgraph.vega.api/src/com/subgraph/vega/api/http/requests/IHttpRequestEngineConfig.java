@@ -31,5 +31,7 @@ public interface IHttpRequestEngineConfig {
 	int getMaxConnections();
 	void setMaxConnectionsPerRoute(int value);
 	int getMaxConnectionsPerRoute();
+	void setMaximumResponseKilobytes(int kb);
+	int getMaximumResponseKilobytes();
 	CookieStore getCookieStore();
 }

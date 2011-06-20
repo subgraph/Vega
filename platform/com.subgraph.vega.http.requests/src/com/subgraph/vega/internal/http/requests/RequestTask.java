@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -34,6 +35,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 
 class RequestTask implements Callable<IHttpResponse> {
+	private final static Logger logger = Logger.getLogger("request-engine");
 
 	private final HttpClient client;
 	private final RateLimiter rateLimit;
@@ -66,6 +68,12 @@ class RequestTask implements Callable<IHttpResponse> {
 		final HttpEntity entity = httpResponse.getEntity();
 
 		if(entity != null) {
+			if(config.getMaximumResponseKilobytes() > 0 && entity.getContentLength() > (config.getMaximumResponseKilobytes() * 1024)) {
+				logger.warning("Aborting request "+ request.getURI().toString() +" because response length "+ entity.getContentLength() + " exceeds maximum length of "+ config.getMaximumResponseKilobytes() +" kb.");
+				request.abort();
+				httpResponse.setEntity(createEmptyEntity());
+			}
+
 			final HttpEntity newEntity = processEntity(httpResponse, entity);
 			httpResponse.setEntity(newEntity);
 		}
@@ -80,8 +88,9 @@ class RequestTask implements Callable<IHttpResponse> {
 				htmlParser
 		);
 
-		for(IHttpResponseProcessor p: config.getResponseProcessors())
+		for(IHttpResponseProcessor p: config.getResponseProcessors()) {
 			p.processResponse(response.getOriginalRequest(), response, context);
+		}
 		
 		return response;
 	}
@@ -95,12 +104,21 @@ class RequestTask implements Callable<IHttpResponse> {
 
 		final InputStream input = entity.getContent();
 
-		if(input == null)
-			return new ByteArrayEntity(new byte[0]);
+		if(input == null) {
+			return createEmptyEntity();
+		}
 
 		String contentType = (entity.getContentType() == null) ? (null) : (entity.getContentType().getValue());
 		String contentEncoding = (entity.getContentEncoding() == null) ? (null) : (entity.getContentEncoding().getValue());
-		return new RepeatableStreamingEntity(input, entity.getContentLength(), false, entity.isChunked(), contentType, contentEncoding);
+		RepeatableStreamingEntity e =  new RepeatableStreamingEntity(input, entity.getContentLength(), false, entity.isChunked(), contentType, contentEncoding);
+		if(config.getMaximumResponseKilobytes() > 0) {
+			e.setMaximumInputKilobytes(config.getMaximumResponseKilobytes());
+		}
+		return e;
+	}
+
+	private HttpEntity createEmptyEntity() {
+		return new ByteArrayEntity(new byte[0]);
 	}
 
 	private HttpEntity processGzipEncodedEntity(HttpResponse response, HttpEntity entity) throws IOException {
@@ -114,6 +132,9 @@ class RequestTask implements Callable<IHttpResponse> {
 		String contentType = (entity.getContentType() == null) ? (null) : (entity.getContentType().getValue());
 		RepeatableStreamingEntity newEntity = new RepeatableStreamingEntity(gzipInput, -1, true, entity.isChunked(), contentType, null);
 		response.setHeader(HTTP.CONTENT_LEN, Long.toString(newEntity.getContentLength()));
+		if(config.getMaximumResponseKilobytes() > 0) {
+			newEntity.setMaximumInputKilobytes(config.getMaximumResponseKilobytes());
+		}
 		return newEntity;
 	}
 

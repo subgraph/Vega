@@ -41,6 +41,7 @@ public class ScannerConfig implements IScannerConfig {
 	private int maxDuplicatePaths = DEFAULT_MAX_DUPLICATE_PATHS;
 	private int maxParameterCount = DEFAULT_MAX_PARAMETER_COUNT;
 	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
+	private int maxResponseKilobytes = DEFAULT_MAX_RESPONSE_KILOBYTES;
 	
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
@@ -253,6 +254,16 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public int getMaxConnections() {
 		return maxConnections;
+	}
+
+	@Override
+	public void setMaxResponseKilobytes(int kb) {
+		maxResponseKilobytes = kb;
+	}
+
+	@Override
+	public int getMaxResponseKilobytes() {
+		return maxResponseKilobytes;
 	}
 }
 

@@ -25,6 +25,7 @@ public class ScanProbe {
 	private final static int MAX_REDIRECT_COUNT = 5;
 	private final URI targetURI;
 	private final IHttpRequestEngine requestEngine;
+	private volatile HttpGet currentRequest;
 	
 	ScanProbe(URI targetURI, IHttpRequestEngine requestEngine) {
 		this.targetURI = targetURI;
@@ -32,9 +33,9 @@ public class ScanProbe {
 	}
 	
 	IScanProbeResult runProbe() {
-		final HttpGet request = new HttpGet(targetURI);
+		currentRequest = new HttpGet(targetURI);
 		try {
-			IHttpResponse response = requestEngine.sendRequest(request);
+			IHttpResponse response = requestEngine.sendRequest(currentRequest);
 			return processFirstProbeResponse(targetURI, response);
 		} catch (RequestEngineException e) {
 			return ScanProbeResult.createConnectFailedResult(e.getMessage());
@@ -64,7 +65,8 @@ public class ScanProbe {
 			}
 
 			try {
-				response = requestEngine.sendRequest(new HttpGet(location));
+				currentRequest = new HttpGet(location);
+				response = requestEngine.sendRequest(currentRequest);
 				if(!isResponseRedirect(response)) {
 					return ScanProbeResult.createRedirectResult(location);
 				}
@@ -97,6 +99,13 @@ public class ScanProbe {
 			return new URI(location);
 		} catch (URISyntaxException e) {
 			return null;
+		}
+	}
+	
+	void abort() {
+		final HttpGet get = currentRequest;
+		if(get != null) {
+			get.abort();
 		}
 	}
 }

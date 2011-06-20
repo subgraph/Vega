@@ -13,6 +13,7 @@ package com.subgraph.vega.api.scanner;
 import java.net.URI;
 import java.util.List;
 
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 
 
@@ -25,4 +26,9 @@ public interface IScanner {
 	void startScanner(IScannerConfig config);
 	void stopScanner();
 	void runDomTests();
+		
+	void addLockStatusListener(IEventHandler listener);
+	void removeLockStatusListener(IEventHandler listener);
+	boolean lock();
+	void unlock();
 }

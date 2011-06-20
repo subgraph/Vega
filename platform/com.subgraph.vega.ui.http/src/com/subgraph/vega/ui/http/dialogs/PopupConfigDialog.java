@@ -39,12 +39,12 @@ public class PopupConfigDialog extends PopupDialog {
 	}
 	
 	@Override
-	protected void handleShellCloseEvent() {
+	public boolean close() {
 		content.onOk();
 		content.onClose();
-		super.handleShellCloseEvent();
+		return super.close();
 	}
-	
+
 	@Override
 	protected Control getFocusControl() {
 		return content.getFocusControl();

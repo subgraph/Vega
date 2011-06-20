@@ -29,6 +29,7 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	private int requestsPerMinute = DEFAULT_REQUESTS_PER_MINUTE;
 	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
 	private int maxConnectionsPerRoute = DEFAULT_MAX_CONNECTIONS_PER_ROUTE;
+	private int maximumResponseKilobytes = 0; // 0 means no limit
 	private final List<IHttpResponseProcessor> responseProcessors = new ArrayList<IHttpResponseProcessor>();
 	
 	@Override
@@ -108,5 +109,15 @@ public class HttpRequestEngineConfig implements IHttpRequestEngineConfig {
 	@Override
 	public int getMaxConnectionsPerRoute() {
 		return maxConnectionsPerRoute;
+	}
+
+	@Override
+	public void setMaximumResponseKilobytes(int kb) {
+		maximumResponseKilobytes = kb;
+	}
+
+	@Override
+	public int getMaximumResponseKilobytes() {
+		return maximumResponseKilobytes;
 	}
 }

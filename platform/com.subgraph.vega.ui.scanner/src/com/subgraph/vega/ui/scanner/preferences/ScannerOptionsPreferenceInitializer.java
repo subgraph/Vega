@@ -27,6 +27,7 @@ public class ScannerOptionsPreferenceInitializer extends
 		store.setDefault("MaxScanDuplicatePaths", IScannerConfig.DEFAULT_MAX_DUPLICATE_PATHS);
 		store.setDefault("MaxRequestsPerSecond", IScannerConfig.DEFAULT_MAX_REQUEST_PER_SECOND);
 		store.setDefault("MaxAlertString", 400);
+		store.setDefault("MaxResponseLength", IScannerConfig.DEFAULT_MAX_RESPONSE_KILOBYTES);
 	}
 
 	@Override

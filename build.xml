@@ -30,5 +30,6 @@
 	<property name="build.all" value="true" />
 	<antcall target="dobuild" />
     <exec executable="build/dist-tools/osx/osx-dist.sh"></exec>
+    <exec executable="build/dist-tools/nsis/windows-dist.sh"></exec>
   </target>
 </project>

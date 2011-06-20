@@ -44,6 +44,8 @@ public class ScanProbeTask implements Runnable {
 				if(processProbeResult(probeResult)) {
 					scanner.setScannerConfig(scannerConfig);
 					scanner.startScanner(scannerConfig);
+				} else {
+					scanner.unlock();
 				}
 			}
 		});

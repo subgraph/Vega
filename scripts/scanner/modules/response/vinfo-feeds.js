@@ -4,7 +4,7 @@ var module = {
 };
 
 function run(request, response, ctx) {
-  var output = " ";
+  var output = "";
   var res = 0;
   var rss = new RegExp("<link.*rel=.*rss.*?>", "ig");
   var atom = new RegExp("<link.*rel=.*xml.*?>", "ig");
@@ -33,7 +33,7 @@ function run(request, response, ctx) {
     ctx.alert("vinfo-feeds", request, response, {
       "output": output,
       "resource": request.requestLine.uri,
-      key: "vinfo-feeds" + request.requestLine.uri
+      key: "vinfo-feeds" + output
     });
   }
 }

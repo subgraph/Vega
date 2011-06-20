@@ -23,6 +23,7 @@ public interface IScannerConfig {
 	final static int DEFAULT_MAX_PARAMETER_COUNT = 16;
 	final static int DEFAULT_MAX_REQUEST_PER_SECOND = 25;
 	final static int DEFAULT_MAX_CONNECTIONS = 16;
+	final static int DEFAULT_MAX_RESPONSE_KILOBYTES = 1024;
 
 	void setBaseURI(URI baseURI);
 	void setCookieList(List<Cookie> list);
@@ -43,6 +44,7 @@ public interface IScannerConfig {
 	void setMaxDuplicatePaths(int value);
 	void setMaxParameterCount(int value);
 	void setMaxConnections(int value);
+	void setMaxResponseKilobytes(int kb);
 	
 	List<Cookie> getCookieList();
 	String getBasicUsername();
@@ -67,4 +69,5 @@ public interface IScannerConfig {
 	int getMaxDuplicatePaths();
 	int getMaxParameterCount();
 	int getMaxConnections();
+	int getMaxResponseKilobytes();
 }
