@@ -62,6 +62,7 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 	public void onOk() {
 		if(conditionSetDirty) {
 			conditionManager.saveConditionSet("filter", conditionSet);
+			conditionSetDirty = false;
 		}		
 	}
 
