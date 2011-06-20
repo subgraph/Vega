@@ -11,7 +11,7 @@ make_dist() {
     /usr/bin/unzip -d $TARGET $VEGA
     cp build/dist-tools/nsis/epl.txt $TARGET
     cp build/dist-tools/nsis/vega.nsi $TARGET
-    makensis $TARGET/vega.nsi
+    /usr/local/bin/makensis $TARGET/vega.nsi
 }
 
 mkdir build/dist
