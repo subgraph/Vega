@@ -10,9 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.conditions;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
@@ -48,21 +46,20 @@ public class ConditionHostname extends AbstractCondition {
 	
 	@Override
 	public boolean matches(HttpRequest request) {
-		
-		final URI uri = getRequestUri(request);
-		if(uri == null)
+		final String hostname = getRequestHostname(request);
+		if(hostname == null) {
 			return false;
-		return matchesString(uri.getHost());
+		}
+		return matchesString(hostname);
 	}
 	
-	private URI getRequestUri(HttpRequest request) {
-		if(request == null)
+	
+	private String getRequestHostname(HttpRequest request) {
+		Header hostHeader = request.getFirstHeader("Host");
+		if(hostHeader == null) {
 			return null;
-		try {
-			return new URI(request.getRequestLine().getUri());
-		} catch (URISyntaxException e) {
-			return null;
-		}		
+		}
+		return hostHeader.getValue();
 	}
 
 	@Override
