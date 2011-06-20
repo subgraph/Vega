@@ -3,3 +3,5 @@ build/buildpack
 build/archives/*.bz2
 vega-build/
 platform/*/bin
+build/tmp
+build/dist
