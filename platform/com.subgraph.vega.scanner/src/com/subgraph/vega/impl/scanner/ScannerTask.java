@@ -84,6 +84,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 			logger.info("Scanner completed");
 		}
 		workspace.getScanAlertRepository().setActiveScanInstance(null);
+		scanner.unlock();
 		workspace.unlock();
 		printModuleRuntimeStats();
 	}

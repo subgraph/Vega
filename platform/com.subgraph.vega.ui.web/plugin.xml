@@ -68,6 +68,14 @@
                   definitionId="oneElementSelected">
             </reference>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="vega.scannerState">
+               <equals
+                     value="idle">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="com.subgraph.vega.ui.web.commands.HideUnvisitedHandler"

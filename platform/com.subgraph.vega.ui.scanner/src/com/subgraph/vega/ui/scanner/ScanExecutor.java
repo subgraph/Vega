@@ -56,7 +56,7 @@ public class ScanExecutor {
 		if(targetURI == null) {
 			return null;
 		}
-		
+		scanner.lock();
 		final IScannerConfig config = scanner.createScannerConfig();
 		
 		config.setBaseURI(targetURI);
