@@ -14,7 +14,7 @@ function run(request, response, ctx) {
   var i;
 
 
-  var html = ["400", "401", "402", "500", "501"];
+  var html = [400, 401, 402, 500, 501];
 
   var php = ["unexpected T_STRING", "unexpected T-STRING", "Parse Error", "Fatal error", "Call to undefined function", "Notice: Undefined index", "T_VARIABLE", "T_DOLLAR_OPEN_CURLY_BRACES", "T_CURLY_OPEN", "unexpected $end, expecting", "syntax error, unexpected", "No row with the given identifier", "open_basedir restriction in effect", "Cannot execute a blank command in", "Fatal error</b>:  preg_replace", "thrown in <b>", "Stack trace:", ];
 
@@ -28,9 +28,9 @@ function run(request, response, ctx) {
 
 
   for (i = 0; i <= html.length - 1; i += 1) {
-    x = response.code.toString();
-    x = x.indexOf(html[i]);
-    if (x >= 0) {
+    x = response.code;
+    if ((x == html[i]) && (request.requestLine.uri.indexOf(";%3F") == -1) && (request.requestLine.uri.indexOf(";?") == -1)) {
+      ctx.debug(request.requestLine.uri);
       htmlres = 1;
     }
   }
