@@ -2,7 +2,7 @@
 <alert>
 <title>Cross Site Scripting</title>
 	
-	<class>Input Validation</class>
+	<class>Input Validation Error</class>
 	<severity>High</severity>
 
 	<impact>Untrustworthy data that is external in origin is possibly being output by the server to clients without adequate filtering.</impact>

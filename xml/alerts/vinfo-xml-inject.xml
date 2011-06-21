@@ -2,7 +2,7 @@
 <alert>
 <title>Possible XML Injection</title>
 	
-	<class>Input Validation</class>
+	<class>Input Validation Error</class>
 	<severity>Medium</severity>
 
 	<impact>Vega has detected that it may be possible to corrupt the structure of a server-side XML document.</impact>

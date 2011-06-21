@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Possible source code disclosure</title>
+<title>Possible Source Code Disclosure</title>
 	
   <class>Information</class>
 
