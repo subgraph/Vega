@@ -109,7 +109,7 @@ public class TransactionViewer extends Composite {
 	}
 
 	private ToolBar createToolbar() {
-		final ToolBar toolBar = new ToolBar(this, SWT.FLAT);
+		final ToolBar toolBar = new ToolBar(this, SWT.RIGHT);
 
 		viewerMenu = new Menu(getShell(), SWT.POP_UP);
 	    final ToolItem item = new ToolItem(toolBar, SWT.DROP_DOWN);
