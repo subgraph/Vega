@@ -3,7 +3,12 @@
 <title>Ruby on Rails error detected</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>		
+	<severity>Medium</severity>		
 	
 	<impact>A Ruby on Rails error has been detected. This could indicate badly written code, and could disclose sensitive information.</impact>
+
+  <remediation>The developer should investigate the error to determine its nature and ensure that it does not represent a vulnerability.</impact>
+  <remediation>Ensure that the application is running in a production environment.</remediation>
+
+
 </alert>

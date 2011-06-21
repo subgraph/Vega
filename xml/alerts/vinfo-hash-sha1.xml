@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<alert>
-<title>SHA-1 hash detected</title>
-	
-	<class>Information</class>
-	<severity>Info</severity>		
-	
-	<impact>A SHA-1 hash has been detected. This hash may have been used to encrypt passwords or other valuable data.</impact>
-</alert>

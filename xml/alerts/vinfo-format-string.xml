@@ -2,20 +2,29 @@
 <alert>
 <title>Format String Injection</title>
 	
-	<class>Information</class>
+	<class>Input Validation Error</class>
 	<severity>High</severity>
 
 	<discussion>
-		Discuss issue here.
+    Vega has detected behavior indicative of a possible format string vulnerability. Format string vulnerabilities occur when untrustworthy input is used to construct the format string parameter passed to one of the printf() family of C library calls (and derivatives). Format string vulnerabilities can be used to overwrite memory, resulting in remote code execution.
 	</discussion>
 
   <impact>
-		Explain impact here.
+    If there is indeed a format string vulnerability present, the attacker could be able to overwrite memory of the target process.
+  </impact>
+  <impact>
+    Overwriting memory can allow for the execution of arbitrary code.
   </impact>
 
   <remediation>
-    Investigate further.
+    The developer should investigate the code in question to determine if it is at all possible that a format string vulnerability could be present.
+  </remediation>
+  <remediation>
+    This can be fixed by ensuring that untrustworthy data is not passed to the printf() function.
   </remediation>
 
+  <references>
+    <url address="http://en.wikipedia.org/wiki/Uncontrolled_format_string">Uncontrolled format string (Wikipedia)</url>
+  </references>
 </alert>
 

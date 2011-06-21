@@ -1,5 +1,5 @@
 var module = {
-  name: "RFC 1918 IP Address Finder",
+  name: "Internal IP Addresses",
   type: "response-processor"
 };
 

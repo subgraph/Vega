@@ -2,7 +2,7 @@
 <alert>
 <title>URL Injection</title>
 	
-	<class>Input Validation</class>
+	<class>Input Validation Error</class>
 	<severity>Medium</severity>
 
 	<impact>An externally supplied link has been used as an attribute (e.g. src, href, value) in a HTML tag.</impact>
