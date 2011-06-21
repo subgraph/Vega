@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>WSDL detected</title>
+<title>WSDL Detected</title>
 	
 	<class>Information</class>
 	<severity>Info</severity>		

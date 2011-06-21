@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>PHP error detected</title>
+<title>PHP Error Detected</title>
 	
 	<class>Information</class>
 	<severity>Medium</severity>		

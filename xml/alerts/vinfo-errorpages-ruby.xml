@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Ruby on Rails error detected</title>
+<title>Ruby on Rails Error Detected</title>
 	
 	<class>Information</class>
 	<severity>Medium</severity>		

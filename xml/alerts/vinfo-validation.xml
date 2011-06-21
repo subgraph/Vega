@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<alert>
-<title>Unencrypted ASP.net validation detected</title>
-	
-	<class>Information</class>
-	<severity>Info</severity>		
-	
-	<impact>Unencrypted ASP.net validation detected.</impact>
-</alert>
