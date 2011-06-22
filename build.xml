@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="vega.build" default="all">
 
-	<property name="buildpack.version" value="06032011" />
+	<property name="buildpack.version" value="06222011" />
 
 	<import file="build/ant/setup-targets.xml" />
 	<import file="build/ant/buildpack-targets.xml" />
