@@ -6,7 +6,7 @@
 	<severity>Info</severity>
 
 	<discussion>
-    Vega has detected that this resource has been created by Oracle Application Server.
+        Vega has detected that this resource is tagged with a string indicating that it may have been created by Oracle Application Server.
 	</discussion>
 
   <impact>

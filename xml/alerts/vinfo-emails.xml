@@ -3,7 +3,7 @@
 <title>Email Addresses Found</title>
 	
 	<class>Information</class>
-	<severity>Info</severity>
+	<severity>Low</severity>
 
 	<impact>E-mail addresses exposed to the Internet will be scraped by spambots and added to spam lists.</impact>
 	<impact>E-mail addresses can also be used in targeted and phishing attacks.</impact>

@@ -6,7 +6,7 @@
 	<severity>Medium</severity>
 
 	<impact>HTTP header injection vulnerabilities allow for attackers to forge request responses from servers.</impact>
-	<impact>Attackers may be able to poison the caches of caching HTTP proxies</impact>
+	<impact>Attackers may be able to poison the caches of caching HTTP proxies.</impact>
 
 	<remediation>Some languages/platforms offer some protection against this class of attacks. On versions of PHP4.4 and later, the header() function will only send one header at a time.</remediation>
 	<remediation>If a safe function is not found, the externally supplied data used in header fields must have newlines sanitized before inclusion in the response header.</remediation>

@@ -15,7 +15,7 @@
   <remediation>The cause should be determined, and the material removed or prevented from being output.</remediation>
 
   <discussion>
-    Vega has detected fragments of text that match signatures of application source code. Application source code unintentedly visible to remote clients can be a security vulnerability. This can occur in applications using technologies such as PHP and JSP, which allow for code to be mixed with static presentation content. For an attacker, source code can reveal information about the nature of the application, such as its design or the use of third-party components. Sometimes sensitive information, such as a database connection string, can be included in source code.
+    Vega has detected fragments of text that match signatures of application source code. Application source code unintentedly visible to remote clients can be a security vulnerability. This can occur in applications using technologies such as PHP and JSP, which allow for code to be mixed with static presentation content. For example, in-line code is sometimes commented using HTML comments, resulting in it being transmitted to remote clients. For an attacker, source code can reveal information about the nature of the application, such as its design or the use of third-party components. Sometimes sensitive information, such as a database connection string, can be included in source code.
   </discussion>
 
   <references>

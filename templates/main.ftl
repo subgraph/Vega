@@ -17,6 +17,10 @@
   vars.severityCSS ! ""
 />
 
+<@discussion
+  doc.alert.discussion
+/>
+
 <@impactsection 
   doc.alert.impact
 />
@@ -44,10 +48,6 @@
 	  </div>
   </div>
 </#if>
-
-<@discussion
-  doc.alert.discussion
-/>
 
 <#if doc.alert.external?size != 0>
   <div class="section" id="remrefsection">

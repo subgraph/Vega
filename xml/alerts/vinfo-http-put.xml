@@ -3,7 +3,7 @@
 <title>Possible HTTP PUT File Upload</title>
 	
 	<class>Configuration</class>
-	<severity>High</severity>		
+	<severity>Medium</severity>		
 	
 	<impact>Arbitrary file uploads could affect application or system integrity.</impact>
 	<impact>This could occur if an attacker were to overwrite a resource pre-existing on the server.</impact>

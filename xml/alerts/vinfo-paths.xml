@@ -3,7 +3,7 @@
 <title>Local Filesystem Paths Found</title>
 	
 	<class>Information</class>
-	<severity>Low</severity>
+	<severity>Medium</severity>
 
 	<impact>Vega has detected what may be absolute filesystem paths in scanned content.</impact>
 	<impact>Disclosure of these paths reveals information about the filesystem layout.</impact>

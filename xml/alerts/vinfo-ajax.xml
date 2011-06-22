@@ -13,7 +13,7 @@
 	</remediation>
 
 	<discussion>
-	AJAX (Asynchronous Javascript and XML) refers to a collection of technologies used to make the user experience of web applications more interactive. AJAX functionality often involves the asynchronous sending of requests and processing of their responses using Javascript, without requiring page reloads. These requests are made to (effectively) RPC endpoints, which accept parameters, making them injection points where vulnerabilities could exist. 
+	AJAX (Asynchronous Javascript and XML) refers to a collection of technologies used to make the user experience of web applications more interactive. AJAX functionality often involves the asynchronous sending of requests and processing of their responses using Javascript, without requiring page reloads. The endpoints on the server side often accept parameters, making them injection points where vulnerabilities could exist. 
 	</discussion>
 	
 	<references>

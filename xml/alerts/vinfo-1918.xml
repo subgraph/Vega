@@ -3,13 +3,13 @@
 <title>Internal Addresses Found</title>
 	
 	<class>Information</class>
-	<severity>Info</severity>
+	<severity>Low</severity>
 
         <impact>May reveal internal network structure to outside attackers.</impact>
 	<impact>Internal IP addresses that have been disclosed could be used as targets in otherwise blind attacks.</impact>
 
 	<discussion>
-	Vega has discovered references to internal hosts or networks in publicly accessible content. These addresses may reveal inform an attacker about the internal network structure, increasing the likelihood of blind attacks involving other vulnerabilities.
+	Vega has discovered references to internal hosts or networks in publicly accessible content. These addresses may reveal information to an attacker about the internal network structure, increasing the likelihood of success for blind attacks involving other vulnerabilities.
 	</discussion>
 
 	<remediation>The cause may be related to the code, content, or due to the configuration of the server environment. </remediation>

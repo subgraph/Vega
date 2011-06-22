@@ -13,7 +13,7 @@
 	<remediation>The nature of the error should be investigated.</remediation>
 
 	<discussion>
-		Many application servers can send verbose error output to clients, and some do this by default. This verbose error output can include stack traces and other detailed, sensitive information. This could be used by attackers to identify patchlevels, filesystem layout,  configuration settings, or internal details about the application or database. Such output should never be sent to remote clients from production servers.</discussion>
+		Many application servers can send verbose error output to clients, and some do this by default. This verbose error output can include stack traces and other detailed, sensitive information. This could be used by attackers to identify patchlevels, filesystem layout, configuration settings, or internal details about the application or database. Such output should never be sent to remote clients from production servers.</discussion>
 
 	<references>
 		<url address="https://www.owasp.org/index.php/Securing_tomcat">Securing Tomcat (OWASP)</url>

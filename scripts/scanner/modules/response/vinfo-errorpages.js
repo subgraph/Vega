@@ -30,7 +30,6 @@ function run(request, response, ctx) {
   for (i = 0; i <= http.length - 1; i += 1) {
     x = response.code;
     if ((x == http[i]) && (request.requestLine.uri.indexOf(";%3F") == -1) && (request.requestLine.uri.indexOf(";?") == -1)) {
-      ctx.debug(request.requestLine.uri);
       httpres = 1;
     }
   }

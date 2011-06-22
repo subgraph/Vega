@@ -31,9 +31,11 @@ function run(request, response, ctx) {
 */
   // Maybe we should not match these exact strings?  Will have to investigate.
   // var oraclefingerprints = ["Oracle"];
+  // This module is incomplete but we're leaving it here.
 
   // IBM fingerprint IBM_HTTP_SERVER
   // Sun-ONE-Web-Server/6.1
+
   if (response.bodyAsString.indexOf("<!-- Created by Oracle ") >= 0) {
     ctx.alert("vinfo-oracle", request, response, {
       "output": "<!-- Created by Oracle..",

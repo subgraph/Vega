@@ -6,7 +6,7 @@
 	<severity>High</severity>
 
 	<discussion>
-    Vega has detected behavior indicative of a possible format string vulnerability. Format string vulnerabilities occur when untrustworthy input is used to construct the format string parameter passed to one of the printf() family of C library calls (and derivatives). Format string vulnerabilities can be used to overwrite memory, resulting in remote code execution.
+    Vega has detected behavior indicative of a possible format string vulnerability. Format string vulnerabilities occur when untrustworthy input is used as or as part of the format string parameter passed to one of the printf() family of C library calls (and derivatives). Format string vulnerabilities can be used to overwrite memory, resulting in remote code execution.
 	</discussion>
 
   <impact>

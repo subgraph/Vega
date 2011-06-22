@@ -5,7 +5,7 @@
 	<class>Information</class>
 	<severity>Info</severity>		
 	
-  <impact>An HTTP error has been detected. This could indicate faulty server configuration.</impact>
+  <impact>The error status code indicates an unidentified event on the server that may be associated with a vulnerability or configuration problem.</impact>
 
   <remediation>The developer should investigate how or why this error occurred and ensure that there is no vulnerability present.</remediation>
 

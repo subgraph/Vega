@@ -6,14 +6,14 @@
 	<severity>High</severity>
 
 	<discussion>
-    Integer overflows occur when integer data types exceed their maximum value. When this occurs in programs written in languages such as C, the resulting behavior can have security implications. For example, unsigned integers will be reduced, wrapping back to a lower numeric value.
+    Integer overflows occur when integer data types exceed their maximum value. When this occurs in programs written in languages such as C, the resulting behavior can have security implications. In these cases, unsigned integers will be reduced, wrapping back to a lower numeric value. The potential impact on security depends on how the integer value is used. If it is used as the size of a data buffer, forcing it to wrap to a lower value may result in bypassing of size checks, introducing possible buffer overflow conditions.
 	</discussion>
 
   <impact>
-    Integer overflow errors can have a variet of impacts, depending on the context and the purpose of the integer value.
+    Integer overflow errors can have a variety of impacts, depending on the context and the purpose of the integer value.
   </impact>
   <impact>
-    Integers used to check the size of a data buffer, if reduced, can falsely represent the total amount of data, resulting in a possible buffer overflow.
+    Integers used to check the size of a data buffer, if reduced, can incorrectly represent the total amount of data, resulting in a possible buffer overflow.
   </impact>
 
   <remediation>

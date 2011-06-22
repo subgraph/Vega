@@ -4,8 +4,11 @@
 	
 	<class>Information</class>
 	<severity>Info</severity>		
+
 	<remediation>The meta tags included in the content should be reviewed to ensure that there is nothing present that could aid an attacker.</remediation>
+
 	<discussion>Vega has detected meta tags that may reveal sensitive information or warrant closer examination. These tags could include information such as platform or configuration characteristics. Interesting meta tags include those that contain: "linux", "visual", "microsoft". </discussion>	
+
 	<impact>Certain meta-tags, which may be intentionally or uninentionally included, may reveal information about the platform or configuration of the application.</impact>
 	<impact>Information about the application unnecessarily revealed in page content may aid in the successful exploitation of more sophisticated attacks.</impact>
 </alert>

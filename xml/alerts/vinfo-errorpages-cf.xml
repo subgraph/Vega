@@ -8,7 +8,7 @@
 	<impact>Vega has detect content that corresponds to verbose debugging output from a ColdFusion server.</impact>
 	<impact>This output can contain sensitive information which could make other attacks easier.</impact>
 	<impact>System configuration settings, absolute file paths, and other information may be disclosed.</impact>
-	<impact>If Robust Exception Information is enabled, this data could include SQL statements and detailed information abou the application error.</impact>
+	<impact>If Robust Exception Information is enabled, this data could include SQL statements and detailed information about the application error.</impact>
 	<impact>The error itself may indicate a vulnerability.</impact> 
 
 	<remediation>ColdFusion can and should be configured to limit the output of debug data when errors occur.</remediation>

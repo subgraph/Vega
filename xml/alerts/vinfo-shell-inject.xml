@@ -13,8 +13,7 @@
 	<remediation>Execution of system commands through a command interpreter, such as with system(), should be avoided.</remediation>
 	<remediation>If absolutely necessary, the developer should take extra care with validating the input before it is passed to the interpreter.</remediation>
 
-	<discussion>
-	Command injection vulnerabilities often occur when inadequately sanitized externally supplied data is used to execute system commands through a command interpreter, or shell. Vulnerabilities such as these can be exploited by using shell metacharacters to execute commands that were not intended to be executed by the application developer. The system() function, and derivatives, are often responsible, as these functions are very simple to use.
+	<discussion>Command injection vulnerabilities often occur when inadequately sanitized externally supplied data is as part of a system command executed through a command interpreter, or shell. Vulnerabilities such as these can be exploited by using shell metacharacters to run additional commands that were not intended to be executed by the application developer. The system() function, and derivatives, are often responsible, as these functions are very simple to use. These vulnerabilities can grant remote access to attackers, if exploited successfully.
 	</discussion>
 
 	<references>

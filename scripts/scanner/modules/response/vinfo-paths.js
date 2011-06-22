@@ -37,12 +37,9 @@ function run(request, response, ctx) {
       if (res) {
         for (j = 0; j < res.length; j++) {
           if (output.indexOf(res[j]) < 0) {
-            //print("match "+j+": *" + res[j] + "* regex: " + r);
             output.push(res[j]);
           }
         }
-      } else {
-        //print("did not match: "+r);
       }
     }
   }

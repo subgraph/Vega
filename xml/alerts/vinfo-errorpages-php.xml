@@ -9,7 +9,7 @@
 	<impact>Automatically generated error pages can leak sensitive information.</impact>
 	<impact>The information leaked can include software patchlevels, configuration settings, and database or filesystem structure.</impact>
 
-	<remediation>The PHP manual recommends disabling "display_errors" on servers exposed to the Internet. For PHP 5.2.4 and greater, the "display_errors" setting in the "php.ini" configuration file should be set to "stderr" (error output stream), rather than "stdout" (output stream sent to clients). For earlier versions, "dispaly_errors" is a boolean type, and can be set to "False" for disabling. The setting can also be disabled at runtime using ini_set() from within a PHP script.</remediation>
+	<remediation>The PHP manual recommends disabling "display_errors" on servers exposed to the Internet. For PHP 5.2.4 and greater, the "display_errors" setting in the "php.ini" configuration file should be set to "stderr" (error output stream), rather than "stdout" (output stream sent to clients). For earlier versions, "display_errors" is a boolean type, and can be set to "False" for disabling. The setting can also be disabled at runtime using ini_set() from within a PHP script.</remediation>
 
 	<references>
 		<url address="http://www.php.net/manual/en/errorfunc.configuration.php#ini.display-errors">Turning off display-errors (php Manual)</url>

@@ -5,7 +5,7 @@
 	<class>Information</class>
 	<severity>Info</severity>		
 	
-	<impact>Vega has detected comments in scanned content that may include sensitive comment.</impact>
+	<impact>Vega has detected comments in scanned content that may include sensitive information.</impact>
 	<impact>Comments left by developers can include source code, usernames, passwords, or configuration settings.</impact>
 	<impact>This information, while not visible on the rendered page, is still transmitted to the client.</impact>
 	<impact>Disclosure of sensitive information could be used by an attacker to perform more intelligent attacks.</impact>
