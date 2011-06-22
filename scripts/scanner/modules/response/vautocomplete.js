@@ -20,11 +20,18 @@ function run(request, response, ctx) {
 
   if (found) {
     var match;
+    ctx.debug(request.requestLine.uri);
+    var sub = request.requestLine.uri;
+    var index = sub.indexOf('?');
+
+    if (index >= 0) {
+      sub = sub.substring(0, index);
+    }
 
     (found > 1) ? match = "instances" : match = "instance";
     ctx.alert("vautocomplete", request, response, {
       "resource": request.requestLine.uri,
-      key: "vautocomplete" + request.requestLine.uri + found + " " + match
+      key: "vautocomplete:" + sub
     });
 
   }
