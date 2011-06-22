@@ -68,6 +68,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     	menuBar.insertAfter(IWorkbenchActionConstants.M_FILE, winMenu);
     	menuBar.insertAfter(IWorkbenchActionConstants.M_WINDOW, helpMenu);
 
+    	final Separator helpSeparator = new Separator("vega.help");
+    	helpMenu.add(helpSeparator);
     	helpMenu.add(aboutItem);
     	
     	if(Util.isMac()) {

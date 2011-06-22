@@ -60,6 +60,14 @@
             id="com.subgraph.vega.commands.resetWorkspace"
             name="Reset Workspace">
       </command>
+      <command
+            id="com.subgraph.vega.commands.browseHelp"
+            name="Open Online Help">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.browseSubgraph"
+            name="Open Subgraph Website ">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -91,6 +99,14 @@
                   value="*">
             </count></activeWhen>
       </handler>
+      <handler
+            class="com.subgraph.vega.application.about.BrowseHelpHandler"
+            commandId="com.subgraph.vega.commands.browseHelp">
+      </handler>
+      <handler
+            class="com.subgraph.vega.application.about.BrowseSubgraphHandler"
+            commandId="com.subgraph.vega.commands.browseSubgraph">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -111,6 +127,18 @@
             locationURI="menu:file?before=vega.quit">
          <command
                commandId="com.subgraph.vega.commands.resetWorkspace"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:help?before=vega.help">
+         <command
+               commandId="com.subgraph.vega.commands.browseHelp"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.browseSubgraph"
                style="push">
          </command>
       </menuContribution>
