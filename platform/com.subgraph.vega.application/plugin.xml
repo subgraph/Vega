@@ -166,15 +166,15 @@
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="com.subgraph.vega.application.preferences.VegaSocksPreferencePage"
-          id="com.subgraph.vega.preferences.socks"
-          name="SOCKS Proxy">
+          class="com.subgraph.vega.application.preferences.ProxyPreferencePage"
+          id="com.subgraph.vega.preferences.general"
+          name="General">
     </page>
  </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="com.subgraph.vega.application.preferences.VegaSocksPreferenceInitializer">
+          class="com.subgraph.vega.application.preferences.ProxyPreferenceInitializer">
     </initializer>
  </extension>
 

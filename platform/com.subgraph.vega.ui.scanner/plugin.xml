@@ -175,7 +175,7 @@
       <page
             class="com.subgraph.vega.ui.scanner.preferences.ScannerOptionsPreferencePage"
             id="com.subgraph.vega.preferences.scanoptions"
-            name="Scanner Options">
+            name="Scanner">
       </page>
    </extension>
 

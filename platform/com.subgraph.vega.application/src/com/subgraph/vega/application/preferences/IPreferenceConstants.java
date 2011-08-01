@@ -10,8 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.application.preferences;
 
-public interface IVegaSocksPreferenceConstants {
+public interface IPreferenceConstants {
 	public static final String P_SOCKS_ENABLED = "vega.preferences.socksEnabled";
 	public static final String P_SOCKS_ADDRESS = "vega.preferences.socksAddress";
 	public static final String P_SOCKS_PORT = "vega.preferences.socksPort";
+	
+	public static final String P_PROXY_ENABLED = "vega.preferences.proxyEnabled";
+	public static final String P_PROXY_ADDRESS = "vega.preferences.proxyAddress";
+	public static final String P_PROXY_PORT = "vega.preferences.proxyPort";
 }

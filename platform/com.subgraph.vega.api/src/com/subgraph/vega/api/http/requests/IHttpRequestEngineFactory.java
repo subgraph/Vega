@@ -10,9 +10,16 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 
 public interface IHttpRequestEngineFactory {
+	/**
+	 * Set a simple one-hop proxy to be set for all HttpClients instantiated from this request engine factory.
+	 * @param proxy Simple one hop proxy, or null to unset.
+	 */
+	void setProxy(HttpHost proxy);
+
 	IHttpRequestEngineConfig createConfig();
 	HttpClient createBasicClient();
 	HttpClient createUnencodingClient();

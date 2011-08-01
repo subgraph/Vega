@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.application;
 
+import org.apache.http.HttpHost;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -19,9 +20,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.console.IConsole;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.application.preferences.IVegaSocksPreferenceConstants;
+import com.subgraph.vega.application.preferences.IPreferenceConstants;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -37,6 +39,7 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceTracker modelTracker;
 	private ServiceTracker consoleTracker;
 	private ServiceTracker pathFinderTracker;
+	private ServiceTracker httpRequestEngineFactoryServiceTracker;
 	
 	/**
 	 * The constructor
@@ -60,30 +63,48 @@ public class Activator extends AbstractUIPlugin {
 		
 		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
-		
+
+		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
+		httpRequestEngineFactoryServiceTracker.open();
+
 		getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				configureSocks();
+				configureHttpProxy();
 			}
 		});
 		configureSocks();
+		configureHttpProxy();
 	}
 
 	private void configureSocks() {
 		final IPreferenceStore store = getPreferenceStore();
-		if(!store.getBoolean(IVegaSocksPreferenceConstants.P_SOCKS_ENABLED)) {
+		if(!store.getBoolean(IPreferenceConstants.P_SOCKS_ENABLED)) {
 			System.getProperties().remove("socksProxyHost");
 			System.getProperties().remove("socksProxyPort");
 			System.getProperties().remove("socksEnabled");
 			return;
 		}
 		
-		System.setProperty("socksProxyHost", store.getString(IVegaSocksPreferenceConstants.P_SOCKS_ADDRESS));
-		System.setProperty("socksProxyPort", store.getString(IVegaSocksPreferenceConstants.P_SOCKS_PORT));
+		System.setProperty("socksProxyHost", store.getString(IPreferenceConstants.P_SOCKS_ADDRESS));
+		System.setProperty("socksProxyPort", store.getString(IPreferenceConstants.P_SOCKS_PORT));
 		System.setProperty("socksEnabled", "true");
 	}
 	
+	private void configureHttpProxy() {
+		final IPreferenceStore store = getPreferenceStore();
+		final IHttpRequestEngineFactory requestEngineFactory = getHttpRequestEngineFactoryService();
+
+		if (store.getBoolean(IPreferenceConstants.P_PROXY_ENABLED)) {
+			final String proxyAddress = store.getString(IPreferenceConstants.P_PROXY_ADDRESS);
+			final Integer proxyPort = store.getInt(IPreferenceConstants.P_PROXY_PORT);
+			requestEngineFactory.setProxy(new HttpHost(proxyAddress, proxyPort));
+		} else {
+			requestEngineFactory.setProxy(null);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
@@ -124,4 +145,9 @@ public class Activator extends AbstractUIPlugin {
 	public IPathFinder getPathFinder() {
 		return (IPathFinder) pathFinderTracker.getService();
 	}
+
+	public IHttpRequestEngineFactory getHttpRequestEngineFactoryService() {
+		return (IHttpRequestEngineFactory) httpRequestEngineFactoryServiceTracker.getService();
+	}
+
 }

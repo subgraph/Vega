@@ -13,8 +13,10 @@ package com.subgraph.vega.internal.http.requests;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 import com.subgraph.vega.api.html.IHTMLParser;
@@ -25,7 +27,13 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private IHTMLParser htmlParser;
-	
+	private HttpHost proxy;
+
+	@Override
+	public void setProxy(HttpHost proxy) {
+		this.proxy = proxy;
+	}
+
 	@Override
 	public IHttpRequestEngineConfig createConfig() {
 		return new HttpRequestEngineConfig();
@@ -33,12 +41,20 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 
 	@Override
 	public HttpClient createBasicClient() {
-		return BasicHttpClientFactory.createHttpClient();
+		HttpClient client = BasicHttpClientFactory.createHttpClient(); 
+		if (proxy != null) {
+			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		}
+		return client;
 	}
 	
 	@Override
 	public HttpClient createUnencodingClient() {
-		return UnencodedHttpClientFactory.createHttpClient();
+		HttpClient client = UnencodedHttpClientFactory.createHttpClient();
+		if (proxy != null) {
+			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		}
+		return client;
 	}
 
 	@Override
@@ -63,4 +79,5 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	protected void unsetHTMLParser(IHTMLParser htmlParser) {
 		this.htmlParser = null;
 	}
+
 }

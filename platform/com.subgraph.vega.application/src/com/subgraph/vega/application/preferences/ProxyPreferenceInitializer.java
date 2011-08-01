@@ -15,14 +15,17 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.subgraph.vega.application.Activator;
 
-public class VegaSocksPreferenceInitializer extends
-		AbstractPreferenceInitializer implements IVegaSocksPreferenceConstants {
+public class ProxyPreferenceInitializer extends
+		AbstractPreferenceInitializer implements IPreferenceConstants {
 
-	public VegaSocksPreferenceInitializer() {
+	public ProxyPreferenceInitializer() {
 		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(P_SOCKS_ENABLED, false);
 		store.setDefault(P_SOCKS_ADDRESS, "127.0.0.1");
 		store.setDefault(P_SOCKS_PORT, 9050);
+		store.setDefault(P_PROXY_ENABLED, false);
+		store.setDefault(P_PROXY_ADDRESS, "127.0.0.1");
+		store.setDefault(P_PROXY_PORT, 8080);
 	}
 
 	@Override
