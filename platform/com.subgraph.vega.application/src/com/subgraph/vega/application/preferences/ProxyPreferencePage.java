@@ -1,13 +1,9 @@
 package com.subgraph.vega.application.preferences;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -20,13 +16,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.subgraph.vega.application.Activator;
+import com.subgraph.vega.util.ui.preferences.VegaPreferencePage;
 
-public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IPropertyChangeListener, IPreferenceConstants {
+public class ProxyPreferencePage extends VegaPreferencePage implements IPropertyChangeListener, IPreferenceConstants {
 	private Composite parentComposite;
-	private ArrayList<FieldEditor> fieldList = new ArrayList<FieldEditor>();
 	private Composite socksConfigControl;
 	private BooleanFieldEditor socksEnableField;
 	private StringFieldEditor socksAddressField;
@@ -42,38 +37,23 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	@Override
 	public void init(IWorkbench workbench) {
+		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 	}
 
 	@Override
-	protected Control createContents(Composite parent) {
+	protected Control createPage(Composite parent) {
 		parentComposite = new SashForm(parent, SWT.VERTICAL);
 		createSocksGroup(parentComposite);
 		createHttpProxyGroup(parentComposite);
-		checkState();
+		updateEnableState();
 		return parentComposite;
 	}
 
-	@Override
-	public boolean performOk() {
-	    boolean rv = super.performOk();
-	    if (rv) {
-		    for (Iterator<FieldEditor> iter = fieldList.iterator(); iter.hasNext();) {
-		    	((FieldEditor) iter.next()).store();
-		    }
-	    }
-	    return rv;
-	}
 
 	@Override
 	protected void performDefaults() {
-	    super.performDefaults();
-	    for (Iterator<FieldEditor> iter = fieldList.iterator(); iter.hasNext();) {
-	    	((FieldEditor) iter.next()).loadDefault();
-	    }
-	    final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		setSocksEnableState(store.getBoolean(IPreferenceConstants.P_SOCKS_ENABLED));
-		setHttpProxyEnableState(store.getBoolean(IPreferenceConstants.P_PROXY_ENABLED));
-		checkState();
+		super.performDefaults();
+		updateEnableState();
 	}
 
 	@Override
@@ -84,16 +64,10 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 			} else if (event.getSource() == httpProxyEnableField) {
 				setHttpProxyEnableState((Boolean) event.getNewValue());
 			}
-		} else if (event.getProperty().equals(FieldEditor.IS_VALID)) {
-            boolean value = ((Boolean) event.getNewValue()).booleanValue();
-            if (value) {
-                checkState();
-            } else {
-                setValid(false);
-            }
-        }
+		}
+		super.propertyChange(event);
 	}
-
+	
 	private Composite createSocksGroup(Composite parent) {
 		final Group rootControl = new Group(parent, SWT.NONE);
 		rootControl.setLayout(new GridLayout(1, false));
@@ -106,7 +80,6 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 		addField(socksEnableField);
 		
 		socksConfigControl = new Composite(rootControl, SWT.NONE);
-//		socksConfigControl.setLayout(new GridLayout(2, false));
 		socksConfigControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		socksAddressField = new StringFieldEditor(P_SOCKS_ADDRESS, "Proxy Address", socksConfigControl);
@@ -117,8 +90,6 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 		socksPortField.setValidRange(1, 65535);
 		socksPortField.setTextLimit(5);
 		addField(socksPortField);
-		
-		setSocksEnableState(Activator.getDefault().getPreferenceStore().getBoolean(IPreferenceConstants.P_SOCKS_ENABLED));
 		
 		return rootControl;
 	}
@@ -135,7 +106,6 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 		addField(httpProxyEnableField);
 		
 		httpProxyConfigControl = new Composite(rootControl, SWT.NONE);
-//		httpProxyConfigControl.setLayout(new GridLayout(2, false));
 		httpProxyConfigControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		httpProxyAddressField = new StringFieldEditor(P_PROXY_ADDRESS, "Proxy Address", httpProxyConfigControl);
@@ -147,17 +117,13 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 		httpProxyPortField.setTextLimit(5);
 		addField(httpProxyPortField);
 
-		setHttpProxyEnableState(Activator.getDefault().getPreferenceStore().getBoolean(IPreferenceConstants.P_PROXY_ENABLED));
-
 		return rootControl;
 	}
 
-	private void addField(FieldEditor editor) {
-		fieldList.add(editor);
-		editor.setPage(this);
-		editor.setPropertyChangeListener(this);
-		editor.setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		editor.load();
+	private void updateEnableState() {
+	    final IPreferenceStore store = getPreferenceStore();
+		setSocksEnableState(store.getBoolean(IPreferenceConstants.P_SOCKS_ENABLED));
+		setHttpProxyEnableState(store.getBoolean(IPreferenceConstants.P_PROXY_ENABLED));
 	}
 
 	private void setSocksEnableState(Boolean enable) {
@@ -168,16 +134,6 @@ public class ProxyPreferencePage extends PreferencePage implements IWorkbenchPre
 	private void setHttpProxyEnableState(Boolean enable) {
 		httpProxyAddressField.setEnabled(enable, httpProxyConfigControl);
 		httpProxyPortField.setEnabled(enable, httpProxyConfigControl);
-	}
-	
-	private void checkState() {
-	    for (Iterator<FieldEditor> iter = fieldList.iterator(); iter.hasNext();) {
-	    	if (!((FieldEditor) iter.next()).isValid()) {
-	    		setValid(false);
-	    		return;
-	    	}
-	    }
-	    setValid(true);
 	}
 
 }
