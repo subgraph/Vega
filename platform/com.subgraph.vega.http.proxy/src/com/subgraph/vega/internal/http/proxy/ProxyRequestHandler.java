@@ -59,10 +59,10 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	};
 
 	private final Logger logger;
-	private final HttpProxy httpProxy;
+	private final HttpProxyListener httpProxy;
 	private final IHttpRequestEngine requestEngine;
 
-	ProxyRequestHandler(HttpProxy httpProxy, Logger logger, IHttpRequestEngine requestEngine) {
+	ProxyRequestHandler(HttpProxyListener httpProxy, Logger logger, IHttpRequestEngine requestEngine) {
 		this.httpProxy = httpProxy;
 		this.logger = logger;
 		this.requestEngine = requestEngine;
@@ -71,7 +71,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 		final ProxyTransaction transaction = new ProxyTransaction(requestEngine, context);
-		context.setAttribute(HttpProxy.PROXY_HTTP_TRANSACTION, transaction);
+		context.setAttribute(HttpProxyListener.PROXY_HTTP_TRANSACTION, transaction);
 
 		try {
 			if (handleRequest(transaction, request) == false) {

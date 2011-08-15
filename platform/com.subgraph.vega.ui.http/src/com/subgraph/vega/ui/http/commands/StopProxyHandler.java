@@ -15,11 +15,9 @@ import com.subgraph.vega.ui.http.Activator;
 
 public class StopProxyHandler extends AbstractProxyCommandHandler {
 	@Override
-	protected void executeCommand(IHttpProxyService proxyService,
-			ProxyStateSourceProvider proxyState) {
+	protected void executeCommand(IHttpProxyService proxyService, ProxyStateSourceProvider proxyState) {
 		proxyService.stop();
 		proxyState.setProxyRunning(false);
-		Activator.getDefault().setStatusLineProxyStopped();
 	}
 
 }

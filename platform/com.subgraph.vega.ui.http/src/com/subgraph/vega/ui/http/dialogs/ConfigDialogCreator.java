@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.preferencepage.PreferenceConstants;
+import com.subgraph.vega.ui.http.preferencepage.IPreferenceConstants;
 
 public class ConfigDialogCreator {
 	
@@ -34,7 +34,7 @@ public class ConfigDialogCreator {
 	}
 	
 	public static Window createDialog(Shell parentShell, Point origin, IConfigDialogContent content) {
-		boolean popup = Activator.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_CONFIG_POPUP);
+		boolean popup = Activator.getDefault().getPreferenceStore().getBoolean(IPreferenceConstants.P_CONFIG_POPUP);
 		if(popup) {
 			return new PopupConfigDialog(parentShell, origin, content);
 		} else {

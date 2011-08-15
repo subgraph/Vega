@@ -178,9 +178,13 @@ public class ProxyStatusLineContribution extends ContributionItem {
 		page.addPartListener(listener);
 	}
 
-	public void setProxyRunning(int port) {
-		runningMessage = "Proxy running on port " + port;
-		setLabelImageAndText(proxyRunning, runningMessage);
+	public void setProxyRunning(int listenerCount) {
+		runningMessage = "Proxy running on " + listenerCount + " listeners";
+		synchronized(alertBlinkTimer) {
+			if (!alertEnabled) {
+				setLabelImageAndText(proxyRunning, runningMessage);
+			}
+		}
 	}
 
 	public void setProxyPending(int size) {

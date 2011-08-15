@@ -17,19 +17,37 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 
 public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	private final BundleContext context;
 	private final ProxyStatusLineContribution statusLineContribution;
+	private IHttpProxyServiceEventHandler proxyEventHandler;
 	private IHttpInterceptor interceptor;
-	private IHttpInterceptorEventHandler eventHandler;
+	private IHttpInterceptorEventHandler interceptorEventHandler;
 
 	ProxyServiceTrackerCustomizer(BundleContext context, ProxyStatusLineContribution statusLineContribution) {
 		this.context = context;
 		this.statusLineContribution = statusLineContribution;
-		eventHandler = new IHttpInterceptorEventHandler() {
+		proxyEventHandler = new IHttpProxyServiceEventHandler() {
+			@Override
+			public void notifyStart(int listenerCount) {
+				handleNotifyStart(listenerCount);
+			}
+
+			@Override
+			public void notifyStop() {
+				handleNotifyStop();
+			}
+
+			@Override
+			public void notifyConfigChange(int listenerCount) {
+				handleNotifyStart(listenerCount);
+			}
+		};
+		interceptorEventHandler = new IHttpInterceptorEventHandler() {
 			@Override
 			public void notifyQueue(IProxyTransaction transaction, int idx) {
 				handleNotifyQueue(transaction);
@@ -50,13 +68,14 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	@Override
 	public Object addingService(ServiceReference reference) {
 		IHttpProxyService proxyService = (IHttpProxyService) context.getService(reference);
+		proxyService.registerEventHandler(proxyEventHandler);
 		if (proxyService.isRunning()) {
-			statusLineContribution.setProxyRunning(proxyService.getListenPort());
+			statusLineContribution.setProxyRunning(proxyService.getListenerConfigsCount());
 		} else {
 			statusLineContribution.setProxyStopped();
 		}
 		interceptor = proxyService.getInterceptor();
-		interceptor.addEventHandler(eventHandler);
+		interceptor.addEventHandler(interceptorEventHandler);
 		return proxyService;
 	}
 
@@ -71,6 +90,14 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
 	}
 
+	private void handleNotifyStart(int numListeners) {
+		statusLineContribution.setProxyRunning(numListeners);
+	}
+
+	private void handleNotifyStop() {
+		statusLineContribution.setProxyStopped();
+	}
+	
 	private void handleNotifyQueue(IProxyTransaction transaction) {
 		statusLineContribution.setProxyPending(interceptor.transactionQueueSize());
 	}

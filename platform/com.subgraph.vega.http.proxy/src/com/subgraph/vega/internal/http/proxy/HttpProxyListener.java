@@ -29,35 +29,35 @@ import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseConnControl;
 
-import com.subgraph.vega.api.http.proxy.IHttpInterceptProxy;
+import com.subgraph.vega.api.http.proxy.IHttpProxyListener;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
+import com.subgraph.vega.api.http.proxy.IHttpProxyListenerConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
-public class HttpProxy implements IHttpInterceptProxy {
+public class HttpProxyListener implements IHttpProxyListener {
 	static final String PROXY_CONTEXT_REQUEST = "proxy.request";
 	static final String PROXY_CONTEXT_RESPONSE = "proxy.response";
 	static final String PROXY_HTTP_HOST = "proxy.host";
 	static final String PROXY_HTTP_TRANSACTION = "proxy.transaction";
-
 	private final Logger logger = Logger.getLogger("proxy");
-
+	private IHttpProxyListenerConfig config;
 	private final ProxyTransactionManipulator transactionManipulator;
 	private final HttpInterceptor interceptor;
 	private final List<IHttpInterceptProxyEventHandler> eventHandlers;
-	private final int listenPort;
 	private ServerSocket serverSocket;
 	private HttpParams params;
 	private VegaHttpService httpService;
-	private ExecutorService executor = Executors.newCachedThreadPool();
+	private ExecutorService executor;
 	private Thread proxyThread;
 	private final List<ConnectionTask> connectionList;
 
-	public HttpProxy(int listenPort, ProxyTransactionManipulator transactionManipulator, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
-		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
+	public HttpProxyListener(IHttpProxyListenerConfig config, ProxyTransactionManipulator transactionManipulator, HttpInterceptor interceptor, IHttpRequestEngine requestEngine, SSLContextRepository sslContextRepository) {
+		this.config = config;
 		this.transactionManipulator = transactionManipulator;
 		this.interceptor = interceptor;
-		this.listenPort = listenPort;
+		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
+
 		this.params = new BasicHttpParams();
 		this.params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0)
 		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
@@ -77,14 +77,20 @@ public class HttpProxy implements IHttpInterceptProxy {
 	}
 
 	@Override
-	public void startProxy() {
+	public IHttpProxyListenerConfig getConfig() {
+		return config;
+	}
+
+	@Override
+	public void start() {
+		executor = Executors.newCachedThreadPool(); // REVISIT: potentially sloppy to just recreate this here
 		try {
-			logger.info("Listening on port "+ listenPort);
-			serverSocket = new ServerSocket(listenPort);
+			logger.info("Listening on " + config.getListenerAddress());
+			serverSocket = new ServerSocket(config.getPort(), config.getBacklog(), config.getInetAddress());
 			proxyThread = new Thread(createProxyLoopRunnable());
 			proxyThread.start();
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "IO error creating listening socket: "+ e.getMessage(), e);
+			logger.log(Level.WARNING, "IO error creating listening socket on " + config.getListenerAddress() + ": "+ e.getMessage(), e);
 		}
 	}
 
@@ -118,7 +124,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 				continue;
 			}
 
-			final ConnectionTask task = new ConnectionTask(httpService, c, HttpProxy.this);
+			final ConnectionTask task = new ConnectionTask(httpService, c, HttpProxyListener.this);
 			synchronized (connectionList) {
 				connectionList.add(task);
 			}
@@ -135,7 +141,7 @@ public class HttpProxy implements IHttpInterceptProxy {
 	}
 
 	@Override
-	public void stopProxy() {
+	public void stop() {
 		proxyThread.interrupt();
 		try {
 			// close the socket to interrupt accept() in proxyAcceptLoop()
@@ -143,11 +149,6 @@ public class HttpProxy implements IHttpInterceptProxy {
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "Unexpected exception closing server socket: " + e.getMessage(), e);
 		}
-	}
-
-	@Override
-	public int getListenPort() {
-		return listenPort;
 	}
 
 	@Override

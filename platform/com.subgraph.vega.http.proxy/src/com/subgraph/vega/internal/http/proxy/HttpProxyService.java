@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+// * Copyright (c) 2011 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.http.proxy;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +25,10 @@ import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptProxyEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
+import com.subgraph.vega.api.http.proxy.IHttpProxyListener;
+import com.subgraph.vega.api.http.proxy.IHttpProxyListenerConfig;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
+import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -36,43 +43,57 @@ import com.subgraph.vega.internal.http.proxy.ssl.SSLContextRepository;
 
 public class HttpProxyService implements IHttpProxyService {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
+	private final List<IHttpProxyServiceEventHandler> eventHandlers;
 	private boolean isRunning = false;
 	private boolean isPassthrough = false;
-	private final IHttpInterceptProxyEventHandler eventHandler;
 	private IModel model;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IContentAnalyzerFactory contentAnalyzerFactory;
+	private IScannerModuleRegistry moduleRepository;
+	private IPathFinder pathFinder;
 	private IContentAnalyzer contentAnalyzer;
 	private List<IResponseProcessingModule> responseProcessingModules;
-
-	private IScannerModuleRegistry moduleRepository;
-	private HttpProxy proxy;
 	private IWorkspace currentWorkspace;
-	private IPathFinder pathFinder;
-
+	private Map<String, HttpProxyListener> listenerMap = new ConcurrentHashMap<String, HttpProxyListener>();
+	private final IHttpInterceptProxyEventHandler listenerEventHandler;
 	private ProxyTransactionManipulator transactionManipulator;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
-
+	private HttpClient httpClient;
+	private IHttpRequestEngine requestEngine;
+	
 	public HttpProxyService() {
-		eventHandler = new IHttpInterceptProxyEventHandler() {
+		eventHandlers = new ArrayList<IHttpProxyServiceEventHandler>();
+		listenerEventHandler = new IHttpInterceptProxyEventHandler() {
 			@Override
 			public void handleRequest(IProxyTransaction transaction) {
 				processTransaction(transaction);
 			}
 		};
-		transactionManipulator = new ProxyTransactionManipulator(); 
+		transactionManipulator = new ProxyTransactionManipulator();
 	}
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
-		responseProcessingModules = loadModules();
+//		responseProcessingModules = loadModules();
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
 		} catch (ProxySSLInitializationException e) {
 			sslContextRepository = null;
 			logger.warning("Failed to initialize SSL support in proxy.  SSL interception will be disabled. ("+ e.getMessage() + ")");
 		}
+		httpClient = requestEngineFactory.createBasicClient();
+		requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
+	}
+
+	@Override
+	public void registerEventHandler(IHttpProxyServiceEventHandler handler) {
+		eventHandlers.add(handler);
+	}
+
+	@Override
+	public void unregisterEventHandler(IHttpProxyServiceEventHandler handler) {
+		eventHandlers.remove(handler);
 	}
 
 	@Override
@@ -88,24 +109,99 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	@Override
-	public void start(int proxyPort) {
+	public IHttpProxyListenerConfig createListenerConfig() {
+		return new HttpProxyListenerConfig();
+	}
+
+	@Override
+	public void setListenerConfigs(IHttpProxyListenerConfig[] listenerConfigs) {
+		// remove existing listeners that are not in the list
+		for (Iterator<Map.Entry<String, HttpProxyListener>> iter = listenerMap.entrySet().iterator(); iter.hasNext();) {
+			final Map.Entry<String, HttpProxyListener> entry = iter.next();
+			final String k = entry.getKey();
+			int idx;
+			for (idx = 0; idx < listenerConfigs.length; idx++) {
+				if (k.compareTo(((IHttpProxyListenerConfig)listenerConfigs[idx]).toString()) == 0) {
+					break;
+				}
+			}
+			if (idx == listenerConfigs.length) {
+				if (isRunning != false) {
+					stopListener(entry.getValue());
+				}
+				iter.remove();
+			}
+		}
+
+		// create listeners for any new addresses
+		for (int idx = 0; idx < listenerConfigs.length; idx++) {
+			final IHttpProxyListenerConfig config = listenerConfigs[idx];
+			if (listenerMap.get(config.toString()) == null) {
+				final HttpProxyListener listener = new HttpProxyListener(config, transactionManipulator, interceptor, requestEngine, sslContextRepository);
+				listenerMap.put(config.toString(), listener);
+				if (isRunning != false) {
+					startListener(listener);
+				}
+			}
+		}
+
+		// notify event handlers
+		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
+			handler.notifyConfigChange(listenerMap.size());
+		}
+	}
+
+	@Override
+	public IHttpProxyListenerConfig[] getListenerConfigs() {
+		return (IHttpProxyListenerConfig[]) listenerMap.values().toArray(new IHttpProxyListenerConfig[0]);
+	}
+
+	@Override
+	public int getListenerConfigsCount() {
+		return listenerMap.size();
+	}
+
+	@Override
+	public void setPassthrough(boolean enabled) {
+		synchronized(this) {
+			isPassthrough = enabled;
+			interceptor.setEnabled(!enabled);
+		}
+	}
+
+	@Override
+	public void start() {
 		currentWorkspace = model.getCurrentWorkspace();
 		if(currentWorkspace == null) 
 			throw new IllegalStateException("Cannot start proxy because no workspace is currently open");
 		currentWorkspace.lock();
+		isRunning = true;
+
 		responseProcessingModules = loadModules();
 		contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(currentWorkspace.getScanAlertRepository().getProxyScanInstance());
 		contentAnalyzer.setResponseProcessingModules(responseProcessingModules);
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 
-		final HttpClient httpClient = requestEngineFactory.createBasicClient();
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
-		proxy = new HttpProxy(proxyPort, transactionManipulator, interceptor, requestEngine, sslContextRepository);
-		proxy.registerEventHandler(eventHandler);
-		proxy.startProxy();
+		for (IHttpProxyListener listener: listenerMap.values()) {
+			startListener(listener);
+		}
+
+		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
+			handler.notifyStart(listenerMap.size());
+		}
 	}
 
+	private void startListener(IHttpProxyListener listener) {
+		listener.registerEventHandler(listenerEventHandler);
+		listener.start();
+	}
+	
+	private void stopListener(IHttpProxyListener listener) {
+		listener.unregisterEventHandler(listenerEventHandler);
+		listener.stop();
+	}
+	
 	private List<IResponseProcessingModule> loadModules() {
 		if(responseProcessingModules == null) {
 			return moduleRepository.getResponseProcessingModules();
@@ -132,26 +228,15 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
 		isRunning = false;
-		proxy.unregisterEventHandler(eventHandler);
-		proxy.stopProxy();
+		for (IHttpProxyListener listener: listenerMap.values()) {
+			stopListener(listener);
+		}
 		contentAnalyzer = null;
 		currentWorkspace.unlock();
-	}
 
-	@Override
-	public void setPassthrough(boolean enabled) {
-		synchronized(this) {
-			isPassthrough = enabled;
-			interceptor.setEnabled(!enabled);
+		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
+			handler.notifyStop();
 		}
-	}
-
-	@Override
-	public int getListenPort() {
-		if (isRunning) {
-			return proxy.getListenPort();
-		}
-		return -1;
 	}
 
 	@Override

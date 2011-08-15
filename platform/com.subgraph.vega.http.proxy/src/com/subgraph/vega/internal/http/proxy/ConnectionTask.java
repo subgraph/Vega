@@ -24,9 +24,9 @@ public class ConnectionTask implements Runnable {
 
 	private final VegaHttpService httpService;
 	private final VegaHttpServerConnection connection;
-	private final HttpProxy proxy;
+	private final HttpProxyListener proxy;
 
-	ConnectionTask(VegaHttpService httpService, VegaHttpServerConnection connection, HttpProxy proxy) {
+	ConnectionTask(VegaHttpService httpService, VegaHttpServerConnection connection, HttpProxyListener proxy) {
 		this.httpService = httpService;
 		this.connection = connection;
 		this.proxy = proxy;
@@ -75,7 +75,7 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void processRequestContext(HttpContext context) throws IOException {
-		final ProxyTransaction transaction = (ProxyTransaction) context.getAttribute(HttpProxy.PROXY_HTTP_TRANSACTION);
+		final ProxyTransaction transaction = (ProxyTransaction) context.getAttribute(HttpProxyListener.PROXY_HTTP_TRANSACTION);
 		if(transaction != null) {
 			proxy.completeRequest(transaction);
 		}

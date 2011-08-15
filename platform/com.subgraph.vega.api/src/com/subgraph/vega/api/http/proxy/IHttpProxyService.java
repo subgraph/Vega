@@ -15,12 +15,17 @@ import java.util.List;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public interface IHttpProxyService {
+	void registerEventHandler(IHttpProxyServiceEventHandler handler);
+	void unregisterEventHandler(IHttpProxyServiceEventHandler handler);
 	boolean isRunning();
 	boolean isPassthrough();
-	void start(int proxyPort);
-	void stop();
+	IHttpProxyListenerConfig createListenerConfig();
+	void setListenerConfigs(IHttpProxyListenerConfig[] listenerConfigs);
+	IHttpProxyListenerConfig[] getListenerConfigs();
+	int getListenerConfigsCount();
 	void setPassthrough(boolean enabled);
-	int getListenPort();
+	void start();
+	void stop();
 	IHttpProxyTransactionManipulator getTransactionManipulator();
 	IHttpInterceptor getInterceptor();
 	List<IResponseProcessingModule> getResponseProcessingModules();

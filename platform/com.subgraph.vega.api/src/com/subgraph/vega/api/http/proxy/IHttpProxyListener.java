@@ -10,10 +10,10 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.proxy;
 
-public interface IHttpInterceptProxy {
-	void startProxy();
-	void stopProxy();
-	int getListenPort();
+public interface IHttpProxyListener {
+	IHttpProxyListenerConfig getConfig();
+	void start();
+	void stop();
 	void registerEventHandler(IHttpInterceptProxyEventHandler handler);
 	void unregisterEventHandler(IHttpInterceptProxyEventHandler handler);
 }
