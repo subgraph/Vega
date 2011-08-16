@@ -24,6 +24,7 @@ import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	private final BundleContext context;
 	private final ProxyStatusLineContribution statusLineContribution;
+	private IHttpProxyService proxyService;
 	private IHttpProxyServiceEventHandler proxyEventHandler;
 	private IHttpInterceptor interceptor;
 	private IHttpInterceptorEventHandler interceptorEventHandler;
@@ -44,7 +45,7 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
 			@Override
 			public void notifyConfigChange(int listenerCount) {
-				handleNotifyStart(listenerCount);
+				handleNotifyConfigChange(listenerCount);
 			}
 		};
 		interceptorEventHandler = new IHttpInterceptorEventHandler() {
@@ -67,7 +68,7 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	
 	@Override
 	public Object addingService(ServiceReference reference) {
-		IHttpProxyService proxyService = (IHttpProxyService) context.getService(reference);
+		proxyService = (IHttpProxyService) context.getService(reference);
 		proxyService.registerEventHandler(proxyEventHandler);
 		if (proxyService.isRunning()) {
 			statusLineContribution.setProxyRunning(proxyService.getListenerConfigsCount());
@@ -98,6 +99,14 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 		statusLineContribution.setProxyStopped();
 	}
 	
+	private void handleNotifyConfigChange(int numListeners) {
+		if (proxyService.isRunning()) {
+			statusLineContribution.setProxyRunning(numListeners);
+		} else {
+			statusLineContribution.setProxyStopped();
+		}
+	}
+
 	private void handleNotifyQueue(IProxyTransaction transaction) {
 		statusLineContribution.setProxyPending(interceptor.transactionQueueSize());
 	}
