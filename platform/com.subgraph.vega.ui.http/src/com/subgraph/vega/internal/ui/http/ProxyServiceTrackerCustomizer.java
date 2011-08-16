@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http;
+package com.subgraph.vega.internal.ui.http;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -19,7 +19,6 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
-import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 
 public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	private final BundleContext context;
@@ -29,7 +28,7 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	private IHttpInterceptor interceptor;
 	private IHttpInterceptorEventHandler interceptorEventHandler;
 
-	ProxyServiceTrackerCustomizer(BundleContext context, ProxyStatusLineContribution statusLineContribution) {
+	public ProxyServiceTrackerCustomizer(BundleContext context, ProxyStatusLineContribution statusLineContribution) {
 		this.context = context;
 		this.statusLineContribution = statusLineContribution;
 		proxyEventHandler = new IHttpProxyServiceEventHandler() {

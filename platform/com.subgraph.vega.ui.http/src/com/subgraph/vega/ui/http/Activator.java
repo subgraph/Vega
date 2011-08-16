@@ -28,6 +28,7 @@ import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.internal.ui.http.ProxyServiceTrackerCustomizer;
 import com.subgraph.vega.internal.ui.http.ProxyStatusLineContribution;
 import com.subgraph.vega.ui.http.preferencepage.IPreferenceConstants;
 import com.subgraph.vega.ui.http.preferencepage.ProxyListenerPreferencePage;
