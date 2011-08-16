@@ -19,7 +19,7 @@ import org.eclipse.ui.services.ISourceProviderService;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.ErrorDisplay;
+import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
 
 public class ProxyPassthrough extends AbstractHandler {
 
@@ -28,7 +28,7 @@ public class ProxyPassthrough extends AbstractHandler {
 		IHttpProxyService proxyService = Activator.getDefault().getProxyService();
 		if(proxyService == null) {
 			Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-			ErrorDisplay.displayError(shell, "Proxy service is null");
+			ErrorDialog.displayError(shell, "Proxy service is null");
 			return null;
 		}
 		
@@ -36,7 +36,7 @@ public class ProxyPassthrough extends AbstractHandler {
 		ProxyStateSourceProvider proxyState = (ProxyStateSourceProvider) sourceProviderService.getSourceProvider(ProxyStateSourceProvider.PASSTHROUGH_STATE);
 		if(proxyState == null) {
 			Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-			ErrorDisplay.displayError(shell, "Proxy state provider is null");
+			ErrorDialog.displayError(shell, "Proxy state provider is null");
 			return null;
 		}
 

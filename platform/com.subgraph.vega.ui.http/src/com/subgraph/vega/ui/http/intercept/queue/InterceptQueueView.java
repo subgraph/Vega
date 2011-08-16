@@ -36,8 +36,8 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.ErrorDisplay;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
+import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
 
 public class InterceptQueueView extends ViewPart {
 	public final static String POPUP_TRANSACTIONS_TABLE = "com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions";
@@ -154,7 +154,7 @@ public class InterceptQueueView extends ViewPart {
 				try {
 					view = (InterceptView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(InterceptView.VIEW_ID);
 				} catch (PartInitException e) {
-					ErrorDisplay.displayExceptionError(parentComposite.getShell(), e);
+					ErrorDialog.displayExceptionError(parentComposite.getShell(), e);
 					return;
 				}
 				view.openTransaction((IProxyTransaction) element);

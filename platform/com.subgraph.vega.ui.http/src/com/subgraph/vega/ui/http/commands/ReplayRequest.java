@@ -25,8 +25,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.subgraph.vega.ui.http.ErrorDisplay;
 import com.subgraph.vega.ui.http.requesteditviewer.RequestEditView;
+import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class ReplayRequest extends AbstractHandler {
@@ -59,7 +59,7 @@ public class ReplayRequest extends AbstractHandler {
 					view = (RequestEditView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(RequestEditView.VIEW_ID, element.toString(), viewMode);
 				} catch (PartInitException e) {
 					Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-					ErrorDisplay.displayExceptionError(shell, e);
+					ErrorDialog.displayExceptionError(shell, e);
 					return null;
 				}
 
@@ -67,7 +67,7 @@ public class ReplayRequest extends AbstractHandler {
 					view.setRequest((IRequestLogRecord) element);
 				} catch (URISyntaxException e) {
 					Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-					ErrorDisplay.displayExceptionError(shell, e);
+					ErrorDialog.displayExceptionError(shell, e);
 					return null;
 				}
 				viewMode = IWorkbenchPage.VIEW_VISIBLE;

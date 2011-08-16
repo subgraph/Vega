@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyListenerConfig;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.ErrorDisplay;
+import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
 
 public class ListenerAddressDialog extends Dialog {
 	private ProxyListenerPreferencePage page;
@@ -117,23 +117,23 @@ public class ListenerAddressDialog extends Dialog {
 		try {
 			inetAddress = InetAddress.getByName(ipAddress.getText());
 		} catch (UnknownHostException e) {
-			ErrorDisplay.displayError(getShell(), "Invalid IP address");
+			ErrorDialog.displayError(getShell(), "Invalid IP address");
 	        return false;
 		}
 
 		try {
 			portNum = Integer.parseInt(port.getText());
 		} catch (NumberFormatException e) {
-			ErrorDisplay.displayError(getShell(), "Invalid port: must be between 1 and 65535");
+			ErrorDialog.displayError(getShell(), "Invalid port: must be between 1 and 65535");
 	        return false;
 		}		
 		if (portNum < 1 || portNum > 65535) {
-			ErrorDisplay.displayError(getShell(), "Invalid port: must be between 1 and 65535");
+			ErrorDialog.displayError(getShell(), "Invalid port: must be between 1 and 65535");
 	        return false;
 		}
 
 		if (page.hasListener(inetAddress, portNum) == true) {
-			ErrorDisplay.displayError(getShell(), "IP address/port combination is already registered");
+			ErrorDialog.displayError(getShell(), "IP address/port combination is already registered");
 	        return false;
 		}
 		

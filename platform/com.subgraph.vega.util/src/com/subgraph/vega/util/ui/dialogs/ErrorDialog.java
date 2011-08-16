@@ -8,14 +8,14 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http;
+package com.subgraph.vega.util.ui.dialogs;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 // temporary class, probably
-public class ErrorDisplay {
+public class ErrorDialog {
 
 	static public void displayError(Shell shell, String text) {
 		MessageBox messageDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);

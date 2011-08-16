@@ -37,13 +37,13 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.ErrorDisplay;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.http.builder.ResponseMessageEditor;
 import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionContent;
+import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
 
 public class TransactionViewer extends Composite {
 	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/interception_rules.png").createImage();
@@ -156,7 +156,7 @@ public class TransactionViewer extends Composite {
 				try {
 					builderPartCurr.processContents();
 				} catch (Exception ex) {
-					ErrorDisplay.displayExceptionError(getShell(), ex);
+					ErrorDialog.displayExceptionError(getShell(), ex);
 					return;
 				}
 
@@ -166,14 +166,14 @@ public class TransactionViewer extends Composite {
 					try {
 						manager.forwardRequest(transactionInfo);
 					} catch (Exception ex) {
-						ErrorDisplay.displayExceptionError(getShell(), ex);
+						ErrorDialog.displayExceptionError(getShell(), ex);
 						return;
 					}
 				} else {
 					try {
 						manager.forwardResponse(transactionInfo);
 					} catch (Exception ex) {
-						ErrorDisplay.displayExceptionError(getShell(), ex);
+						ErrorDialog.displayExceptionError(getShell(), ex);
 						return;
 					}
 				}
@@ -256,7 +256,7 @@ public class TransactionViewer extends Composite {
 					try {
 						builderPartCurr.processContents();
 					} catch (Exception e) {
-						ErrorDisplay.displayExceptionError(getShell(), e);
+						ErrorDialog.displayExceptionError(getShell(), e);
 						return;
 					}
 				}

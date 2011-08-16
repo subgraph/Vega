@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.ui;bundle-version="3.7.0",
  org.eclipse.core.runtime;bundle-version="3.7.0",
  com.subgraph.vega.api;bundle-version="1.0.0"
-Export-Package: com.subgraph.vega.util.ui.preferences
+Export-Package: com.subgraph.vega.util.ui.dialogs,
+ com.subgraph.vega.util.ui.preferences
