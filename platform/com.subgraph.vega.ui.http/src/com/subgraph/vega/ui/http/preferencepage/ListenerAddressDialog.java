@@ -121,7 +121,12 @@ public class ListenerAddressDialog extends Dialog {
 	        return false;
 		}
 
-		portNum = Integer.parseInt(port.getText());
+		try {
+			portNum = Integer.parseInt(port.getText());
+		} catch (NumberFormatException e) {
+			ErrorDisplay.displayError(getShell(), "Invalid port: must be between 1 and 65535");
+	        return false;
+		}		
 		if (portNum < 1 || portNum > 65535) {
 			ErrorDisplay.displayError(getShell(), "Invalid port: must be between 1 and 65535");
 	        return false;
