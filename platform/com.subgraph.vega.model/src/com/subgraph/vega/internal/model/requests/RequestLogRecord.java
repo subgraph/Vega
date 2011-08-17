@@ -148,6 +148,7 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 
 	@Override
 	public long getRequestMilliseconds() {
+		activate(ActivationPurpose.READ);
 		return requestTimeMs;
 	}
 
