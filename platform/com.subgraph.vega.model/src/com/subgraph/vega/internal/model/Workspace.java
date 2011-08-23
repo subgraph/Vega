@@ -30,11 +30,13 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertRepository;
 import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.requests.RequestLog;
+import com.subgraph.vega.internal.model.tags.TagModel;
 import com.subgraph.vega.internal.model.web.WebModel;
 
 public class Workspace implements IWorkspace {
@@ -48,8 +50,9 @@ public class Workspace implements IWorkspace {
 	private final IXmlRepository xmlRepository;
 	private final WorkspaceLockStatus lockStatus;
 
+	private ITagModel tagModel;
 	private IWebModel webModel;
-	private  IRequestLog requestLog;
+	private IRequestLog requestLog;
 	private IScanAlertRepository scanAlerts;
 	private HttpConditionManager conditionManager;
 
@@ -69,10 +72,6 @@ public class Workspace implements IWorkspace {
 		this.console = console;
 		this.htmlParser = htmlParser;
 		this.xmlRepository = xmlRepository;
-		this.webModel = null;
-		this.requestLog = null;
-		this.scanAlerts = null;
-		this.conditionManager = null;
 		this.lockStatus = new WorkspaceLockStatus(eventManager);
 		this.backgroundCommitTimer = new Timer();
 	}
@@ -100,6 +99,7 @@ public class Workspace implements IWorkspace {
 	private ObjectContainer openDatabase(String databasePath) {
 		try {
 			final ObjectContainer db = configurationFactory.openContainer(databasePath);
+			tagModel = new TagModel(db);
 			webModel = new WebModel(db);
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertRepository(db, xmlRepository);
@@ -112,6 +112,14 @@ public class Workspace implements IWorkspace {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public ITagModel getTagModel() {
+		if (!opened) {
+			throw new IllegalStateException("Must open workspace first");
+		}
+		return tagModel;
 	}
 
 	@Override
@@ -266,4 +274,5 @@ public class Workspace implements IWorkspace {
 			}
 		};
 	}
+
 }
