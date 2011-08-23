@@ -18,6 +18,7 @@ import com.db4o.reflect.jdk.JdkReflector;
 import com.db4o.ta.TransparentPersistenceSupport;
 import com.subgraph.vega.internal.model.alerts.ScanAlert;
 import com.subgraph.vega.internal.model.requests.RequestLogRecord;
+import com.subgraph.vega.internal.model.tags.Tag;
 
 public class DatabaseConfigurationFactory {
 	final private static boolean DIAGNOSTICS_ENABLED = false;
@@ -35,9 +36,11 @@ public class DatabaseConfigurationFactory {
 		configuration.common().objectClass(RequestLogRecord.class).objectField("responseCode").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("responseLength").indexed(true);
 //		configuration.common().objectClass(RequestLogRecord.class).objectField("responseHeaders").indexed(true);
+		configuration.common().objectClass(RequestLogRecord.class).objectField("tagList").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("key").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("resource").indexed(true);
-		
+		configuration.common().objectClass(Tag.class).objectField("name").indexed(true);
+
 		configuration.common().weakReferences(false);
 		
 		if(DIAGNOSTICS_ENABLED) {
