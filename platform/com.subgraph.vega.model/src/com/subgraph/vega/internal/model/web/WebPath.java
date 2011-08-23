@@ -303,10 +303,11 @@ public class WebPath extends WebEntity implements IWebPath {
 
 	@Override
 	public void setPathType(PathType type) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		this.pathType = type;
 		cachedFullPath = null;
 		cachedUri = null;
+		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override

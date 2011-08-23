@@ -63,8 +63,9 @@ public class WebMountPoint implements IWebMountPoint, Activatable {
 	}
 	
 	void setWebHost(IWebHost host) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		this.host = host;
+		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override

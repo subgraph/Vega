@@ -113,9 +113,10 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	}
 	
 	void setResponse(HttpResponse response) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		this.response = response;
 		setCachedResponseFields(response);
+		activate(ActivationPurpose.WRITE);
 	}
 	
 	String getHostname() { return hostname; }

@@ -47,14 +47,15 @@ public abstract class WebEntity implements IWebEntity, Activatable {
 
 	@Override
 	public void setVisited(boolean notify) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		if(getParent() != null)
 			getParent().setVisited(notify);
 		if(!visitedFlag) {
 			visitedFlag = true;
+			activate(ActivationPurpose.WRITE);
 			if(notify)
 				notifyUpdatedEntity(this);
-		}
+		}		
 	}
 	
 	@Override
@@ -65,8 +66,9 @@ public abstract class WebEntity implements IWebEntity, Activatable {
 	
 	@Override
 	public void setScanned() {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		scannedFlag = true;
+		activate(ActivationPurpose.WRITE);
 	}
 	
 	@Override

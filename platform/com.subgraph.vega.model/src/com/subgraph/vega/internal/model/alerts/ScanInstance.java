@@ -193,9 +193,10 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public void updateScanStatus(int status) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		this.scanStatus = status;
 		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override

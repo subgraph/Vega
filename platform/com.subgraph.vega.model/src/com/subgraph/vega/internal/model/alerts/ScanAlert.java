@@ -62,16 +62,17 @@ public class ScanAlert implements IScanAlert, Activatable {
 
 	@Override
 	public void setTemplateName(String name) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		templateName = name;		
+		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override
 	public void setProperty(String name, Object value) {
 		activate(ActivationPurpose.READ);
 		if(name.equals("resource") && value instanceof String) {
-			activate(ActivationPurpose.WRITE);
 			resource = (String) value;
+			activate(ActivationPurpose.WRITE);
 		}
 		properties.setProperty(name, value);
 	}

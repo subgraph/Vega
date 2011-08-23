@@ -39,9 +39,11 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 	
 	@Override
 	public void setMatchAction(IHttpConditionMatchAction matchAction) {
-		activate(ActivationPurpose.WRITE);
-		if(matchAction instanceof IHttpConditionMatchActionEx)
+		activate(ActivationPurpose.READ);
+		if(matchAction instanceof IHttpConditionMatchActionEx) {
 			this.matchAction = (IHttpConditionMatchActionEx) matchAction;
+			activate(ActivationPurpose.WRITE);
+		}
 	}
 
 	@Override
@@ -52,8 +54,9 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 
 	@Override
 	public void setEnabled(boolean state) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		isEnabled = state;
+		activate(ActivationPurpose.WRITE);
 	}
 
 	public IHttpCondition createCopy() {

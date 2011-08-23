@@ -129,8 +129,9 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	void setConditionManager(HttpConditionManager conditionManager) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		this.conditionManager = conditionManager;
+		activate(ActivationPurpose.WRITE);
 	}
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
@@ -155,8 +156,9 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	@Override
 	public void setMatchOnEmptySet(boolean flag) {
-		activate(ActivationPurpose.WRITE);
+		activate(ActivationPurpose.READ);
 		matchOnEmptySet = flag;
+		activate(ActivationPurpose.WRITE);
 	}
 
 	private transient Activator activator;
