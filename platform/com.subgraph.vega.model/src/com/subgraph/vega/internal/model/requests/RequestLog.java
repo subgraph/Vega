@@ -93,7 +93,7 @@ public class RequestLog implements IRequestLog {
 		final HttpResponse newResponse = cloner.copyResponse(response.getRawResponse());
 		database.store(newRequest);
 		database.store(newResponse);
-		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, response.getHost(), response.getRequestMilliseconds());
+		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, response.getHost(), response.getRequestMilliseconds(), response.getTags());
 		synchronized(lock){
 			database.store(record);
 			filterNewRecord(record);

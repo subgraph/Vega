@@ -11,12 +11,14 @@
 package com.subgraph.vega.api.http.requests;
 
 import java.net.URI;
+import java.util.List;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
+import com.subgraph.vega.api.model.tags.ITag;
 
 public interface IHttpResponse {
 	enum ResponseStatus { RESPONSE_OK };
@@ -34,6 +36,35 @@ public interface IHttpResponse {
 	IPageFingerprint getPageFingerprint();
 	boolean lockResponseEntity();
 	long getRequestMilliseconds();
+	
+	/**
+	 * Set the database ID of a IRequestLogRecord created for this object. Must only be invoked when a IRequestLogRecord
+	 * is inserted into the database.
+	 * @param requestId Database ID of IRequestLogRecord.
+	 */
 	void setRequestId(long requestId);
+
+	/**
+	 * Get the database ID of the IRequestLogRecord corresponding with this object.
+	 * @return Database ID of IRequestLogRecord, or -1 if none has been set.
+	 */
 	long getRequestId();
+
+	/**
+	 * Get a list of all tags applied to this record.
+	 * @return Tags applied to this record.
+	 */
+	List<ITag> getTags();
+
+	/**
+	 * Apply a tag to this record.
+	 * @param tag Tag.
+	 */
+	void addTag(ITag tag);
+
+	/**
+	 * Remove a tag from this record.
+	 * @param tag Tag.
+	 */
+	void removeTag(ITag tag);
 }

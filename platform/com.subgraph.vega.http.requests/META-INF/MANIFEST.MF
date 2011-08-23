@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.model.requests,
+ com.subgraph.vega.api.model.tags,
  org.apache.http;version="4.0.0",
  org.apache.http.client,
  org.apache.http.client.methods,

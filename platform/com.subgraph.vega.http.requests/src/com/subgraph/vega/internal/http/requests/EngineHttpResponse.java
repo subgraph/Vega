@@ -12,6 +12,9 @@ package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +30,7 @@ import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
+import com.subgraph.vega.api.model.tags.ITag;
 
 public class EngineHttpResponse implements IHttpResponse {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -36,14 +40,15 @@ public class EngineHttpResponse implements IHttpResponse {
 	private /*final*/ HttpResponse rawResponse;
 	private final long requestTime;
 	private final IHTMLParser htmlParser;
-	
+	private final List<ITag> tagList = new ArrayList<ITag>();
+
 	private String cachedString;
 	private PageFingerprint cachedFingerprint;
 	private boolean htmlParseFailed;
 	private IHTMLParseResult htmlParseResult;
 	private boolean isMostlyAsciiTestDone;
 	private boolean isMostlyAscii;
-	private long requestId;
+	private long requestId = -1;
 
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
@@ -52,7 +57,6 @@ public class EngineHttpResponse implements IHttpResponse {
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
-		requestId = -1;
 	}
 
 	@Override
@@ -208,4 +212,20 @@ public class EngineHttpResponse implements IHttpResponse {
 	public URI getRequestUri() {
 		return requestUri;
 	}
+
+	@Override
+	public List<ITag> getTags() {
+		return Collections.unmodifiableList(new ArrayList<ITag>(tagList));
+	}
+
+	@Override
+	public void addTag(ITag tag) {
+		tagList.add(tag);
+	}
+
+	@Override
+	public void removeTag(ITag tag) {
+		tagList.remove(tag);
+	}
+
 }

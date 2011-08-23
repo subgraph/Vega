@@ -10,7 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.requests;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -19,54 +23,42 @@ import org.apache.http.HttpResponse;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
+import com.db4o.collections.ActivatableArrayList;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-
+import com.subgraph.vega.api.model.tags.ITag;
 
 public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	final long requestId;
 	private final HttpRequest request;
 	private final HttpHost host;
-	
 	private String hostname;
 	private String requestMethod;
 	private String requestPath;
 	private String requestHeaders;
-	
 	private int responseCode;
 	private int responseLength;
 	private String responseHeaders;
-
 	private HttpResponse response;
 	private final long timestamp;
 	private long requestTimeMs;
-
+	private ActivatableArrayList<ITag> tagList;
 	private transient Activator activator;
 
-	RequestLogRecord() {
-		requestId = 0;
-		request = null;
-		response = null;
-		host = null;
-		timestamp = 0;
-		requestTimeMs = -1;
-		setCachedRequestFields(null, null);
-		setCachedResponseFields(null);
-	}
-
-	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs) {
+	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs, List<ITag> tagList) {
 		this.requestId = requestId;
 		this.request = request;
 		this.response = response;
 		this.host = host;
 		this.timestamp = new Date().getTime();
 		this.requestTimeMs = requestTimeMs;
+		this.tagList = new ActivatableArrayList<ITag>(tagList);
 		setCachedRequestFields(request, host);
 		setCachedResponseFields(response);
 	}
 
-	RequestLogRecord(long requestId, HttpRequest request, HttpHost host, long requestTimeMs) {
-		this(requestId, request, null, host, requestTimeMs);
+	RequestLogRecord(long requestId, HttpRequest request, HttpHost host, long requestTimeMs, List<ITag> tagList) {
+		this(requestId, request, null, host, requestTimeMs, tagList);
 	}
 
 	private void setCachedRequestFields(HttpRequest request, HttpHost host) {
@@ -190,6 +182,26 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		}
 
 		this.activator = activator;
+	}
+
+	@Override
+	public Collection<ITag> getAllTags() {
+		activate(ActivationPurpose.READ);
+		return Collections.unmodifiableList(new ArrayList<ITag>(tagList));
+	}
+
+	@Override
+	public void addTag(ITag tag) {
+		activate(ActivationPurpose.READ);
+		tagList.add(tag);
+		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public void removeTag(ITag tag) {
+		activate(ActivationPurpose.READ);
+		tagList.remove(tag);
+		activate(ActivationPurpose.WRITE);
 	}
 
 }
