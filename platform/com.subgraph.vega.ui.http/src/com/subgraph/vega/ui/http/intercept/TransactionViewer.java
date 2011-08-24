@@ -43,7 +43,7 @@ import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.http.builder.ResponseMessageEditor;
 import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionContent;
-import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class TransactionViewer extends Composite {
 	private static final Image IMAGE_CONFIGURE = Activator.getImageDescriptor("icons/interception_rules.png").createImage();

@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.util.ui.dialogs;
+package com.subgraph.vega.ui.util.dialogs;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;

@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.util.ui.preferences;
+package com.subgraph.vega.ui.util.preferences;
 
 import java.util.ArrayList;
 import java.util.Iterator;

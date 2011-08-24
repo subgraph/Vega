@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyListenerConfig;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class ListenerAddressDialog extends Dialog {
 	private ProxyListenerPreferencePage page;

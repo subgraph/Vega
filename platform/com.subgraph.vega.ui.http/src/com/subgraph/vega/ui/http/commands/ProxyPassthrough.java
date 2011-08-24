@@ -19,7 +19,7 @@ import org.eclipse.ui.services.ISourceProviderService;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class ProxyPassthrough extends AbstractHandler {
 

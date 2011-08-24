@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 
 import com.subgraph.vega.application.Activator;
-import com.subgraph.vega.util.ui.preferences.VegaPreferencePage;
+import com.subgraph.vega.ui.util.preferences.VegaPreferencePage;
 
 public class ProxyPreferencePage extends VegaPreferencePage implements IPropertyChangeListener, IPreferenceConstants {
 	private Composite parentComposite;

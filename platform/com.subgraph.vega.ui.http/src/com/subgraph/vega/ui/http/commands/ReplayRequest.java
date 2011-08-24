@@ -26,7 +26,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.ui.http.requesteditviewer.RequestEditView;
-import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class ReplayRequest extends AbstractHandler {

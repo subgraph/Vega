@@ -37,7 +37,7 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
-import com.subgraph.vega.util.ui.dialogs.ErrorDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class InterceptQueueView extends ViewPart {
 	public final static String POPUP_TRANSACTIONS_TABLE = "com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions";

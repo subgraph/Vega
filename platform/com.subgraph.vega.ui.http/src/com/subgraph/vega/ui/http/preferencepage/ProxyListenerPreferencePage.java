@@ -42,7 +42,7 @@ import org.eclipse.ui.IWorkbench;
 
 import com.subgraph.vega.api.http.proxy.IHttpProxyListenerConfig;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.util.ui.preferences.VegaPreferencePage;
+import com.subgraph.vega.ui.util.preferences.VegaPreferencePage;
 
 public class ProxyListenerPreferencePage extends VegaPreferencePage implements IPreferenceConstants {
 	private static final String SEPARATOR_LISTENER = ";"; 
