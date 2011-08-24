@@ -28,8 +28,8 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker modelTracker;
-	private ServiceTracker crawlerTracker;
+	private ServiceTracker<IModel, IModel> modelTracker;
+	private ServiceTracker<IWebCrawlerFactory, IWebCrawlerFactory> crawlerTracker;
 	
 	/**
 	 * The constructor
@@ -69,11 +69,11 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public IWebCrawlerFactory getWebCrawlerFactory() {
-		return (IWebCrawlerFactory) crawlerTracker.getService();
+		return crawlerTracker.getService();
 	}
 	
 	public IModel getModel() {
-		return (IModel) modelTracker.getService();
+		return modelTracker.getService();
 	}
 
 }

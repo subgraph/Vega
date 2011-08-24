@@ -41,12 +41,12 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker modelTracker;
+	private ServiceTracker<IModel, IModel> modelTracker;
 	private ProxyServiceTrackerCustomizer proxyServiceTrackerCustomizer;
-	private ServiceTracker proxyServiceTracker;
-	private ServiceTracker httpRequestEngineFactoryServiceTracker;
-	private ServiceTracker contentAnalyzerFactoryTracker;
-	private ServiceTracker scannerModuleRegistryTracker;
+	private ServiceTracker<IHttpProxyService, IHttpProxyService> proxyServiceTracker;
+	private ServiceTracker<IHttpRequestEngineFactory, IHttpRequestEngineFactory> httpRequestEngineFactoryServiceTracker;
+	private ServiceTracker<IContentAnalyzerFactory, IContentAnalyzerFactory> contentAnalyzerFactoryTracker;
+	private ServiceTracker<IScannerModuleRegistry, IScannerModuleRegistry> scannerModuleRegistryTracker;
 
 	private ProxyStatusLineContribution statusLineContribution = new ProxyStatusLineContribution();
 	
@@ -64,22 +64,22 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
+		modelTracker = new ServiceTracker<IModel, IModel>(context, IModel.class.getName(), null);
 		modelTracker.open();
 		
 		proxyServiceTrackerCustomizer = new ProxyServiceTrackerCustomizer(context, statusLineContribution);
-		proxyServiceTracker = new ServiceTracker(context, IHttpProxyService.class.getName(), proxyServiceTrackerCustomizer);
+		proxyServiceTracker = new ServiceTracker<IHttpProxyService, IHttpProxyService>(context, IHttpProxyService.class.getName(), proxyServiceTrackerCustomizer);
 		proxyServiceTracker.open();
 		setProxyListenerAddresses();
 		setProxyTransactionManipulator();
 		
-		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
+		httpRequestEngineFactoryServiceTracker = new ServiceTracker<IHttpRequestEngineFactory, IHttpRequestEngineFactory>(context, IHttpRequestEngineFactory.class.getName(), null);
 		httpRequestEngineFactoryServiceTracker.open();
 
-		contentAnalyzerFactoryTracker = new ServiceTracker(context, IContentAnalyzerFactory.class.getName(), null);
+		contentAnalyzerFactoryTracker = new ServiceTracker<IContentAnalyzerFactory, IContentAnalyzerFactory>(context, IContentAnalyzerFactory.class.getName(), null);
 		contentAnalyzerFactoryTracker.open();
 
-		scannerModuleRegistryTracker = new ServiceTracker(context, IScannerModuleRegistry.class.getName(), null);
+		scannerModuleRegistryTracker = new ServiceTracker<IScannerModuleRegistry, IScannerModuleRegistry>(context, IScannerModuleRegistry.class.getName(), null);
 		scannerModuleRegistryTracker.open();
 	}
 
@@ -113,23 +113,23 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public IModel getModel() {
-		return (IModel) modelTracker.getService();
+		return modelTracker.getService();
 	}
 	
 	public IHttpProxyService getProxyService() {
-		return (IHttpProxyService) proxyServiceTracker.getService();
+		return proxyServiceTracker.getService();
 	}
 	
 	public IHttpRequestEngineFactory getHttpRequestEngineFactoryService() {
-		return (IHttpRequestEngineFactory) httpRequestEngineFactoryServiceTracker.getService();
+		return httpRequestEngineFactoryServiceTracker.getService();
 	}
 
 	public IContentAnalyzerFactory getContentAnalyzerFactoryService() {
-		return (IContentAnalyzerFactory) contentAnalyzerFactoryTracker.getService();
+		return contentAnalyzerFactoryTracker.getService();
 	}
 	
 	public IScannerModuleRegistry getScannerModuleRegistry() {
-		return (IScannerModuleRegistry) scannerModuleRegistryTracker.getService();
+		return scannerModuleRegistryTracker.getService();
 	}
 
 	public ContributionItem getStatusLineContribution() {

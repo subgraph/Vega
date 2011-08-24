@@ -20,7 +20,7 @@ import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 
-public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer<IHttpProxyService, IHttpProxyService> {
 	private final BundleContext context;
 	private final ProxyStatusLineContribution statusLineContribution;
 	private IHttpProxyService proxyService;
@@ -66,8 +66,8 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	}
 	
 	@Override
-	public Object addingService(ServiceReference reference) {
-		proxyService = (IHttpProxyService) context.getService(reference);
+	public IHttpProxyService addingService(ServiceReference<IHttpProxyService> reference) {
+		proxyService = context.getService(reference);
 		proxyService.registerEventHandler(proxyEventHandler);
 		if (proxyService.isRunning()) {
 			statusLineContribution.setProxyRunning(proxyService.getListenerConfigsCount());
@@ -80,14 +80,13 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 	}
 
 	@Override
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<IHttpProxyService> reference, IHttpProxyService service) {
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<IHttpProxyService> reference, IHttpProxyService service) {
 		// TODO Auto-generated method stub
-
 	}
 
 	private void handleNotifyStart(int numListeners) {

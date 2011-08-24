@@ -17,7 +17,7 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker consoleServiceTracker;
+	private ServiceTracker<IConsole, IConsole> consoleServiceTracker;
 	
 	/**
 	 * The constructor
@@ -32,7 +32,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		consoleServiceTracker = new ServiceTracker(context, IConsole.class.getName(), null);
+		consoleServiceTracker = new ServiceTracker<IConsole, IConsole>(context, IConsole.class.getName(), null);
 		consoleServiceTracker.open();
 	}
 
@@ -55,7 +55,7 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public IConsole getConsoleService() {
-		return (IConsole) consoleServiceTracker.getService();
+		return consoleServiceTracker.getService();
 	}
 
 }

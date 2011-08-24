@@ -36,10 +36,10 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker modelTracker;
-	private ServiceTracker consoleTracker;
-	private ServiceTracker pathFinderTracker;
-	private ServiceTracker httpRequestEngineFactoryServiceTracker;
+	private ServiceTracker<IModel, IModel> modelTracker;
+	private ServiceTracker<IConsole, IConsole> consoleTracker;
+	private ServiceTracker<IPathFinder, IPathFinder> pathFinderTracker;
+	private ServiceTracker<IHttpRequestEngineFactory, IHttpRequestEngineFactory> httpRequestEngineFactoryServiceTracker;
 	
 	/**
 	 * The constructor
@@ -55,16 +55,16 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
+		modelTracker = new ServiceTracker<IModel, IModel>(context, IModel.class.getName(), null);
 		modelTracker.open();
 		
-		consoleTracker = new ServiceTracker(context, IConsole.class.getName(), null);
+		consoleTracker = new ServiceTracker<IConsole, IConsole>(context, IConsole.class.getName(), null);
 		consoleTracker.open();
 		
-		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
+		pathFinderTracker = new ServiceTracker<IPathFinder, IPathFinder>(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
 
-		httpRequestEngineFactoryServiceTracker = new ServiceTracker(context, IHttpRequestEngineFactory.class.getName(), null);
+		httpRequestEngineFactoryServiceTracker = new ServiceTracker<IHttpRequestEngineFactory, IHttpRequestEngineFactory>(context, IHttpRequestEngineFactory.class.getName(), null);
 		httpRequestEngineFactoryServiceTracker.open();
 
 		getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
@@ -135,19 +135,19 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public IModel getModel() {
-		return (IModel) modelTracker.getService();
+		return modelTracker.getService();
 	}
 	
 	public IConsole getConsole() {
-		return (IConsole) consoleTracker.getService();
+		return consoleTracker.getService();
 	}
 	
 	public IPathFinder getPathFinder() {
-		return (IPathFinder) pathFinderTracker.getService();
+		return pathFinderTracker.getService();
 	}
 
 	public IHttpRequestEngineFactory getHttpRequestEngineFactoryService() {
-		return (IHttpRequestEngineFactory) httpRequestEngineFactoryServiceTracker.getService();
+		return httpRequestEngineFactoryServiceTracker.getService();
 	}
 
 }

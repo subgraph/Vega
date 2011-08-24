@@ -31,11 +31,11 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private ServiceTracker scannerTracker;
-	private ServiceTracker pathFinderTracker;
-	private ServiceTracker modelTracker;
-	private ServiceTracker xmlRepositoryTracker;
-	private ServiceTracker moduleRegistryTracker;
+	private ServiceTracker<IScanner, IScanner> scannerTracker;
+	private ServiceTracker<IPathFinder, IPathFinder> pathFinderTracker;
+	private ServiceTracker<IModel, IModel> modelTracker;
+	private ServiceTracker<IXmlRepository, IXmlRepository> xmlRepositoryTracker;
+	private ServiceTracker<IScannerModuleRegistry, IScannerModuleRegistry> moduleRegistryTracker;
 
 	/**
 	 * The constructor
@@ -51,19 +51,19 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 
-		scannerTracker = new ServiceTracker(context, IScanner.class.getName(), null);
+		scannerTracker = new ServiceTracker<IScanner, IScanner>(context, IScanner.class.getName(), null);
 		scannerTracker.open();
 
-		pathFinderTracker = new ServiceTracker(context, IPathFinder.class.getName(), null);
+		pathFinderTracker = new ServiceTracker<IPathFinder, IPathFinder>(context, IPathFinder.class.getName(), null);
 		pathFinderTracker.open();
 
-		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
+		modelTracker = new ServiceTracker<IModel, IModel>(context, IModel.class.getName(), null);
 		modelTracker.open();
 
-		xmlRepositoryTracker = new ServiceTracker(context, IXmlRepository.class.getName(), null);
+		xmlRepositoryTracker = new ServiceTracker<IXmlRepository, IXmlRepository>(context, IXmlRepository.class.getName(), null);
 		xmlRepositoryTracker.open();
 
-		moduleRegistryTracker = new ServiceTracker(context, IScannerModuleRegistry.class.getName(), null);
+		moduleRegistryTracker = new ServiceTracker<IScannerModuleRegistry, IScannerModuleRegistry>(context, IScannerModuleRegistry.class.getName(), null);
 		moduleRegistryTracker.open();
 		
 	}
@@ -87,22 +87,22 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public IScanner getScanner() {
-		return (IScanner) scannerTracker.getService();
+		return scannerTracker.getService();
 	}
 	
 	public IPathFinder getPathFinder() {
-		return (IPathFinder) pathFinderTracker.getService();
+		return pathFinderTracker.getService();
 	}
 	
 	public IModel getModel() {
-		return (IModel) modelTracker.getService();
+		return modelTracker.getService();
 	}
 	
 	public IXmlRepository getXmlRepository() {
-		return (IXmlRepository) xmlRepositoryTracker.getService();
+		return xmlRepositoryTracker.getService();
 	}
 	
 	public IScannerModuleRegistry getIScannerModuleRegistry() {
-		return (IScannerModuleRegistry) moduleRegistryTracker.getService();
+		return moduleRegistryTracker.getService();
 	}
 }
