@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import com.subgraph.vega.api.scanner.modules.IEnableableModule;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
-import com.subgraph.vega.ui.http.dialogs.IConfigDialogContent;
+import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 
 public class ConfigureProxyModulesContent implements IConfigDialogContent, ICheckStateListener, ICheckStateProvider {
 	private final List<IResponseProcessingModule> modules;

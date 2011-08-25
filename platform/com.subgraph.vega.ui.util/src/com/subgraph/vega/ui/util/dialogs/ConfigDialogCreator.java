@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.dialogs;
+package com.subgraph.vega.ui.util.dialogs;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jface.window.Window;
@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.preferencepage.IPreferenceConstants;
+import com.subgraph.vega.ui.util.Activator;
+import com.subgraph.vega.ui.util.preferencepage.IPreferenceConstants;
 
 public class ConfigDialogCreator {
 	

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="com.subgraph.vega.preferences.general"
+            class="com.subgraph.vega.ui.util.preferencepage.AppearancePreferencePage"
+            id="com.subgraph.vega.ui.util.preferences.appearance"
+            name="Appearance">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.preferences.preferences">
+      <initializer
+            class="com.subgraph.vega.ui.util.preferencepage.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>

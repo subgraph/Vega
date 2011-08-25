@@ -16,8 +16,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.window.Window;
 
-import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.requestfilters.RequestFilterConfigContent;
+import com.subgraph.vega.ui.util.dialogs.ConfigDialogCreator;
 
 public class OpenRequestViewFilter extends AbstractHandler implements IHandler {
 	private Window dialog;

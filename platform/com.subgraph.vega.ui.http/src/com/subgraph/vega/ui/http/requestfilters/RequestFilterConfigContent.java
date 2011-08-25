@@ -30,7 +30,7 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.dialogs.IConfigDialogContent;
+import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 
 public class RequestFilterConfigContent implements IConfigDialogContent {
 	private Composite composite;

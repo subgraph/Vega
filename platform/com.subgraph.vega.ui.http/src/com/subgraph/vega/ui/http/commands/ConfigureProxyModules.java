@@ -19,8 +19,8 @@ import org.eclipse.jface.window.Window;
 
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.proxy.ConfigureProxyModulesContent;
+import com.subgraph.vega.ui.util.dialogs.ConfigDialogCreator;
 
 public class ConfigureProxyModules extends AbstractHandler {
 	private Window dialog;

@@ -41,8 +41,8 @@ import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.http.builder.ResponseMessageEditor;
-import com.subgraph.vega.ui.http.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.http.intercept.config.ConfigureInterceptionContent;
+import com.subgraph.vega.ui.util.dialogs.ConfigDialogCreator;
 import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class TransactionViewer extends Composite {

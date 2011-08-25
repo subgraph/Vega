@@ -53,7 +53,7 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.conditions.ConditionInput;
-import com.subgraph.vega.ui.http.dialogs.IConfigDialogContent;
+import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 
 public class ConfigureInterceptionContent implements IConfigDialogContent {
 	private static final Image IMAGE_CHECKED = Activator.getImageDescriptor("icons/checked.png").createImage();

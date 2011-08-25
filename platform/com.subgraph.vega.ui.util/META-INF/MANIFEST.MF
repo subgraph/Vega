@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Util
-Bundle-SymbolicName: com.subgraph.vega.ui.util
+Bundle-SymbolicName: com.subgraph.vega.ui.util;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.subgraph.vega.ui.util.Activator
 Bundle-Vendor: SUBGRAPH
