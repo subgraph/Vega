@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.subgraph.vega.internal.ui.util.PopupConfigDialog;
+import com.subgraph.vega.internal.ui.util.TitleAreaConfigDialog;
 import com.subgraph.vega.ui.util.Activator;
 import com.subgraph.vega.ui.util.preferencepage.IPreferenceConstants;
 

@@ -8,12 +8,14 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.util.dialogs;
+package com.subgraph.vega.internal.ui.util;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 
 public class TitleAreaConfigDialog extends TitleAreaDialog {
 
