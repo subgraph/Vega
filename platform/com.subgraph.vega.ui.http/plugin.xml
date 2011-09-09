@@ -63,10 +63,6 @@
          </enabledWhen>
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
-            commandId="com.subgraph.vega.commands.popup.replayRequest">
-      </handler>
-      <handler
             class="com.subgraph.vega.ui.http.commands.SendRequest"
             commandId="com.subgraph.vega.commands.sendRequest">
       </handler>
@@ -93,6 +89,14 @@
       <handler
             class="com.subgraph.vega.ui.http.commands.ProxyPassthrough"
             commandId="com.subgraph.vega.commands.proxyPassthrough">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
+            commandId="com.subgraph.vega.commands.popup.replayRequest">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.TagEdit"
+            commandId="com.subgraph.vega.commands.popup.tagEdit">
       </handler>
    </extension>
    <extension
@@ -133,6 +137,11 @@
             categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
             id="com.subgraph.vega.commands.popup.replayRequest"
             name="Replay Request">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
+            id="com.subgraph.vega.commands.popup.tagEdit"
+            name="Edit Tags">
       </command>
       <category
             description="Commands for controlling the request editor"
@@ -242,6 +251,20 @@
          <command
                commandId="com.subgraph.vega.commands.popup.replayRequest"
                label="Replay Request"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="+">
+                  </count>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.popup.tagEdit"
+               label="Edit Tags"
                style="push">
             <visibleWhen
                   checkEnabled="true">

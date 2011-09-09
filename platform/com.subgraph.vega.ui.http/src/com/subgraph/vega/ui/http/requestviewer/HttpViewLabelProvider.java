@@ -59,6 +59,8 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 			return getResponseLength(record.getResponse());
 		case 6:
 			return Long.toString(record.getRequestMilliseconds());
+		case 7:
+			return Integer.toString(record.getTagCount());
 		}
 		return null;
 	}

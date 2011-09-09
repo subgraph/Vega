@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Subgraph.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Subgraph - initial API and implementation
+ ******************************************************************************/
 package com.subgraph.vega.api.model.tags;
 
 /**
@@ -18,14 +28,14 @@ public interface ITag {
 	String getName();
 	
 	/**
-	 * Set the description for the tag.
-	 * @param description Tag description.
+	 * Set the description for the tag. Can be null.
+	 * @param description Tag description. Can be null.
 	 */
 	void setDescription(String description);
 
 	/**
-	 * Get the description for the tag.
-	 * @return Tag description.
+	 * Get the description for the tag. May be null.
+	 * @return Tag description. May be null.
 	 */
 	String getDescription();
 

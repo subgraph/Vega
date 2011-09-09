@@ -12,6 +12,17 @@ public class Tag implements ITag, Activatable {
 	private int nameColor;
 	private int rowColor;
 
+	public Tag() {
+		rowColor = 0xffffff;
+	}
+
+	public Tag(ITag tag) {
+		name = tag.getName();
+		description = tag.getDescription();
+		nameColor = tag.getNameColor();
+		rowColor = tag.getRowColor();
+	}
+
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if (activator != null) {

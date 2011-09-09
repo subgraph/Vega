@@ -23,11 +23,16 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.model.IModel;
@@ -35,11 +40,13 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.model.taggablepopup.TaggablePopupDialog;
 
 public class HttpRequestView extends ViewPart {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
+	private TaggablePopupDialog taggablePopupDialog;
 
 	public HttpRequestView() {
 	}
@@ -59,6 +66,8 @@ public class HttpRequestView extends ViewPart {
 		MenuManager menuManager = new MenuManager();
 		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
 		tableViewer.getTable().setMenu(menu);
+		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
+		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
 		getSite().registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
 		getSite().setSelectionProvider(tableViewer);
 
@@ -70,8 +79,6 @@ public class HttpRequestView extends ViewPart {
 
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 	}
-
-
 
 	public void  focusOnRecord(long requestId) {
 		final Object inputObj = tableViewer.getInput();
@@ -94,7 +101,7 @@ public class HttpRequestView extends ViewPart {
 	}
 
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", "Time (ms)", };
+		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", "Time (ms)", "Tags" };
 		final ColumnLayoutData[] layoutData = {
 				new ColumnPixelData(60, true, true),
 				new ColumnPixelData(120, true, true),
@@ -102,7 +109,8 @@ public class HttpRequestView extends ViewPart {
 				new ColumnWeightData(100, 100, true),
 				new ColumnPixelData(50, true, true),
 				new ColumnPixelData(80, true, true),
-				new ColumnPixelData(50, true, true)
+				new ColumnPixelData(50, true, true),
+				new ColumnPixelData(15, true, true)
 		};
 
 		for(int i = 0; i < titles.length; i++) {
@@ -133,6 +141,44 @@ public class HttpRequestView extends ViewPart {
 	@Override
 	public void setFocus() {
 		tableViewer.getControl().setFocus();
+	}
+
+	private MouseMoveListener createMouseMoveListener() {
+		return new MouseMoveListener() {
+			@Override
+			public void mouseMove(MouseEvent e) {
+				if (taggablePopupDialog != null) {
+					taggablePopupDialog.close();
+					taggablePopupDialog = null;
+				}
+			}
+
+		};
+	}
+	
+	private MouseTrackListener createTableMouseTrackListener() {
+		return new MouseTrackListener() {
+			@Override
+			public void mouseEnter(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExit(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseHover(MouseEvent e) {
+				Point pt = new Point(e.x, e.y);
+				TableItem tableItem = tableViewer.getTable().getItem(pt);
+				if (tableItem != null) {
+					IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
+					if (record.getTagCount() > 0) {
+						taggablePopupDialog = new TaggablePopupDialog(tableViewer.getTable().getShell(), record, pt);
+						taggablePopupDialog.open();
+					}
+				}			
+			}
+		};
 	}
 
 }
