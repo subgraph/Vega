@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.model.taggableeditor;
+package com.subgraph.vega.internal.ui.model.taggableeditor;
 
 import java.util.List;
 

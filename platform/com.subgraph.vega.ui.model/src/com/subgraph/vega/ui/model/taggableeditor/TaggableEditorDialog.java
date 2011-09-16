@@ -47,6 +47,10 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.tags.ITag;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.tags.ITaggable;
+import com.subgraph.vega.internal.ui.model.taggableeditor.TagModifier;
+import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableContentProvider;
+import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableLabelProvider;
+import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableSearchFilter;
 import com.subgraph.vega.ui.model.Activator;
 
 public class TaggableEditorDialog extends TitleAreaDialog {

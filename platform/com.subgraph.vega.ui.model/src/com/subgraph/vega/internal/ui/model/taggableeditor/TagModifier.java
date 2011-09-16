@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.model.taggableeditor;
+package com.subgraph.vega.internal.ui.model.taggableeditor;
 
 import com.subgraph.vega.api.model.tags.ITag;
 import com.subgraph.vega.api.model.tags.ITagModel;
@@ -31,11 +31,11 @@ public class TagModifier {
 		return tagMod;
 	}
 
-	void setModified() {
+	public void setModified() {
 		isModified = true;
 	}
 
-	boolean isModified() {
+	public boolean isModified() {
 		return isModified;
 	}
 	
