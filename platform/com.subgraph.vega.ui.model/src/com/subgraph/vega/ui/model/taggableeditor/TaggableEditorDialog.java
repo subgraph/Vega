@@ -11,6 +11,7 @@
 package com.subgraph.vega.ui.model.taggableeditor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -18,7 +19,6 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -48,6 +48,7 @@ import com.subgraph.vega.api.model.tags.ITag;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.tags.ITaggable;
 import com.subgraph.vega.internal.ui.model.taggableeditor.TagModifier;
+import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableCheckStateManager;
 import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableContentProvider;
 import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableLabelProvider;
 import com.subgraph.vega.internal.ui.model.taggableeditor.TagTableSearchFilter;
@@ -62,6 +63,7 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 	private Composite parentComposite;
 	private Text tagFilterText;
 	private CheckboxTableViewer tagTableViewer;
+	private TagTableCheckStateManager checkStateManager;
 	private TagTableSearchFilter tagTableSearchFilter;
 	private Text tagNameText;
 	private Text tagDescText;
@@ -87,6 +89,7 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 			}
 		});
 		tagModel = currentWorkspace.getTagModel();
+		checkStateManager = new TagTableCheckStateManager(); 
 		tagTableSearchFilter = new TagTableSearchFilter();
 	}
 
@@ -125,16 +128,14 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		for (ITag tag: tagModel.getAllTags()) {
 			TagModifier tagModifier = new TagModifier(tag, tagModel.createTag(tag));
 			tagList.add(tagModifier);
-		}
-		tagTableViewer.setInput(tagList);
-		for (ITag tag: taggable.getAllTags()) {
-			for (TagModifier tagModifier: tagList) {
-				if (tagModifier.getTagOrig() == tag) {
-					tagTableViewer.setChecked(tagModifier, true);
+			for (ITag tagged: taggable.getAllTags()) {
+				if (tagModifier.getTagOrig() == tagged) {
+					checkStateManager.addChecked(tagModifier);
 					break;
 				}
 			}
 		}
+		tagTableViewer.setInput(tagList);
 
 		setTagSelected(null);
 		
@@ -149,8 +150,8 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 			}
 		}
 
-		Object checked[] = tagTableViewer.getCheckedElements();
-		ArrayList<ITag> checkedList = new ArrayList<ITag>(checked.length);
+		List<TagModifier> checked = checkStateManager.getCheckedList(); 
+		ArrayList<ITag> checkedList = new ArrayList<ITag>(checked.size());
 		for (Object tagModifier: checked) {
 			checkedList.add(((TagModifier) tagModifier).getTagOrig());
 		}
@@ -208,6 +209,8 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		tagTableViewer.setLabelProvider(new TagTableLabelProvider());
 		tagTableViewer.setContentProvider(new TagTableContentProvider());
 		tagTableViewer.addSelectionChangedListener(createSelectionChangedListener());
+		tagTableViewer.setCheckStateProvider(checkStateManager);
+		tagTableViewer.addCheckStateListener(checkStateManager);
 		tagTableViewer.addFilter(tagTableSearchFilter);
 		gd.heightHint = tagTableViewer.getTable().getItemHeight() * heightInRows;
 		return tagTableViewer.getTable();
