@@ -10,11 +10,13 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -67,6 +69,11 @@ public class ScanProbe {
 			try {
 				currentRequest = new HttpGet(location);
 				response = requestEngine.sendRequest(currentRequest);
+				try {
+					EntityUtils.consume(response.getRawResponse().getEntity());
+				} catch (IOException e) {
+					// shouldn't matter
+				}
 				if(!isResponseRedirect(response)) {
 					return ScanProbeResult.createRedirectResult(location);
 				}
