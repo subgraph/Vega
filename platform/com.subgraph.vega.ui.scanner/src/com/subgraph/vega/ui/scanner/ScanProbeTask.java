@@ -42,8 +42,7 @@ public class ScanProbeTask implements Runnable {
 			@Override
 			public void run() {
 				if(processProbeResult(probeResult)) {
-					scanner.setScannerConfig(scannerConfig);
-					scanner.startScanner(scannerConfig);
+					scanner.startScanner();
 				} else {
 					scanner.unlock();
 				}

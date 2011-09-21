@@ -56,9 +56,9 @@ public class ScanExecutor {
 		if(targetURI == null) {
 			return null;
 		}
+
 		scanner.lock();
 		final IScannerConfig config = scanner.createScannerConfig();
-		
 		config.setBaseURI(targetURI);
 		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetURI));
 		config.setBasicUsername(wizard.getBasicUsername());
@@ -77,9 +77,11 @@ public class ScanExecutor {
 		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
 		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
 		config.setMaxResponseKilobytes(preferences.getInt("MaxResponseLength"));
-		
+		scanner.setScannerConfig(config);
+
 		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetURI, scanner, config));
 		probeThread.start();
+
 		return wizard.getTargetField();
 	}
 

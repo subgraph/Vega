@@ -44,8 +44,9 @@ public class Scanner implements IScanner {
 
 	private IModel model;
 	private IScanInstance currentScan;
-	private IScannerConfig persistentConfig;
-	
+	private IScannerConfig currentConfig;
+	private IHttpRequestEngine currentRequestEngine;
+
 	private IWebCrawlerFactory crawlerFactory;
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IScannerModuleRegistry moduleRegistry;
@@ -117,7 +118,7 @@ public class Scanner implements IScanner {
 	
 	@Override
 	public IScannerConfig getScannerConfig() {
-		return persistentConfig;
+		return currentConfig;
 	}
 	
 	@Override
@@ -133,7 +134,14 @@ public class Scanner implements IScanner {
 
 	@Override 
 	public void setScannerConfig(IScannerConfig config) {
-		persistentConfig = config;
+		synchronized(lock) {
+			if(!isLocked) {
+				throw new IllegalStateException("Scanner must be locked before setting config");
+			}
+		}
+
+		currentConfig = config;
+		currentRequestEngine = null;
 	}	
 	
 	@Override
@@ -148,17 +156,41 @@ public class Scanner implements IScanner {
 			throw new IllegalStateException("Another target probe is already in progress");
 		}
 
-		final HttpClient client = requestEngineFactory.createUnencodingClient();
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig() );
+		if (currentConfig == null) {
+			throw new IllegalStateException("A scanner configuration must first be specified");
+		}
+
+		if (currentRequestEngine == null) {
+			currentRequestEngine = createRequestEngine(currentConfig);
+		}
 		
-		currentProbe = new ScanProbe(uri, requestEngine);
+		currentProbe = new ScanProbe(uri, currentRequestEngine);
 		final IScanProbeResult probeResult = currentProbe.runProbe();
 		currentProbe = null;
 		return probeResult;
 	}
 
+	private IHttpRequestEngine createRequestEngine(IScannerConfig config) {
+		final IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
+		if (config.getCookieList() != null) {
+			CookieStore cookieStore = requestEngineConfig.getCookieStore();
+			for (Cookie c: config.getCookieList()) {
+				cookieStore.addCookie(c);
+			}
+		}		
+		if (config.getMaxRequestsPerSecond() > 0) {
+			requestEngineConfig.setRequestsPerMinute(config.getMaxRequestsPerSecond() * 60);
+		}
+		requestEngineConfig.setMaxConnections(config.getMaxConnections());
+		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
+		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
+
+		final HttpClient client = requestEngineFactory.createUnencodingClient();
+		return requestEngineFactory.createRequestEngine(client, requestEngineConfig);
+	}
+	
 	@Override
-	public synchronized void startScanner(IScannerConfig config) {
+	public synchronized void startScanner() {
 		synchronized(lock) {
 			if(!isLocked) {
 				throw new IllegalStateException("Scanner must be locked before starting scan.");
@@ -169,32 +201,24 @@ public class Scanner implements IScanner {
 			throw new IllegalStateException("Scanner is already running.  Verify scanner is not running with getScannerStatus() before trying to start.");
 		}
 		
-		if(config.getBaseURI() == null)
+		if (currentConfig == null) {
+			throw new IllegalStateException("A scanner configuration must first be specified");
+		}
+		
+		if (currentConfig.getBaseURI() == null) {
 			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
-		
-		IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
-		if (config.getCookieList() != null) {
-			CookieStore cookieStore = requestEngineConfig.getCookieStore();
-			for (Cookie c: config.getCookieList()) {
-				cookieStore.addCookie(c);
-			}
 		}
-		
-		if(config.getMaxRequestsPerSecond() > 0) {
-			requestEngineConfig.setRequestsPerMinute(config.getMaxRequestsPerSecond() * 60);
+
+		if (currentRequestEngine == null) {
+			currentRequestEngine = createRequestEngine(currentConfig);
 		}
-		
-		requestEngineConfig.setMaxConnections(config.getMaxConnections());
-		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
-		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
-		final HttpClient client = requestEngineFactory.createUnencodingClient();
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig);
+
 		reloadModules();
 		resetModuleTimestamps();
 		currentWorkspace.lock();
 		
 		currentScan = currentWorkspace.getScanAlertRepository().createNewScanInstance();
-		scannerTask = new ScannerTask(currentScan, this, config, requestEngine, 
+		scannerTask = new ScannerTask(currentScan, this, currentConfig, currentRequestEngine, 
 				currentWorkspace, contentAnalyzerFactory.createContentAnalyzer(currentScan), 
 				responseProcessingModules, basicModules);
 		scannerThread = new Thread(scannerTask);

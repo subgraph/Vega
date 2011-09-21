@@ -16,14 +16,19 @@ import java.util.List;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 
-
+/**
+ * Scanner usage:
+ * 	1. set config via setScannerConfig
+ *  2. optionally probe one or more targets using probeTargetURI
+ *  3. invoke startScanner 
+ */
 public interface IScanner {
 	IScannerConfig createScannerConfig();
 	void setScannerConfig(IScannerConfig config);
 	IScannerConfig getScannerConfig();
 	List<IScannerModule> getAllModules();
 	IScanProbeResult probeTargetURI(URI uri);
-	void startScanner(IScannerConfig config);
+	void startScanner();
 	void stopScanner();
 	void runDomTests();
 		
