@@ -40,6 +40,7 @@ import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class InterceptQueueView extends ViewPart {
+	public final static String ID = "com.subgraph.vega.views.intercept.queue";
 	public final static String POPUP_TRANSACTIONS_TABLE = "com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions";
 	private IHttpInterceptor interceptor;
 	private Composite parentComposite;
@@ -152,7 +153,7 @@ public class InterceptQueueView extends ViewPart {
 				final Object element = ((IStructuredSelection) event.getSelection()).getFirstElement();
 				final InterceptView view;
 				try {
-					view = (InterceptView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(InterceptView.VIEW_ID);
+					view = (InterceptView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(InterceptView.ID);
 				} catch (PartInitException e) {
 					ErrorDialog.displayExceptionError(parentComposite.getShell(), e);
 					return;

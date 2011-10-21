@@ -43,6 +43,7 @@ import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.model.taggablepopup.TaggablePopupDialog;
 
 public class HttpRequestView extends ViewPart {
+	public final static String ID = "com.subgraph.vega.views.http";
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;

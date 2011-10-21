@@ -25,7 +25,7 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
 
 public class InterceptView extends ViewPart {
-	public final static String VIEW_ID = "com.subgraph.vega.views.intercept";
+	public final static String ID = "com.subgraph.vega.views.intercept";
 	private SashForm parentComposite;
 	private TransactionManager transactionManager;
 	private TransactionInfo transactionInfo;

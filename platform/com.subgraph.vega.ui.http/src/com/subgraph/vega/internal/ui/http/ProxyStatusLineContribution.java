@@ -325,7 +325,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 	private void handleAlertClick() {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		try {
-			window.getActivePage().showView(InterceptView.VIEW_ID);
+			window.getActivePage().showView(InterceptView.ID);
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Failed to open interception view", e);
 		}		
