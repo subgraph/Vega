@@ -33,6 +33,7 @@ import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 class RequestTask implements Callable<IHttpResponse> {
 	private final static Logger logger = Logger.getLogger("request-engine");
@@ -40,14 +41,16 @@ class RequestTask implements Callable<IHttpResponse> {
 	private final HttpClient client;
 	private final RateLimiter rateLimit;
 	private final HttpUriRequest request;
+	private final IRequestOrigin requestOrigin;
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
 
-	RequestTask(HttpClient client, RateLimiter rateLimit, HttpUriRequest request, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	RequestTask(HttpClient client, RateLimiter rateLimit, HttpUriRequest request, IRequestOrigin requestOrigin, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.client = client;
 		this.rateLimit = rateLimit;
 		this.request = request;
+		this.requestOrigin = requestOrigin;
 		this.context = context;
 		this.config = config;
 		this.htmlParser = htmlParser;
@@ -82,7 +85,7 @@ class RequestTask implements Callable<IHttpResponse> {
 		
 		final IHttpResponse response = new EngineHttpResponse(
 				request.getURI(), host,  
-				(sentRequest == null) ? (request) : (sentRequest),
+				(sentRequest == null) ? (request) : (sentRequest), requestOrigin,
 				httpResponse, 
 				elapsed, 
 				htmlParser

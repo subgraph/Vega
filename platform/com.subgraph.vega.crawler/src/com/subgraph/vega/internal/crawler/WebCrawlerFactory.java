@@ -16,6 +16,7 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {
 	private final static int DEFAULT_RESPONSE_THREAD_COUNT = 10;
@@ -24,9 +25,9 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 	private IHttpRequestEngineFactory requestEngineFactory;
 	
 	@Override
-	public IWebCrawler create() {
+	public IWebCrawler create(IRequestOrigin requestOrigin) {
 		final HttpClient client = requestEngineFactory.createBasicClient();
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig());
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig(), requestOrigin);
 		return create(requestEngine);
 	}
 

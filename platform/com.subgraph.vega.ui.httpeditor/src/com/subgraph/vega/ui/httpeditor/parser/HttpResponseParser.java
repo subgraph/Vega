@@ -19,7 +19,6 @@ import org.apache.http.message.LineParser;
 import org.apache.http.message.ParserCursor;
 import org.apache.http.util.CharArrayBuffer;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
 /**
@@ -32,10 +31,6 @@ public class HttpResponseParser extends ParserBase {
 	public HttpResponseParser(final IHttpResponseBuilder builder, boolean parseInlineEntities) {
 		this.builder = builder;
 		this.parseInlineEntities = parseInlineEntities;
-	}
-	
-	public HttpResponseParser(IHttpRequestEngine requestEngine) {
-		this(requestEngine.createResponseBuilder(), true);
 	}
 
 	/**

@@ -26,11 +26,13 @@ import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableArrayList;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.tags.ITag;
 
 public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	final long requestId;
 	private final HttpRequest request;
+	private IRequestOrigin requestOrigin;
 	private final HttpHost host;
 	private String hostname;
 	private String requestMethod;
@@ -45,9 +47,10 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	private ActivatableArrayList<ITag> tagList;
 	private transient Activator activator;
 
-	RequestLogRecord(long requestId, HttpRequest request, HttpResponse response, HttpHost host, long requestTimeMs, List<ITag> tagList) {
+	RequestLogRecord(long requestId, HttpRequest request, IRequestOrigin requestOrigin, HttpResponse response, HttpHost host, long requestTimeMs, List<ITag> tagList) {
 		this.requestId = requestId;
 		this.request = request;
+		this.requestOrigin = requestOrigin;
 		this.response = response;
 		this.host = host;
 		this.timestamp = new Date().getTime();
@@ -57,8 +60,8 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		setCachedResponseFields(response);
 	}
 
-	RequestLogRecord(long requestId, HttpRequest request, HttpHost host, long requestTimeMs, List<ITag> tagList) {
-		this(requestId, request, null, host, requestTimeMs, tagList);
+	RequestLogRecord(long requestId, HttpRequest request, IRequestOrigin requestOrigin, HttpHost host, long requestTimeMs, List<ITag> tagList) {
+		this(requestId, request, requestOrigin, null, host, requestTimeMs, tagList);
 	}
 
 	private void setCachedRequestFields(HttpRequest request, HttpHost host) {
@@ -119,13 +122,33 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 		activate(ActivationPurpose.WRITE);
 	}
 	
-	String getHostname() { return hostname; }
-	String getRequestMethod() { return requestMethod; }
-	String getRequestHeaders() { return requestHeaders; }
-	String getRequestPath() { return requestPath; }
-	int getResponseCode() { return responseCode; }
-	int getResponseLength() { return responseLength; }
-	String getResponseHeaders() { return responseHeaders; }
+	String getHostname() {
+		return hostname;
+	}
+
+	String getRequestMethod() {
+			return requestMethod;
+	}
+	
+	String getRequestHeaders() {
+			return requestHeaders;
+	}
+
+	String getRequestPath() {
+			return requestPath;
+	}
+
+	int getResponseCode() {
+		return responseCode;
+	}
+
+	int getResponseLength() {
+		return responseLength;
+	}
+
+	String getResponseHeaders() {
+		return responseHeaders;
+	}
 	
 	@Override
 	public long getRequestId() {
@@ -137,6 +160,12 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	public long getTimestamp() {
 		activate(ActivationPurpose.READ);
 		return timestamp;
+	}
+
+	@Override
+	public IRequestOrigin getRequestOrigin() {
+		activate(ActivationPurpose.READ);
+		return requestOrigin;
 	}
 
 	@Override

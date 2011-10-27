@@ -26,6 +26,12 @@ public interface IRequestLogRecord extends ITaggable {
 	 */
 	long getRequestMilliseconds();
 
+	/**
+	 * Get information about the origin of the request within Vega.
+	 * @return Vega request origin.
+	 */
+	IRequestOrigin getRequestOrigin();
+	
 	HttpHost getHttpHost();
 	HttpRequest getRequest();
 	HttpResponse getResponse();

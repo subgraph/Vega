@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.http.intercept;
 
-import org.apache.http.client.HttpClient;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
@@ -19,7 +18,6 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
@@ -38,13 +36,9 @@ public class InterceptView extends ViewPart {
 		final IModel model = Activator.getDefault().getModel();
 		parentComposite = new SashForm(parent, SWT.VERTICAL);
 		transactionManager = new TransactionManager(this, interceptor);
-
-		// REVISIT: shouldn't need to instantiate a request engine to get builders
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
-		HttpClient client = requestEngineFactory.createBasicClient();
-		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig());
-		transactionInfo = new TransactionInfo(requestEngine);
-		
+		transactionInfo = new TransactionInfo(requestEngineFactory.createRequestBuilder(), requestEngineFactory.createResponseBuilder());
+
 		transactionViewerRequest = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
 		transactionViewerResponse = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_RESPONSE);
 		transactionManager.setManagerActive();

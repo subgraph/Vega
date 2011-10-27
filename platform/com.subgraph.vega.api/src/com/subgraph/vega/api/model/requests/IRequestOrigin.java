@@ -8,12 +8,25 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.api.crawler;
+package com.subgraph.vega.api.model.requests;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.model.requests.IRequestOrigin;
+/**
+ * Describes the origin of a request within Vega, i.e. which module generated a request, along with optional additional
+ * information about the origin.
+ */ 
+public interface IRequestOrigin {
+	/**
+	 * Enumeration of request origins.
+	 */
+	public enum Origin {
+		ORIGIN_SCANNNER, /** IRequestOriginScanner */
+		ORIGIN_PROXY, /** IRequestOriginProxy */
+		ORIGIN_REQUEST_EDITOR,
+	};
 
-public interface IWebCrawlerFactory {
-	IWebCrawler create(IRequestOrigin requestOrigin);
-	IWebCrawler create(IHttpRequestEngine requestEngine);
+	/**
+	 * Get the origin.
+	 * @return Origin.
+	 */
+	Origin getOrigin();	
 }

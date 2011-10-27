@@ -36,6 +36,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
@@ -59,12 +60,19 @@ public class RequestEditView extends ViewPart {
 
 	public RequestEditView() {
 		super();
-		if (requestEngine == null) {
-			IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
-			final HttpClient httpClient = requestEngineFactory.createBasicClient();
-			requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
+		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
+		// XXX we should be watching for workspace events
+		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
+		if(workspace != null) {
+			contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(workspace.getScanAlertRepository().getProxyScanInstance());
+			contentAnalyzer.setDefaultAddToRequestLog(true);
+			contentAnalyzer.setAddLinksToModel(true);
 		}
-		requestBuilder = requestEngine.createRequestBuilder();
+		IRequestOrigin requestOrigin = workspace.getRequestLog().getRequestOriginRequestEditor();
+		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
+		final HttpClient httpClient = requestEngineFactory.createBasicClient();
+		requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig(), requestOrigin);
+		requestBuilder = requestEngineFactory.createRequestBuilder();
 	}
 	
 	@Override
@@ -76,14 +84,6 @@ public class RequestEditView extends ViewPart {
 		
 		parentComposite.setWeights(new int[] {50, 50});
 		parentComposite.pack();
-
-		final IContentAnalyzerFactory contentAnalyzerFactory = Activator.getDefault().getContentAnalyzerFactoryService();
-		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
-		if(workspace != null) {
-			contentAnalyzer = contentAnalyzerFactory.createContentAnalyzer(workspace.getScanAlertRepository().getProxyScanInstance());
-			contentAnalyzer.setDefaultAddToRequestLog(true);
-			contentAnalyzer.setAddLinksToModel(true);
-		}
 	}
 
 	@Override

@@ -13,6 +13,8 @@ package com.subgraph.vega.api.http.requests;
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
+
 public interface IHttpRequestEngineFactory {
 	/**
 	 * Set a simple one-hop proxy to be set for all HttpClients instantiated from this request engine factory.
@@ -23,5 +25,19 @@ public interface IHttpRequestEngineFactory {
 	IHttpRequestEngineConfig createConfig();
 	HttpClient createBasicClient();
 	HttpClient createUnencodingClient();
-	IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config);
+	IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin);
+
+	/**
+	 * Instantiate a HttpRequestBuilder.
+	 * 
+	 * @return HttpRequestBuilder instance.
+	 */
+	IHttpRequestBuilder createRequestBuilder();
+
+	/**
+	 * Instantiate a HttpResponseBuilder.
+	 *
+	 * @return HttpResponseBuilder instance.
+	 */
+	IHttpResponseBuilder createResponseBuilder();
 }

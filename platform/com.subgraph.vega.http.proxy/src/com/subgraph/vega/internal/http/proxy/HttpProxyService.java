@@ -12,6 +12,7 @@ package com.subgraph.vega.internal.http.proxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,12 @@ import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IHttpProxyTransactionManipulator;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -47,20 +51,23 @@ public class HttpProxyService implements IHttpProxyService {
 	private boolean isRunning = false;
 	private boolean isPassthrough = false;
 	private IModel model;
+
 	private IHttpRequestEngineFactory requestEngineFactory;
+	private IHttpRequestEngineConfig requestEngineConfig;
+
 	private IContentAnalyzerFactory contentAnalyzerFactory;
 	private IScannerModuleRegistry moduleRepository;
 	private IPathFinder pathFinder;
 	private IContentAnalyzer contentAnalyzer;
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private IWorkspace currentWorkspace;
+	private Map<String, IHttpProxyListenerConfig> listenerConfigMap = new HashMap<String, IHttpProxyListenerConfig>();
 	private Map<String, HttpProxyListener> listenerMap = new ConcurrentHashMap<String, HttpProxyListener>();
 	private final IHttpInterceptProxyEventHandler listenerEventHandler;
 	private ProxyTransactionManipulator transactionManipulator;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
 	private HttpClient httpClient;
-	private IHttpRequestEngine requestEngine;
 	
 	public HttpProxyService() {
 		eventHandlers = new ArrayList<IHttpProxyServiceEventHandler>();
@@ -75,7 +82,6 @@ public class HttpProxyService implements IHttpProxyService {
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
-//		responseProcessingModules = loadModules();
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
 		} catch (ProxySSLInitializationException e) {
@@ -83,7 +89,6 @@ public class HttpProxyService implements IHttpProxyService {
 			logger.warning("Failed to initialize SSL support in proxy.  SSL interception will be disabled. ("+ e.getMessage() + ")");
 		}
 		httpClient = requestEngineFactory.createBasicClient();
-		requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig());
 	}
 
 	@Override
@@ -116,8 +121,8 @@ public class HttpProxyService implements IHttpProxyService {
 	@Override
 	public void setListenerConfigs(IHttpProxyListenerConfig[] listenerConfigs) {
 		// remove existing listeners that are not in the list
-		for (Iterator<Map.Entry<String, HttpProxyListener>> iter = listenerMap.entrySet().iterator(); iter.hasNext();) {
-			final Map.Entry<String, HttpProxyListener> entry = iter.next();
+		for (Iterator<Map.Entry<String, IHttpProxyListenerConfig>> iter = listenerConfigMap.entrySet().iterator(); iter.hasNext();) {
+			final Map.Entry<String, IHttpProxyListenerConfig> entry = iter.next();
 			final String k = entry.getKey();
 			int idx;
 			for (idx = 0; idx < listenerConfigs.length; idx++) {
@@ -127,7 +132,8 @@ public class HttpProxyService implements IHttpProxyService {
 			}
 			if (idx == listenerConfigs.length) {
 				if (isRunning != false) {
-					stopListener(entry.getValue());
+					HttpProxyListener listener = listenerMap.remove(k); 
+					stopListener(listener);
 				}
 				iter.remove();
 			}
@@ -136,11 +142,11 @@ public class HttpProxyService implements IHttpProxyService {
 		// create listeners for any new addresses
 		for (int idx = 0; idx < listenerConfigs.length; idx++) {
 			final IHttpProxyListenerConfig config = listenerConfigs[idx];
-			if (listenerMap.get(config.toString()) == null) {
-				final HttpProxyListener listener = new HttpProxyListener(config, transactionManipulator, interceptor, requestEngine, sslContextRepository);
-				listenerMap.put(config.toString(), listener);
+			final String key = config.toString();
+			if (listenerConfigMap.get(key) == null) {
+				listenerConfigMap.put(key, config);
 				if (isRunning != false) {
-					startListener(listener);
+					startListener(config);
 				}
 			}
 		}
@@ -183,8 +189,8 @@ public class HttpProxyService implements IHttpProxyService {
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 
-		for (IHttpProxyListener listener: listenerMap.values()) {
-			startListener(listener);
+		for (IHttpProxyListenerConfig config: listenerConfigMap.values()) {
+			startListener(config);
 		}
 
 		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
@@ -192,8 +198,12 @@ public class HttpProxyService implements IHttpProxyService {
 		}
 	}
 
-	private void startListener(IHttpProxyListener listener) {
+	private void startListener(IHttpProxyListenerConfig config) {
+		IRequestOriginProxy requestOrigin = currentWorkspace.getRequestLog().getRequestOriginProxy(config.getInetAddress(), config.getPort());
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineConfig, requestOrigin);
+		HttpProxyListener listener = new HttpProxyListener(config, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		listener.registerEventHandler(listenerEventHandler);
+		listenerMap.put(config.toString(), listener);
 		listener.start();
 	}
 	
@@ -228,9 +238,13 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
 		isRunning = false;
-		for (IHttpProxyListener listener: listenerMap.values()) {
-			stopListener(listener);
+		for (Iterator<Map.Entry<String, HttpProxyListener>> iter = listenerMap.entrySet().iterator(); iter.hasNext();) {
+			final Map.Entry<String, HttpProxyListener> entry = iter.next();
+			stopListener(entry.getValue());
+			iter.remove();
 		}
+		listenerMap.clear();
+
 		contentAnalyzer = null;
 		currentWorkspace.unlock();
 
@@ -267,10 +281,12 @@ public class HttpProxyService implements IHttpProxyService {
 
 	protected void setRequestEngineFactory(IHttpRequestEngineFactory factory) {
 		this.requestEngineFactory = factory;
+		requestEngineConfig = requestEngineFactory.createConfig();
 	}
 
 	protected void unsetRequestEngineFactory(IHttpRequestEngineFactory factory) {
 		this.requestEngineFactory = null;
+		requestEngineConfig = null;
 	}
 	
 	protected void setModuleRepository(IScannerModuleRegistry moduleRepository) {

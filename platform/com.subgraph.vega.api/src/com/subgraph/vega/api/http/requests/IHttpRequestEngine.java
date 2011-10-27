@@ -13,6 +13,8 @@ package com.subgraph.vega.api.http.requests;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
+
 public interface IHttpRequestEngine {
 	/**
 	 * Get the configuration for this request engine.
@@ -20,21 +22,13 @@ public interface IHttpRequestEngine {
 	 * @return IHttpRequestEngineConfig
 	 */
 	IHttpRequestEngineConfig getRequestEngineConfig();
+
+	/**
+	 * Get the request origin associated with this request engine.
+	 * @return Request origin.
+	 */
+	IRequestOrigin getRequestOrigin();
 	
-	/**
-	 * Instantiate a HttpRequestBuilder.
-	 * 
-	 * @return HttpRequestBuilder instance.
-	 */
-	IHttpRequestBuilder createRequestBuilder();
-
-	/**
-	 * Instantiate a HttpResponseBuilder.
-	 *
-	 * @return HttpResponseBuilder instance.
-	 */
-	IHttpResponseBuilder createResponseBuilder();
-
 	/**
 	 * Send a request, specifying the HTTP context. 
 	 * 

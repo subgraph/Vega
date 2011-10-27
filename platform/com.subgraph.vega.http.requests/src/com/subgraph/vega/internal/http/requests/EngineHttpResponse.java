@@ -30,6 +30,7 @@ import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.tags.ITag;
 
 public class EngineHttpResponse implements IHttpResponse {
@@ -37,6 +38,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final URI requestUri;
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
+	private final IRequestOrigin requestOrigin;
 	private /*final*/ HttpResponse rawResponse;
 	private final long requestTime;
 	private final IHTMLParser htmlParser;
@@ -50,10 +52,11 @@ public class EngineHttpResponse implements IHttpResponse {
 	private boolean isMostlyAscii;
 	private long requestId = -1;
 
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, IRequestOrigin requestOrigin, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = originalRequest;
+		this.requestOrigin = requestOrigin;
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
@@ -209,6 +212,11 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
+	public IRequestOrigin getRequestOrigin() {
+		return requestOrigin;
+	}
+
+	@Override
 	public URI getRequestUri() {
 		return requestUri;
 	}
@@ -227,5 +235,6 @@ public class EngineHttpResponse implements IHttpResponse {
 	public void removeTag(ITag tag) {
 		tagList.remove(tag);
 	}
+
 
 }

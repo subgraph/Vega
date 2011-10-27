@@ -8,12 +8,15 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.api.crawler;
+package com.subgraph.vega.api.model.requests;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.model.requests.IRequestOrigin;
-
-public interface IWebCrawlerFactory {
-	IWebCrawler create(IRequestOrigin requestOrigin);
-	IWebCrawler create(IHttpRequestEngine requestEngine);
+/**
+ * Request origin information for the scanner.
+ */
+public interface IRequestOriginScanner extends IRequestOrigin {
+	/**
+	 * Get the ID of the IScanInstance that generated the request.
+	 * @return IScanInstance ID.
+	 */
+	long getScanId();
 }

@@ -23,7 +23,6 @@ import org.apache.http.message.ParserCursor;
 import org.apache.http.util.CharArrayBuffer;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 /**
  * Parser to parse user-entered requests into an IHttpRequestBuilder.
@@ -41,9 +40,9 @@ public class HttpRequestParser extends ParserBase {
 		this(builder, true);
 	}
 	
-	public HttpRequestParser(IHttpRequestEngine requestEngine) {
-		this(requestEngine.createRequestBuilder(), true);
-	}
+//	public HttpRequestParser(IHttpRequestEngine requestEngine) {
+//		this(requestEngine.createRequestBuilder(), true);
+//	}
 
 	/**
 	 * Parse a manually-entered HTTP request into the IHttpRequestBuilder.

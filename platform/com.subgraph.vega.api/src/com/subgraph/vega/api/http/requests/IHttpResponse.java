@@ -18,6 +18,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.tags.ITag;
 
 public interface IHttpResponse {
@@ -50,6 +51,12 @@ public interface IHttpResponse {
 	 */
 	long getRequestId();
 
+	/**
+	 * Get the origin within Vega of the request.
+	 * @return Request origin.
+	 */
+	IRequestOrigin getRequestOrigin();
+	
 	/**
 	 * Get a list of all tags applied to this record.
 	 * @return Tags applied to this record.

@@ -31,6 +31,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
@@ -41,7 +42,6 @@ import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class Scanner implements IScanner {
-
 	private IModel model;
 	private IScanInstance currentScan;
 	private IScannerConfig currentConfig;
@@ -186,7 +186,8 @@ public class Scanner implements IScanner {
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
-		return requestEngineFactory.createRequestEngine(client, requestEngineConfig);
+		final IRequestOriginScanner requestOrigin = currentWorkspace.getRequestLog().getRequestOriginScanner(currentScan.getScanId());
+		return requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
 	}
 	
 	@Override

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.requests;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,8 +32,11 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
+import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
+import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
+import com.subgraph.vega.api.model.tags.ITag;
 import com.subgraph.vega.internal.model.conditions.HttpConditionSet;
-
 
 public class RequestLog implements IRequestLog {
 	private final ObjectContainer database;
@@ -93,7 +97,7 @@ public class RequestLog implements IRequestLog {
 		final HttpResponse newResponse = cloner.copyResponse(response.getRawResponse());
 		database.store(newRequest);
 		database.store(newResponse);
-		final RequestLogRecord record = new RequestLogRecord(id, newRequest, newResponse, response.getHost(), response.getRequestMilliseconds(), response.getTags());
+		final RequestLogRecord record = new RequestLogRecord(id, newRequest, response.getRequestOrigin(), newResponse, response.getHost(), response.getRequestMilliseconds(), response.getTags());
 		synchronized(lock){
 			database.store(record);
 			filterNewRecord(record);
@@ -153,6 +157,60 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
+	public IRequestOriginProxy getRequestOriginProxy(final InetAddress address, final int port) {
+		final List<IRequestOriginProxy> results = database.query(new Predicate<IRequestOriginProxy>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IRequestOriginProxy requestOrigin) {
+				return address.equals(requestOrigin.getInetAddress()) && port == requestOrigin.getPort();
+			}
+		});
+		if (results.size() == 0) {
+			IRequestOriginProxy requestOrigin = new RequestOriginProxy(address, port);
+			database.store(requestOrigin);
+			return requestOrigin;
+		} else {
+			return results.get(0);
+		}
+	}
+
+	@Override
+	public IRequestOriginScanner getRequestOriginScanner(final long scanId) {
+		final List<IRequestOriginScanner> results = database.query(new Predicate<IRequestOriginScanner>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IRequestOriginScanner requestOrigin) {
+				return scanId == requestOrigin.getScanId();
+			}
+		});
+		if (results.size() == 0) {
+			IRequestOriginScanner requestOrigin = new RequestOriginScanner(scanId);
+			database.store(requestOrigin);
+			return requestOrigin;
+		} else {
+			return results.get(0);
+		}
+	}
+
+	@Override
+	public IRequestOrigin getRequestOriginRequestEditor() {
+		final List<IRequestOrigin> results = database.query(new Predicate<IRequestOrigin>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IRequestOrigin requestOrigin) {
+				return requestOrigin.getOrigin() == IRequestOrigin.Origin.ORIGIN_REQUEST_EDITOR;
+			}
+		});
+		if (results.size() == 0) {
+			IRequestOrigin requestOrigin = new RequestOrigin(IRequestOrigin.Origin.ORIGIN_REQUEST_EDITOR);
+			database.store(requestOrigin);
+			return requestOrigin;
+		} else {
+			return results.get(0);
+		}
+	}
+
+	@Override
 	public void addUpdateListener(IRequestLogUpdateListener callback) {
 		synchronized(lock) {
 			listenerList.add(new RequestLogListener(callback, null, getAllRecords().size()));
@@ -177,4 +235,5 @@ public class RequestLog implements IRequestLog {
 			}
 		}
 	}
+
 }

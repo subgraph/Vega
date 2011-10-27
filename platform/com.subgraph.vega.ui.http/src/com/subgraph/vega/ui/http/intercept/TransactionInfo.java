@@ -16,7 +16,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
 /**
@@ -24,25 +23,25 @@ import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
  */
 public class TransactionInfo {
 	private int requestTransactionSerial;
-	private IHttpRequestBuilder requestBuilder;
+	private final IHttpRequestBuilder requestBuilder;
 	private boolean requestHasContent;
 	private TransactionManager.TransactionStatus requestStatus;
 	private String requestStatusMessage;
 	private int requestSerial;
 	private int responseTransactionSerial;
-	private IHttpResponseBuilder responseBuilder;
+	private final IHttpResponseBuilder responseBuilder;
 	private boolean responseHasContent;
 	private TransactionManager.TransactionStatus responseStatus;
 	private String responseStatusMessage;
 	private int responseSerial;
 	
-	public TransactionInfo(IHttpRequestEngine requestEngine) {
+	public TransactionInfo(IHttpRequestBuilder requestBuilder, IHttpResponseBuilder responseBuilder) {
 		requestTransactionSerial = -1;
-		requestBuilder = requestEngine.createRequestBuilder();
+		this.requestBuilder = requestBuilder;
 		requestHasContent = false;
 		setRequestStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);
 		requestSerial = -1;
-		responseBuilder = requestEngine.createResponseBuilder();
+		this.responseBuilder = responseBuilder;
 		responseHasContent = false;
 		setResponseStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);
 		responseSerial = -1;

@@ -20,9 +20,12 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 import com.subgraph.vega.api.html.IHTMLParser;
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
+import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -58,11 +61,21 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	}
 
 	@Override
-	public IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config) {
+	public IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin) {
 		configureClient(client, config);
-		return new HttpRequestEngine(executor, client, config, htmlParser);
+		return new HttpRequestEngine(executor, client, config, requestOrigin, htmlParser);
 	}
 	
+	@Override
+	public IHttpRequestBuilder createRequestBuilder() {
+		return new HttpRequestBuilder();
+	}
+
+	@Override
+	public IHttpResponseBuilder createResponseBuilder() {
+		return new HttpResponseBuilder();
+	}
+
 	private void configureClient(HttpClient client, IHttpRequestEngineConfig config) {
 		final ClientConnectionManager connectionManager = client.getConnectionManager();
 		if(connectionManager instanceof ThreadSafeClientConnManager) {

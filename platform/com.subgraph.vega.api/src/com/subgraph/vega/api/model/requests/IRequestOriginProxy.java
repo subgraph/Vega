@@ -8,12 +8,23 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.api.crawler;
+package com.subgraph.vega.api.model.requests;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
-import com.subgraph.vega.api.model.requests.IRequestOrigin;
+import java.net.InetAddress;
 
-public interface IWebCrawlerFactory {
-	IWebCrawler create(IRequestOrigin requestOrigin);
-	IWebCrawler create(IHttpRequestEngine requestEngine);
+/**
+ * Request origin information for the Vega intercepting proxy.
+ */
+public interface IRequestOriginProxy extends IRequestOrigin {
+	/**
+	 * Get the internet address of the proxy listener.
+	 * @return Proxy listener address.
+	 */
+	InetAddress getInetAddress();
+
+	/**
+	 * Get the port of the proxy listener.
+	 * @return Proxy listener port.
+	 */
+	int getPort();
 }

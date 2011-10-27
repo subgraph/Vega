@@ -24,12 +24,11 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
-import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
@@ -37,13 +36,15 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final ExecutorService executor;
 	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
+	private final IRequestOrigin requestOrigin;
 	private final IHTMLParser htmlParser;
 	private final RateLimiter rateLimit;
 
-	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
 		this.executor = executor;
 		this.client = client;
 		this.config = config;
+		this.requestOrigin = requestOrigin;
 		this.htmlParser = htmlParser;
 		this.rateLimit = new RateLimiter(config.getRequestsPerMinute());
 	}
@@ -54,20 +55,15 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
-	public IHttpRequestBuilder createRequestBuilder() {
-		return new HttpRequestBuilder();
-	}
-
-	@Override
-	public IHttpResponseBuilder createResponseBuilder() {
-		return new HttpResponseBuilder();
+	public IRequestOrigin getRequestOrigin() {
+		return requestOrigin;
 	}
 
 	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
 		requestContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
-		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestContext, config, htmlParser));
+		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestOrigin, requestContext, config, htmlParser));
 		try {
 			return future.get();
 		} catch (InterruptedException e) {
@@ -99,4 +95,5 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		sb.append("]");
 		return new RequestEngineException(sb.toString(), ex);
 	}
+
 }
