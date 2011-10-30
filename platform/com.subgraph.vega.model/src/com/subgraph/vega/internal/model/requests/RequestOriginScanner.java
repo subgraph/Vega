@@ -11,21 +11,22 @@
 package com.subgraph.vega.internal.model.requests;
 
 import com.db4o.activation.ActivationPurpose;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class RequestOriginScanner extends RequestOrigin implements IRequestOriginScanner {
-	private long scanId;
+	private IScanInstance scanInstance;
 	
-	public RequestOriginScanner(long scanId) {
+	public RequestOriginScanner(IScanInstance scanInstance) {
 		super(IRequestOrigin.Origin.ORIGIN_SCANNNER);
-		this.scanId = scanId;
+		this.scanInstance = scanInstance;
 	}
 	
 	@Override
-	public long getScanId() {
+	public IScanInstance getScanInstance() {
 		activate(ActivationPurpose.READ);
-		return scanId;
+		return scanInstance;
 	}
 
 }

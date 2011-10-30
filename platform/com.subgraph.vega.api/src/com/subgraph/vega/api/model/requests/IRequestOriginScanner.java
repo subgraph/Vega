@@ -10,13 +10,15 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.requests;
 
+import com.subgraph.vega.api.model.alerts.IScanInstance;
+
 /**
  * Request origin information for the scanner.
  */
 public interface IRequestOriginScanner extends IRequestOrigin {
 	/**
-	 * Get the ID of the IScanInstance that generated the request.
-	 * @return IScanInstance ID.
+	 * Get the IScanInstance that generated the request.
+	 * @return IScanInstance.
 	 */
-	long getScanId();
+	IScanInstance getScanInstance();
 }

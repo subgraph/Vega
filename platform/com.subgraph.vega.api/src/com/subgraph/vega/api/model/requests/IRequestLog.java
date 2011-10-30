@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 
 public interface IRequestLog {
@@ -24,7 +25,7 @@ public interface IRequestLog {
 	List<IRequestLogRecord> getRecordsByConditionSet(IHttpConditionSet filterCondition);
 	
 	IRequestOriginProxy getRequestOriginProxy(InetAddress address, int port);
-	IRequestOriginScanner getRequestOriginScanner(long scanId);
+	IRequestOriginScanner getRequestOriginScanner(IScanInstance scanInstance);
 	IRequestOrigin getRequestOriginRequestEditor();
 
 	void addUpdateListener(IRequestLogUpdateListener callback);

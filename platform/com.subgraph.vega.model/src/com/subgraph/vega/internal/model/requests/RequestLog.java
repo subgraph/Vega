@@ -28,6 +28,7 @@ import com.db4o.events.ObjectInfoEventArgs;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
@@ -175,16 +176,16 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
-	public IRequestOriginScanner getRequestOriginScanner(final long scanId) {
+	public IRequestOriginScanner getRequestOriginScanner(final IScanInstance scanInstance) {
 		final List<IRequestOriginScanner> results = database.query(new Predicate<IRequestOriginScanner>() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public boolean match(IRequestOriginScanner requestOrigin) {
-				return scanId == requestOrigin.getScanId();
+				return scanInstance.getScanId() == requestOrigin.getScanInstance().getScanId();
 			}
 		});
 		if (results.size() == 0) {
-			IRequestOriginScanner requestOrigin = new RequestOriginScanner(scanId);
+			IRequestOriginScanner requestOrigin = new RequestOriginScanner(scanInstance);
 			database.store(requestOrigin);
 			return requestOrigin;
 		} else {

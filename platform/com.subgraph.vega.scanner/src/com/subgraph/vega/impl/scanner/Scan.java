@@ -152,7 +152,7 @@ public class Scan implements IScan {
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
-		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance.getScanId());
+		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
 		return requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
 	}
 
