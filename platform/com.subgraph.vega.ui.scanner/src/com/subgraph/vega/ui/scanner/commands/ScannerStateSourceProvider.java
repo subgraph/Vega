@@ -81,7 +81,8 @@ public class ScannerStateSourceProvider extends AbstractSourceProvider implement
 	}
 
 	private void handleLockStatus(LockStatusEvent event) {
-		if(event.isLocked()) {
+		Activator.getDefault().setCurrentScan(event.getScan());
+		if (event.getScan() != null) {
 			setScannerRunning();
 		} else {
 			setScannerStopped();

@@ -15,36 +15,33 @@ import java.net.URI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
-import com.subgraph.vega.api.scanner.IScanner;
-import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
 
 public class ScanProbeTask implements Runnable {
 
 	private final Shell shell;
 	private final URI targetURI;
-	private final IScanner scanner;
-	private final IScannerConfig scannerConfig;
+	private final IScan scan;
 	
 	
-	ScanProbeTask(Shell shell, URI targetURI, IScanner scanner, IScannerConfig scannerConfig) {
+	ScanProbeTask(Shell shell, URI targetURI, IScan scan) {
 		this.shell = shell;
 		this.targetURI = targetURI;
-		this.scanner = scanner;
-		this.scannerConfig = scannerConfig;
+		this.scan = scan;
 	}
 
 	@Override
 	public void run() {
-		final IScanProbeResult probeResult = scanner.probeTargetURI(targetURI);
+		final IScanProbeResult probeResult = scan.probeTargetUri(targetURI);
 		shell.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if(processProbeResult(probeResult)) {
-					scanner.startScanner();
+					scan.startScan();
 				} else {
-					scanner.unlock();
+					scan.stopScan();
 				}
 			}
 		});
@@ -64,7 +61,7 @@ public class ScanProbeTask implements Runnable {
 					return false;
 				}
 			}
-			scannerConfig.setBaseURI(probeResult.getRedirectTarget());
+			scan.getConfig().setBaseURI(probeResult.getRedirectTarget());
 			return true;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
 			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());

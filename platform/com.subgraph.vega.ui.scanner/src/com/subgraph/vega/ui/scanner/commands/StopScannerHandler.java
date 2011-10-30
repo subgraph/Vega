@@ -20,9 +20,8 @@ public class StopScannerHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Activator.getDefault().getScanner().stopScanner();
+		Activator.getDefault().getCurrentScan().stopScan();
 		return null;
 	}
 
-	
 }

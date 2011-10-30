@@ -3,14 +3,13 @@ package com.subgraph.vega.api.scanner;
 import com.subgraph.vega.api.events.IEvent;
 
 public class LockStatusEvent implements IEvent {
+	private final IScan scan;
 
-	private final boolean isLocked;
-
-	public LockStatusEvent(boolean isLocked) {
-		this.isLocked = isLocked;
+	public LockStatusEvent(IScan scan) {
+		this.scan = scan;
 	}
 	
-	public boolean isLocked() {
-		return isLocked;
+	public IScan getScan() {
+		return scan;
 	}
 }

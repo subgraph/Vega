@@ -10,30 +10,15 @@
  ******************************************************************************/
 package com.subgraph.vega.api.scanner;
 
-import java.net.URI;
-import java.util.List;
-
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.scanner.modules.IScannerModule;
 
-/**
- * Scanner usage:
- * 	1. set config via setScannerConfig
- *  2. optionally probe one or more targets using probeTargetURI
- *  3. invoke startScanner 
- */
 public interface IScanner {
-	IScannerConfig createScannerConfig();
-	void setScannerConfig(IScannerConfig config);
-	IScannerConfig getScannerConfig();
-	List<IScannerModule> getAllModules();
-	IScanProbeResult probeTargetURI(URI uri);
-	void startScanner();
-	void stopScanner();
+	IScan createScan();
 	void runDomTests();
-		
+
+	// TODO: remove these. we should be able to run more than one scan simultaneously
 	void addLockStatusListener(IEventHandler listener);
 	void removeLockStatusListener(IEventHandler listener);
-	boolean lock();
+	boolean lock(IScan scan);
 	void unlock();
 }

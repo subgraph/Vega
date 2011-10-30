@@ -23,6 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
@@ -32,12 +33,13 @@ public class ScanExecutor {
 	
 	public String runScan(Shell shell, String target) {
 		final IScanner scanner = Activator.getDefault().getScanner();
+		final IScan scan = scanner.createScan();
 
 		NewScanWizard wizard = new NewScanWizard();
 		if(target != null) {
 			wizard.setTargetField(target);
 		}
-		wizard.setScannerModules(scanner.getAllModules());
+		wizard.setScannerModules(scan.getModuleList());
 		
 		WizardDialog dialog = new NewWizardDialog(shell, wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
@@ -45,22 +47,25 @@ public class ScanExecutor {
 				runDomTest();
 				return null;
 			}
-			return maybeLaunchScanFromWizard(shell, wizard, scanner);
+			return maybeLaunchScanFromWizard(shell, wizard, scanner, scan);
+		} else {
+			// REVISIT lame
+			scan.stopScan();
 		}
 		return null;
 	}
 
 	
-	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner) {
-		URI targetURI = wizard.getScanHostURI();
-		if(targetURI == null) {
+	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner, IScan scan) {
+		URI targetUri = wizard.getScanHostURI();
+		if(targetUri == null) {
 			return null;
 		}
 
-		scanner.lock();
-		final IScannerConfig config = scanner.createScannerConfig();
-		config.setBaseURI(targetURI);
-		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetURI));
+		scanner.lock(scan);
+		final IScannerConfig config = scan.getConfig();
+		config.setBaseURI(targetUri);
+		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetUri));
 		config.setBasicUsername(wizard.getBasicUsername());
 		config.setBasicPassword(wizard.getBasicPassword());
 		config.setBasicRealm(wizard.getBasicRealm());
@@ -77,9 +82,8 @@ public class ScanExecutor {
 		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
 		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
 		config.setMaxResponseKilobytes(preferences.getInt("MaxResponseLength"));
-		scanner.setScannerConfig(config);
 
-		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetURI, scanner, config));
+		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetUri, scan));
 		probeThread.start();
 
 		return wizard.getTargetField();
