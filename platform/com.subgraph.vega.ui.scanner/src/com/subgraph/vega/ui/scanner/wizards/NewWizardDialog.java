@@ -19,7 +19,7 @@ public class NewWizardDialog extends WizardDialog {
 
 	public NewWizardDialog(Shell parentShell, IWizard newWizard) {
 		super(parentShell, newWizard);
-		setShellStyle(SWT.CLOSE | SWT.MAX | SWT.TITLE | SWT.BORDER | SWT.MODELESS | SWT.RESIZE | getDefaultOrientation());
+		setShellStyle(SWT.CLOSE | SWT.MAX | SWT.TITLE | SWT.BORDER | SWT.RESIZE | getDefaultOrientation());
 	}
 
 }
