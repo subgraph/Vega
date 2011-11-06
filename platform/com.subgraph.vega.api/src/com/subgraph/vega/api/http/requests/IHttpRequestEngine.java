@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
@@ -28,12 +29,26 @@ public interface IHttpRequestEngine {
 	 * @return Request origin.
 	 */
 	IRequestOrigin getRequestOrigin();
+
+	/**
+	 * Get the HttpClient used by this request engine.
+	 * @return HttpClient.
+	 */
+	HttpClient getHttpClient();
+
+	/**
+	 * Register a request modifier.
+	 * @param modifier IHttpRequestModifier.
+	 */
+	void addRequestModifier(IHttpRequestModifier modifier);
 	
 	/**
 	 * Send a request, specifying the HTTP context. 
 	 * 
-	 * The following variables cannot be set in context and will be overwritten:
+	 * The following execution context variables cannot be set and will be overwritten:
 	 * 	- ClientContext.COOKIE_STORE (set in the IHttpRequestEngineConfig this request engine was instantiated with)
+	 * 
+	 * Additional variables may be overwritten by request modifiers.
 	 * 
 	 * @param request Request to send.
 	 * @param context HTTP context.

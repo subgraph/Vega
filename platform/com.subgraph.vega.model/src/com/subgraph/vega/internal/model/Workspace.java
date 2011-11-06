@@ -29,14 +29,18 @@ import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
+import com.subgraph.vega.api.model.identity.IIdentityModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.tags.ITagModel;
+import com.subgraph.vega.api.model.variables.IVariableModel;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertRepository;
 import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
+import com.subgraph.vega.internal.model.identity.IdentityModel;
 import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.tags.TagModel;
+import com.subgraph.vega.internal.model.variables.VariableModel;
 import com.subgraph.vega.internal.model.web.WebModel;
 
 public class Workspace implements IWorkspace {
@@ -52,6 +56,8 @@ public class Workspace implements IWorkspace {
 
 	private ITagModel tagModel;
 	private IWebModel webModel;
+	private IVariableModel variableModel;
+	private IIdentityModel identityModel;
 	private IRequestLog requestLog;
 	private IScanAlertRepository scanAlerts;
 	private HttpConditionManager conditionManager;
@@ -101,6 +107,8 @@ public class Workspace implements IWorkspace {
 			final ObjectContainer db = configurationFactory.openContainer(databasePath);
 			tagModel = new TagModel(db);
 			webModel = new WebModel(db);
+			variableModel = new VariableModel(db);
+			identityModel = new IdentityModel(db);
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertRepository(db, xmlRepository);
 			conditionManager = new HttpConditionManager(db, conditionChangeManager);
@@ -120,6 +128,22 @@ public class Workspace implements IWorkspace {
 			throw new IllegalStateException("Must open workspace first");
 		}
 		return tagModel;
+	}
+
+	@Override
+	public IVariableModel getVariableModel() {
+		if (!opened) {
+			throw new IllegalStateException("Must open workspace first");
+		}
+		return variableModel;
+	}
+
+	@Override
+	public IIdentityModel getIdentityModel() {
+		if (!opened) {
+			throw new IllegalStateException("Must open workspace first");
+		}
+		return identityModel;
 	}
 
 	@Override
@@ -250,7 +274,7 @@ public class Workspace implements IWorkspace {
 			database.close();
 			final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
 			if(!databaseFile.delete()) {
-
+				// XXX
 			}
 			database = openDatabase(getDatabasePath());
 			if(database != null) {

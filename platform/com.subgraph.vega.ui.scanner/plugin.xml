@@ -76,6 +76,10 @@
    </extension>
    <extension
          point="org.eclipse.ui.views">
+      <category
+            id="com.subgraph.vega.views.category.scanner"
+            name="Scanner">
+      </category>
       <view
             category="com.subgraph.vega.views.category.scanner"
             class="com.subgraph.vega.ui.scanner.info.ScanInfoView"
@@ -92,10 +96,6 @@
             name="Scan Alerts"
             restorable="true">
       </view>
-      <category
-            id="com.subgraph.vega.views.category.scanner"
-            name="Scanner">
-      </category>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

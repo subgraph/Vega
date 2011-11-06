@@ -11,6 +11,8 @@
 package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -19,13 +21,13 @@ import java.util.logging.Logger;
 import org.apache.http.HttpException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpRequestModifier;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
@@ -39,6 +41,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final IRequestOrigin requestOrigin;
 	private final IHTMLParser htmlParser;
 	private final RateLimiter rateLimit;
+	private final List<IHttpRequestModifier> requestModifierList;
 
 	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
 		this.executor = executor;
@@ -46,7 +49,9 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.config = config;
 		this.requestOrigin = requestOrigin;
 		this.htmlParser = htmlParser;
-		this.rateLimit = new RateLimiter(config.getRequestsPerMinute());
+		rateLimit = new RateLimiter(config.getRequestsPerMinute());
+		requestModifierList = new ArrayList<IHttpRequestModifier>();
+		addRequestModifier(new HttpRequestModifierCookies(this.config));
 	}
 
 	@Override
@@ -60,9 +65,21 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
+	public HttpClient getHttpClient() {
+		return client;
+	}
+
+	@Override
+	public void addRequestModifier(IHttpRequestModifier modifier) {
+		requestModifierList.add(modifier);
+	}
+
+	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException {
 		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
-		requestContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
+		for (IHttpRequestModifier modifier: requestModifierList) {
+			modifier.process(request, requestContext);
+		}
 		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestOrigin, requestContext, config, htmlParser));
 		try {
 			return future.get();
@@ -80,7 +97,6 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 
 	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {
 		final StringBuilder sb = new StringBuilder();
-
 		if(ex instanceof IOException) {
 			sb.append("Network problem");
 		} else if(ex instanceof HttpException) {

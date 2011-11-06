@@ -14,6 +14,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
+import com.subgraph.vega.ui.http.identities.IdentitiesView;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView;
 import com.subgraph.vega.ui.http.requestviewer.HttpRequestView;
@@ -28,6 +29,7 @@ public class ProxyPerspectiveFactory implements IPerspectiveFactory {
 		proxyFolder.addView(HttpRequestView.ID);
 		proxyFolder.addView(InterceptView.ID);
 		proxyFolder.addView(InterceptQueueView.ID);
+		proxyFolder.addView(IdentitiesView.ID);
 		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, PROXY_FOLDER);
 		layout.setEditorAreaVisible(false);
 		layout.getViewLayout(HttpRequestView.ID).setCloseable(false);

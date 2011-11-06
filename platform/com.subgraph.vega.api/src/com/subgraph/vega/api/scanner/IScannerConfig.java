@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.apache.http.cookie.Cookie;
 
+import com.subgraph.vega.api.model.identity.IIdentity;
+
 public interface IScannerConfig {
 	final static int DEFAULT_MAX_DESCENDANTS = 8192;
 	final static int DEFAULT_MAX_CHILDREN = 512;
@@ -26,15 +28,22 @@ public interface IScannerConfig {
 	final static int DEFAULT_MAX_RESPONSE_KILOBYTES = 1024;
 
 	void setBaseURI(URI baseURI);
+
+	/**
+	 * Set the website identity the scan will be performed as. 
+	 * @param scanIdentity Scan identity to perform the scan as, or null.
+	 */
+	void setScanIdentity(IIdentity scanIdentity);
+	
 	void setCookieList(List<Cookie> list);
-	void setBasicUsername(String username);
-	void setBasicPassword(String password);
-	void setBasicRealm(String realm);
-	void setBasicDomain(String domain);
-	void setNtlmUsername(String username);
-	void setNtlmPassword(String password);
+//	void setBasicUsername(String username);
+//	void setBasicPassword(String password);
+//	void setBasicRealm(String realm);
+//	void setBasicDomain(String domain);
+//	void setNtlmUsername(String username);
+//	void setNtlmPassword(String password);
 	void setModulesList(List<String> modules);
-	void setExclusions(List<String> exclusions);
+	void setExclusions(List<String> exclusions); // in addition to those specified for the scan identity
 	void setLogAllRequests(boolean flag);
 	void setDisplayDebugOutput(boolean flag);
 	void setMaxRequestsPerSecond(int rps);
@@ -47,17 +56,24 @@ public interface IScannerConfig {
 	void setMaxResponseKilobytes(int kb);
 	
 	List<Cookie> getCookieList();
-	String getBasicUsername();
-	String getBasicPassword();
-	String getBasicRealm();
-	String getBasicDomain();
-	String getNtlmUsername();
-	String getNtlmPassword();
+//	String getBasicUsername();
+//	String getBasicPassword();
+//	String getBasicRealm();
+//	String getBasicDomain();
+//	String getNtlmUsername();
+//	String getNtlmPassword();
 	URI getBaseURI();
+
+	/**
+	 * Get the identity the scan will be performed as. 
+	 * @return Scan identity to perform the scan as, or null if none is set.
+	 */
+	IIdentity getScanIdentity();
+	
 	List<String> getModulesList();
 	List<String> getExclusions();
-	IFormCredential createFormCredential(String username, String password) ;
-	List<IFormCredential> getFormCredentials();
+	IFormCredential createFormCredential(String username, String password) ; // XXX
+	List<IFormCredential> getFormCredentials(); // XXX
 	boolean getLogAllRequests();
 	boolean getDisplayDebugOutput();
 	boolean getDirectoryInjectionChecksFlag();

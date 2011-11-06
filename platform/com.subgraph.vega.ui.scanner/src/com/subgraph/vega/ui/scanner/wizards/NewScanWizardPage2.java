@@ -32,8 +32,8 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizardPage2 extends WizardPage {
+	static private final String VEGA_LOGO = "icons/vega_small.png";
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
-	private final static String VEGA_LOGO = "icons/vega_small.png";
 	private Table cookiesTable;
 	private Table exclusionsTable;
 	
@@ -53,7 +53,7 @@ public class NewScanWizardPage2 extends WizardPage {
 		gd.widthHint = 140;
 		gd.heightHint = 60;
 		createCookiesPart(container, gd);
-		createExclusionsPart(container, gd);
+		createExclusionsPart(container);
 
 		setControl(container);
 		setPageComplete(true);
@@ -104,7 +104,7 @@ public class NewScanWizardPage2 extends WizardPage {
 		});
 	}
 	
-	private void createExclusionsPart(Composite parent, GridData exlusionTableLayoutData) {
+	private void createExclusionsPart(Composite parent) {
 		final Label exclusionLabel = new Label(parent, SWT.NULL);
 		exclusionLabel.setText("Set scan exclusion patterns:");
 
@@ -133,7 +133,7 @@ public class NewScanWizardPage2 extends WizardPage {
 		});
 
 		exclusionsTable = new Table(parent, SWT.BORDER | SWT.MULTI);
-		exclusionsTable.setLayoutData(exlusionTableLayoutData);
+		exclusionsTable.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		final Button removeButton = new Button(parent, SWT.PUSH);
 		removeButton.setText("Remove selected exclusion(s)");		

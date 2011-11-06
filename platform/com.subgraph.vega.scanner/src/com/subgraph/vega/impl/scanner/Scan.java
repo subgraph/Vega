@@ -23,6 +23,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
@@ -150,10 +151,15 @@ public class Scan implements IScan {
 		requestEngineConfig.setMaxConnections(config.getMaxConnections());
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
-
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
 		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
-		return requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
+		// REVISIT: consider moving authentication method to request engine config
+		IIdentity identity = config.getScanIdentity();
+		if (identity != null && identity.getAuthMethod() != null) {
+			identity.getAuthMethod().setAuth(requestEngine);
+		}
+		return requestEngine;
 	}
 
 	private void reloadModules() {

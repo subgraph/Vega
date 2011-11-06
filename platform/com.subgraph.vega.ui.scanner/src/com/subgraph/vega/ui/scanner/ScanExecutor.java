@@ -14,6 +14,7 @@ import java.net.HttpCookie;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
@@ -24,6 +25,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import com.subgraph.vega.api.scanner.IScan;
+import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
@@ -34,13 +36,9 @@ public class ScanExecutor {
 	public String runScan(Shell shell, String target) {
 		final IScanner scanner = Activator.getDefault().getScanner();
 		final IScan scan = scanner.createScan();
+		final Collection<IIdentity> identities = Activator.getDefault().getModel().getCurrentWorkspace().getIdentityModel().getAllIdentities();
 
-		NewScanWizard wizard = new NewScanWizard();
-		if(target != null) {
-			wizard.setTargetField(target);
-		}
-		wizard.setScannerModules(scan.getModuleList());
-		
+		NewScanWizard wizard = new NewScanWizard(target, identities, scan.getModuleList());
 		WizardDialog dialog = new NewWizardDialog(shell, wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
 			if(wizard.isDomTest()) {
@@ -54,7 +52,6 @@ public class ScanExecutor {
 		}
 		return null;
 	}
-
 	
 	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner, IScan scan) {
 		URI targetUri = wizard.getScanHostURI();
@@ -66,13 +63,12 @@ public class ScanExecutor {
 		final IScannerConfig config = scan.getConfig();
 		config.setBaseURI(targetUri);
 		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetUri));
-		config.setBasicUsername(wizard.getBasicUsername());
-		config.setBasicPassword(wizard.getBasicPassword());
-		config.setBasicRealm(wizard.getBasicRealm());
-		config.setBasicDomain(wizard.getBasicDomain());
+//		config.setBasicUsername(wizard.getBasicUsername());
+//		config.setBasicPassword(wizard.getBasicPassword());
+//		config.setBasicRealm(wizard.getBasicRealm());
+//		config.setBasicDomain(wizard.getBasicDomain());
+		config.setScanIdentity(wizard.getScanIdentity());
 		config.setExclusions(wizard.getExclusions());
-		config.setNtlmUsername(wizard.getNtlmUsername());
-		config.setNtlmPassword(wizard.getNtlmPassword());
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 		config.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
 		config.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));

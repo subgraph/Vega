@@ -42,9 +42,9 @@ public class Scanner implements IScanner {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
-				if(event instanceof WorkspaceOpenEvent) {
+				if (event instanceof WorkspaceOpenEvent) {
 					handleWorkspaceOpen((WorkspaceOpenEvent) event);
-				} else if(event instanceof WorkspaceCloseEvent) {
+				} else if (event instanceof WorkspaceCloseEvent) {
 					handleWorkspaceClose((WorkspaceCloseEvent) event);
 				} else if (event instanceof WorkspaceResetEvent) {
 					handleWorkspaceReset((WorkspaceResetEvent) event);

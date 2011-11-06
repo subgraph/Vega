@@ -28,6 +28,12 @@ public class UriFilter {
 		for (String exclusion: scannerConfig.getExclusions()) {
 			exclusionList.add(Pattern.compile(exclusion));
 		}
+		// REVISIT: we should really be merging identity config into scan config when scan starts
+		if (scannerConfig.getScanIdentity() != null) {
+			for (String exclusion: scannerConfig.getScanIdentity().getPathExclusions()) {
+				exclusionList.add(Pattern.compile(exclusion));
+			}
+		}
 	}
 
 	public boolean isExcluded(final URI uri) {
