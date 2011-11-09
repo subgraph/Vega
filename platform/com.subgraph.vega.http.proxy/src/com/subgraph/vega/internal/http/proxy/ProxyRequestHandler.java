@@ -81,9 +81,8 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			}
 
 			HttpUriRequest uriRequest = transaction.getRequest();
-			BasicHttpContext ctx = new BasicHttpContext();
 			transaction.signalForward();
-			IHttpResponse r = requestEngine.sendRequest(uriRequest, ctx);
+			IHttpResponse r = requestEngine.sendRequest(uriRequest);
 			if(r == null) {
 				response.setStatusCode(503);
 				transaction.signalComplete(false);

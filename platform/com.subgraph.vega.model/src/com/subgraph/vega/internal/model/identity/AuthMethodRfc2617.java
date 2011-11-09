@@ -10,6 +10,19 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.identity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.auth.params.AuthPNames;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.params.AuthPolicy;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.protocol.HttpContext;
+
 import com.db4o.activation.ActivationPurpose;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.identity.IAuthMethod;
@@ -81,8 +94,24 @@ public class AuthMethodRfc2617 extends AbstractAuthMethod implements IAuthMethod
 	@Override
 	public void setAuth(IHttpRequestEngine requestEngine) {
 		activate(ActivationPurpose.READ);
-		final RequestModifierRfc2617 requestModifier = new RequestModifierRfc2617(authScheme, username, password);
-		requestModifier.bind(requestEngine);
+
+		HttpClient httpClient = requestEngine.getHttpClient();
+		List<String> authPref = new ArrayList<String>(1);
+		switch (authScheme) {
+		case AUTH_SCHEME_BASIC:
+			authPref.add(AuthPolicy.BASIC);
+			break;
+		case AUTH_SCHEME_DIGEST:
+			authPref.add(AuthPolicy.DIGEST);
+			break;
+		}
+		httpClient.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authPref);
+
+		HttpContext httpContext = requestEngine.getHttpContext();
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		credsProvider.setCredentials(AuthScope.ANY, creds);
+		httpContext.setAttribute(ClientContext.CREDS_PROVIDER, credsProvider);
 	}
 
 }

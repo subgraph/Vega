@@ -21,8 +21,10 @@ import java.util.logging.Logger;
 import org.apache.http.HttpException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.SyncBasicHttpContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -41,8 +43,9 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final IRequestOrigin requestOrigin;
 	private final IHTMLParser htmlParser;
 	private final RateLimiter rateLimit;
+	private final HttpContext httpContext;
 	private final List<IHttpRequestModifier> requestModifierList;
-
+	
 	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
 		this.executor = executor;
 		this.client = client;
@@ -50,8 +53,9 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.requestOrigin = requestOrigin;
 		this.htmlParser = htmlParser;
 		rateLimit = new RateLimiter(config.getRequestsPerMinute());
+		httpContext = new SyncBasicHttpContext(null);
+		httpContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
 		requestModifierList = new ArrayList<IHttpRequestModifier>();
-		addRequestModifier(new HttpRequestModifierCookies(this.config));
 	}
 
 	@Override
@@ -70,17 +74,21 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
+	public HttpContext getHttpContext() {
+		return httpContext;
+	}
+
+	@Override
 	public void addRequestModifier(IHttpRequestModifier modifier) {
 		requestModifierList.add(modifier);
 	}
 
 	@Override
 	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException {
-		final HttpContext requestContext = (context == null) ? (new BasicHttpContext()) : (context);
 		for (IHttpRequestModifier modifier: requestModifierList) {
-			modifier.process(request, requestContext);
+			modifier.process(request, context);
 		}
-		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestOrigin, requestContext, config, htmlParser));
+		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestOrigin, context, config, htmlParser));
 		try {
 			return future.get();
 		} catch (InterruptedException e) {
@@ -92,7 +100,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	public IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException {
-		return sendRequest(request, null);
+		return sendRequest(request, new BasicHttpContext(httpContext));
 	}
 
 	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {

@@ -35,7 +35,14 @@ public interface IHttpRequestEngine {
 	 * @return HttpClient.
 	 */
 	HttpClient getHttpClient();
-
+	
+	/**
+	 * Get the parent HttpContext associated with this request engine. The parent HttpContext is thread-safe and should
+	 * be used as the parent for the request HttpContext.
+	 * @return Parent HttpContext.
+	 */
+	HttpContext getHttpContext();
+	
 	/**
 	 * Register a request modifier.
 	 * @param modifier IHttpRequestModifier.
@@ -43,25 +50,20 @@ public interface IHttpRequestEngine {
 	void addRequestModifier(IHttpRequestModifier modifier);
 	
 	/**
-	 * Send a request, specifying the HTTP context. 
-	 * 
-	 * The following execution context variables cannot be set and will be overwritten:
-	 * 	- ClientContext.COOKIE_STORE (set in the IHttpRequestEngineConfig this request engine was instantiated with)
-	 * 
-	 * Additional variables may be overwritten by request modifiers.
-	 * 
+	 * Send a request, specifying the HttpContext. The HttpContext should use this request engine's HttpContext as its
+	 * parent. 
 	 * @param request Request to send.
 	 * @param context HTTP context.
-	 * @return IHttpResponse
+	 * @return IHttpResponse Response.
 	 * @throws RequestEngineException
 	 */
 	IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException;
 
 	/**
-	 * Send a request, specifying the HTTP context.
-	 * 
+	 * Send a request without providing a HttpContext. A HttpContext is automatically generated for the request with
+	 * this request engine's HttpContext as its parent.
 	 * @param request Request to send.
-	 * @return IHttpResponse
+	 * @return IHttpResponse Response.
 	 * @throws RequestEngineException
 	 */
 	IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException;

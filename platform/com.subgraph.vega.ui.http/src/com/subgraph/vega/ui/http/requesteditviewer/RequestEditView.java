@@ -141,10 +141,9 @@ public class RequestEditView extends ViewPart {
 			return;
 		}
 
-		BasicHttpContext ctx = new BasicHttpContext();
 		IHttpResponse response;
 		try {
-			response = requestEngine.sendRequest(uriRequest, ctx);
+			response = requestEngine.sendRequest(uriRequest);
 			responseViewer.displayHttpResponse(response.getRawResponse());
 		} catch (Exception e) {
 			displayExceptionError(e);
