@@ -22,10 +22,10 @@ public interface IAuthMethod {
 		 */
 		AUTH_METHOD_RFC2617,
 
-//		/**
-//		 * NTLM and NTLMv2. IAuthMethodNtlm.
-//		 */
-//		AUTH_METHOD_NTLM,
+		/**
+		 * NTLM and NTLMv2. IAuthMethodNtlm.
+		 */
+		AUTH_METHOD_NTLM,
 	}
 
 	/**

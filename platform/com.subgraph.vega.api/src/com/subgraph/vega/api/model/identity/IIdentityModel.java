@@ -31,11 +31,11 @@ public interface IIdentityModel {
 	 */
 	IAuthMethodRfc2617 createAuthMethodRfc2617();
 
-//	/**
-//	 * Create an IAuthMethodNtlm instance with no fields set. The IAuthMethod is not associated with any identity. 
-//	 * @return IAuthMethodNtlm.
-//	 */
-//	IAuthMethodNtlm createAuthMethodNtlm();
+	/**
+	 * Create an IAuthMethodNtlm instance with no fields set. The IAuthMethod is not associated with any identity. 
+	 * @return IAuthMethodNtlm.
+	 */
+	IAuthMethodNtlm createAuthMethodNtlm();
 	
 	/**
 	 * Store an identity in the workspace. The caller is responsible for ensuring an IIdentity with the same name does

@@ -61,6 +61,11 @@ public class IdentityWizardPage2 extends WizardPage implements IIdentityWizardPa
 		case AUTH_METHOD_DIGEST:
 			control = new AuthMethodControlRfc2617(parentComposite, this, IAuthMethodRfc2617.AuthScheme.AUTH_SCHEME_DIGEST);
 			break;
+		case AUTH_METHOD_NTLM:
+			control = new AuthMethodControlNtlm(parentComposite, this);
+			break;
+		default:
+			return null;
 		}
 		return control;
 	}

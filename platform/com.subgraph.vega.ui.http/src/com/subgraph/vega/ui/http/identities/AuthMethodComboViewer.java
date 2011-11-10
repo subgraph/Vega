@@ -24,7 +24,8 @@ import com.subgraph.vega.api.model.identity.IAuthMethod;
 public class AuthMethodComboViewer extends ComboViewer {
 	public enum AuthMethodSelection {
 		AUTH_METHOD_BASIC("basic http authentication", IAuthMethod.AuthMethodType.AUTH_METHOD_RFC2617),
-		AUTH_METHOD_DIGEST("digest http authentication", IAuthMethod.AuthMethodType.AUTH_METHOD_RFC2617);
+		AUTH_METHOD_DIGEST("digest http authentication", IAuthMethod.AuthMethodType.AUTH_METHOD_RFC2617),
+		AUTH_METHOD_NTLM("NTLM", IAuthMethod.AuthMethodType.AUTH_METHOD_NTLM);
 		
 		private String name;
 		private IAuthMethod.AuthMethodType authMethodType;

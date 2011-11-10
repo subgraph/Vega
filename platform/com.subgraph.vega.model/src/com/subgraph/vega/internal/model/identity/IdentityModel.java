@@ -16,6 +16,7 @@ import java.util.List;
 import com.db4o.ObjectContainer;
 import com.db4o.query.Predicate;
 
+import com.subgraph.vega.api.model.identity.IAuthMethodNtlm;
 import com.subgraph.vega.api.model.identity.IAuthMethodRfc2617;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
@@ -42,10 +43,10 @@ public class IdentityModel implements IIdentityModel {
 		return new AuthMethodRfc2617();
 	}
 
-//	@Override
-//	public IAuthMethodNtlm createAuthMethodNtlm() {
-//		return null;
-//	}
+	@Override
+	public IAuthMethodNtlm createAuthMethodNtlm() {
+		return new AuthMethodNtlm();
+	}
 
 	@Override
 	public void store(IIdentity identity) {
