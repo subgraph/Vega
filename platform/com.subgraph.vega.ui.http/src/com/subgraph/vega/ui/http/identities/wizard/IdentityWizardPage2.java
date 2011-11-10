@@ -48,6 +48,7 @@ public class IdentityWizardPage2 extends WizardPage implements IIdentityWizardPa
 			authMethodSelCurr = page1.getAuthMethodSelection();
 			authMethodControl = instAuthMethodControl(authMethodSelCurr);
 			stackLayout.topControl = authMethodControl.getControl();
+			stackLayout.topControl.setFocus();
 			parentComposite.layout();
 		}
 	}
