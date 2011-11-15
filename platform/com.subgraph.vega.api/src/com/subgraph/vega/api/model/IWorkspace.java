@@ -14,6 +14,7 @@ import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
+import com.subgraph.vega.api.model.macros.IHttpMacroModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.variables.IVariableModel;
@@ -23,6 +24,7 @@ public interface IWorkspace extends IModelProperties {
 	ITagModel getTagModel();
 	IWebModel getWebModel();
 	IVariableModel getVariableModel();
+	IHttpMacroModel getHttpMacroModel();
 	IIdentityModel getIdentityModel();
 	IScanAlertRepository getScanAlertRepository();
 	IRequestLog getRequestLog();

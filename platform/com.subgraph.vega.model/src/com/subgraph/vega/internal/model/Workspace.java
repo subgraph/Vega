@@ -30,6 +30,7 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
+import com.subgraph.vega.api.model.macros.IHttpMacroModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.variables.IVariableModel;
@@ -38,6 +39,7 @@ import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertRepository;
 import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.identity.IdentityModel;
+import com.subgraph.vega.internal.model.macros.HttpMacroModel;
 import com.subgraph.vega.internal.model.requests.RequestLog;
 import com.subgraph.vega.internal.model.tags.TagModel;
 import com.subgraph.vega.internal.model.variables.VariableModel;
@@ -57,6 +59,7 @@ public class Workspace implements IWorkspace {
 	private ITagModel tagModel;
 	private IWebModel webModel;
 	private IVariableModel variableModel;
+	private IHttpMacroModel httpMacroModel;
 	private IIdentityModel identityModel;
 	private IRequestLog requestLog;
 	private IScanAlertRepository scanAlerts;
@@ -108,6 +111,7 @@ public class Workspace implements IWorkspace {
 			tagModel = new TagModel(db);
 			webModel = new WebModel(db);
 			variableModel = new VariableModel(db);
+			httpMacroModel = new HttpMacroModel(db);
 			identityModel = new IdentityModel(db);
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertRepository(db, xmlRepository);
@@ -136,6 +140,14 @@ public class Workspace implements IWorkspace {
 			throw new IllegalStateException("Must open workspace first");
 		}
 		return variableModel;
+	}
+
+	@Override
+	public IHttpMacroModel getHttpMacroModel() {
+		if (!opened) {
+			throw new IllegalStateException("Must open workspace first");
+		}
+		return httpMacroModel;
 	}
 
 	@Override
