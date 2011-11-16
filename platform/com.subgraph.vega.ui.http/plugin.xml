@@ -5,7 +5,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
-            class="com.subgraph.vega.ui.http.requestviewer.HttpRequestView"
+            class="com.subgraph.vega.ui.http.request.view.HttpRequestView"
             icon="icons/requestview.png"
             id="com.subgraph.vega.views.http"
             name="Requests"
@@ -253,7 +253,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView">
+            locationURI="popup:com.subgraph.vega.ui.http.requestlogviewer.popup">
          <command
                commandId="com.subgraph.vega.commands.popup.replayRequest"
                label="Replay Request"

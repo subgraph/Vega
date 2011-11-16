@@ -29,7 +29,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.IServiceLocator;
 
-import com.subgraph.vega.ui.http.requestviewer.HttpRequestView;
+import com.subgraph.vega.ui.http.request.view.HttpRequestView;
 
 public class LinkHandler extends BrowserFunction {
 	final private static Logger logger = Logger.getLogger("alertView");

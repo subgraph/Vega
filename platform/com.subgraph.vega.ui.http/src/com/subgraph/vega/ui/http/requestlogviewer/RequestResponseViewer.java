@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.requestviewer;
+package com.subgraph.vega.ui.http.requestlogviewer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -37,10 +37,11 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.internal.ui.http.requestlogviewer.ImageCache;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 
-public class RequestResponseViewer {
+public class RequestResponseViewer extends Composite {
 	private final static String VERTICAL_ICON = "icons/vertical.png";
 	private final static String HORIZONTAL_ICON = "icons/horizontal.png";
 	private final static String TABBED_ICON = "icons/tabbed.png";
@@ -48,9 +49,8 @@ public class RequestResponseViewer {
 	private final static String DOWN_ICON = "icons/down.png";
 	private final static String CONFIG_ICON = "icons/configure.png";
 	
-	private final ImageCache imageCache;
 	private final SashForm parentForm;
-	private final Composite parentComposite;
+	private final ImageCache imageCache;
 	private final Menu optionsMenu;
 	private final Composite toolbarComposite;
 	private ToolItem hideItem;
@@ -67,12 +67,12 @@ public class RequestResponseViewer {
 	private boolean hideState = false;
 
 	public RequestResponseViewer(SashForm parentForm) {
-		imageCache = new ImageCache(Activator.PLUGIN_ID);
+		super(parentForm, SWT.NONE);
+		setLayout(new FormLayout());
 		this.parentForm = parentForm;
-		parentComposite = new Composite(parentForm, SWT.NONE);
-		parentComposite.setLayout(new FormLayout());
+		imageCache = new ImageCache(Activator.PLUGIN_ID);
 		optionsMenu = createOptionsMenu(parentForm.getShell());
-		toolbarComposite = createToolbarComposite(parentComposite);
+		toolbarComposite = createToolbarComposite(this);
 
 		FormData fd = new FormData();
 		fd.left = new FormAttachment(0);
@@ -97,7 +97,7 @@ public class RequestResponseViewer {
 	}
 
 	private Composite createToolbarComposite(Composite parent) {
-		final Composite c = new Composite(parentComposite, SWT.NONE);
+		final Composite c = new Composite(this, SWT.NONE);
 		final GridLayout layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
@@ -241,7 +241,7 @@ public class RequestResponseViewer {
 			hideState = true;
 			hideItem.setToolTipText("Show Request Table");
 			hideItem.setImage(imageCache.get(DOWN_ICON));
-			parentForm.setMaximizedControl(parentComposite);
+			parentForm.setMaximizedControl(this);
 		}	
 	}
 	
@@ -260,7 +260,7 @@ public class RequestResponseViewer {
 		responseItem.setText("Response");
 		responseItem.setControl(responseViewer);
 
-		parentComposite.layout();
+		this.layout();
 		if(currentRecord != null)
 			processCurrentTransaction();
 		setDisplayResponse();
@@ -284,7 +284,7 @@ public class RequestResponseViewer {
 	private void recreateRootComposite() {
 		if(rootComposite != null)
 			rootComposite.dispose();
-		rootComposite = new Composite(parentComposite, SWT.NONE);
+		rootComposite = new Composite(this, SWT.NONE);
 		rootComposite.setLayout(new FillLayout());
 		
 		final FormData fd = new FormData();
@@ -316,7 +316,7 @@ public class RequestResponseViewer {
 		createMessageViewers(sashForm);
 
 		sashForm.setWeights(new int[] {50, 50});
-		parentComposite.layout();
+		this.layout();
 		processCurrentTransaction();
 	}
 	

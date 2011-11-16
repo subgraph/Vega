@@ -17,7 +17,7 @@ import org.eclipse.ui.IPerspectiveFactory;
 import com.subgraph.vega.ui.http.identities.IdentitiesView;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView;
-import com.subgraph.vega.ui.http.requestviewer.HttpRequestView;
+import com.subgraph.vega.ui.http.request.view.HttpRequestView;
 
 public class ProxyPerspectiveFactory implements IPerspectiveFactory {
 	private final static String PROXY_FOLDER = "proxy";

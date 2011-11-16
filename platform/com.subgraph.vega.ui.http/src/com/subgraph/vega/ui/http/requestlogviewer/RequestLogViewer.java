@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.requestviewer;
+package com.subgraph.vega.ui.http.requestlogviewer;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -23,65 +23,43 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewContentProviderLazy;
+import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewLabelProvider;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.model.taggablepopup.TaggablePopupDialog;
 
-public class HttpRequestView extends ViewPart {
-	public final static String ID = "com.subgraph.vega.views.http";
-	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestviewer.HttpRequestView.requestView";
+public class RequestLogViewer extends Composite {
+	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestlogviewer.popup";
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
-	private TaggablePopupDialog taggablePopupDialog;
+//	private TaggablePopupDialog taggablePopupDialog;
 
-	public HttpRequestView() {
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		parent.setLayout(new FillLayout());
-		final SashForm form = new SashForm(parent, SWT.VERTICAL);
-		final Composite comp = new Composite(form, SWT.NONE);
+	public RequestLogViewer(SashForm parent) {
+		super(parent, SWT.NONE);
 		final TableColumnLayout tcl = new TableColumnLayout();
-		comp.setLayout(tcl);
-
-		tableViewer = new TableViewer(comp, SWT.VIRTUAL | SWT.FULL_SELECTION);
-		createColumns(tableViewer, tcl);
-		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
-		tableViewer.setLabelProvider(new HttpViewLabelProvider());
-		MenuManager menuManager = new MenuManager();
-		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
-		tableViewer.getTable().setMenu(menu);
-		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
-		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
-		getSite().registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
-		getSite().setSelectionProvider(tableViewer);
-
+		setLayout(tcl);
+		createTable(tcl);
 		tableViewer.setInput(Activator.getDefault().getModel());
-
-		requestResponseViewer = new RequestResponseViewer(form);
-		form.setWeights(new int[] {40, 60});
-		parent.pack();
-
-		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 	}
 
-	public void  focusOnRecord(long requestId) {
+	public void setRequestResponseViewer(RequestResponseViewer requestResponseViewer) {
+		if (requestResponseViewer != null) {
+			this.requestResponseViewer = requestResponseViewer;
+		} else {
+
+		}
+	}
+
+	public void focusOnRecord(long requestId) {
 		final Object inputObj = tableViewer.getInput();
 		if(!(inputObj instanceof IModel)) {
 			return;
@@ -94,13 +72,37 @@ public class HttpRequestView extends ViewPart {
 		
 		final IRequestLog requestLog = workspace.getRequestLog();
 		final IRequestLogRecord record = requestLog.lookupRecord(requestId);
-		if(record == null)
+		if(record == null) {
 			return;
+		}
 
 		tableViewer.setSelection(new StructuredSelection(record), true);
-		requestResponseViewer.setDisplayResponse();
+		if (requestResponseViewer != null) {
+			requestResponseViewer.setDisplayResponse();
+		}
+	}
+	
+	public void registerContextMenu(IWorkbenchPartSite site) {
+		MenuManager menuManager = new MenuManager();
+		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
+		tableViewer.getTable().setMenu(menu);
+		site.registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
 	}
 
+	private void createTable(TableColumnLayout tcl) {
+		tableViewer = new TableViewer(this, SWT.VIRTUAL | SWT.FULL_SELECTION);
+		createColumns(tableViewer, tcl);
+
+		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
+		tableViewer.setLabelProvider(new HttpViewLabelProvider());
+		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
+
+//		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
+//		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
+
+//		getSite().setSelectionProvider(tableViewer);
+	}
+	
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
 		final String[] titles = {"ID", "Host", "Method", "Request", "Status", "Length", "Time (ms)", "Tags" };
 		final ColumnLayoutData[] layoutData = {
@@ -130,56 +132,54 @@ public class HttpRequestView extends ViewPart {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				if(selection.getFirstElement() instanceof IRequestLogRecord)
-					requestResponseViewer.setCurrentRecord((IRequestLogRecord) selection.getFirstElement());
-				else
-					requestResponseViewer.setCurrentRecord(null);
-			}
-		};
-	}
-
-	@Override
-	public void setFocus() {
-		tableViewer.getControl().setFocus();
-	}
-
-	private MouseMoveListener createMouseMoveListener() {
-		return new MouseMoveListener() {
-			@Override
-			public void mouseMove(MouseEvent e) {
-				if (taggablePopupDialog != null) {
-					taggablePopupDialog.close();
-					taggablePopupDialog = null;
+				if (requestResponseViewer != null) { // REVISIT gross
+					IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+					if (selection.getFirstElement() instanceof IRequestLogRecord) {
+						requestResponseViewer.setCurrentRecord((IRequestLogRecord) selection.getFirstElement());
+					} else {
+						requestResponseViewer.setCurrentRecord(null);
+					}
 				}
 			}
-
 		};
 	}
 	
-	private MouseTrackListener createTableMouseTrackListener() {
-		return new MouseTrackListener() {
-			@Override
-			public void mouseEnter(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExit(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseHover(MouseEvent e) {
-				Point pt = new Point(e.x, e.y);
-				TableItem tableItem = tableViewer.getTable().getItem(pt);
-				if (tableItem != null) {
-					IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
-					if (record.getTagCount() > 0) {
-						taggablePopupDialog = new TaggablePopupDialog(tableViewer.getTable().getShell(), record, pt);
-						taggablePopupDialog.open();
-					}
-				}			
-			}
-		};
-	}
+//	private MouseMoveListener createMouseMoveListener() {
+//		return new MouseMoveListener() {
+//			@Override
+//			public void mouseMove(MouseEvent e) {
+//				if (taggablePopupDialog != null) {
+//					taggablePopupDialog.close();
+//					taggablePopupDialog = null;
+//				}
+//			}
+//
+//		};
+//	}
+//	
+//	private MouseTrackListener createTableMouseTrackListener() {
+//		return new MouseTrackListener() {
+//			@Override
+//			public void mouseEnter(MouseEvent e) {
+//			}
+//
+//			@Override
+//			public void mouseExit(MouseEvent e) {
+//			}
+//
+//			@Override
+//			public void mouseHover(MouseEvent e) {
+//				Point pt = new Point(e.x, e.y);
+//				TableItem tableItem = tableViewer.getTable().getItem(pt);
+//				if (tableItem != null) {
+//					IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
+//					if (record.getTagCount() > 0) {
+//						taggablePopupDialog = new TaggablePopupDialog(tableViewer.getTable().getShell(), record, pt);
+//						taggablePopupDialog.open();
+//					}
+//				}			
+//			}
+//		};
+//	}
 
 }

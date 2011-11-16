@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.requestviewer;
+package com.subgraph.vega.internal.ui.http.requestlogviewer;
 
 import java.util.HashMap;
 import java.util.Map;
