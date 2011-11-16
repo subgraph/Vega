@@ -52,11 +52,7 @@ public class RequestLogViewer extends Composite {
 	}
 
 	public void setRequestResponseViewer(RequestResponseViewer requestResponseViewer) {
-		if (requestResponseViewer != null) {
-			this.requestResponseViewer = requestResponseViewer;
-		} else {
-
-		}
+		this.requestResponseViewer = requestResponseViewer;
 	}
 
 	public void focusOnRecord(long requestId) {
