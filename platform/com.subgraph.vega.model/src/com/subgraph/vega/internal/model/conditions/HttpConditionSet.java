@@ -124,14 +124,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	@Override
 	public IHttpConditionManager getConditionManager() {
-		activate(ActivationPurpose.READ);
 		return conditionManager;
 	}
 
 	void setConditionManager(HttpConditionManager conditionManager) {
-		activate(ActivationPurpose.READ);
 		this.conditionManager = conditionManager;
-		activate(ActivationPurpose.WRITE);
 	}
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
