@@ -83,6 +83,7 @@ public class RequestLogViewer extends Composite {
 		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
 		tableViewer.getTable().setMenu(menu);
 		site.registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
+		site.setSelectionProvider(tableViewer);
 	}
 
 	private void createTable(TableColumnLayout tcl) {
@@ -95,8 +96,6 @@ public class RequestLogViewer extends Composite {
 
 //		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
 //		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
-
-//		getSite().setSelectionProvider(tableViewer);
 	}
 	
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
