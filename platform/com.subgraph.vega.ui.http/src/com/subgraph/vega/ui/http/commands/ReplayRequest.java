@@ -12,6 +12,7 @@ package com.subgraph.vega.ui.http.commands;
 
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -53,10 +54,10 @@ public class ReplayRequest extends AbstractHandler {
 			int viewMode = IWorkbenchPage.VIEW_ACTIVATE;
 			for (Iterator<Object> iterator = strucSelection.iterator(); iterator.hasNext();) {
 				Object element = iterator.next();
+				String secondaryId = UUID.randomUUID().toString();
 				RequestEditView view;
-
 				try {
-					view = (RequestEditView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(RequestEditView.VIEW_ID, element.toString(), viewMode);
+					view = (RequestEditView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(RequestEditView.VIEW_ID, secondaryId, viewMode);
 				} catch (PartInitException e) {
 					Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
 					ErrorDialog.displayExceptionError(shell, e);
