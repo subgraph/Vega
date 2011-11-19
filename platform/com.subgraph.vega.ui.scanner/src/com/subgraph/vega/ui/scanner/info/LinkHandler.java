@@ -23,6 +23,8 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -30,6 +32,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.IServiceLocator;
 
 import com.subgraph.vega.ui.http.request.view.HttpRequestView;
+import com.subgraph.vega.ui.scanner.ScannerPerspectiveFactory;
 
 public class LinkHandler extends BrowserFunction {
 	final private static Logger logger = Logger.getLogger("alertView");
@@ -46,15 +49,15 @@ public class LinkHandler extends BrowserFunction {
 		try {
 			IHandlerService handlerService = (IHandlerService) serviceLocator.getService(IHandlerService.class);
 			ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
-			Command showView = commandService.getCommand("org.eclipse.ui.views.showView");
-			IParameter parameter = showView.getParameter("org.eclipse.ui.views.showView.viewId");
-			Parameterization parm = new Parameterization(parameter, "com.subgraph.vega.views.http");
-			ParameterizedCommand parmCommand = new ParameterizedCommand(showView, new Parameterization[] { parm });
+			Command showView = commandService.getCommand(IWorkbenchCommandConstants.VIEWS_SHOW_VIEW);
+			IParameter parm1 = showView.getParameter(IWorkbenchCommandConstants.VIEWS_SHOW_VIEW_PARM_ID);
+			Parameterization parmId1 = new Parameterization(parm1, HttpRequestView.ID);
+			IParameter parm2 = showView.getParameter(IWorkbenchCommandConstants.VIEWS_SHOW_VIEW_SECONDARY_ID);
+			Parameterization parmId2 = new Parameterization(parm2, ScannerPerspectiveFactory.HTTP_VIEW_SECONDARY_ID);
+			ParameterizedCommand parmCommand = new ParameterizedCommand(showView, new Parameterization[] { parmId1, parmId2 });
 			handlerService.executeCommand(parmCommand, null);
-						
-			
 
-			IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.subgraph.vega.views.http");
+			IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(HttpRequestView.ID, ScannerPerspectiveFactory.HTTP_VIEW_SECONDARY_ID, IWorkbenchPage.VIEW_VISIBLE);
 			if(view instanceof HttpRequestView && arguments[0] instanceof String) {
 				final HttpRequestView requestView = (HttpRequestView) view;
 				try {
@@ -64,7 +67,6 @@ public class LinkHandler extends BrowserFunction {
 					
 				}
 			}
-			
 		} catch (PartInitException e) {
 			logger.warning("Failed to open HTTP request viewer");
 		} catch (NotDefinedException e) {

@@ -19,6 +19,7 @@ import com.subgraph.vega.ui.scanner.info.ScanInfoView;
 
 public class ScannerPerspectiveFactory implements IPerspectiveFactory {
 	private final static String WEBSITE_VIEW = "com.subgraph.vega.views.website";
+	public final static String HTTP_VIEW_SECONDARY_ID = "scanner"; /** Secondary ID for the scanner's com.subgraph.vega.views.http */
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
