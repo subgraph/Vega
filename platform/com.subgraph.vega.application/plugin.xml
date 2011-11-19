@@ -113,6 +113,7 @@
       <perspectiveExtension
             targetID="*">
          <view
+               closeable="false"
                id="com.subgraph.vega.views.VegaConsole"
                minimized="false"
                ratio="0.5"
