@@ -43,11 +43,11 @@ import com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView;
 
 public class ProxyStatusLineContribution extends ContributionItem {
 	private final static int BLINK_INTERVAL = 500;
+	private final static Image proxyAlert = Activator.getImageDescriptor("icons/proxy_alert.png").createImage();
+	private final static Image proxyRunning = Activator.getImageDescriptor("icons/proxy_running.png").createImage();
+	private final static Image proxyStopped = Activator.getImageDescriptor("icons/proxy_stopped.png").createImage();
 	private final Logger logger = Logger.getLogger("proxy");
 	private CLabel label;
-	private Image proxyAlert = Activator.getImageDescriptor("icons/proxy_alert.png").createImage();
-	private Image proxyRunning = Activator.getImageDescriptor("icons/proxy_running.png").createImage();
-	private Image proxyStopped = Activator.getImageDescriptor("icons/proxy_stopped.png").createImage();
 	private final Timer alertBlinkTimer = new Timer();
 	private TimerTask alertBlinkTask;
 	private boolean alertEnabled;
