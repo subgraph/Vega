@@ -62,6 +62,22 @@
             </command>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.alert">
+         <command
+               commandId="com.subgraph.vega.ui.scanner.expandallalerts"
+               icon="icons/expandall.png"
+               label="Expand All"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.ui.scanner.collapseallalerts"
+               icon="icons/collapseall.png"
+               label="Collapse All"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -72,6 +88,14 @@
       <command
             id="com.subgraph.vega.ui.scanner.stopscan"
             name="Stop Scanner">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.expandallalerts"
+            name="Expand All Scan Alerts">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.collapseallalerts"
+            name="Collapse All Scan Alerts">
       </command>
    </extension>
    <extension
@@ -131,6 +155,14 @@
                </equals>
             </with>
          </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.ExpandAllAlerts"
+            commandId="com.subgraph.vega.ui.scanner.expandallalerts">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.CollapseAllAlerts"
+            commandId="com.subgraph.vega.ui.scanner.collapseallalerts">
       </handler>
    </extension>
    <extension

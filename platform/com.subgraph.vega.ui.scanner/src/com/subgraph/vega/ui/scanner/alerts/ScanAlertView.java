@@ -104,6 +104,18 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		}
 	}
 
+	public void expandAll() {
+		if (viewer != null) {
+			viewer.expandAll();
+		}
+	}
+
+	public void collapseAll() {
+		if (viewer != null) {
+			viewer.collapseAll();
+		}
+	}
+
 	private int compareAlertNodes(AlertScanNode n1, AlertScanNode n2) {
 		if((n1.getScanInstance() == null) || (n2.getScanInstance() == null)) {
 			return (int) (n1.getScanId() - n2.getScanId());
