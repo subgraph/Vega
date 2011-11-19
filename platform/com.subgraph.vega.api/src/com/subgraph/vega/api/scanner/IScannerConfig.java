@@ -35,6 +35,7 @@ public interface IScannerConfig {
 	 */
 	void setScanIdentity(IIdentity scanIdentity);
 	
+	void setUserAgent(String userAgent);
 	void setCookieList(List<Cookie> list);
 //	void setBasicUsername(String username);
 //	void setBasicPassword(String password);
@@ -63,6 +64,7 @@ public interface IScannerConfig {
 //	String getNtlmUsername();
 //	String getNtlmPassword();
 	URI getBaseURI();
+	String getUserAgent();
 
 	/**
 	 * Get the identity the scan will be performed as. 

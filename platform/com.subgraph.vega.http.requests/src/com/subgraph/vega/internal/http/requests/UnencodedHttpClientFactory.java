@@ -20,14 +20,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.internal.http.requests.connection.UnencodingThreadSafeClientConnectionManager;
 
 public class UnencodedHttpClientFactory extends AbstractHttpClientFactory {
-	private static final String userAgent = 
-		"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; "+
-          "Trident/4.0; .NET CLR 1.1.4322; InfoPath.1; .NET CLR "+
-          "2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; Vega/1.0";
-          
 	static HttpClient createHttpClient() {
 		final HttpParams params = createHttpParams();
 		final ClientConnectionManager ccm = createConnectionManager(params);
@@ -46,7 +42,7 @@ public class UnencodedHttpClientFactory extends AbstractHttpClientFactory {
 	private static HttpParams createHttpParams() {
 		final HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setUserAgent(params, userAgent);
+		HttpProtocolParams.setUserAgent(params, IHttpRequestEngineFactory.DEFAULT_USER_AGENT);
 		return params;
 	}
 

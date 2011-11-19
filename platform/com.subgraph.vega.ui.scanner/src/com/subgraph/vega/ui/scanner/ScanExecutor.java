@@ -28,6 +28,7 @@ import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.ui.scanner.preferences.IPreferenceConstants;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
 import com.subgraph.vega.ui.scanner.wizards.NewWizardDialog;
 
@@ -62,6 +63,7 @@ public class ScanExecutor {
 		scanner.lock(scan);
 		final IScannerConfig config = scan.getConfig();
 		config.setBaseURI(targetUri);
+		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);
 		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetUri));
 //		config.setBasicUsername(wizard.getBasicUsername());
 //		config.setBasicPassword(wizard.getBasicPassword());
@@ -70,14 +72,14 @@ public class ScanExecutor {
 		config.setScanIdentity(wizard.getScanIdentity());
 		config.setExclusions(wizard.getExclusions());
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
-		config.setLogAllRequests(preferences.getBoolean("LogAllRequests"));
-		config.setDisplayDebugOutput(preferences.getBoolean("DisplayDebugOutput"));
-		config.setMaxRequestsPerSecond(preferences.getInt("MaxRequestsPerSecond"));
-		config.setMaxDescendants(preferences.getInt("MaxScanDescendants"));
-		config.setMaxChildren(preferences.getInt("MaxScanChildren"));
-		config.setMaxDepth(preferences.getInt("MaxScanDepth"));
-		config.setMaxDuplicatePaths(preferences.getInt("MaxScanDuplicatePaths"));
-		config.setMaxResponseKilobytes(preferences.getInt("MaxResponseLength"));
+		config.setLogAllRequests(preferences.getBoolean(IPreferenceConstants.P_LOG_ALL_REQUESTS));
+		config.setDisplayDebugOutput(preferences.getBoolean(IPreferenceConstants.P_DISPLAY_DEBUG_OUTPUT));
+		config.setMaxRequestsPerSecond(preferences.getInt(IPreferenceConstants.P_MAX_REQUESTS_PER_SECOND));
+		config.setMaxDescendants(preferences.getInt(IPreferenceConstants.P_MAX_SCAN_DESCENDANTS));
+		config.setMaxChildren(preferences.getInt(IPreferenceConstants.P_MAX_SCAN_CHILDREN));
+		config.setMaxDepth(preferences.getInt(IPreferenceConstants.P_MAX_SCAN_DEPTH));
+		config.setMaxDuplicatePaths(preferences.getInt(IPreferenceConstants.P_MAX_SCAN_DUPLICATE_PATHS));
+		config.setMaxResponseKilobytes(preferences.getInt(IPreferenceConstants.P_MAX_RESPONSE_LENGTH));
 
 		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetUri, scan));
 		probeThread.start();

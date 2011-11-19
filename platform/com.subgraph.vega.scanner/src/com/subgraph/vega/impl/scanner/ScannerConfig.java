@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.apache.http.cookie.Cookie;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.IFormCredential;
 import com.subgraph.vega.api.scanner.IScannerConfig;
@@ -23,6 +24,7 @@ import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
 	private URI baseURI;
+	private String userAgent = IHttpRequestEngineFactory.DEFAULT_USER_AGENT;
 	private IIdentity scanIdentity;
 	private List<Cookie> cookieList;
 	private List<String> modulesList;
@@ -49,6 +51,11 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public void setBaseURI(URI baseURI) {
 		this.baseURI = baseURI;
+	}
+
+	@Override
+	public void setUserAgent(String userAgent) {
+		this.userAgent = userAgent;
 	}
 
 	@Override
@@ -104,6 +111,11 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
  	public URI getBaseURI() {
 		return baseURI;
+	}
+
+	@Override
+	public String getUserAgent() {
+		return userAgent;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import java.util.List;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.params.HttpProtocolParams;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
@@ -152,6 +153,8 @@ public class Scan implements IScan {
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 		final HttpClient client = requestEngineFactory.createUnencodingClient();
+		HttpProtocolParams.setUserAgent(client.getParams(), config.getUserAgent());
+		
 		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
 		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
 		// REVISIT: consider moving authentication method to request engine config

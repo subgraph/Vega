@@ -40,6 +40,7 @@ import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.preferences.IPreferenceConstants;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.dom.NodeModel;
@@ -104,7 +105,7 @@ public class AlertRenderer {
 	}
 	
 	public String render(IScanAlert alert) {
-		final int maxAlertString = Activator.getDefault().getPreferenceStore().getInt("MaxAlertString");
+		final int maxAlertString = Activator.getDefault().getPreferenceStore().getInt(IPreferenceConstants.P_MAX_ALERT_STRING);
 		Map<String, Object> root = new HashMap<String, Object>();
 		try {
 			Template t = configuration.getTemplate("main.ftl");
