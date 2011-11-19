@@ -37,9 +37,9 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.internal.ui.http.requestlogviewer.ImageCache;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class RequestResponseViewer extends Composite {
 	private final static String VERTICAL_ICON = "icons/vertical.png";

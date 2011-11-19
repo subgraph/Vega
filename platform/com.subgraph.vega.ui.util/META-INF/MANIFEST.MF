@@ -10,4 +10,5 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.subgraph.vega.ui.util.dialogs,
+ com.subgraph.vega.ui.util.images,
  com.subgraph.vega.ui.util.preferences
