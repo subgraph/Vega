@@ -41,6 +41,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private IWorkspace currentWorkspace;
 	private TableViewer tableViewer;
 	private List<IRequestLogRecord> records;
+	private final String conditionSetId;
 	private final IRequestLogUpdateListener callback;
 	private final IEventHandler conditionSetListener;
 
@@ -50,7 +51,15 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private int currentCount;
 	private IHttpConditionSet filterCondition;
 
-	public HttpViewContentProviderLazy() {
+	/**
+	 * @param instanceId A unique ID to differentiate between condition filter sets.
+	 */
+	public HttpViewContentProviderLazy(String instanceId) {
+		if (instanceId != null) {
+			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER + "." + instanceId;
+		} else {
+			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER;
+		}
 		callback = createUpdateListener();
 		conditionSetListener = createConditionSetListener();
 	}
@@ -61,7 +70,6 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-
 		if(updateTask != null)
 			updateTask.cancel();
 
@@ -91,7 +99,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 			return;
 		}
 		
-		filterCondition = model.addConditionSetTracker(IHttpConditionManager.CONDITION_SET_FILTER, conditionSetListener);
+		filterCondition = model.addConditionSetTracker(conditionSetId, conditionSetListener);
 		filterCondition.setMatchOnEmptySet(true);
 		
 		currentWorkspace = model.addWorkspaceListener(createWorkspaceListener());

@@ -19,8 +19,14 @@ import org.eclipse.ui.part.ViewPart;
 import com.subgraph.vega.ui.http.requestlogviewer.RequestLogViewer;
 import com.subgraph.vega.ui.http.requestlogviewer.RequestResponseViewer;
 
+/**
+ * When multiple instances of this view are opened, the secondary view ID must be set to a unique value. The value is
+ * used to differentiate between condition filter sets.
+ */
 public class HttpRequestView extends ViewPart {
 	public final static String ID = "com.subgraph.vega.views.http";
+	public final static String ID_PROXY_SECONDARY = "proxy";
+	public final static String ID_PROXY = ID + ":" + ID_PROXY_SECONDARY; /** Compound ID identifying the non-closable base view in the proxy perspective */
 	private RequestLogViewer requestLogViewer;
 	private RequestResponseViewer requestResponseViewer;
 
@@ -32,7 +38,7 @@ public class HttpRequestView extends ViewPart {
 		parent.setLayout(new FillLayout());
 		final SashForm form = new SashForm(parent, SWT.VERTICAL);
 
-		requestLogViewer = new RequestLogViewer(form);
+		requestLogViewer = new RequestLogViewer(form, getViewSite().getSecondaryId());
 		requestLogViewer.registerContextMenu(getSite());
 
 		requestResponseViewer = new RequestResponseViewer(form);

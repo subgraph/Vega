@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.http.requestfilters;
 
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -33,11 +32,23 @@ import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 
 public class RequestFilterConfigContent implements IConfigDialogContent {
+	private final String conditionSetId;
 	private Composite composite;
 	private TreeViewer treeViewer;
 	private IHttpConditionManager conditionManager;
 	private IHttpConditionSet conditionSet;
 	private boolean conditionSetDirty;
+
+	/**
+	 * @param instanceId A unique ID to differentiate between condition filter sets.
+	 */
+	public RequestFilterConfigContent(String instanceId) {
+		if (instanceId != null) {
+			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER + "." + instanceId;
+		} else {
+			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER;
+		}
+	}
 	
 	@Override
 	public String getTitle() {
@@ -61,11 +72,10 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 	@Override
 	public void onOk() {
 		if(conditionSetDirty) {
-			conditionManager.saveConditionSet("filter", conditionSet);
+			conditionManager.saveConditionSet(conditionSetId, conditionSet);
 			conditionSetDirty = false;
 		}		
 	}
-
 
 	@Override
 	public Composite createContents(Composite parent) {
@@ -91,7 +101,7 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 		final IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
 		if(workspace != null) {
 			conditionManager = workspace.getHttpConditionMananger();
-			conditionSet = conditionManager.getConditionSetCopy("filter");
+			conditionSet = conditionManager.getConditionSetCopy(conditionSetId);
 
 		} else {
 			conditionManager = null;

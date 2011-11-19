@@ -36,6 +36,7 @@
             restorable="false">
       </view>
       <view
+            allowMultiple="false"
             class="com.subgraph.vega.ui.http.identities.IdentitiesView"
             id="com.subgraph.vega.views.http.identities"
             name="Identities"
@@ -71,6 +72,10 @@
       <handler
             class="com.subgraph.vega.ui.http.commands.SendRequest"
             commandId="com.subgraph.vega.commands.sendRequest">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.OpenRequestView"
+            commandId="com.subgraph.vega.commands.openRequestView">
       </handler>
       <handler
             class="com.subgraph.vega.ui.http.commands.OpenRequestViewFilter"
@@ -160,14 +165,6 @@
             id="com.subgraph.vega.commands.sendRequest"
             name="Send Request">
       </command>
-      <command
-            id="com.subgraph.vega.commands.openRequestFilter"
-            name="Open Request View Filters">
-      </command>
-      <command
-            id="com.subgraph.vega.commands.resetRequestFilter"
-            name="Reset Request View Filter">
-      </command>
       <category
             id="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
             name="Interception Queue View Popup">
@@ -181,6 +178,25 @@
             category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
             id="com.subgraph.vega.commands.popup.dropTransaction"
             name="Drop pending transaction">
+      </command>
+      <category
+            id="com.subgraph.vega.commands.requestViewCategory"
+            name="Commands for controlling the Request View">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.requestViewCategory"
+            id="com.subgraph.vega.commands.openRequestView"
+            name="Open New Request Viewer">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.requestViewCategory"
+            id="com.subgraph.vega.commands.openRequestFilter"
+            name="Open Request View Filter">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.requestViewCategory"
+            id="com.subgraph.vega.commands.resetRequestFilter"
+            name="Reset Request View Filter">
       </command>
    </extension>
    <extension
@@ -296,20 +312,22 @@
             allPopups="false"
             locationURI="toolbar:com.subgraph.vega.views.http">
          <command
-               commandId="com.subgraph.vega.commands.openRequestFilter"
-               icon="icons/filter.gif"
-               id="openfilter"
-               label="Open Request Filter"
+               commandId="com.subgraph.vega.commands.openRequestView"
+               icon="icons/new_request_view.png"
+               label="Open New Request Viewer"
                style="push">
          </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:com.subgraph.vega.views.http?before=openfilter">
          <command
                commandId="com.subgraph.vega.commands.resetRequestFilter"
                icon="icons/reset_filter.png"
                label="Reset Request Filter"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.openRequestFilter"
+               icon="icons/filter.gif"
+               id="openfilter"
+               label="Open Request Filter"
                style="push">
          </command>
       </menuContribution>

@@ -39,12 +39,19 @@ import com.subgraph.vega.ui.http.Activator;
 
 public class RequestLogViewer extends Composite {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestlogviewer.popup";
+	private final String instanceId;
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
 //	private TaggablePopupDialog taggablePopupDialog;
 
-	public RequestLogViewer(SashForm parent) {
+	/**
+	 * @param parent
+	 * @param instanceId A unique ID to differentiate between condition filter sets.
+	 */
+	public RequestLogViewer(SashForm parent, String instanceId) {
 		super(parent, SWT.NONE);
+		this.instanceId = instanceId;
+
 		final TableColumnLayout tcl = new TableColumnLayout();
 		setLayout(tcl);
 		createTable(tcl);
@@ -90,7 +97,7 @@ public class RequestLogViewer extends Composite {
 		tableViewer = new TableViewer(this, SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 
-		tableViewer.setContentProvider(new HttpViewContentProviderLazy());
+		tableViewer.setContentProvider(new HttpViewContentProviderLazy(instanceId));
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 
