@@ -21,6 +21,7 @@ import com.subgraph.vega.api.model.variables.IVariableModel;
 import com.subgraph.vega.api.model.web.IWebModel;
 
 public interface IWorkspace extends IModelProperties {
+	IModelVersion getModelVersion();
 	ITagModel getTagModel();
 	IWebModel getWebModel();
 	IVariableModel getVariableModel();

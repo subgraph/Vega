@@ -22,6 +22,7 @@ import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.NamedEventListenerManager;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.model.IModelProperties;
+import com.subgraph.vega.api.model.IModelVersion;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.IWorkspaceEntry;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
@@ -35,6 +36,7 @@ import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.variables.IVariableModel;
 import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.vuge.IConstants;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.internal.model.alerts.ScanAlertRepository;
 import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
@@ -56,6 +58,7 @@ public class Workspace implements IWorkspace {
 	private final IXmlRepository xmlRepository;
 	private final WorkspaceLockStatus lockStatus;
 
+	private IModelVersion modelVersion;
 	private ITagModel tagModel;
 	private IWebModel webModel;
 	private IVariableModel variableModel;
@@ -90,7 +93,7 @@ public class Workspace implements IWorkspace {
 		if(opened)
 			throw new IllegalStateException("open() called on workspace which has already been opened.");
 
-		database = openDatabase(getDatabasePath());
+		database = openDatabase(getDatabaseFile());
 		if(database == null)
 			return false;
 		opened = true;
@@ -100,14 +103,16 @@ public class Workspace implements IWorkspace {
 		return true;
 	}
 
-	private String getDatabasePath() {
-		final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
-		return databaseFile.getAbsolutePath();
+	private File getDatabaseFile() {
+		return new File(workspaceEntry.getPath(), "model.db");
 	}
 
-	private ObjectContainer openDatabase(String databasePath) {
+	private ObjectContainer openDatabase(final File databaseFile) {
 		try {
+			final String databasePath = databaseFile.getAbsolutePath();
+			final boolean exists = databaseFile.exists(); // possible race condition  
 			final ObjectContainer db = configurationFactory.openContainer(databasePath);
+			loadModelVersion(db, !exists);
 			tagModel = new TagModel(db);
 			webModel = new WebModel(db);
 			variableModel = new VariableModel(db);
@@ -124,6 +129,14 @@ public class Workspace implements IWorkspace {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public IModelVersion getModelVersion() {
+		if (!opened) {
+			throw new IllegalStateException("Must open workspace first");
+		}
+		return modelVersion;
 	}
 
 	@Override
@@ -284,11 +297,11 @@ public class Workspace implements IWorkspace {
 		synchronized(this) {
 			conditionManager.notifyClosed();
 			database.close();
-			final File databaseFile = new File(workspaceEntry.getPath(), "model.db");
+			final File databaseFile = getDatabaseFile();
 			if(!databaseFile.delete()) {
 				// XXX
 			}
-			database = openDatabase(getDatabasePath());
+			database = openDatabase(databaseFile);
 			if(database != null) {
 				workspaceStatus = null;
 				eventManager.fireEvent(new WorkspaceResetEvent(this));
@@ -309,6 +322,22 @@ public class Workspace implements IWorkspace {
 				}
 			}
 		};
+	}
+
+	private void loadModelVersion(ObjectContainer database, boolean newFile) {
+		if (newFile == false) {
+			final List<IModelVersion> results = database.query(IModelVersion.class);
+			if (results.size() != 0) {
+				modelVersion = results.get(0);
+			} else {
+				// reverse compatibility: Vega 1.0 beta and earlier did not have model version
+				modelVersion = new ModelVersion(1, 0);
+				database.store(modelVersion);
+			}
+		} else {
+			modelVersion = new ModelVersion(IConstants.VERSION_MAJOR, IConstants.VERSION_MINOR);
+			database.store(modelVersion);
+		}
 	}
 
 }

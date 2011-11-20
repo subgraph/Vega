@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.subgraph.vega.api.vuge.IConstants;
 import com.subgraph.vega.application.Activator;
 
 public class AboutDialog extends TitleAreaDialog {
@@ -30,7 +31,7 @@ public class AboutDialog extends TitleAreaDialog {
 	private final static String LOGO_IMAGE = "icons/subgraph.png";
 	
 	private String aboutText = "Vega, the Open Source Web Application Security Platform.\n\n" +
-								"Version: Beta 1\n" +
+								"Version: " + IConstants.VERSION_STRING + "\n" +
 								"Build id: 0xC0FFEEEE\n" +
 								"\n" +
 								"(c) Copyright Subgraph Technologies, Inc. and others, 2011. All rights reserved.\n" +
