@@ -8,13 +8,13 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.identities.wizard;
+package com.subgraph.vega.ui.identity.identitywizard;
 
 import org.eclipse.jface.wizard.Wizard;
 
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
-import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.identity.Activator;
 
 public class IdentityWizard extends Wizard {
 	private final IdentityWizardPage1 page1;

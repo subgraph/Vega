@@ -8,11 +8,22 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.identities.wizard;
+package com.subgraph.vega.api.model.identity;
 
-public interface IIdentityWizardPage {
-	/**
-	 * Notification that the page was selected.
-	 */
-	public void pageSelected();
+import com.subgraph.vega.api.events.IEvent;
+
+/**
+ * Event indicating a new identity was stored to the database.
+ */
+public class NewIdentityEvent implements IEvent {
+	private final IIdentity identity;
+	
+	public NewIdentityEvent(IIdentity identity) {
+		this.identity = identity;
+	}
+
+	public IIdentity getIdentity() {
+		return identity;
+	}
+
 }

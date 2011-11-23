@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.identities.wizard;
+package com.subgraph.vega.ui.identity.identitywizard;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.subgraph.vega.api.model.identity.IAuthMethod;
 import com.subgraph.vega.api.model.identity.IAuthMethodRfc2617;
-import com.subgraph.vega.ui.http.identities.AuthMethodComboViewer;
+import com.subgraph.vega.ui.identity.identitiesview.AuthMethodComboViewer;
 
 public class IdentityWizardPage2 extends WizardPage implements IIdentityWizardPage {
 	private final IdentityWizardPage1 page1;

@@ -35,13 +35,6 @@
             name="Request Editor"
             restorable="false">
       </view>
-      <view
-            allowMultiple="false"
-            class="com.subgraph.vega.ui.http.identities.IdentitiesView"
-            id="com.subgraph.vega.views.http.identities"
-            name="Identities"
-            restorable="true">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.identities.wizard;
+package com.subgraph.vega.ui.identity.identitywizard;
 
 import org.eclipse.swt.widgets.Control;
 

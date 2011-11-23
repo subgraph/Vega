@@ -12,6 +12,8 @@ package com.subgraph.vega.api.model.identity;
 
 import java.util.Collection;
 
+import com.subgraph.vega.api.events.IEventHandler;
+
 public interface IIdentityModel {
 	/**
 	 * Get all identities managed by the model.
@@ -56,4 +58,16 @@ public interface IIdentityModel {
 	 * @param name Identity, or null if none exists with the given name.
 	 */
 	IIdentity getIdentityByName(String name);
+
+	/**
+	 * Register an event listener to watch for changes to identities managed by the model.
+	 * @param listener Event listener.
+	 */
+	void addChangeListener(IEventHandler listener);
+
+	/**
+	 * De4register a change event listener.
+	 * @param listener Event listener.
+	 */
+	void removeChangeListener(IEventHandler listener);
 }

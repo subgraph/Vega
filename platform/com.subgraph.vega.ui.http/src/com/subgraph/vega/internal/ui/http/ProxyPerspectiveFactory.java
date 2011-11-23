@@ -14,7 +14,6 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
-import com.subgraph.vega.ui.http.identities.IdentitiesView;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView;
 import com.subgraph.vega.ui.http.request.view.HttpRequestView;
@@ -27,15 +26,15 @@ public class ProxyPerspectiveFactory implements IPerspectiveFactory {
 	public void createInitialLayout(IPageLayout layout) {
 		IFolderLayout proxyFolder = layout.createFolder(PROXY_FOLDER, IPageLayout.TOP, 0f, layout.getEditorArea());
 		proxyFolder.addView(HttpRequestView.ID_PROXY);
-		proxyFolder.addView(InterceptView.ID);
-		proxyFolder.addView(InterceptQueueView.ID);
-		proxyFolder.addView(IdentitiesView.ID);
-		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, PROXY_FOLDER);
-		layout.setEditorAreaVisible(false);
 		layout.getViewLayout(HttpRequestView.ID_PROXY).setCloseable(false);
+		proxyFolder.addView(InterceptView.ID);
 		layout.getViewLayout(InterceptView.ID).setCloseable(false);
+		proxyFolder.addView(InterceptQueueView.ID);
 		layout.getViewLayout(InterceptQueueView.ID).setCloseable(false);
+		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, PROXY_FOLDER);
 		layout.getViewLayout(WEBSITE_VIEW).setCloseable(false);
+
+		layout.setEditorAreaVisible(false);
 	}
 
 }
