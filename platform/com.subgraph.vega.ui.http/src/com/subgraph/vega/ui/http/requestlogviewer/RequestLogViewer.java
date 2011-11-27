@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
@@ -48,7 +47,7 @@ public class RequestLogViewer extends Composite {
 	 * @param parent
 	 * @param instanceId A unique ID to differentiate between condition filter sets.
 	 */
-	public RequestLogViewer(SashForm parent, String instanceId) {
+	public RequestLogViewer(Composite parent, String instanceId) {
 		super(parent, SWT.NONE);
 		this.instanceId = instanceId;
 
