@@ -93,7 +93,7 @@ public class RequestLogViewer extends Composite {
 	}
 
 	private void createTable(TableColumnLayout tcl) {
-		tableViewer = new TableViewer(this, SWT.VIRTUAL | SWT.FULL_SELECTION);
+		tableViewer = new TableViewer(this, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 
 		tableViewer.setContentProvider(new HttpViewContentProviderLazy(instanceId));

@@ -321,8 +321,10 @@ public class RequestResponseViewer extends Composite {
 	}
 	
 	public void setCurrentRecord(IRequestLogRecord record) {
-		currentRecord = record;
-		processCurrentTransaction();
+		if (currentRecord != record) {
+			currentRecord = record;
+			processCurrentTransaction();
+		}
 	}
 	
 	private void processCurrentTransaction() {
