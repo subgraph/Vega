@@ -22,6 +22,39 @@ import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 public abstract class ParserBase {
 
 	/**
+	 * Strip leading whitespace from a buffer. Lines with 0 or more SP or HT characters ending with LF or CRLF are
+	 * removed. 
+	 * @param buf Buffer.
+	 * @param bufCursor Parser cursor for buf.
+	 */
+	protected void stripLeadingWhitspace(final CharArrayBuffer buf, final ParserCursor bufCursor) {
+		final int idxTo = bufCursor.getUpperBound();
+		int idxPos = bufCursor.getPos();
+		int idxLast = idxPos;
+		while (idxPos < idxTo) {
+			char ch = buf.charAt(idxPos);
+			if (ch == HTTP.CR) {
+				if (idxTo + 1 < idxPos && buf.charAt(idxPos) == HTTP.LF) {
+					idxPos += 2;
+					idxLast = idxPos;
+				} else {
+					break;
+				}
+			} else if (ch == HTTP.LF) {
+				idxPos++;
+				idxLast = idxPos;
+			} else {
+				if (ch == HTTP.SP || ch == HTTP.HT) {
+					idxPos++;
+				} else {
+					break;
+				}
+			}
+		}
+		bufCursor.updatePos(idxLast);		
+	}
+	
+	/**
 	 * Get the next line of characters from a CharArrayBuffer into another CharArrayBuffer. Treats LF and CRLF as valid
 	 * line delimiters. Treats the entire buffer as a line if no line delimiters are found.
 	 * 
@@ -39,8 +72,8 @@ public abstract class ParserBase {
 		int idxLf = src.indexOf(HTTP.LF, idxPos, srcCursor.getUpperBound());
 		int idxEnd;
 
-		if (idxLf > 0) {
-			if (src.charAt(idxLf - 1) == HTTP.CR) {
+		if (idxLf >= 0) {
+			if (idxLf != 0 && src.charAt(idxLf - 1) == HTTP.CR) {
 				idxEnd = idxLf - 1;
 			} else {
 				idxEnd = idxLf;
@@ -78,7 +111,7 @@ public abstract class ParserBase {
 			idxLf = src.indexOf(HTTP.LF, idxPos, srcCursor.getUpperBound());
 
 			if (idxLf > 0) {
-				if (src.charAt(idxLf - 1) == HTTP.CR) {
+				if (idxLf != srcCursor.getPos() && src.charAt(idxLf - 1) == HTTP.CR) {
 					idxEnd = idxLf - 1;
 				} else {
 					idxEnd = idxLf;
