@@ -69,7 +69,7 @@ public class EmbeddedControlPainter implements IPainter, PaintListener, ControlL
 		final String content = document.get();
 		final String tag = "\n" + TAG_CHARACTER;
 		final int tagIndex = content.indexOf(tag);
-		if(tagIndex == -1) {
+		if(tagIndex != -1) {
 			return content.substring(0, tagIndex);
 		} else {
 			return content;
