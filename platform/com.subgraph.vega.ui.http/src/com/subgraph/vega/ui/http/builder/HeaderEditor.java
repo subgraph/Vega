@@ -44,6 +44,7 @@ import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
 public class HeaderEditor extends Composite implements IHttpBuilderPart {
 	private IHttpMessageBuilder messageBuilder;
 	private TableViewer tableViewerHeaders;
+	private boolean headersTableHasSelection;
 	private Button buttonCreate;
 	private Button buttonRemove;
 	private Button buttonMoveUp;
@@ -81,9 +82,9 @@ public class HeaderEditor extends Composite implements IHttpBuilderPart {
 	@Override
 	public void setEditable(boolean editable) {
 		buttonCreate.setEnabled(editable);
-		buttonRemove.setEnabled(editable);
-		buttonMoveUp.setEnabled(editable);
-		buttonMoveDown.setEnabled(editable);
+		buttonRemove.setEnabled(editable && headersTableHasSelection);
+		buttonMoveUp.setEnabled(editable && headersTableHasSelection);
+		buttonMoveDown.setEnabled(editable && headersTableHasSelection);
 	}
 
 	@Override
@@ -119,10 +120,10 @@ public class HeaderEditor extends Composite implements IHttpBuilderPart {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				boolean sel = event.getSelection().isEmpty(); 
-				buttonRemove.setGrayed(sel);
-				buttonMoveUp.setGrayed(sel);
-				buttonMoveDown.setGrayed(sel);
+				headersTableHasSelection = !event.getSelection().isEmpty(); 
+				buttonRemove.setEnabled(headersTableHasSelection);
+				buttonMoveUp.setEnabled(headersTableHasSelection);
+				buttonMoveDown.setEnabled(headersTableHasSelection);
 			}
 		};
 	}
@@ -174,17 +175,17 @@ public class HeaderEditor extends Composite implements IHttpBuilderPart {
 		buttonRemove = new Button(rootControl, SWT.PUSH);
 		buttonRemove.setText("remove");
 		buttonRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		buttonRemove.setGrayed(true);
+		buttonRemove.setEnabled(false);
 		buttonRemove.addSelectionListener(createSelectionListenerButtonRemove());
 		buttonMoveUp = new Button(rootControl, SWT.PUSH);
 		buttonMoveUp.setText("move up");
 		buttonMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		buttonMoveUp.setGrayed(true);
+		buttonMoveUp.setEnabled(false);
 		buttonMoveUp.addSelectionListener(createSelectionListenerButtonMoveUp());
 		buttonMoveDown = new Button(rootControl, SWT.PUSH);
 		buttonMoveDown.setText("move down");
 		buttonMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		buttonMoveDown.setGrayed(true);
+		buttonMoveDown.setEnabled(false);
 		buttonMoveDown.addSelectionListener(createSelectionListenerButtonMoveDown());
 
 		return rootControl;
