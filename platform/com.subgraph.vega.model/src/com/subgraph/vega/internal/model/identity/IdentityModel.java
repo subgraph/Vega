@@ -18,6 +18,7 @@ import com.db4o.query.Predicate;
 
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.identity.IAuthMethodHttpMacro;
 import com.subgraph.vega.api.model.identity.IAuthMethodNtlm;
 import com.subgraph.vega.api.model.identity.IAuthMethodRfc2617;
 import com.subgraph.vega.api.model.identity.IIdentity;
@@ -51,6 +52,11 @@ public class IdentityModel implements IIdentityModel {
 	@Override
 	public IAuthMethodNtlm createAuthMethodNtlm() {
 		return new AuthMethodNtlm();
+	}
+
+	@Override
+	public IAuthMethodHttpMacro createAuthMethodHttpMacro() {
+		return new AuthMethodHttpMacro();
 	}
 
 	@Override

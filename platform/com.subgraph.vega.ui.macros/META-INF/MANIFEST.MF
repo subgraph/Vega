@@ -19,3 +19,4 @@ Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.ui.http.requestlogviewer,
  com.subgraph.vega.ui.util,
  org.apache.http;version="4.1.0"
+Export-Package: com.subgraph.vega.ui.macros.macrodialog

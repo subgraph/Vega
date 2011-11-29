@@ -24,6 +24,7 @@ public class IdentitiesViewerLabelProvider extends LabelProvider {
 		return ((IIdentityTreeNode) element).getText();
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		final String imagePath = ((IIdentityTreeNode) element).getImagePath();
 		if (imagePath != null) {

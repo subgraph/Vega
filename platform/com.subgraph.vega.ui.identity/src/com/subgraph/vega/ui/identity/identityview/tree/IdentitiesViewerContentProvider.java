@@ -29,6 +29,9 @@ public class IdentitiesViewerContentProvider implements ITreeContentProvider, IE
 
 	@Override
 	public void dispose() {
+		if (identityModel != null) {
+			identityModel.removeChangeListener(this);
+		}
 	}
 
 	@Override

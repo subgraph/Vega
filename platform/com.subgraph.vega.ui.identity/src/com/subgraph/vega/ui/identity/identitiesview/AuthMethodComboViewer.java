@@ -25,7 +25,8 @@ public class AuthMethodComboViewer extends ComboViewer {
 	public enum AuthMethodSelection {
 		AUTH_METHOD_BASIC("basic http authentication", IAuthMethod.AuthMethodType.AUTH_METHOD_RFC2617),
 		AUTH_METHOD_DIGEST("digest http authentication", IAuthMethod.AuthMethodType.AUTH_METHOD_RFC2617),
-		AUTH_METHOD_NTLM("NTLM", IAuthMethod.AuthMethodType.AUTH_METHOD_NTLM);
+		AUTH_METHOD_NTLM("NTLM", IAuthMethod.AuthMethodType.AUTH_METHOD_NTLM),
+		AUTH_METHOD_HTTP_MACRO("macro", IAuthMethod.AuthMethodType.AUTH_METHOD_HTTP_MACRO);
 		
 		private String name;
 		private IAuthMethod.AuthMethodType authMethodType;

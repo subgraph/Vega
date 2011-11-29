@@ -65,6 +65,9 @@ public class IdentityWizardPage2 extends WizardPage implements IIdentityWizardPa
 		case AUTH_METHOD_NTLM:
 			control = new AuthMethodControlNtlm(parentComposite, this);
 			break;
+		case AUTH_METHOD_HTTP_MACRO:
+			control = new AuthMethodControlHttpMacro(parentComposite, this);
+			break;
 		default:
 			return null;
 		}
