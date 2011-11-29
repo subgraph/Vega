@@ -10,7 +10,16 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.macros;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
+
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpRequest;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
@@ -29,6 +38,10 @@ public class HttpMacroItem implements IHttpMacroItem, Activatable {
 
 	public HttpMacroItem(IRequestLogRecord requestLogRecord) {
 		this.requestLogRecord = requestLogRecord;
+		useCookies = true;
+		keepCookies = true;
+		paramDict = new ActivatableHashMap<String, IHttpMacroItemParam>();
+		createParams();
 	}
 
 	@Override
@@ -93,5 +106,34 @@ public class HttpMacroItem implements IHttpMacroItem, Activatable {
 		}
 		this.activator = activator;			
 	}
+
+	// XXX clean this
+	private void createParams() {
+		HttpRequest request = requestLogRecord.getRequest();
+
+		URI uri = null;
+		try {
+			uri = new URI(request.getRequestLine().getUri());
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		List<NameValuePair> requestParamList = URLEncodedUtils.parse(uri, "UTF-8");
+		for (NameValuePair pair: requestParamList) {
+			paramDict.put(pair.getName(), new HttpMacroItemParam(pair.getName(), pair.getValue()));
+		}		
+
+		if (request instanceof HttpEntityEnclosingRequest) {
+			List<NameValuePair> entityParamList = null;
+			try {
+				entityParamList = URLEncodedUtils.parse(((HttpEntityEnclosingRequest) request).getEntity());
+			} catch (IOException e) {
+				// there won't be any exceptions for a record from the database
+			}
+			for (NameValuePair pair: entityParamList) {
+				paramDict.put(pair.getName(), new HttpMacroItemParam(pair.getName(), pair.getValue()));
+			}
+		}
+	}	
 
 }

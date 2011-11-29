@@ -12,6 +12,9 @@ package com.subgraph.vega.api.model.macros;
 
 import java.util.Collection;
 
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+
 /**
  * A HTTP macro. A macro is a sequence of one or more requests.
  */
@@ -28,6 +31,13 @@ public interface IHttpMacro {
 	 */
 	String getName();
 
+	/**
+	 * Create an IHttpMacroItem and add it to this macro.
+	 * @param record IRequestLogRecord to create the item for.
+	 * @return
+	 */
+	IHttpMacroItem createMacroItem(IRequestLogRecord record);
+	
 	/**
 	 * Get the macro items comprising this macro. The collection is ordered by item execution order.
 	 * @return Macro items. 

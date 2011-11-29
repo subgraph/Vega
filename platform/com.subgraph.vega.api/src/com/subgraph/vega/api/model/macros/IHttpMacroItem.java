@@ -20,7 +20,7 @@ public interface IHttpMacroItem {
 	 * @return IRequestLogRecord.
 	 */
 	IRequestLogRecord getRequestLogRecord();
-	
+
 	/**
 	 * Set whether cookies set in the request engine should be used when sending the macro request. 
 	 * @param useCookies Boolean value indicating whether cookies should be used.

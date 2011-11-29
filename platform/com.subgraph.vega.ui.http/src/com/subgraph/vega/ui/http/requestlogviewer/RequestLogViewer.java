@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.http.requestlogviewer;
 
+import java.util.List;
+
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLayoutData;
@@ -143,6 +145,11 @@ public class RequestLogViewer extends Composite {
 				}
 			}
 		};
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<IRequestLogRecord> getSelectionList() {
+		return ((IStructuredSelection) tableViewer.getSelection()).toList();
 	}
 	
 //	private MouseMoveListener createMouseMoveListener() {

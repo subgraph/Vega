@@ -19,11 +19,16 @@ import com.db4o.collections.ActivatableArrayList;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroItem;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public class HttpMacro implements IHttpMacro, Activatable {
 	private transient Activator activator;
 	private String name;
 	private ActivatableArrayList<IHttpMacroItem> macroItemList;
+
+	public HttpMacro() {
+		macroItemList = new ActivatableArrayList<IHttpMacroItem>();
+	}
 
 	@Override
 	public void setName(String name) {
@@ -36,6 +41,14 @@ public class HttpMacro implements IHttpMacro, Activatable {
 	public String getName() {
 		activate(ActivationPurpose.READ);
 		return name;
+	}
+
+	@Override
+	public IHttpMacroItem createMacroItem(IRequestLogRecord record) {
+		activate(ActivationPurpose.READ);
+		HttpMacroItem macroItem = new HttpMacroItem(record);
+		macroItemList.add(macroItem);
+		return macroItem;
 	}
 
 	@Override

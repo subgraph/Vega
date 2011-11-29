@@ -25,6 +25,12 @@ public class HttpMacroItemParam implements IHttpMacroItemParam, Activatable {
 		this.name = name;
 	}
 
+	public HttpMacroItemParam(String name, String value) {
+		this.name = name;
+		this.source = IHttpMacroItemParam.ValueSource.SOURCE_LITERAL;
+		this.value = value;
+	}
+	
 	@Override
 	public String getName() {
 		activate(ActivationPurpose.READ);
