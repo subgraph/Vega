@@ -10,8 +10,13 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.macros;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 
+import org.apache.http.client.methods.HttpUriRequest;
+
+import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 public interface IHttpMacroItem {
@@ -59,4 +64,13 @@ public interface IHttpMacroItem {
 	 * @return Parameter, or null if none exists for that name.
 	 */
 	IHttpMacroItemParam getParam(String name);
+
+	/**
+	 * Create a HttpUriRequest for this macro item.
+	 * @param context Macro context.
+	 * @return HttpUriRequest.
+	 * @throws URISyntaxException 
+	 * @throws UnsupportedEncodingException 
+	 */
+	HttpUriRequest createRequest(IHttpMacroContext context) throws URISyntaxException, UnsupportedEncodingException;
 }

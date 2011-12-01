@@ -27,11 +27,14 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.SyncBasicHttpContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
+import com.subgraph.vega.api.http.requests.IHttpMacroContext;
+import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestModifier;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
+import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
@@ -118,6 +121,16 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		sb.append(ex.getMessage());
 		sb.append("]");
 		return new RequestEngineException(sb.toString(), ex);
+	}
+
+	@Override
+	public IHttpMacroContext createMacroContext() {
+		return new HttpMacroContext();
+	}
+
+	@Override
+	public IHttpMacroExecutor createMacroExecutor(IHttpMacro macro, IHttpMacroContext context) {
+		return new HttpMacroExecutor(this, macro, context);
 	}
 
 }

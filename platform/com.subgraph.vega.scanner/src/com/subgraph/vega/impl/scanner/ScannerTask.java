@@ -19,7 +19,13 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
+import com.subgraph.vega.api.http.requests.IHttpMacroContext;
+import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
+import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.model.identity.IAuthMethod;
+import com.subgraph.vega.api.model.identity.IAuthMethodHttpMacro;
+import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
@@ -54,14 +60,16 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
 		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
 		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
-		runCrawlerPhase();
+		if (handleMacroAuthentication()) {
+			runCrawlerPhase();
 
-		if(stopRequested) {
-			scanInstance.updateScanStatus(IScanInstance.SCAN_CANCELLED);
-			logger.info("Scanner cancelled");
-		} else {
-			scanInstance.updateScanStatus(IScanInstance.SCAN_COMPLETED);
-			logger.info("Scanner completed");
+			if(stopRequested) {
+				scanInstance.updateScanStatus(IScanInstance.SCAN_CANCELLED);
+				logger.info("Scanner cancelled");
+			} else {
+				scanInstance.updateScanStatus(IScanInstance.SCAN_COMPLETED);
+				logger.info("Scanner completed");
+			}
 		}
 		scan.doFinish();
 		printModuleRuntimeStats();
@@ -79,6 +87,32 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 			if(profile.getInvocationCount() > 0)
 				logger.info(profile.toString());			
 		}
+	}
+	
+	// temporary: in the future this will be managed with session handling rules
+	private boolean handleMacroAuthentication() {
+		IIdentity identity = scan.getConfig().getScanIdentity();
+		if (identity != null) {
+			IAuthMethod authMethod = identity.getAuthMethod();
+			if (authMethod != null && authMethod.getType() == IAuthMethod.AuthMethodType.AUTH_METHOD_HTTP_MACRO) {
+				logger.info("Pre-authenticating using an HTTP macro");
+				IAuthMethodHttpMacro authMethodMacro = (IAuthMethodHttpMacro)authMethod;
+				IHttpMacroContext context = scan.getRequestEngine().createMacroContext();
+				context.setDict(identity.getDict());
+				IHttpMacroExecutor executor = scan.getRequestEngine().createMacroExecutor(authMethodMacro.getMacro(), context);
+				while (executor.hasNext()) {
+					IHttpResponse response;
+					try {
+						response = executor.sendNextRequest();
+					} catch (Exception e) {
+						logger.log(Level.WARNING, e.getMessage());
+						return false;
+					}
+					contentAnalyzer.processResponse(response, true, false);
+				}
+			}
+		}
+		return true;
 	}
 	
 	private void runCrawlerPhase() {

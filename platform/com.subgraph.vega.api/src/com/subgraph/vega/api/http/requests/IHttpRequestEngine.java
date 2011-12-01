@@ -14,6 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public interface IHttpRequestEngine {
@@ -67,4 +68,19 @@ public interface IHttpRequestEngine {
 	 * @throws RequestEngineException
 	 */
 	IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException;
+
+	/**
+	 * Create a macro context.
+	 * @return Macro context.
+	 */
+	IHttpMacroContext createMacroContext();
+	
+	/**
+	 * Create a macro executor to execute a macro with this request engine.
+	 * @param macro Macro to execute.
+	 * @param context Macro context.
+	 * @return Macro executor.
+	 */
+	IHttpMacroExecutor createMacroExecutor(IHttpMacro macro, IHttpMacroContext context);
+	
 }

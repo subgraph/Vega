@@ -28,8 +28,7 @@ public class AuthMethodHttpMacro extends AbstractAuthMethod implements IAuthMeth
 
 	@Override
 	public void setAuth(IHttpRequestEngine requestEngine) {
-		activate(ActivationPurpose.READ);
-
+		// authentication is handled externally for now
 	}
 
 }

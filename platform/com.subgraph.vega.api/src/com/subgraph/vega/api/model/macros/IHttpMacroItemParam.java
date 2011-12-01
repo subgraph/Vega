@@ -34,6 +34,14 @@ public interface IHttpMacroItemParam {
 	};
 
 	/**
+	 * Enumeration of where the parameter is set.
+	 */
+	enum ValueSetIn {
+		VALUE_SET_IN_URI,
+		VALUE_SET_IN_BODY,
+	}
+
+	/**
 	 * Get the parameter name.
 	 * @return Parameter name.
 	 */
@@ -44,7 +52,7 @@ public interface IHttpMacroItemParam {
 	 * @param source Value source.
 	 */
 	void setValueSource(ValueSource source);
-	
+
 	/**
 	 * Get the value source for the parameter.
 	 * @return Value source.
@@ -52,9 +60,21 @@ public interface IHttpMacroItemParam {
 	ValueSource getValueSource();
 
 	/**
+	 * Set where the parameter is to be put in a request.
+	 * @param setIn Where the parameter is to be put in a request.
+	 */
+	void setSetIn(ValueSetIn setIn);
+
+	/**
+	 * Get where the parameter is to be put in a request.
+	 * @return Where the parameter is to be put in a request.
+	 */
+	ValueSetIn getSetIn();
+	
+	/**
 	 * Set the value of the parameter. Varies depending on the ValueSource:
 	 * 	- SOURCE_LITERAL: the literal value to submit.
-	 * 	- SOURCE_VARIABLE: the name of the identity variable to obtain a value from.
+	 * 	- SOURCE_VARIABLE: the name of the variable in a variable dictionary to obtain a value from.
 	 *  - SOURCE_DERIVE: must be null
 	 */
 	void setValue(String value);
@@ -62,7 +82,7 @@ public interface IHttpMacroItemParam {
 	/**
 	 * Get the value of the parameter. Varies depending on the ValueSource:
 	 * 	- SOURCE_LITERAL: the literal value to submit.
-	 * 	- SOURCE_VARIABLE: the name of the identity variable to obtain a value from.
+	 * 	- SOURCE_VARIABLE: the name of the variable in a variable dictionary to obtain a value from.
 	 *  - SOURCE_DERIVE: always null
 	 * @return Parameter value, or null if none is set.
 	 */

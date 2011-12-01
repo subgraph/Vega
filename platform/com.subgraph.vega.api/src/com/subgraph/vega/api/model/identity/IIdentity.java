@@ -12,11 +12,13 @@ package com.subgraph.vega.api.model.identity;
 
 import java.util.Collection;
 
+import com.subgraph.vega.api.model.variables.IVariableDictionary;
+
 /**
  * An identity consists of a dictionary of information about a website identity (typical ex. a user on a website) and
  * additional information about how to interact with a site when using that identity.
  */
-public interface IIdentity {
+public interface IIdentity extends IVariableDictionary {
 	/**
 	 * Set the name of this identity. The identity name must be unique within the workspace.
 	 * @param name Identity name.
@@ -40,21 +42,6 @@ public interface IIdentity {
 	 * @return Authentication method.
 	 */
 	IAuthMethod getAuthMethod();
-	
-	/**
-	 * Set a dictionary value.
-	 * @param key IVariable name to set.
-	 * @param value Value to set.
-	 * @return Previous value, or null if none was set.
-	 */
-	String setDictValue(String key, String value);
-
-	/**
-	 * Get a dictionary value for a variable name.
-	 * @param key IVariable name.
-	 * @return Dictionary value, or null if none exists.
-	 */
-	String getDictValue(String key);
 
 	/**
 	 * Add a path exclusion regular expression to prevent the scanner from accessing paths. 

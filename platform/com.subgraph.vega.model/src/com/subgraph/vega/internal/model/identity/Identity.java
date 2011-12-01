@@ -12,6 +12,8 @@ package com.subgraph.vega.internal.model.identity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
@@ -61,18 +63,6 @@ public class Identity implements IIdentity, Activatable {
 	}
 
 	@Override
-	public String setDictValue(String key, String value) {
-		activate(ActivationPurpose.READ);
-		return userDict.put(key, value);
-	}
-
-	@Override
-	public String getDictValue(String key) {
-		activate(ActivationPurpose.READ);
-		return userDict.get(key);
-	}
-
-	@Override
 	public void addPathExclusion(String expression) {
 		activate(ActivationPurpose.READ);
 		pathExclusionList.add(expression);
@@ -90,6 +80,24 @@ public class Identity implements IIdentity, Activatable {
 		activate(ActivationPurpose.READ);
 		pathExclusionList.remove(expression);
 		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public String setDictValue(String key, String value) {
+		activate(ActivationPurpose.READ);
+		return userDict.put(key, value);
+	}
+
+	@Override
+	public String getDictValue(String key) {
+		activate(ActivationPurpose.READ);
+		return userDict.get(key);
+	}
+
+	@Override
+	public Map<String, String> getDict() {
+		activate(ActivationPurpose.READ);
+		return new HashMap<String, String>(userDict);
 	}
 
 	@Override
