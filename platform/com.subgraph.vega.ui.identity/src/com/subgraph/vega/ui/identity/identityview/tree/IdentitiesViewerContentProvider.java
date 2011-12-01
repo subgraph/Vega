@@ -25,7 +25,7 @@ import com.subgraph.vega.api.model.identity.NewIdentityEvent;
 public class IdentitiesViewerContentProvider implements ITreeContentProvider, IEventHandler {
 	private IIdentityModel identityModel;
 	private Viewer viewer;
-	private List<IdentityTreeNode> rootList = new ArrayList<IdentityTreeNode>();
+	private List<IIdentityTreeNode> childrenList = new ArrayList<IIdentityTreeNode>();
 
 	@Override
 	public void dispose() {
@@ -40,14 +40,15 @@ public class IdentitiesViewerContentProvider implements ITreeContentProvider, IE
 		if (identityModel != newInput) {
 			if (identityModel != null) {
 				identityModel.removeChangeListener(this);
+				childrenList.clear();
 			}
 
 			identityModel = (IIdentityModel) newInput;
-			rootList.clear();
+			childrenList.clear();
 			if (identityModel != null) {
 				identityModel.addChangeListener(this);
 				for (IIdentity identity: identityModel.getAllIdentities()) {
-					rootList.add(new IdentityTreeNode(identity));
+					childrenList.add(new IdentityTreeNode(identity));
 				}
 			} 
 		}
@@ -55,7 +56,7 @@ public class IdentitiesViewerContentProvider implements ITreeContentProvider, IE
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return rootList.toArray();
+		return childrenList.toArray();
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class IdentitiesViewerContentProvider implements ITreeContentProvider, IE
 	@Override
 	public void handleEvent(IEvent event) {
 		if (event instanceof NewIdentityEvent) {
-			rootList.add(new IdentityTreeNode(((NewIdentityEvent) event).getIdentity()));
+			childrenList.add(new IdentityTreeNode(((NewIdentityEvent) event).getIdentity()));
 			viewer.refresh();
 		}
 	}
