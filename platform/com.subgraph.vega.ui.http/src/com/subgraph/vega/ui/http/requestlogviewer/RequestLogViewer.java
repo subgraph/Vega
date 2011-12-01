@@ -24,6 +24,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
@@ -41,6 +43,7 @@ import com.subgraph.vega.ui.http.Activator;
 public class RequestLogViewer extends Composite {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestlogviewer.popup";
 	private final String instanceId;
+	private final int heightInRows;
 	private TableViewer tableViewer;
 	private RequestResponseViewer requestResponseViewer;
 //	private TaggablePopupDialog taggablePopupDialog;
@@ -48,14 +51,24 @@ public class RequestLogViewer extends Composite {
 	/**
 	 * @param parent
 	 * @param instanceId A unique ID to differentiate between condition filter sets.
+	 * @param heightInRows Desired height of table in text rows, or 0 to fill available space. 
 	 */
-	public RequestLogViewer(Composite parent, String instanceId) {
+	public RequestLogViewer(Composite parent, String instanceId, int heightInRows) {
 		super(parent, SWT.NONE);
 		this.instanceId = instanceId;
+		this.heightInRows = heightInRows;
 
-		final TableColumnLayout tcl = new TableColumnLayout();
-		setLayout(tcl);
-		createTable(tcl);
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.marginLeft = 0;
+		layout.marginTop = 0;
+		layout.marginRight = 0;
+		layout.marginBottom = 0;
+		setLayout(layout);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		createTable(gd).setLayoutData(gd);
+
 		tableViewer.setInput(Activator.getDefault().getModel());
 	}
 
@@ -94,16 +107,23 @@ public class RequestLogViewer extends Composite {
 		site.setSelectionProvider(tableViewer);
 	}
 
-	private void createTable(TableColumnLayout tcl) {
-		tableViewer = new TableViewer(this, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
-		createColumns(tableViewer, tcl);
+	private Composite createTable(GridData gd) {
+		final Composite rootControl = new Composite(this, SWT.NONE);
+		final TableColumnLayout tcl = new TableColumnLayout();
+		rootControl.setLayout(tcl);
 
+		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
+		createColumns(tableViewer, tcl);
 		tableViewer.setContentProvider(new HttpViewContentProviderLazy(instanceId));
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
-
 //		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
 //		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
+		if (heightInRows != 0) {
+			gd.heightHint = tableViewer.getTable().getItemHeight() * heightInRows;
+		}		
+		
+		return rootControl;
 	}
 	
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
