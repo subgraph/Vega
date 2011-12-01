@@ -235,13 +235,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.subgraph.vega.ui.model"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.subgraph.vega.ui.identity"
          download-size="0"
          install-size="0"
@@ -250,6 +243,13 @@
 
    <plugin
          id="com.subgraph.vega.ui.macros"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.subgraph.vega.ui.tags"
          download-size="0"
          install-size="0"
          version="0.0.0"

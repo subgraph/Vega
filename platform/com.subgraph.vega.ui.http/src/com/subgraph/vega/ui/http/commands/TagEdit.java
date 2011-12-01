@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.ui.model.taggableeditor.TaggableEditorDialog;
+import com.subgraph.vega.ui.tags.taggableeditor.TaggableEditorDialog;
 
 public class TagEdit extends AbstractHandler {
 

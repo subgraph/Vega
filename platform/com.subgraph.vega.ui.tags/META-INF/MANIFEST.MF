@@ -1,16 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Model
-Bundle-SymbolicName: com.subgraph.vega.ui.model;singleton:=true
+Bundle-Name: Tags
+Bundle-SymbolicName: com.subgraph.vega.ui.tags
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.subgraph.vega.ui.model.Activator
+Bundle-Activator: com.subgraph.vega.ui.tags.Activator
 Bundle-Vendor: SUBGRAPH
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Export-Package: com.subgraph.vega.ui.tags.taggableeditor,
+ com.subgraph.vega.ui.tagsl.taggablepopup
 Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.api.model,
  com.subgraph.vega.api.model.tags
-Export-Package: com.subgraph.vega.ui.model.taggableeditor,
- com.subgraph.vega.ui.model.taggablepopup
