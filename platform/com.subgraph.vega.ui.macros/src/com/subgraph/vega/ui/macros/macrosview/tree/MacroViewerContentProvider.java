@@ -10,19 +10,28 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.macros.macrosview.tree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroModel;
+import com.subgraph.vega.api.model.macros.NewMacroEvent;
 
 public class MacroViewerContentProvider implements ITreeContentProvider, IEventHandler {
 	private IHttpMacroModel macroModel;
 	private Viewer viewer;
+	private final List<IMacroTreeNode> childrenList = new ArrayList<IMacroTreeNode>();
 
 	@Override
 	public void dispose() {
+		if (macroModel != null) {
+			macroModel.removeChangeListener(this);
+		}
 	}
 
 	@Override
@@ -31,23 +40,27 @@ public class MacroViewerContentProvider implements ITreeContentProvider, IEventH
 		if (newInput != oldInput) {
 			if (macroModel != null) {
 				macroModel.removeChangeListener(this);
+				childrenList.clear();
 			}
 
 			macroModel = (IHttpMacroModel) newInput;
 			if (macroModel != null) {
 				macroModel.addChangeListener(this);
+				for (IHttpMacro macro: macroModel.getAllMacros()) {
+					childrenList.add(new MacroTreeNode(macro));
+				}
 			}
 		}
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return new Object[0];
+		return childrenList.toArray();
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		return null;
+		return ((IMacroTreeNode) parentElement).getChildren();
 	}
 
 	@Override
@@ -57,11 +70,15 @@ public class MacroViewerContentProvider implements ITreeContentProvider, IEventH
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return false;
+		return ((IMacroTreeNode) element).hasChildren();
 	}
 
 	@Override
 	public void handleEvent(IEvent event) {
+		if (event instanceof NewMacroEvent) {
+			childrenList.add(new MacroTreeNode(((NewMacroEvent) event).getMacro()));
+			viewer.refresh();
+		}
 	}
 
 }

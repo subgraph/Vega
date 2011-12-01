@@ -11,6 +11,7 @@
 package com.subgraph.vega.ui.macros.macrosview.tree;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
 
 import com.subgraph.vega.ui.macros.Activator;
 import com.subgraph.vega.ui.util.ImageCache;
@@ -20,7 +21,16 @@ public class MacroViewerLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		return "";
+		return ((IMacroTreeNode) element).getText();
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		final String imagePath = ((IMacroTreeNode) element).getImagePath();
+		if (imagePath != null) {
+			return imageCache.get(imagePath);
+		}
+		return null;
 	}
 
 }
