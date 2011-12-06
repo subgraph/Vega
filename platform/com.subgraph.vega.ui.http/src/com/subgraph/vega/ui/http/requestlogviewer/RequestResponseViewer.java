@@ -96,11 +96,6 @@ public class RequestResponseViewer extends Composite {
 		createDisposeListener();
 	}
 
-	@Override
-	public void dispose() {
-		Activator.getDefault().getModel().removeWorkspaceListener(workspaceListener);
-	}
-
 	private void createDisposeListener() {
 		addDisposeListener(new DisposeListener() {
 			@Override
