@@ -38,7 +38,9 @@ import com.subgraph.vega.api.model.requests.RequestLogUpdateEvent;
 public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private static final int UPDATE_INTERVAL = 500;
 
+	private IModel model;
 	private IWorkspace currentWorkspace;
+	private IEventHandler workspaceListener;
 	private TableViewer tableViewer;
 	private List<IRequestLogRecord> records;
 	private final String conditionSetId;
@@ -60,12 +62,14 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		} else {
 			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER;
 		}
+		workspaceListener = createWorkspaceListener();
 		callback = createUpdateListener();
 		conditionSetListener = createConditionSetListener();
 	}
 
 	@Override
 	public void dispose() {
+		cleanupListeners();
 	}
 
 	@Override
@@ -84,16 +88,19 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		else
 			setNullInput();
 	}
-
+	
 	private void setNullInput() {
+		cleanupListeners();
 		currentCount = lastUpdateCount = 0;
 		tableViewer.setItemCount(0);
+		model = null; 
 		currentWorkspace = null;
 		updateTask = null;
 		filterCondition = null;
 	}
 	
 	private void setNewInput(IModel model) {
+		this.model = model;
 		if(model == null) {
 			setNullInput();
 			return;
@@ -102,7 +109,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		filterCondition = model.addConditionSetTracker(conditionSetId, conditionSetListener);
 		filterCondition.setMatchOnEmptySet(true);
 		
-		currentWorkspace = model.addWorkspaceListener(createWorkspaceListener());
+		currentWorkspace = model.addWorkspaceListener(workspaceListener);
 		if(currentWorkspace != null) 
 			currentWorkspace.getRequestLog().addUpdateListener(callback, filterCondition);
 		
@@ -110,8 +117,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		updateTask = createTimerTask(tableViewer.getControl().getDisplay());
 		updateTimer.scheduleAtFixedRate(updateTask, 0, UPDATE_INTERVAL);
 	}
-	
-	
+
 	private IRequestLogUpdateListener createUpdateListener() {
 		return new IRequestLogUpdateListener() {
 			@Override
@@ -148,6 +154,20 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		};
 	}
 	
+	private void cleanupListeners() {
+		if (currentWorkspace != null) {
+			currentWorkspace.getRequestLog().removeUpdateListener(callback);
+		}
+
+		if (model != null) {
+			if (filterCondition != null) {
+				model.removeConditionSetTracker(conditionSetId, conditionSetListener);
+				filterCondition = null;
+			}
+			model.removeWorkspaceListener(workspaceListener);
+		}
+	}
+
 	private void onWorkspaceOpen(WorkspaceOpenEvent event) {
 		currentWorkspace.getRequestLog().removeUpdateListener(callback);
 		currentWorkspace = event.getWorkspace();
