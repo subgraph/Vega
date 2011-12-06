@@ -86,9 +86,9 @@ public class TransactionManager {
 		};
 		currentSerial = 0;
 		requestStatus = TransactionStatus.STATUS_INACTIVE;
-		requestTransactionSerial = currentSerial;
+		requestTransactionSerial = 0;
 		responseStatus = TransactionStatus.STATUS_INACTIVE;
-		responseTransactionSerial = currentSerial;
+		responseTransactionSerial = 0;
 	}
 	
 	/**
@@ -132,8 +132,6 @@ public class TransactionManager {
 					currentSerial++;
 					requestTransactionSerial++;
 					responseTransactionSerial++;
-//					requestSerial++;
-//					responseSerial++;
 					requestStatus = responseStatus = TransactionStatus.STATUS_INACTIVE;
 				}
 				interceptor = null;

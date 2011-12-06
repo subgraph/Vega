@@ -55,7 +55,8 @@ public class TransactionViewer extends Composite {
 	private StackLayout viewerLayout;
 	private Composite viewerEmpty;
 	private Menu viewerMenu;
-	private boolean isPending = false;
+	private boolean isPending;
+	private int lastTransactionSerial;
 	private IHttpBuilderPart builderPartCurr;
 	private Window configDialog;
 
@@ -65,6 +66,7 @@ public class TransactionViewer extends Composite {
 		this.model = model;
 		this.direction = direction;
 		this.transactionInfo = transactionInfo;
+		isPending = false;
 
 		setLayout(createLayout());
 
@@ -76,9 +78,11 @@ public class TransactionViewer extends Composite {
 		viewerGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		if (direction == TransactionDirection.DIRECTION_REQUEST) { 
+		    lastTransactionSerial = transactionInfo.getRequestTransactionSerial();
 			createViewersRequest(viewerGroup);
 			updateViewerRequest();
 		} else {
+		    lastTransactionSerial = transactionInfo.getResponseTransactionSerial();
 			createViewersResponse(viewerGroup);
 			updateViewerResponse();
 		}
@@ -233,7 +237,10 @@ public class TransactionViewer extends Composite {
 			isPending = (status == TransactionManager.TransactionStatus.STATUS_PENDING);
 			topControl = builderPartCurr.getControl();
 			builderPartCurr.setEditable(isPending);
-			builderPartCurr.refresh();
+			if (lastTransactionSerial != transactionInfo.getRequestTransactionSerial()) {
+				lastTransactionSerial = transactionInfo.getRequestTransactionSerial();
+				builderPartCurr.refresh();
+			}
 		}
 		statusLabel.setText(statusMessage);
 		if (viewerLayout.topControl != topControl) {
@@ -254,7 +261,10 @@ public class TransactionViewer extends Composite {
 			isPending = (status == TransactionManager.TransactionStatus.STATUS_PENDING);
 			topControl = builderPartCurr.getControl();
 			builderPartCurr.setEditable(isPending);
-			builderPartCurr.refresh();
+			if (lastTransactionSerial != transactionInfo.getResponseTransactionSerial()) {
+				lastTransactionSerial = transactionInfo.getResponseTransactionSerial();
+				builderPartCurr.refresh();
+			}
 		}
 		statusLabel.setText(statusMessage);
 		if (viewerLayout.topControl != topControl) {

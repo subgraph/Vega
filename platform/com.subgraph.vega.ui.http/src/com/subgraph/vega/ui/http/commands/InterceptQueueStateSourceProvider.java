@@ -28,7 +28,7 @@ public class InterceptQueueStateSourceProvider extends AbstractSourceProvider {
 
 	@Override
 	public Map<?, ?> getCurrentState() {
-		Map<String, String> stateMap = new HashMap<String, String>(2);
+		Map<String, String> stateMap = new HashMap<String, String>(1);
 		stateMap.put(INTERCEPT_QUEUE_STATE, getCurrentQueueState());
 		return stateMap;
 	}

@@ -39,11 +39,11 @@ public class TransactionInfo {
 	
 	public TransactionInfo(IHttpRequestBuilder requestBuilder, IHttpResponseBuilder responseBuilder) {
 		currentSerial = -1;
-		requestTransactionSerial = currentSerial;
+		requestTransactionSerial = -1;
 		this.requestBuilder = requestBuilder;
 		requestHasContent = false;
 		setRequestStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);
-		responseTransactionSerial = currentSerial;
+		responseTransactionSerial = -1;
 		this.responseBuilder = responseBuilder;
 		responseHasContent = false;
 		setResponseStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);

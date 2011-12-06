@@ -59,7 +59,6 @@ public class InterceptView extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		parentComposite.setFocus();
 	}
 
 	public void openTransaction(IProxyTransaction transaction) {
