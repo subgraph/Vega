@@ -23,6 +23,15 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
 
+/**
+ * Manages transactions held by the HTTP proxy interceptor on behalf of InterceptView.
+ * 
+ * The transaction manager employs a serial number to avoid race conditions caused by the delay signaling to the UI
+ * thread that a change occurred in the transaction queue. The TransactionInfo class, which the UI uses to display the
+ * transaction held by the manager after an event is received, records currentSerial when a transaction is pending. That
+ * way, if the transaction queue changes before the next event reaches the UI, the UI can't accidentally forward the
+ * wrong transaction. 
+ */
 public class TransactionManager {
 	public enum TransactionStatus {
 		STATUS_INACTIVE,
@@ -37,12 +46,11 @@ public class TransactionManager {
 	private IProxyTransactionEventHandler transactionEventHandler;
 	private IProxyTransaction currentTransaction;
 	private IProxyTransaction currentRequestTransaction;
+	private int currentSerial; // Serial number of current pending transaction
 	private TransactionStatus requestStatus;
-	private int requestTransactionSerial;
-	private int requestSerial;
+	private int requestTransactionSerial; // Serial number of last request change
 	private TransactionStatus responseStatus;
-	private int responseSerial;
-	private int responseTransactionSerial;
+	private int responseTransactionSerial; // Serial number of last response change
 	
 	TransactionManager(InterceptView interceptView, IHttpInterceptor interceptor) {
 		this.interceptView = interceptView;
@@ -76,12 +84,11 @@ public class TransactionManager {
 				handleTransactionComplete();
 			}
 		};
+		currentSerial = 0;
 		requestStatus = TransactionStatus.STATUS_INACTIVE;
-		requestSerial = 0;
-		requestTransactionSerial = 0;
+		requestTransactionSerial = currentSerial;
 		responseStatus = TransactionStatus.STATUS_INACTIVE;
-		responseSerial = 0;
-		responseTransactionSerial = 0;
+		responseTransactionSerial = currentSerial;
 	}
 	
 	/**
@@ -112,7 +119,7 @@ public class TransactionManager {
 	}
 	
 	/**
-	 * Close this transaction manager prior to the interceptor view being closed. Unregisters the manager as an event
+	 * Close this transaction manager prior to the interceptor view being disposed. Unregisters the manager as an event
 	 * handler in the interceptor and the current transaction, if one exists. 
 	 */
 	public void close() {
@@ -122,10 +129,11 @@ public class TransactionManager {
 				if (currentTransaction != null) {
 					currentTransaction.setEventHandler(null);
 					currentTransaction = currentRequestTransaction = null;
+					currentSerial++;
 					requestTransactionSerial++;
 					responseTransactionSerial++;
-					requestSerial++;
-					responseSerial++;
+//					requestSerial++;
+//					responseSerial++;
 					requestStatus = responseStatus = TransactionStatus.STATUS_INACTIVE;
 				}
 				interceptor = null;
@@ -149,9 +157,11 @@ public class TransactionManager {
 						handleBadUpdate(transactionInfo);
 						return;
 					}
+					if (requestStatus == TransactionStatus.STATUS_PENDING) {
+						transactionInfo.setCurrentSerial(currentSerial);
+					}
 					transactionInfo.setRequestHasContent(true);
 					transactionInfo.setRequestStatus(requestStatus);
-					transactionInfo.setRequestSerial(requestSerial);
 					transactionInfo.setRequestTransactionSerial(requestTransactionSerial);
 				} else {
 					if (transactionInfo.getRequestStatus() != requestStatus) {
@@ -168,13 +178,15 @@ public class TransactionManager {
 							handleBadUpdate(transactionInfo);
 							return;
 						}
+						if (responseStatus == TransactionStatus.STATUS_PENDING) {
+							transactionInfo.setCurrentSerial(currentSerial);
+						}
 						transactionInfo.setResponseHasContent(true);
 					} else {
 						transactionInfo.getResponseBuilder().clear();
 						transactionInfo.setResponseHasContent(false);
 					}
 					transactionInfo.setResponseStatus(responseStatus);
-					transactionInfo.setResponseSerial(responseSerial);
 					transactionInfo.setResponseTransactionSerial(responseTransactionSerial);
 				} else {
 					if (transactionInfo.getResponseStatus() != responseStatus) {
@@ -286,69 +298,59 @@ public class TransactionManager {
 	private void setRequestPending() {
 		currentRequestTransaction = currentTransaction;
 		requestStatus = TransactionStatus.STATUS_PENDING;
-		requestSerial++;
+		currentSerial++;
 	}
 	
 	private void setRequestInactive() {
 		currentRequestTransaction = currentTransaction;
 		requestStatus = TransactionStatus.STATUS_INACTIVE;
-		requestSerial++;
+		currentSerial++;
 	}
 
 	private void setRequestSent() {
 		currentRequestTransaction = currentTransaction;
 		requestStatus = TransactionStatus.STATUS_SENT;
-		requestSerial++;
+		currentSerial++;
 	}
 
 	private void setResponseInactive() {
 		responseStatus = TransactionStatus.STATUS_INACTIVE;
-		responseSerial++;
+		currentSerial++;
 	}
 
 	private void setResponsePending() {
 		responseStatus = TransactionStatus.STATUS_PENDING;
-		responseSerial++;
+		currentSerial++;
 		if(currentRequestTransaction != currentTransaction) {
 			setRequestSent();
 		}
 	}
 
-	public void forwardRequest(TransactionInfo info) throws URISyntaxException, UnsupportedEncodingException {
+	public void forwardTransaction(TransactionInfo info) throws URISyntaxException, UnsupportedEncodingException {
 		synchronized(this) {
-			if (info.getRequestSerial() == requestSerial) {
-				HttpUriRequest request = info.getRequestBuilder().buildRequest();
-				currentTransaction.setRequest(request);
-				requestSerial++;
-				currentTransaction.doForward();
+			if (info.getCurrentSerial() == currentSerial) {
+				if (requestStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {
+					HttpUriRequest request = info.getRequestBuilder().buildRequest();
+					currentTransaction.setRequest(request);
+					currentTransaction.doForward();
+				} else {
+					HttpResponse response = info.getResponseBuilder().buildResponse();
+					currentTransaction.getResponse().setRawResponse(response);
+					currentTransaction.doForward();
+				}
 			}
 		}
 	}
 
-	public void forwardResponse(TransactionInfo info) throws UnsupportedEncodingException {
+	public void dropTransaction(TransactionInfo info) {
 		synchronized(this) {
-			if (info.getResponseSerial() == responseSerial) {
-				HttpResponse response = info.getResponseBuilder().buildResponse();
-				currentTransaction.getResponse().setRawResponse(response);
-				currentTransaction.doForward();
-			}
-		}
-	}
-	
-	public void dropRequest(TransactionInfo info) {
-		synchronized(this) {
-			if (info.getRequestSerial() == requestSerial) {
-				requestSerial++;
-				currentTransaction.doDrop();
-			}
-		}
-	}
-
-	public void dropResponse(TransactionInfo info) {
-		synchronized(this) {
-			if (info.getResponseSerial() == responseSerial) {
-				responseSerial++;
-				currentTransaction.doDrop();
+			if (info.getCurrentSerial() == currentSerial) {
+				currentSerial++;
+				if (requestStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {
+					currentTransaction.doDrop();
+				} else {
+					currentTransaction.doDrop();
+				}
 			}
 		}
 	}

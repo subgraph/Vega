@@ -102,6 +102,30 @@
             class="com.subgraph.vega.ui.http.commands.TagEdit"
             commandId="com.subgraph.vega.commands.popup.tagEdit">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.InterceptForwardTransaction"
+            commandId="com.subgraph.vega.commands.interceptForward">
+         <enabledWhen>
+            <with
+                  variable="vega.interceptQueueState">
+               <equals
+                     value="pending">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.InterceptDropTransaction"
+            commandId="com.subgraph.vega.commands.interceptDrop">
+         <enabledWhen>
+            <with
+                  variable="vega.interceptQueueState">
+               <equals
+                     value="pending">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -190,6 +214,21 @@
             categoryId="com.subgraph.vega.commands.requestViewCategory"
             id="com.subgraph.vega.commands.resetRequestFilter"
             name="Reset Request View Filter">
+      </command>
+      <category
+            description="Commands for controlling the HTTP proxy interceptor"
+            id="com.subgraph.vega.commands.interceptCategory"
+            name="Proxy Interceptor Commands">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.interceptCategory"
+            id="com.subgraph.vega.commands.interceptForward"
+            name="Forward Transaction">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.interceptCategory"
+            id="com.subgraph.vega.commands.interceptDrop"
+            name="Drop Transaction">
       </command>
    </extension>
    <extension
@@ -356,6 +395,22 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.intercept">
+         <command
+               commandId="com.subgraph.vega.commands.interceptForward"
+               icon="icons/start_16x16.png"
+               label="Forward Transaction"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.interceptDrop"
+               icon="icons/stop_16x16.png"
+               label="Drop Transaction"
+               style="push">
+         </command>
+      </menuContribution>
     
    </extension>
    <extension
@@ -364,6 +419,13 @@
             provider="com.subgraph.vega.ui.http.commands.ProxyStateSourceProvider">
          <variable
                name="vega.proxyState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
+      <sourceProvider
+            provider="com.subgraph.vega.ui.http.commands.InterceptQueueStateSourceProvider">
+         <variable
+               name="vega.interceptQueueState"
                priorityLevel="workbench">
          </variable>
       </sourceProvider>

@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.services.ISourceProviderService;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
@@ -21,6 +22,8 @@ import com.subgraph.vega.api.http.proxy.IProxyTransaction.TransactionDirection;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.commands.InterceptQueueStateSourceProvider;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class InterceptView extends ViewPart {
 	public final static String ID = "com.subgraph.vega.views.intercept";
@@ -39,8 +42,8 @@ public class InterceptView extends ViewPart {
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
 		transactionInfo = new TransactionInfo(requestEngineFactory.createRequestBuilder(), requestEngineFactory.createResponseBuilder());
 
-		transactionViewerRequest = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
-		transactionViewerResponse = new TransactionViewer(parentComposite, model, interceptor, transactionManager, transactionInfo, TransactionDirection.DIRECTION_RESPONSE);
+		transactionViewerRequest = new TransactionViewer(parentComposite, model, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
+		transactionViewerResponse = new TransactionViewer(parentComposite, model, transactionInfo, TransactionDirection.DIRECTION_RESPONSE);
 		transactionManager.setManagerActive();
 		parentComposite.setWeights(new int[] { 50, 50, });
 		parentComposite.pack();
@@ -56,6 +59,7 @@ public class InterceptView extends ViewPart {
 
 	@Override
 	public void setFocus() {
+		parentComposite.setFocus();
 	}
 
 	public void openTransaction(IProxyTransaction transaction) {
@@ -72,8 +76,29 @@ public class InterceptView extends ViewPart {
 	
 	private void doUpdate() {
 		transactionManager.updateTransactionInfo(transactionInfo);
+		ISourceProviderService sourceProviderService = (ISourceProviderService) getViewSite().getWorkbenchWindow().getService(ISourceProviderService.class);
+		InterceptQueueStateSourceProvider provider = (InterceptQueueStateSourceProvider) sourceProviderService.getSourceProvider(InterceptQueueStateSourceProvider.INTERCEPT_QUEUE_STATE);
+		provider.setPending(transactionInfo.isPending());		
 		transactionViewerRequest.notifyUpdate();
 		transactionViewerResponse.notifyUpdate();
 	}
-	
+
+	public void forwardTransaction() {
+		try {
+			transactionManager.forwardTransaction(transactionInfo);
+		} catch (Exception ex) {
+			ErrorDialog.displayExceptionError(parentComposite.getShell(), ex);
+			return;
+		}
+	}
+
+	public void dropTransaction() {
+		try {
+			transactionManager.dropTransaction(transactionInfo);
+		} catch (Exception ex) {
+			ErrorDialog.displayExceptionError(parentComposite.getShell(), ex);
+			return;
+		}
+	}
+
 }
