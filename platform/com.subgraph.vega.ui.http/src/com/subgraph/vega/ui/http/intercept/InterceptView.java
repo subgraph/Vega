@@ -41,6 +41,7 @@ public class InterceptView extends ViewPart {
 		transactionManager = new TransactionManager(this, interceptor);
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
 		transactionInfo = new TransactionInfo(requestEngineFactory.createRequestBuilder(), requestEngineFactory.createResponseBuilder());
+		transactionManager.updateTransactionInfo(transactionInfo);
 
 		transactionViewerRequest = new TransactionViewer(parentComposite, model, transactionInfo, TransactionDirection.DIRECTION_REQUEST);
 		transactionViewerResponse = new TransactionViewer(parentComposite, model, transactionInfo, TransactionDirection.DIRECTION_RESPONSE);

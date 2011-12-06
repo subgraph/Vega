@@ -89,6 +89,7 @@ public class TransactionManager {
 		requestTransactionSerial = 0;
 		responseStatus = TransactionStatus.STATUS_INACTIVE;
 		responseTransactionSerial = 0;
+		getNextTransaction();
 	}
 	
 	/**
