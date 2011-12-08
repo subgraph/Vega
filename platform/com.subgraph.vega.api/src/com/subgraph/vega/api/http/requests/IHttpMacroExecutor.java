@@ -46,22 +46,21 @@ public interface IHttpMacroExecutor {
 	boolean hasNext();
 
 	/**
-	 * Send the next request in the macro. The HttpContext should use the request engine's HttpContext as its parent.
-	 * @param context HTTP context.
-	 * @return IHttpResponse response, or null if no further items exist to execute.
-	 * @throws RequestEngineException
+	 * Send the next request in the macro, returning the request task managing request execution. The provided
+	 * HttpContext should use the request engine's HttpContext as its parent.
+	 * @param context HTTP execution context.
+	 * @return Request task, or null if no further items exist to execute.
 	 * @throws URISyntaxException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	IHttpResponse sendNextRequest(HttpContext context) throws RequestEngineException, URISyntaxException, UnsupportedEncodingException;
+	IHttpRequestTask sendNextRequest(HttpContext context) throws URISyntaxException, UnsupportedEncodingException;
 
 	/**
-	 * Send the next request in the macro without providing a HttpContext. A HttpContext is automatically generated for
-	 * the request with the request engine's HttpContext as its parent.
-	 * @return IHttpResponse response, or null if no further items exist to execute.
-	 * @throws RequestEngineException
+  	 * Send the next request in the macro, returning the request task managing request execution. A HttpContext is
+  	 * automatically generated for the request using the request engine's HttpContext as its parent. 
+	 * @return Request task, or null if no further items exist to execute.
 	 * @throws URISyntaxException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	IHttpResponse sendNextRequest() throws RequestEngineException, URISyntaxException, UnsupportedEncodingException;
+	IHttpRequestTask sendNextRequest() throws URISyntaxException, UnsupportedEncodingException;
 }

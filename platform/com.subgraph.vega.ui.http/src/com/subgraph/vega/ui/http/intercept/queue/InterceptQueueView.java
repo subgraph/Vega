@@ -11,8 +11,8 @@
 package com.subgraph.vega.ui.http.intercept.queue;
 
 import java.net.URI;
+import java.util.Iterator;
 
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
@@ -20,71 +20,86 @@ import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class InterceptQueueView extends ViewPart {
 	public final static String ID = "com.subgraph.vega.views.intercept.queue";
-	public final static String POPUP_TRANSACTIONS_TABLE = "com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions";
-	private IHttpInterceptor interceptor;
 	private Composite parentComposite;
-	private TableViewer tableViewerTransactions;
+	private TableViewer interceptQueueTableViewer;
+	private Menu interceptQueueTableMenu;
+	private TableViewer requestStatusTableViewer;
+	private Menu requestStatusTableMenu;
 
 	public InterceptQueueView() {
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		interceptor = Activator.getDefault().getProxyService().getInterceptor();
 		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new FillLayout());
-		createTable(parentComposite);
-		tableViewerTransactions.setInput(interceptor);
+		parentComposite.setLayout(new GridLayout(1, false));
+		createInterceptQueueArea(parentComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
+		createRequestStatusArea(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		interceptQueueTableViewer.setInput(Activator.getDefault().getProxyService().getInterceptor());
+		requestStatusTableViewer.setInput(Activator.getDefault().getProxyService());
 	}
 
 	@Override
 	public void setFocus() {
-		tableViewerTransactions.getTable().setFocus();
 	}
 
-	private Composite createTable(Composite parent) {
-		final Composite rootControl = new Composite(parent, SWT.NONE);
-		final TableColumnLayout tcl = new TableColumnLayout();
-		rootControl.setLayout(tcl);
+	private Composite createInterceptQueueArea(Composite parent) {
+		final Group rootControl = new Group(parent, SWT.NONE);
+		rootControl.setLayout(new GridLayout(1, false));
+		rootControl.setText("Interceptor Queue");
 
-		tableViewerTransactions = new TableViewer(rootControl, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-		tableViewerTransactions.setContentProvider(new TransactionTableContentProvider(tableViewerTransactions));
-		createColumns(tableViewerTransactions, tcl);
-		final Table table = tableViewerTransactions.getTable();
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-		tableViewerTransactions.addDoubleClickListener(createDoubleClickListener());
-		MenuManager menuManager = new MenuManager();
-		Menu menu = menuManager.createContextMenu(tableViewerTransactions.getTable());
-		tableViewerTransactions.getTable().setMenu(menu);
-		getSite().registerContextMenu(POPUP_TRANSACTIONS_TABLE, menuManager, tableViewerTransactions);
-		getSite().setSelectionProvider(tableViewerTransactions);
+		createInterceptQueueTable(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		return rootControl;
 	}
 	
-	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
+	private Composite createInterceptQueueTable(Composite parent) {
+		final Composite rootControl = new Composite(parent, SWT.NONE);
+		final TableColumnLayout tcl = new TableColumnLayout();
+		rootControl.setLayout(tcl);
+
+		interceptQueueTableViewer = new TableViewer(rootControl, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		interceptQueueTableViewer.setContentProvider(new InterceptQueueTableContentProvider());
+		createInterceptQueueTableColumns(interceptQueueTableViewer, tcl);
+		final Table table = interceptQueueTableViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		interceptQueueTableViewer.addSelectionChangedListener(createInterceptQueueTableSelectionChangedListener());
+		interceptQueueTableViewer.addDoubleClickListener(createInterceptQueueTableDoubleClickListener());
+		table.setMenu(createInterceptQueueTableMenu(table));
+
+		return rootControl;
+	}
+	
+	private void createInterceptQueueTableColumns(TableViewer viewer, TableColumnLayout layout) {
 		final String[] titles = { "Type", "Host", "Method", "Request", };
 		final ColumnLayoutData[] layoutData = {
 				new ColumnPixelData(60, true, true),
@@ -103,16 +118,7 @@ public class InterceptQueueView extends ViewPart {
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					final URI uri = ((IProxyTransaction) element).getRequest().getURI();
-					final StringBuilder buf = new StringBuilder();
-					buf.append(uri.getScheme());
-					buf.append("://");
-					buf.append(uri.getHost());
-					if (uri.getPort() != -1) {
-						buf.append(':');
-						buf.append(Integer.toString(uri.getPort()));
-					}
-					return buf.toString();
+					return uriToHostString(((IProxyTransaction) element).getRequest().getURI());
 				}
 			},
 			new ColumnLabelProvider() {
@@ -124,12 +130,7 @@ public class InterceptQueueView extends ViewPart {
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					final URI uri = ((IProxyTransaction) element).getRequest().getURI();
-					if (uri.getRawQuery() != null) {
-						return uri.getRawPath() + "?" + uri.getRawQuery();
-					} else {
-						return uri.getRawPath();
-					}
+					return uriToPathString(((IProxyTransaction) element).getRequest().getURI());
 				}
 			}
 		};
@@ -146,7 +147,16 @@ public class InterceptQueueView extends ViewPart {
 		table.setLinesVisible(true);
 	}
 
-	private IDoubleClickListener createDoubleClickListener() {
+	private ISelectionChangedListener createInterceptQueueTableSelectionChangedListener() {
+		return new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				interceptQueueTableMenu.setEnabled(!event.getSelection().isEmpty());
+			}
+		};
+	}
+	
+	private IDoubleClickListener createInterceptQueueTableDoubleClickListener() {
 		return new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -163,4 +173,167 @@ public class InterceptQueueView extends ViewPart {
 		};
 	}
 
+	private Menu createInterceptQueueTableMenu(Table table) {
+		interceptQueueTableMenu = new Menu(table);
+		interceptQueueTableMenu.setEnabled(false);
+		
+	    MenuItem forwardMenuItem = new MenuItem(interceptQueueTableMenu, SWT.CASCADE);
+	    forwardMenuItem.setText("Forward Transaction");
+	    forwardMenuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				forwardInterceptQueueSelection();
+			};
+	    });
+
+	    MenuItem dropMenuItem = new MenuItem(interceptQueueTableMenu, SWT.CASCADE);
+	    dropMenuItem.setText("Drop Transaction");
+	    dropMenuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dropInterceptQueueSelection();
+			};
+	    });
+
+		return interceptQueueTableMenu;
+	}
+
+	private void forwardInterceptQueueSelection() {
+		IStructuredSelection selection = (IStructuredSelection) interceptQueueTableViewer.getSelection();
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext(); ) {
+			IProxyTransaction transaction = (IProxyTransaction) iter.next();
+			transaction.doForward();
+		}
+	}
+
+	private void dropInterceptQueueSelection() {
+		IStructuredSelection selection = (IStructuredSelection) interceptQueueTableViewer.getSelection();
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext(); ) {
+			IProxyTransaction transaction = (IProxyTransaction) iter.next();
+			transaction.doDrop();
+		}
+	}
+	
+	private Composite createRequestStatusArea(Composite parent) {
+		final Group rootControl = new Group(parent, SWT.NONE);
+		rootControl.setLayout(new GridLayout(1, false));
+		rootControl.setText("Request Status");
+
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		createRequestStatusTable(rootControl, gd, 12).setLayoutData(gd);
+
+		return rootControl;
+	}
+
+	private Composite createRequestStatusTable(Composite parent, GridData gd, int heightInRows) {
+		final Composite rootControl = new Composite(parent, SWT.NONE);
+		final TableColumnLayout tcl = new TableColumnLayout();
+		rootControl.setLayout(tcl);
+
+		requestStatusTableViewer = new TableViewer(rootControl, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		requestStatusTableViewer.setContentProvider(new RequestStatusTableContentProvider());
+		createRequestStatusTableColumns(requestStatusTableViewer, tcl);
+		final Table table = requestStatusTableViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		requestStatusTableViewer.addSelectionChangedListener(createRequestStatusTableSelectionChangedListener());
+		table.setMenu(createRequestStatusTableMenu(table));
+		gd.heightHint = table.getItemHeight() * heightInRows;
+
+		return rootControl;
+	}
+	
+	private String uriToHostString(URI uri) {
+		final StringBuilder buf = new StringBuilder();
+		buf.append(uri.getScheme());
+		buf.append("://");
+		buf.append(uri.getHost());
+		if (uri.getPort() != -1) {
+			buf.append(':');
+			buf.append(Integer.toString(uri.getPort()));
+		}
+		return buf.toString();
+	}
+
+	private String uriToPathString(URI uri) {
+		if (uri.getRawQuery() != null) {
+			return uri.getRawPath() + "?" + uri.getRawQuery();
+		} else {
+			return uri.getRawPath();
+		}
+	}
+
+	private void createRequestStatusTableColumns(TableViewer viewer, TableColumnLayout layout) {
+		final String[] titles = { "Method", "Host", "Request", };
+		final ColumnLayoutData[] layoutData = {
+				new ColumnPixelData(60, true, true),
+				new ColumnPixelData(120, true, true),
+				new ColumnWeightData(100, 100, true),
+		};
+
+		final ColumnLabelProvider providerList[] = {
+				new ColumnLabelProvider() {
+					@Override
+					public String getText(Object element) {
+						return ((IHttpRequestTask) element).getRequest().getMethod();
+					}
+				},
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					return uriToHostString(((IHttpRequestTask) element).getRequest().getURI());
+				}
+			},
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					return uriToPathString(((IHttpRequestTask) element).getRequest().getURI());
+				}
+			}
+		};
+		for(int i = 0; i < titles.length; i++) {
+			final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
+			final TableColumn c = column.getColumn();
+			layout.setColumnData(c, layoutData[i]);
+			c.setText(titles[i]);
+			c.setMoveable(true);
+			column.setLabelProvider(providerList[i]);
+		}
+		final Table table = viewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+	}
+
+	private ISelectionChangedListener createRequestStatusTableSelectionChangedListener() {
+		return new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				requestStatusTableMenu.setEnabled(!event.getSelection().isEmpty());
+			}
+		};
+	}
+
+	private Menu createRequestStatusTableMenu(Table table) {
+		requestStatusTableMenu = new Menu(table);
+		requestStatusTableMenu.setEnabled(false);
+		
+	    MenuItem abortMenuItem = new MenuItem(requestStatusTableMenu, SWT.CASCADE);
+	    abortMenuItem.setText("Abort Request");
+	    abortMenuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				abortRequestStatusSelection();
+			};
+	    });
+
+		return requestStatusTableMenu;
+	}
+
+	private void abortRequestStatusSelection() {
+		IStructuredSelection selection = (IStructuredSelection) requestStatusTableViewer.getSelection();
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext(); ) {
+			IHttpRequestTask requestTask = (IHttpRequestTask) iter.next();
+			requestTask.abort();
+		}
+	}
 }

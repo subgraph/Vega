@@ -10,15 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.http.requests;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
-import org.apache.http.HttpException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
@@ -26,20 +22,23 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.SyncBasicHttpContext;
 
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestModifier;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.http.requests.RequestEngineException;
+import com.subgraph.vega.api.http.requests.RequestTaskStartEvent;
+import com.subgraph.vega.api.http.requests.RequestTaskStopEvent;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
-	private final Logger logger = Logger.getLogger("request-engine");
 	private final ExecutorService executor;
 	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
@@ -48,6 +47,8 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final RateLimiter rateLimit;
 	private final HttpContext httpContext;
 	private final List<IHttpRequestModifier> requestModifierList;
+	private final EventListenerManager requestEventManager;
+	private final List<HttpRequestTask> requestInProgressList;
 	
 	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
 		this.executor = executor;
@@ -59,6 +60,8 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		httpContext = new SyncBasicHttpContext(null);
 		httpContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
 		requestModifierList = new ArrayList<IHttpRequestModifier>();
+		requestEventManager = new EventListenerManager();
+		requestInProgressList = new ArrayList<HttpRequestTask>();
 	}
 
 	@Override
@@ -87,42 +90,38 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	}
 
 	@Override
-	public IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException {
+	public void addRequestListener(IEventHandler listener) {
+		requestEventManager.addListener(listener);
+	}
+
+	@Override
+	public void removeRequestListener(IEventHandler listener) {
+		requestEventManager.removeListener(listener);
+	}
+
+	@Override
+	public IHttpRequestTask[] getRequestList() {
+		synchronized(this) {
+			return requestInProgressList.toArray(new IHttpRequestTask[0]);
+		}
+	}
+	
+	@Override
+	public IHttpRequestTask sendRequest(HttpUriRequest request, HttpContext context) {
 		for (IHttpRequestModifier modifier: requestModifierList) {
 			modifier.process(request, context);
 		}
-		Future<IHttpResponse> future = executor.submit(new RequestTask(client, rateLimit, request, requestOrigin, context, config, htmlParser));
-		try {
-			return future.get();
-		} catch (InterruptedException e) {
-			logger.info("Request "+ request.getURI() +" was interrupted before completion");
-		} catch (ExecutionException e) {
-			throw translateException(request, e.getCause());
-		}
-		return null;
+		HttpRequestTask requestTask = new HttpRequestTask(this, client, rateLimit, request, requestOrigin, context, config, htmlParser);
+		Future<IHttpResponse> future = executor.submit(requestTask);
+		requestTask.setFuture(future);
+		return requestTask;
 	}
 
-	public IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException {
+	@Override
+	public IHttpRequestTask sendRequest(HttpUriRequest request) {
 		return sendRequest(request, new BasicHttpContext(httpContext));
 	}
-
-	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {
-		final StringBuilder sb = new StringBuilder();
-		if(ex instanceof IOException) {
-			sb.append("Network problem");
-		} else if(ex instanceof HttpException) {
-			sb.append("Protocol problem");
-		} else {
-			sb.append("Unknown problem");
-		}
-		sb.append(" while retrieving URI ");
-		sb.append(request.getURI().toString());
-		sb.append(" [");
-		sb.append(ex.getMessage());
-		sb.append("]");
-		return new RequestEngineException(sb.toString(), ex);
-	}
-
+	
 	@Override
 	public IHttpMacroContext createMacroContext() {
 		return new HttpMacroContext();
@@ -133,4 +132,18 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		return new HttpMacroExecutor(this, macro, context);
 	}
 
+	public void addRequestInProgress(HttpRequestTask requestTask) {
+		synchronized(this) {
+			requestInProgressList.add(requestTask);
+			requestEventManager.fireEvent(new RequestTaskStartEvent(requestTask));
+		}
+	}
+	
+	public void removeRequestInProgress(HttpRequestTask requestTask) {
+		synchronized(this) {
+			requestInProgressList.remove(requestTask);
+			requestEventManager.fireEvent(new RequestTaskStopEvent(requestTask));
+		}
+	}
+	
 }

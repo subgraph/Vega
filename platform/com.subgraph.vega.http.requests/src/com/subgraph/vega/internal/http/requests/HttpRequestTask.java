@@ -13,12 +13,15 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -30,14 +33,18 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.html.IHTMLParser;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
+import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
-class RequestTask implements Callable<IHttpResponse> {
+class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 	private final static Logger logger = Logger.getLogger("request-engine");
-
+	private Future<IHttpResponse> future;
+	private final HttpRequestEngine requestEngine;
 	private final HttpClient client;
 	private final RateLimiter rateLimit;
 	private final HttpUriRequest request;
@@ -46,7 +53,8 @@ class RequestTask implements Callable<IHttpResponse> {
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
 
-	RequestTask(HttpClient client, RateLimiter rateLimit, HttpUriRequest request, IRequestOrigin requestOrigin, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+	public HttpRequestTask(HttpRequestEngine requestEngine, HttpClient client, RateLimiter rateLimit, HttpUriRequest request, IRequestOrigin requestOrigin, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
+		this.requestEngine = requestEngine;
 		this.client = client;
 		this.rateLimit = rateLimit;
 		this.request = request;
@@ -56,6 +64,37 @@ class RequestTask implements Callable<IHttpResponse> {
 		this.htmlParser = htmlParser;
 	}
 
+	public void setFuture(Future<IHttpResponse> future) {
+		this.future = future;
+	}
+	
+	@Override
+	public IHttpRequestEngine getRequestEngine() {
+		return requestEngine;
+	}
+
+	@Override
+	public void abort() {
+		request.abort();
+	}
+
+	@Override
+	public HttpUriRequest getRequest() {
+		return request;
+	}
+
+	@Override
+	public IHttpResponse get() throws RequestEngineException {
+		try {
+			return future.get();
+		} catch (InterruptedException e) {
+			logger.info("Request "+ request.getURI() +" was interrupted before completion");
+		} catch (ExecutionException e) {
+			throw translateException(request, e.getCause());
+		}
+		return null;
+	}
+
 	@Override
 	public IHttpResponse call() throws Exception {
 		if(config.getForceIdentityEncoding())
@@ -63,13 +102,19 @@ class RequestTask implements Callable<IHttpResponse> {
 
 		if(rateLimit != null)
 			rateLimit.maybeDelayRequest();
-		
+
+		requestEngine.addRequestInProgress(this);
 		final long start = System.currentTimeMillis();
-		final HttpResponse httpResponse = client.execute(request, context);
-		final long elapsed = System.currentTimeMillis() - start;
+		final long elapsed;
+		final HttpResponse httpResponse;
+		try {
+			httpResponse = client.execute(request, context);
+			elapsed = System.currentTimeMillis() - start;
+		} finally {
+			requestEngine.removeRequestInProgress(this);
+		}
 
 		final HttpEntity entity = httpResponse.getEntity();
-
 		if(entity != null) {
 			if(config.getMaximumResponseKilobytes() > 0 && entity.getContentLength() > (config.getMaximumResponseKilobytes() * 1024)) {
 				logger.warning("Aborting request "+ request.getURI().toString() +" because response length "+ entity.getContentLength() + " exceeds maximum length of "+ config.getMaximumResponseKilobytes() +" kb.");
@@ -153,4 +198,22 @@ class RequestTask implements Callable<IHttpResponse> {
 		}
 		return false;
 	}
+
+	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {
+		final StringBuilder sb = new StringBuilder();
+		if(ex instanceof IOException) {
+			sb.append("Network problem");
+		} else if(ex instanceof HttpException) {
+			sb.append("Protocol problem");
+		} else {
+			sb.append("Unknown problem");
+		}
+		sb.append(" while retrieving URI ");
+		sb.append(request.getURI().toString());
+		sb.append(" [");
+		sb.append(ex.getMessage());
+		sb.append("]");
+		return new RequestEngineException(sb.toString(), ex);
+	}
+
 }

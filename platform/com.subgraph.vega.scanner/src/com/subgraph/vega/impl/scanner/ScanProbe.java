@@ -37,7 +37,7 @@ public class ScanProbe {
 	IScanProbeResult runProbe() {
 		currentRequest = new HttpGet(targetURI);
 		try {
-			IHttpResponse response = requestEngine.sendRequest(currentRequest);
+			IHttpResponse response = requestEngine.sendRequest(currentRequest).get();
 			return processFirstProbeResponse(targetURI, response);
 		} catch (RequestEngineException e) {
 			return ScanProbeResult.createConnectFailedResult(e.getMessage());
@@ -68,7 +68,7 @@ public class ScanProbe {
 
 			try {
 				currentRequest = new HttpGet(location);
-				response = requestEngine.sendRequest(currentRequest);
+				response = requestEngine.sendRequest(currentRequest).get();
 				try {
 					EntityUtils.consume(response.getRawResponse().getEntity());
 				} catch (IOException e) {

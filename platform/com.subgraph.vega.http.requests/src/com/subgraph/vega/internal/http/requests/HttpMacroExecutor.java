@@ -21,6 +21,7 @@ import org.apache.http.protocol.HttpContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
@@ -62,7 +63,7 @@ public class HttpMacroExecutor implements IHttpMacroExecutor {
 	}
 	
 	@Override
-	public IHttpResponse sendNextRequest(HttpContext context) throws RequestEngineException, URISyntaxException, UnsupportedEncodingException {
+	public IHttpRequestTask sendNextRequest(HttpContext context) throws URISyntaxException, UnsupportedEncodingException {
 		if (!macroItemIterator.hasNext()) {
 			return null;
 		}
@@ -72,7 +73,7 @@ public class HttpMacroExecutor implements IHttpMacroExecutor {
 	}
 
 	@Override
-	public IHttpResponse sendNextRequest() throws RequestEngineException, URISyntaxException, UnsupportedEncodingException {
+	public IHttpRequestTask sendNextRequest() throws URISyntaxException, UnsupportedEncodingException {
 		if (!macroItemIterator.hasNext()) {
 			return null;
 		}

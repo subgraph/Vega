@@ -21,6 +21,7 @@ public interface IHttpProxyService {
 	boolean isPassthrough();
 	IHttpProxyListenerConfig createListenerConfig();
 	void setListenerConfigs(IHttpProxyListenerConfig[] listenerConfigs);
+	IHttpProxyListener[] getListeners();
 	IHttpProxyListenerConfig[] getListenerConfigs();
 	int getListenerConfigsCount();
 	void setPassthrough(boolean enabled);

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.subgraph.vega.http.requests
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.subgraph.vega.api.html,
+Import-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.model.macros,
  com.subgraph.vega.api.model.requests,

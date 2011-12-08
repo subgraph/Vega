@@ -18,13 +18,12 @@ import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 
-public class TransactionTableContentProvider implements IStructuredContentProvider {
-	private final TableViewer viewer;
+public class InterceptQueueTableContentProvider implements IStructuredContentProvider {
+	private Viewer viewer;
 	private IHttpInterceptor interceptor;
 	private IHttpInterceptorEventHandler eventHandler;
 
-	public TransactionTableContentProvider(final TableViewer viewer) {
-		this.viewer = viewer;
+	public InterceptQueueTableContentProvider() {
 		eventHandler = new IHttpInterceptorEventHandler() {
 			@Override
 			public void notifyQueue(IProxyTransaction transaction, int idx) {
@@ -44,7 +43,7 @@ public class TransactionTableContentProvider implements IStructuredContentProvid
 	}
 
 	private void handleUpdate() {
-		viewer.getTable().getDisplay().asyncExec(new Runnable() {
+		viewer.getControl().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				viewer.refresh();
 			}
@@ -61,6 +60,7 @@ public class TransactionTableContentProvider implements IStructuredContentProvid
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.viewer = viewer;
 		if (interceptor != null) {
 			interceptor.removeEventHandler(eventHandler);
 		}

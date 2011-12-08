@@ -83,14 +83,6 @@
             commandId="com.subgraph.vega.commands.proxyConfigureModules">
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ForwardTransaction"
-            commandId="com.subgraph.vega.commands.popup.forwardTransaction">
-      </handler>
-      <handler
-            class="com.subgraph.vega.ui.http.commands.DropTransaction"
-            commandId="com.subgraph.vega.commands.popup.dropTransaction">
-      </handler>
-      <handler
             class="com.subgraph.vega.ui.http.commands.ProxyPassthrough"
             commandId="com.subgraph.vega.commands.proxyPassthrough">
       </handler>
@@ -181,20 +173,6 @@
             description="Send the HTTP Request"
             id="com.subgraph.vega.commands.sendRequest"
             name="Send Request">
-      </command>
-      <category
-            id="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            name="Interception Queue View Popup">
-      </category>
-      <command
-            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.forwardTransaction"
-            name="Forward pending transaction">
-      </command>
-      <command
-            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.dropTransaction"
-            name="Drop pending transaction">
       </command>
       <category
             id="com.subgraph.vega.commands.requestViewCategory"
@@ -361,38 +339,6 @@
                id="openfilter"
                label="Open Request Filter"
                style="push">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions">
-         <command
-               commandId="com.subgraph.vega.commands.popup.forwardTransaction"
-               label="Forward Transaction"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
-         </command>
-         <command
-               commandId="com.subgraph.vega.commands.popup.dropTransaction"
-               label="Drop Transaction"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution

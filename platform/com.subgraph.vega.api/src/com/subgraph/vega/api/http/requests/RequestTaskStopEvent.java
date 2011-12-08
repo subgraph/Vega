@@ -8,15 +8,22 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.api.http.proxy;
+package com.subgraph.vega.api.http.requests;
 
-import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.events.IEvent;
 
-public interface IHttpProxyListener {
-	IHttpProxyListenerConfig getConfig();
-	IHttpRequestEngine getRequestEngine();
-	void start();
-	void stop();
-	void registerEventHandler(IHttpInterceptProxyEventHandler handler);
-	void unregisterEventHandler(IHttpInterceptProxyEventHandler handler);
+/**
+ * Event indicating an IHttpRequestTask has finished performing an HTTP request.
+ */
+public class RequestTaskStopEvent implements IEvent {
+	private final IHttpRequestTask requestTask;
+	
+	public RequestTaskStopEvent(IHttpRequestTask requestTask) {
+		this.requestTask = requestTask;
+	}
+
+	public IHttpRequestTask getRequestTask() {
+		return requestTask;
+	}
+
 }

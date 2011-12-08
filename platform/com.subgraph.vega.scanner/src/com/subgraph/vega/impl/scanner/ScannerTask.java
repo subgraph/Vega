@@ -103,7 +103,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 				while (executor.hasNext()) {
 					IHttpResponse response;
 					try {
-						response = executor.sendNextRequest();
+						response = executor.sendNextRequest().get();
 					} catch (Exception e) {
 						logger.log(Level.WARNING, e.getMessage());
 						return false;

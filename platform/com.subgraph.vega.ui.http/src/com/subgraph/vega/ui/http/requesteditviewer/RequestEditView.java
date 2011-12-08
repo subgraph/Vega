@@ -143,7 +143,7 @@ public class RequestEditView extends ViewPart {
 
 		IHttpResponse response;
 		try {
-			response = requestEngine.sendRequest(uriRequest);
+			response = requestEngine.sendRequest(uriRequest).get();
 			responseViewer.displayHttpResponse(response.getRawResponse());
 		} catch (Exception e) {
 			displayExceptionError(e);
