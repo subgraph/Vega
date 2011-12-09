@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -245,7 +246,9 @@ public class RequestLogViewer extends Composite {
 		final IRequestLogRecord record = (IRequestLogRecord)((IStructuredSelection) tableViewer.getSelection()).getFirstElement();
 		final Dialog dialog = new TaggableEditorDialog(getShell(), record);
 		dialog.create();
-		dialog.open();
+		if (dialog.open() == Window.OK) {
+			tableViewer.refresh();
+		}
 	}	
 	
 	@SuppressWarnings("unchecked")
