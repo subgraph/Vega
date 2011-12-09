@@ -87,14 +87,6 @@
             commandId="com.subgraph.vega.commands.proxyPassthrough">
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
-            commandId="com.subgraph.vega.commands.popup.replayRequest">
-      </handler>
-      <handler
-            class="com.subgraph.vega.ui.http.commands.TagEdit"
-            commandId="com.subgraph.vega.commands.popup.tagEdit">
-      </handler>
-      <handler
             class="com.subgraph.vega.ui.http.commands.InterceptForwardTransaction"
             commandId="com.subgraph.vega.commands.interceptForward">
          <enabledWhen>
@@ -148,20 +140,6 @@
             categoryId="com.subgraph.vega.commands.proxyCategory"
             id="com.subgraph.vega.commands.proxyPassthrough"
             name="Toggle HTTP proxy passthrough">
-      </command>
-      <category
-            id="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            name="HTTP Request View Popup">
-      </category>
-      <command
-            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.replayRequest"
-            name="Replay Request">
-      </command>
-      <command
-            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.tagEdit"
-            name="Edit Tags">
       </command>
       <category
             description="Commands for controlling the request editor"
@@ -276,38 +254,6 @@
                </visibleWhen>
             </command>
          </toolbar>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:com.subgraph.vega.ui.http.requestlogviewer.popup">
-         <command
-               commandId="com.subgraph.vega.commands.popup.replayRequest"
-               label="Replay Request"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
-         </command>
-         <command
-               commandId="com.subgraph.vega.commands.popup.tagEdit"
-               label="Edit Tags"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
-         </command>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:com.subgraph.vega.views.requestEdit">
