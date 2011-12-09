@@ -221,6 +221,12 @@ public class RequestLogRecord implements IRequestLogRecord, Activatable {
 	}
 
 	@Override
+	public ITag getTag(int idx) {
+		activate(ActivationPurpose.READ);
+		return tagList.get(idx);
+	}
+
+	@Override
 	public int getTagCount() {
 		activate(ActivationPurpose.READ);
 		return tagList.size();

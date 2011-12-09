@@ -15,13 +15,18 @@ import java.net.URISyntaxException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.api.model.tags.ITag;
 
-public class HttpViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+public class HttpViewLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider {
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
@@ -74,4 +79,25 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 		
 		return Long.toString(response.getEntity().getContentLength());
 	}
+
+	@Override
+	public Color getForeground(Object element, int columnIndex) {
+		IRequestLogRecord record = (IRequestLogRecord) element;
+		if (record.getTagCount() != 0) {
+			int color = record.getTag(0).getNameColor();
+			return new Color(Display.getCurrent(), (color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff);
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element, int columnIndex) {
+		IRequestLogRecord record = (IRequestLogRecord) element;
+		if (record.getTagCount() != 0) {
+			int color = record.getTag(0).getRowColor();
+			return new Color(Display.getCurrent(), (color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff);
+		}
+		return null;
+	}
+	
 }

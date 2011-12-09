@@ -23,6 +23,13 @@ public interface ITaggable {
 	Collection<ITag> getAllTags();
 
 	/**
+	 * Get a tag with a given array index.
+	 * @param idx Array index.
+	 * @return Tag.
+	 */
+	ITag getTag(int idx);
+	
+	/**
 	 * Get a count of tags applied to this object.
 	 * @return Count of tags applied to this object.
 	 */
