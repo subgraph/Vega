@@ -87,6 +87,7 @@ public class VegaConsoleView extends ConsoleView implements IEventHandler {
 			console.removeConsoleOutputListener(this);
 		}
 		getSite().getPage().removePartListener(partListener);
+		imageCache.dispose();
 		super.dispose();
 	}
 

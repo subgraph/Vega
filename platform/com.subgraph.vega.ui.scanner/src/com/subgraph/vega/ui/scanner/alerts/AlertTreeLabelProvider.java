@@ -25,7 +25,14 @@ public class AlertTreeLabelProvider extends LabelProvider {
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 
 	private boolean activeBlinkState;
-	
+
+	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+
+	@Override
 	public String getText(Object element) {
 		if(element instanceof IAlertTreeNode) {
 			final IAlertTreeNode node = (IAlertTreeNode) element;
@@ -42,6 +49,7 @@ public class AlertTreeLabelProvider extends LabelProvider {
 		}
 	}
 	
+	@Override
 	public Image getImage(Object element) {
 		if(element instanceof AlertScanNode) {
 			AlertScanNode node = (AlertScanNode) element;

@@ -47,6 +47,13 @@ public class ConsoleView extends ViewPart implements IConsoleDisplay {
 	}
 
 	@Override
+	public void dispose() {
+		imageCache.dispose();
+		contextMenu.dispose();
+		super.dispose();
+	}
+	
+	@Override
 	public void setFocus() {
 		showingErrorIcon = false;
 		showingOutputIcon = false;

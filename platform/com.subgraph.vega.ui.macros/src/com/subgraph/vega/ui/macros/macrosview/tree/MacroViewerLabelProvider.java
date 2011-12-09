@@ -25,6 +25,12 @@ public class MacroViewerLabelProvider extends LabelProvider {
 	}
 
 	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+	
+	@Override
 	public Image getImage(Object element) {
 		final String imagePath = ((IMacroTreeNode) element).getImagePath();
 		if (imagePath != null) {

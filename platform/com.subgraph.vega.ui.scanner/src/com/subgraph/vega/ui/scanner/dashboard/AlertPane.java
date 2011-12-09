@@ -43,7 +43,12 @@ public class AlertPane extends Composite {
 		reset();
 	}
 	
-	
+	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+
 	private void addSeverityCells(Color background) {
 		for(Severity s: Severity.values()) {
 			if(s.equals(Severity.UNKNOWN))

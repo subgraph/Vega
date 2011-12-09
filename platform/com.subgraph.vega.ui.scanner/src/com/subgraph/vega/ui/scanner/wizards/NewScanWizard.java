@@ -19,8 +19,11 @@ import org.eclipse.jface.wizard.Wizard;
 
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
+import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.util.ImageCache;
 
 public class NewScanWizard extends Wizard {
+	private final ImageCache imageCache;
 	private NewScanWizardPage page1;
 	private NewScanWizardPage2 page2;
 	private URI scanHostURI;
@@ -31,8 +34,9 @@ public class NewScanWizard extends Wizard {
 	private List<String> exclusions;
 
 	public NewScanWizard(String target, Collection<IIdentity> identities, List<IScannerModule> modules) {
-		page1 = new NewScanWizardPage(target, identities, modules);
-		page2 = new NewScanWizardPage2();
+		imageCache = new ImageCache(Activator.PLUGIN_ID);
+		page1 = new NewScanWizardPage(imageCache, target, identities, modules);
+		page2 = new NewScanWizardPage2(imageCache);
 	}
 	
 	@Override
@@ -77,6 +81,12 @@ public class NewScanWizard extends Wizard {
 		}
 
 		return (scanHostURI != null);		
+	}
+
+	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
 	}
 	
 	public URI getScanHostURI() {
