@@ -57,6 +57,11 @@ public class TaggablePopupDialog extends PopupDialog {
 		return false;
 	}
 
+	@Override
+	protected Point getInitialLocation(Point initialSize) {
+		return origin;
+	}
+
 	private void createTagLabel(Composite parent, ITag tag) {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(tag.getName());
