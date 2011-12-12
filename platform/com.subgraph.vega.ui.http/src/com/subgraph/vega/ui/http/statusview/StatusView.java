@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.intercept.queue;
+package com.subgraph.vega.ui.http.statusview;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -46,15 +46,15 @@ import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
-public class InterceptQueueView extends ViewPart {
-	public final static String ID = "com.subgraph.vega.views.intercept.queue";
+public class StatusView extends ViewPart {
+	public final static String ID = "com.subgraph.vega.views.proxystatus";
 	private Composite parentComposite;
 	private TableViewer interceptQueueTableViewer;
 	private Menu interceptQueueTableMenu;
 	private TableViewer requestStatusTableViewer;
 	private Menu requestStatusTableMenu;
 
-	public InterceptQueueView() {
+	public StatusView() {
 	}
 
 	@Override

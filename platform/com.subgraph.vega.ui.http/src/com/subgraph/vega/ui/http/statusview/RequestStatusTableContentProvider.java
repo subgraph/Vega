@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.http.intercept.queue;
+package com.subgraph.vega.ui.http.statusview;
 
 import java.util.ArrayList;
 import java.util.List;

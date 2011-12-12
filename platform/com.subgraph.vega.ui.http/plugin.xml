@@ -21,10 +21,10 @@
       </view>
       <view
             allowMultiple="false"
-            class="com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView"
-            icon="icons/interceptQueue_view.png"
-            id="com.subgraph.vega.views.intercept.queue"
-            name="Intercept Queue"
+            class="com.subgraph.vega.ui.http.statusview.StatusView"
+            icon="icons/proxy_status.png"
+            id="com.subgraph.vega.views.proxystatus"
+            name="Proxy Status"
             restorable="true">
       </view>
       <view
