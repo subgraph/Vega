@@ -42,6 +42,8 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.requests.IHttpRequestTask;
+import com.subgraph.vega.api.model.requests.IRequestOrigin;
+import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
 import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
@@ -100,12 +102,13 @@ public class StatusView extends ViewPart {
 	}
 	
 	private void createInterceptQueueTableColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = { "Type", "Host", "Method", "Request", };
+		final String[] titles = { "Type", "Host", "Method", "Request", "Listener", };
 		final ColumnLayoutData[] layoutData = {
 				new ColumnPixelData(60, true, true),
 				new ColumnPixelData(120, true, true),
 				new ColumnPixelData(60, true, true),
 				new ColumnWeightData(100, 100, true),
+				new ColumnPixelData(100, true, true),
 		};
 
 		final ColumnLabelProvider providerList[] = {
@@ -132,7 +135,18 @@ public class StatusView extends ViewPart {
 				public String getText(Object element) {
 					return uriToPathString(((IProxyTransaction) element).getRequest().getURI());
 				}
-			}
+			},
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					final IRequestOrigin origin = ((IProxyTransaction) element).getRequestEngine().getRequestOrigin();
+					if (origin instanceof IRequestOriginProxy) {
+						return origin.toString();
+					} else {
+						return null;
+					}
+				}
+			},
 		};
 		for(int i = 0; i < titles.length; i++) {
 			final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
@@ -264,20 +278,14 @@ public class StatusView extends ViewPart {
 	}
 
 	private void createRequestStatusTableColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = { "Method", "Host", "Request", };
+		final String[] titles = { "Host", "Method", "Request", "Listener", };
 		final ColumnLayoutData[] layoutData = {
-				new ColumnPixelData(60, true, true),
-				new ColumnPixelData(120, true, true),
-				new ColumnWeightData(100, 100, true),
+			new ColumnPixelData(120, true, true),
+			new ColumnPixelData(60, true, true),
+			new ColumnWeightData(100, 100, true),
+			new ColumnPixelData(100, true, true),
 		};
-
 		final ColumnLabelProvider providerList[] = {
-				new ColumnLabelProvider() {
-					@Override
-					public String getText(Object element) {
-						return ((IHttpRequestTask) element).getRequest().getMethod();
-					}
-				},
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
@@ -287,9 +295,26 @@ public class StatusView extends ViewPart {
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
+					return ((IHttpRequestTask) element).getRequest().getMethod();
+				}
+			},
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
 					return uriToPathString(((IHttpRequestTask) element).getRequest().getURI());
 				}
-			}
+			},
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					final IRequestOrigin origin = ((IHttpRequestTask) element).getRequestEngine().getRequestOrigin();
+					if (origin instanceof IRequestOriginProxy) {
+						return origin.toString();
+					} else {
+						return null;
+					}
+				}
+			},
 		};
 		for(int i = 0; i < titles.length; i++) {
 			final TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);

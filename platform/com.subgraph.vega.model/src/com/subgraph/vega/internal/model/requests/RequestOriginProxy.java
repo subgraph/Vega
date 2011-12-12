@@ -38,4 +38,14 @@ public class RequestOriginProxy extends RequestOrigin implements IRequestOriginP
 		return port;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuffer buf = new StringBuffer();
+		buf.append('[');
+		buf.append(address.getHostAddress());
+		buf.append("]:");
+		buf.append(port);
+		return buf.toString();
+	}
+
 }
