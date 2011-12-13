@@ -26,8 +26,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,7 +52,7 @@ import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class StatusView extends ViewPart {
 	public final static String ID = "com.subgraph.vega.views.proxystatus";
-	private Composite parentComposite;
+	private SashForm parentComposite;
 	private TableViewer interceptQueueTableViewer;
 	private Menu interceptQueueTableMenu;
 	private TableViewer requestStatusTableViewer;
@@ -61,10 +63,11 @@ public class StatusView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		parentComposite = new Composite(parent, SWT.NONE);
-		parentComposite.setLayout(new GridLayout(1, false));
-		createInterceptQueueArea(parentComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
-		createRequestStatusArea(parentComposite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		parentComposite = new SashForm(parent, SWT.VERTICAL);
+		parentComposite.setLayout(new FillLayout());
+		createInterceptQueueArea(parentComposite);
+		createRequestStatusArea(parentComposite);
+		parentComposite.setWeights(new int[] {75, 25});
 		interceptQueueTableViewer.setInput(Activator.getDefault().getProxyService().getInterceptor());
 		requestStatusTableViewer.setInput(Activator.getDefault().getProxyService());
 	}
@@ -233,13 +236,12 @@ public class StatusView extends ViewPart {
 		rootControl.setLayout(new GridLayout(1, false));
 		rootControl.setText("Request Status");
 
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-		createRequestStatusTable(rootControl, gd, 12).setLayoutData(gd);
+		createRequestStatusTable(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		return rootControl;
 	}
 
-	private Composite createRequestStatusTable(Composite parent, GridData gd, int heightInRows) {
+	private Composite createRequestStatusTable(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		final TableColumnLayout tcl = new TableColumnLayout();
 		rootControl.setLayout(tcl);
@@ -252,7 +254,6 @@ public class StatusView extends ViewPart {
 		table.setLinesVisible(true);
 		requestStatusTableViewer.addSelectionChangedListener(createRequestStatusTableSelectionChangedListener());
 		table.setMenu(createRequestStatusTableMenu(table));
-		gd.heightHint = table.getItemHeight() * heightInRows;
 
 		return rootControl;
 	}
