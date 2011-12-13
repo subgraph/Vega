@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import java.util.Date;
+
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
@@ -40,4 +42,16 @@ public interface IHttpRequestTask {
 	 * @throws RequestEngineException 
 	 */
 	IHttpResponse get() throws RequestEngineException;
+
+	/**
+	 * Determine whether the request task has completed.
+	 * @return Boolean indicating whether the request task has completed. 
+	 */
+	boolean isComplete();
+	
+	/**
+	 * Get the time the request task finished performing the request.
+	 * @return Completion time, or null.
+	 */
+	Date getTimeCompleted();
 }

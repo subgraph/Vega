@@ -12,6 +12,7 @@ package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -25,6 +26,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
@@ -52,6 +54,7 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 	private final HttpContext context;
 	private final IHttpRequestEngineConfig config;
 	private final IHTMLParser htmlParser;
+	private Date timeCompleted;
 
 	public HttpRequestTask(HttpRequestEngine requestEngine, HttpClient client, RateLimiter rateLimit, HttpUriRequest request, IRequestOrigin requestOrigin, HttpContext context, IHttpRequestEngineConfig config, IHTMLParser htmlParser) {
 		this.requestEngine = requestEngine;
@@ -96,6 +99,16 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 	}
 
 	@Override
+	public boolean isComplete() {
+		return future.isDone();
+	}
+
+	@Override
+	public synchronized Date getTimeCompleted() {
+		return timeCompleted;
+	}
+	
+	@Override
 	public IHttpResponse call() throws Exception {
 		if(config.getForceIdentityEncoding())
 			request.setHeader(HTTP.CONTENT_ENCODING, HTTP.IDENTITY_CODING);
@@ -109,8 +122,11 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		final HttpResponse httpResponse;
 		try {
 			httpResponse = client.execute(request, context);
-			elapsed = System.currentTimeMillis() - start;
 		} finally {
+			elapsed = System.currentTimeMillis() - start;
+			synchronized(this) {
+				timeCompleted = new Date();
+			}
 			requestEngine.removeRequestInProgress(this);
 		}
 
@@ -142,7 +158,7 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		
 		return response;
 	}
-
+	
 	private HttpEntity processEntity(HttpResponse response, HttpEntity entity) throws IOException {
 		if(entity == null)
 			return null;

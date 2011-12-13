@@ -278,14 +278,21 @@ public class StatusView extends ViewPart {
 	}
 
 	private void createRequestStatusTableColumns(TableViewer viewer, TableColumnLayout layout) {
-		final String[] titles = { "Host", "Method", "Request", "Listener", };
+		final String[] titles = { "Status", "Host", "Method", "Request", "Listener", };
 		final ColumnLayoutData[] layoutData = {
+			new ColumnPixelData(45, true, true),
 			new ColumnPixelData(120, true, true),
 			new ColumnPixelData(60, true, true),
 			new ColumnWeightData(100, 100, true),
 			new ColumnPixelData(100, true, true),
 		};
 		final ColumnLabelProvider providerList[] = {
+			new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					return (((IHttpRequestTask) element).getTimeCompleted() == null) ? "in progress" : "complete"; 
+				}
+			},
 			new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
