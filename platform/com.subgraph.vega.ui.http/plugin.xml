@@ -104,9 +104,14 @@
          <enabledWhen>
             <with
                   variable="vega.interceptQueueState">
-               <equals
-                     value="pending">
-               </equals>
+               <or>
+                  <equals
+                        value="pending">
+                  </equals>
+                  <equals
+                        value="requestSent">
+                  </equals>
+               </or>
             </with>
          </enabledWhen>
       </handler>

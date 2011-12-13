@@ -78,7 +78,11 @@ public class InterceptView extends ViewPart {
 		transactionManager.updateTransactionInfo(transactionInfo);
 		ISourceProviderService sourceProviderService = (ISourceProviderService) getViewSite().getWorkbenchWindow().getService(ISourceProviderService.class);
 		InterceptQueueStateSourceProvider provider = (InterceptQueueStateSourceProvider) sourceProviderService.getSourceProvider(InterceptQueueStateSourceProvider.INTERCEPT_QUEUE_STATE);
-		provider.setPending(transactionInfo.isPending());		
+		if (transactionInfo.isPending() == true) {
+			provider.setPending(true);
+		} else {
+			provider.setSent(transactionInfo.getRequestStatus() == TransactionManager.TransactionStatus.STATUS_SENT);
+		}
 		transactionViewerRequest.notifyUpdate();
 		transactionViewerResponse.notifyUpdate();
 	}

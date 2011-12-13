@@ -164,6 +164,9 @@ public class TransactionManager {
 					transactionInfo.setRequestTransactionSerial(requestTransactionSerial);
 				} else {
 					if (transactionInfo.getRequestStatus() != requestStatus) {
+						if (requestStatus == TransactionStatus.STATUS_SENT) {
+							transactionInfo.setCurrentSerial(currentSerial);
+						}
 						transactionInfo.setRequestStatus(requestStatus);
 					}
 				}
@@ -332,7 +335,7 @@ public class TransactionManager {
 					HttpUriRequest request = info.getRequestBuilder().buildRequest();
 					currentTransaction.setRequest(request);
 					currentTransaction.doForward();
-				} else {
+				} else if (responseStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {
 					HttpResponse response = info.getResponseBuilder().buildResponse();
 					currentTransaction.getResponse().setRawResponse(response);
 					currentTransaction.doForward();
@@ -345,11 +348,7 @@ public class TransactionManager {
 		synchronized(this) {
 			if (info.getCurrentSerial() == currentSerial) {
 				currentSerial++;
-				if (requestStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {
-					currentTransaction.doDrop();
-				} else {
-					currentTransaction.doDrop();
-				}
+				currentTransaction.doDrop();
 			}
 		}
 	}

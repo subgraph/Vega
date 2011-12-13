@@ -18,9 +18,11 @@ import org.eclipse.ui.ISources;
 
 public class InterceptQueueStateSourceProvider extends AbstractSourceProvider {
 	public static final String INTERCEPT_QUEUE_STATE = "vega.interceptQueueState";
-	public static final String QUEUE_PENDING = "pending";
-	public static final String QUEUE_EMPTY = "empty";
+	public static final String QUEUE_PENDING = "pending"; // intercepted request or response pending an action
+	public static final String QUEUE_REQUEST_SENT = "requestSent"; // request sent, awaiting response
+	public static final String QUEUE_EMPTY = "idle";
 	private boolean isPending = false;
+	private boolean isSent = false;
 
 	@Override
 	public void dispose() {
@@ -41,6 +43,8 @@ public class InterceptQueueStateSourceProvider extends AbstractSourceProvider {
 	private String getCurrentQueueState() {
 		if (isPending == true) {
 			return QUEUE_PENDING;
+		} else if (isSent == true) {
+			return QUEUE_REQUEST_SENT;
 		} else {
 			return QUEUE_EMPTY;
 		}
@@ -48,7 +52,14 @@ public class InterceptQueueStateSourceProvider extends AbstractSourceProvider {
 
 	public void setPending(boolean isPending) {
 		this.isPending = isPending;
+		this.isSent = false;
 		fireSourceChanged(ISources.WORKBENCH, INTERCEPT_QUEUE_STATE, getCurrentQueueState());
 	}
 	
+	public void setSent(boolean isSent) {
+		this.isSent = isSent;
+		this.isPending = false;
+		fireSourceChanged(ISources.WORKBENCH, INTERCEPT_QUEUE_STATE, getCurrentQueueState());
+	}
+
 }
