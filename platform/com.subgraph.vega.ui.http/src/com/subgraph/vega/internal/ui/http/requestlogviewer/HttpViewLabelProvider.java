@@ -12,6 +12,8 @@ package com.subgraph.vega.internal.ui.http.requestlogviewer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -20,17 +22,22 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.api.model.tags.ITag;
 
 public class HttpViewLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider {
+	private final Map<Integer, Color> colorMap = new TreeMap<Integer, Color>();
+	
+	@Override
+	public void dispose() {
+		for (Color color: colorMap.values()) {
+			color.dispose();
+		}
+	}
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -84,8 +91,7 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 	public Color getForeground(Object element, int columnIndex) {
 		IRequestLogRecord record = (IRequestLogRecord) element;
 		if (record.getTagCount() != 0) {
-			int color = record.getTag(0).getNameColor();
-			return new Color(Display.getCurrent(), (color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff);
+			return getColorInverse(record.getTag(0).getRowColor());
 		}
 		return null;
 	}
@@ -94,10 +100,27 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 	public Color getBackground(Object element, int columnIndex) {
 		IRequestLogRecord record = (IRequestLogRecord) element;
 		if (record.getTagCount() != 0) {
-			int color = record.getTag(0).getRowColor();
-			return new Color(Display.getCurrent(), (color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff);
+			return getColor(record.getTag(0).getRowColor());
 		}
 		return null;
+	}
+
+	private Color getColor(int colorCode) {
+		Color color = colorMap.get(colorCode);
+		if (color == null) {
+			color = new Color(Display.getCurrent(), (colorCode >> 16) & 0xff, (colorCode >> 8) & 0xff, colorCode & 0xff);
+			colorMap.put(colorCode, color);
+		}
+		return color;
+	}
+	
+	// REVISIT: this isn't very nice.
+	private Color getColorInverse(int colorCode) {
+		final int inverseR = 255 - ((colorCode >> 16) & 0xff);
+		final int inverseG = 255 - ((colorCode >> 8) & 0xff);
+		final int inverseB = 255 - (colorCode & 0xff);
+
+		return getColor(inverseR << 16 | inverseG << 8 | inverseB);
 	}
 	
 }
