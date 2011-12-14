@@ -83,7 +83,9 @@ public class TaggablePopupDialog extends PopupDialog {
 
 	@Override
 	protected Point getInitialLocation(Point initialSize) {
-		return origin;
+		final int diff = origin.x - initialSize.x;
+		final int x = (diff > 0) ? (diff) : (origin.x); 
+		return new Point(x, origin.y);
 	}
 	
 	@Override
