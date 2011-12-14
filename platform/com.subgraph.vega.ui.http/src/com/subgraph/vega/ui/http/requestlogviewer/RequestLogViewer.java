@@ -244,8 +244,7 @@ public class RequestLogViewer extends Composite {
 
 	private void tagEditSelection() {
 		final IRequestLogRecord record = (IRequestLogRecord)((IStructuredSelection) tableViewer.getSelection()).getFirstElement();
-		final Dialog dialog = new TaggableEditorDialog(getShell(), record);
-		dialog.create();
+		final Dialog dialog = TaggableEditorDialog.createDialog(getShell(), record);
 		if (dialog.open() == Window.OK) {
 			tableViewer.refresh();
 		}
@@ -284,17 +283,19 @@ public class RequestLogViewer extends Composite {
 
 			@Override
 			public void mouseHover(MouseEvent e) {
-				Point pt = new Point(e.x, e.y);
-				Table table = tableViewer.getTable();
-				TableItem tableItem = table.getItem(pt);
-				if (tableItem != null) {
-					IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
-					if (record.getTagCount() > 0) {
-						Point origin = tableViewer.getTable().getDisplay().map(table.getParent(), null, e.x, e.y);
-						taggablePopupDialog = new TaggablePopupDialog(table.getShell(), record, origin);
-						taggablePopupDialog.open();
+				if (taggablePopupDialog == null) {
+					Point pt = new Point(e.x, e.y);
+					Table table = tableViewer.getTable();
+					TableItem tableItem = table.getItem(pt);
+					if (tableItem != null) {
+						IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
+						if (record.getTagCount() > 0) {
+							Point origin = tableViewer.getTable().getDisplay().map(table.getParent(), null, e.x, e.y);
+							taggablePopupDialog = new TaggablePopupDialog(table.getShell(), record, origin);
+							taggablePopupDialog.open();
+						}
 					}
-				}			
+				}
 			}
 		};
 	}
