@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
@@ -127,6 +128,7 @@ public class AuthMethodControlHttpMacro extends Composite implements IAuthMethod
 				MacroDialog dialog = new MacroDialog(getShell());
 				if (dialog.open() == Window.OK) {
 					macrosTableViewer.refresh();
+					macrosTableViewer.setSelection(new StructuredSelection(dialog.getMacro()), true);
 				}
 			}
 		});		
