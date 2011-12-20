@@ -19,8 +19,9 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModelProperties;
 
 public interface IScanInstance extends IModelProperties {
-	final static int SCAN_IDLE = 1;
-	final static int SCAN_STARTING = 2;
+	final static int SCAN_CONFIG = 0; /** Scan is being configured */
+	final static int SCAN_PROBING = 1; /** Pre-scan site probing */
+	final static int SCAN_STARTING = 2; /** Scan is starting */
 	final static int SCAN_AUDITING = 3;
 	final static int SCAN_COMPLETED = 4;
 	final static int SCAN_CANCELLED = 5;
@@ -34,6 +35,11 @@ public interface IScanInstance extends IModelProperties {
 	List<IScanAlert> getAllAlerts();
 	
 	long getScanId();
+	
+	/**
+	 * Get the scan start time. Returns null until state is SCAN_PROBING or greater.
+	 * @return Scan start time, or null.
+	 */
 	Date getStartTime();
 	int getScanStatus();
 	int getScanCompletedCount();

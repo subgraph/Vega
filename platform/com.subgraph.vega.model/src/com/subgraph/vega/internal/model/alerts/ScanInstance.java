@@ -36,23 +36,20 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
 	private final ModelProperties properties;
-	private final Date startTime;
-	private int scanStatus;
-	
+	private Date startTime;
+	private int scanStatus;	
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
 	private transient ScanAlertFactory alertFactory;
 	private transient Lock lock;
 	private transient int activeScanCompletedCount;
 	private transient int activeScanTotalCount;
-	
 	private transient Activator activator;
-	
+
 	ScanInstance(long scanId) {
 		this.scanId = scanId;
-		this.scanStatus = SCAN_IDLE;
+		this.scanStatus = SCAN_CONFIG;
 		this.properties = new ModelProperties();
-		this.startTime = new Date();
 	}
 
 	void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
@@ -156,7 +153,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 			for(IScanAlert alert: getAllAlerts()) {
 				listener.handleEvent(new NewScanAlertEvent(alert));
 			}
-			listener.handleEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+			listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 			eventManager.addListener(listener);
 		} finally {
 			unlock();
@@ -188,14 +185,17 @@ public class ScanInstance implements IScanInstance, Activatable {
 	public void updateScanProgress(int completedCount, int totalCount) {
 		activeScanCompletedCount = completedCount;
 		activeScanTotalCount = totalCount;
-		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 	}
 
 	@Override
 	public void updateScanStatus(int status) {
 		activate(ActivationPurpose.READ);
+		if (startTime == null && (status == SCAN_PROBING || status == SCAN_STARTING)) {
+			startTime = new Date();
+		}
 		this.scanStatus = status;
-		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 		activate(ActivationPurpose.WRITE);
 	}
 

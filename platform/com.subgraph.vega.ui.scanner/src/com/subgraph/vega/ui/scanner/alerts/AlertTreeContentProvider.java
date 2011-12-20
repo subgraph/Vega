@@ -79,9 +79,11 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 			tree = new AlertTree(workspace);
 			this.viewer = (TreeViewer) newViewer;
 			for(IScanInstance scan: workspace.getScanAlertRepository().getAllScanInstances()) {
-				tree.addScan(scan);
-				for(IScanAlert alert: scan.getAllAlerts()) {
-					tree.addAlert(alert);
+				if (scan.getScanStatus() != IScanInstance.SCAN_CONFIG) {
+					tree.addScan(scan);
+					for(IScanAlert alert: scan.getAllAlerts()) {
+						tree.addAlert(alert);
+					}
 				}
 			}
 			setActiveScan(workspace.getScanAlertRepository().addActiveScanInstanceListener(this));
@@ -130,8 +132,8 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	
 	private void handleNewScanInstance(NewScanInstanceEvent event) {
 		if(tree != null) {
-			tree.addScan(event.getScanInstance());
-			refreshViewer();
+//			tree.addScan(event.getScanInstance());
+//			refreshViewer();
 		}
 	}
 
@@ -160,7 +162,9 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	private void handleScanStatusChange(ScanStatusChangeEvent event) {
 		if(event.getStatus() != lastStatus) {
 			lastStatus = event.getStatus();
-			if(event.getStatus() == IScanInstance.SCAN_AUDITING) {
+			if (event.getStatus() == IScanInstance.SCAN_STARTING) {
+				tree.addScan(event.getScanInstance());
+			} else if (event.getStatus() == IScanInstance.SCAN_AUDITING) {
 				AlertScanNode scanNode = tree.getScanNode(activeScan.getScanId());
 				blinkTimer.scheduleAtFixedRate(createBlinkTask(scanNode), 0, 500);
 			}

@@ -45,13 +45,7 @@ abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 	
 	@Override
 	public synchronized IAlertTreeNode[] getChildren() {
-		final IAlertTreeNode[] children = new IAlertTreeNode[nodeMap.size()];
-		int i = 0;
-		for(IAlertTreeNode node: nodeMap.values()) {
-			children[i] = node;
-			i += 1;
-		}
-		return children;
+		return nodeMap.values().toArray(new IAlertTreeNode[0]);
 	}
 
 	@Override

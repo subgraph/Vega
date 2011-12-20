@@ -79,7 +79,8 @@ public class Scan implements IScan {
 			throw new IllegalStateException("Scanner must be locked to this scan before sending probe requests");
 		}
 
-		if (scanInstance.getScanStatus() != IScanInstance.SCAN_IDLE) {
+		final int scanStatus = scanInstance.getScanStatus();
+		if (scanStatus != IScanInstance.SCAN_CONFIG && scanStatus != IScanInstance.SCAN_PROBING) {
 			throw new IllegalStateException("Unable to run a probe for a scan that is already running or complete");
 		}
 
@@ -92,6 +93,7 @@ public class Scan implements IScan {
 		}
 		
 		scanProbe = new ScanProbe(uri, requestEngine);
+		scanInstance.updateScanStatus(IScanInstance.SCAN_PROBING);
 		final IScanProbeResult probeResult = scanProbe.runProbe();
 		scanProbe = null;
 		return probeResult;
@@ -103,7 +105,8 @@ public class Scan implements IScan {
 			throw new IllegalStateException("Scanner must be locked to this scan before a scan can start");
 		}
 
-		if (scanInstance.getScanStatus() != IScanInstance.SCAN_IDLE) {
+		final int scanStatus = scanInstance.getScanStatus();
+		if (scanStatus != IScanInstance.SCAN_CONFIG && scanStatus != IScanInstance.SCAN_PROBING) {
 			throw new IllegalStateException("Scan is already running or complete");
 		}
 

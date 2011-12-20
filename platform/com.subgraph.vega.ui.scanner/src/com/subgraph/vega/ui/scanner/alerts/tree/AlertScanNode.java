@@ -58,12 +58,14 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 
 	private String renderScanInstance() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append(dateFormat.format(scanInstance.getStartTime()));
+		if (scanInstance.getStartTime() != null) {
+			sb.append(dateFormat.format(scanInstance.getStartTime()));
+		}
 
 		sb.append(" [");
 		switch(scanInstance.getScanStatus()) {
-		case IScanInstance.SCAN_IDLE:
-			sb.append("Idle");
+		case IScanInstance.SCAN_PROBING:
+			sb.append("Probing");
 			break;
 		case IScanInstance.SCAN_STARTING:
 			sb.append("Starting");
