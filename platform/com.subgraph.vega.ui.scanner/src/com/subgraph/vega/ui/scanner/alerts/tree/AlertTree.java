@@ -14,7 +14,6 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
-import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 public class AlertTree extends AbstractAlertTreeNode {
 

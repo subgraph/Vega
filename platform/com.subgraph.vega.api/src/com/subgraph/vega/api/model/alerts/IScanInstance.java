@@ -45,6 +45,7 @@ public interface IScanInstance extends IModelProperties {
 	Date getStartTime();
 	int getScanStatus();
 	boolean isActive();
+	boolean isComplete();
 	int getScanCompletedCount();
 	int getScanTotalCount();
 	void setScan(IScan scan);

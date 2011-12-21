@@ -185,6 +185,12 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 	
 	@Override
+	public boolean isComplete() {
+		activate(ActivationPurpose.READ);
+		return (scanStatus == SCAN_CANCELLED || scanStatus == SCAN_COMPLETED);
+	}
+
+	@Override
 	public int getScanCompletedCount() {
 		return activeScanCompletedCount;
 	}

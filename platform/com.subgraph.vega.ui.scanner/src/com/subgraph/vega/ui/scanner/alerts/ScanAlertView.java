@@ -44,7 +44,6 @@ import com.subgraph.vega.ui.scanner.commands.ScannerStateSourceProvider;
 
 public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	public final static String ID = "com.subgraph.vega.views.alert";
-
 	private final Logger logger = Logger.getLogger("scan-alert-view");
 	private TreeViewer viewer;
 	private IWorkspace currentWorkspace;
@@ -52,8 +51,9 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	@Override
 	public void createPartControl(Composite parent) {
 		viewer = new TreeViewer(parent);
-		viewer.setContentProvider(new AlertTreeContentProvider());
-		viewer.setLabelProvider(new AlertTreeLabelProvider());
+		final AlertTreeContentProvider contentProvider = new AlertTreeContentProvider();
+		viewer.setContentProvider(contentProvider);
+		viewer.setLabelProvider(new AlertTreeLabelProvider(contentProvider));
 		viewer.addDoubleClickListener(this);
 		viewer.setSorter(new ViewerSorter() {
 			@Override
