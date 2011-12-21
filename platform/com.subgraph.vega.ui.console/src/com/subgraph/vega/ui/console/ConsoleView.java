@@ -14,7 +14,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.console.IConsoleDisplay;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class ConsoleView extends ViewPart implements IConsoleDisplay {
 

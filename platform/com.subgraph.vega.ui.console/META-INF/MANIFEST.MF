@@ -11,6 +11,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.subgraph.vega.api.console,
  com.subgraph.vega.api.events,
- com.subgraph.vega.ui.util,
+ com.subgraph.vega.ui.util.images,
  org.eclipse.ui.console
 Service-Component: OSGI-INF/console-service.xml

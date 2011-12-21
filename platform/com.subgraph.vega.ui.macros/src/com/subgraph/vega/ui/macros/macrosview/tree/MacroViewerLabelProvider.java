@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.subgraph.vega.ui.macros.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class MacroViewerLabelProvider extends LabelProvider {
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);

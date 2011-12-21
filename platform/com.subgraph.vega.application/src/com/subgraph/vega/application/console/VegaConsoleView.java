@@ -25,7 +25,7 @@ import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.application.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 @SuppressWarnings("restriction")
 public class VegaConsoleView extends ConsoleView implements IEventHandler {
