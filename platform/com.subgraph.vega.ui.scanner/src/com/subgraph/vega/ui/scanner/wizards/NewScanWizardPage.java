@@ -37,7 +37,7 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class NewScanWizardPage extends WizardPage {
 	static private final String VEGA_LOGO = "icons/vega_small.png";

@@ -20,7 +20,7 @@ import org.eclipse.jface.wizard.Wizard;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class NewScanWizard extends Wizard {
 	private final ImageCache imageCache;

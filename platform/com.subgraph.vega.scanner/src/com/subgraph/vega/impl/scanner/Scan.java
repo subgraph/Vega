@@ -46,13 +46,19 @@ public class Scan implements IScan {
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private List<IBasicModuleScript> basicModules;
 
+	public static Scan createScan(Scanner scanner, IScanInstance scanInstance, IWorkspace workspace) {
+		final Scan scan = new Scan(scanner, scanInstance, workspace);
+		scanInstance.setScan(scan);
+		return scan;
+	}
+
 	/**
 	 * @param scanner Scanner the scan will be run with.
 	 * @param scanInstance Scan instance for this scan.
 	 * @param workspace Workspace the IScanInstance was created in. Workspace lock count must be increased by 1 and will
 	 * be decreased when this scan finishes.
 	 */
-	public Scan(Scanner scanner, IScanInstance scanInstance, IWorkspace workspace) {
+	private Scan(Scanner scanner, IScanInstance scanInstance, IWorkspace workspace) {
 		this.scanner = scanner;
 		this.scanInstance = scanInstance;
 		this.workspace = workspace;
@@ -75,25 +81,22 @@ public class Scan implements IScan {
 
 	@Override
 	public IScanProbeResult probeTargetUri(URI uri) {
-		if (!scanner.isLocked(this)) {
-			throw new IllegalStateException("Scanner must be locked to this scan before sending probe requests");
-		}
-
 		final int scanStatus = scanInstance.getScanStatus();
-		if (scanStatus != IScanInstance.SCAN_CONFIG && scanStatus != IScanInstance.SCAN_PROBING) {
-			throw new IllegalStateException("Unable to run a probe for a scan that is already running or complete");
-		}
-
-		if (scanProbe != null) {
-			throw new IllegalStateException("Another probe is already in progress");
-		}
-
-		if (requestEngine == null) {
+		if (scanStatus != IScanInstance.SCAN_CONFIG) {
+			if (scanStatus != IScanInstance.SCAN_PROBING) {
+				throw new IllegalStateException("Unable to run a probe for a scan that is already running or complete");
+			} else {
+				if (scanProbe != null) {
+					throw new IllegalStateException("Another probe is already in progress");
+				}
+			}
+		} else {
 			requestEngine = createRequestEngine(config);
+			workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
 		}
 		
-		scanProbe = new ScanProbe(uri, requestEngine);
 		scanInstance.updateScanStatus(IScanInstance.SCAN_PROBING);
+		scanProbe = new ScanProbe(uri, requestEngine);
 		final IScanProbeResult probeResult = scanProbe.runProbe();
 		scanProbe = null;
 		return probeResult;
@@ -101,28 +104,28 @@ public class Scan implements IScan {
 
 	@Override
 	public void startScan() {
-		if (!scanner.isLocked(this)) {
-			throw new IllegalStateException("Scanner must be locked to this scan before a scan can start");
-		}
-
-		final int scanStatus = scanInstance.getScanStatus();
-		if (scanStatus != IScanInstance.SCAN_CONFIG && scanStatus != IScanInstance.SCAN_PROBING) {
-			throw new IllegalStateException("Scan is already running or complete");
-		}
-
 		if (config.getBaseURI() == null) {
 			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
 		}
 
-		if (requestEngine == null) {
+		final int scanStatus = scanInstance.getScanStatus();
+		if (scanStatus != IScanInstance.SCAN_CONFIG) {
+			if (scanStatus != IScanInstance.SCAN_PROBING) {
+				throw new IllegalStateException("Scan is already running or complete");
+			} else {
+				if (scanProbe != null) {
+					throw new IllegalStateException("A scan probe is in progress");
+				}
+			}
+		} else {
 			requestEngine = createRequestEngine(config);
+			workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
 		}
 
+		scanInstance.updateScanStatus(IScanInstance.SCAN_STARTING);
 		reloadModules();
 		scannerTask = new ScannerTask(this);
 		scannerThread = new Thread(scannerTask);
-		workspace.getScanAlertRepository().setActiveScanInstance(scanInstance);
-		scanInstance.updateScanStatus(IScanInstance.SCAN_STARTING);
 		scannerThread.start();
 	}
 
@@ -204,8 +207,8 @@ public class Scan implements IScan {
 	}
 
 	public void doFinish() {
-		workspace.getScanAlertRepository().setActiveScanInstance(null);
-		getScanner().unlock();
+		scanInstance.setScan(null);
+		workspace.getScanAlertRepository().removeActiveScanInstance(null);
 		workspace.unlock();
 	}
 	

@@ -14,15 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 public class AlertTitleNode implements IAlertTreeNode {
 	private final static String ALERT_ITEM = "icons/alert_item.png";
-
+	private final IAlertTreeNode parentNode;
 	private final String title;
 	private final List<IScanAlert> alerts;
 	
-	AlertTitleNode(String title) {
+	AlertTitleNode(IAlertTreeNode parentNode, String title) {
+		this.parentNode = parentNode;
 		this.title = title;
 		this.alerts = new ArrayList<IScanAlert>();
 	}
@@ -69,5 +71,10 @@ public class AlertTitleNode implements IAlertTreeNode {
 	@Override
 	public String getImage() {
 		return ALERT_ITEM;
+	}
+
+	@Override
+	public IScanInstance getScanInstance() {
+		return parentNode.getScanInstance();
 	}
 }

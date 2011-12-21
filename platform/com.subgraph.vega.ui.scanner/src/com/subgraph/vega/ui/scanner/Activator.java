@@ -16,7 +16,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.xml.IXmlRepository;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -37,8 +36,6 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceTracker<IModel, IModel> modelTracker;
 	private ServiceTracker<IXmlRepository, IXmlRepository> xmlRepositoryTracker;
 	private ServiceTracker<IScannerModuleRegistry, IScannerModuleRegistry> moduleRegistryTracker;
-
-	private IScan currentScan;
 
 	/**
 	 * The constructor
@@ -107,14 +104,6 @@ public class Activator extends AbstractUIPlugin {
 	
 	public IScannerModuleRegistry getIScannerModuleRegistry() {
 		return moduleRegistryTracker.getService();
-	}
-
-	public void setCurrentScan(IScan scan) {
-		currentScan = scan;
-	}
-
-	public IScan getCurrentScan() {
-		return currentScan;
 	}
 	
 }

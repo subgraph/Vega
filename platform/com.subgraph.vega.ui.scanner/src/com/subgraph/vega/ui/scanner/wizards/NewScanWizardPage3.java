@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class NewScanWizardPage3 extends WizardPage {
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);

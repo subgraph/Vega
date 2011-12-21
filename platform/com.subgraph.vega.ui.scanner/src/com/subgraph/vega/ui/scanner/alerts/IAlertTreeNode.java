@@ -11,6 +11,7 @@
 package com.subgraph.vega.ui.scanner.alerts;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 
 public interface IAlertTreeNode {
 	void addAlert(IScanAlert alert);
@@ -19,4 +20,5 @@ public interface IAlertTreeNode {
 	Object[] getChildren();
 	String getLabel();
 	String getImage();
+	IScanInstance getScanInstance();
 }

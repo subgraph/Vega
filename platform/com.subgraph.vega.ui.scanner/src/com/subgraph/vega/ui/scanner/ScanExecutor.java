@@ -59,7 +59,6 @@ public class ScanExecutor {
 			return null;
 		}
 
-		scanner.lock(scan);
 		final IScannerConfig config = scan.getConfig();
 		config.setBaseURI(targetUri);
 		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);

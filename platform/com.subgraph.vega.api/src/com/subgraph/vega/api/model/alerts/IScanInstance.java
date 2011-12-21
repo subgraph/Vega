@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModelProperties;
+import com.subgraph.vega.api.scanner.IScan;
 
 public interface IScanInstance extends IModelProperties {
 	final static int SCAN_CONFIG = 0; /** Scan is being configured */
@@ -35,6 +36,7 @@ public interface IScanInstance extends IModelProperties {
 	List<IScanAlert> getAllAlerts();
 	
 	long getScanId();
+	IScan getScan();
 	
 	/**
 	 * Get the scan start time. Returns null until state is SCAN_PROBING or greater.
@@ -42,8 +44,10 @@ public interface IScanInstance extends IModelProperties {
 	 */
 	Date getStartTime();
 	int getScanStatus();
+	boolean isActive();
 	int getScanCompletedCount();
 	int getScanTotalCount();
+	void setScan(IScan scan);
 	void updateScanProgress(int completedCount, int totalCount);
 	void updateScanStatus(int status);
 	void notifyScanException(HttpUriRequest request, Throwable exception);

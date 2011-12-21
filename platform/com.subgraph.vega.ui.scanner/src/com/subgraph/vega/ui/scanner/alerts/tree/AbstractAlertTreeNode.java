@@ -14,11 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 abstract class AbstractAlertTreeNode implements IAlertTreeNode {
-	
+	protected final IAlertTreeNode parentNode;
 	protected final Map<String, IAlertTreeNode> nodeMap = new HashMap<String, IAlertTreeNode>();
+
+	protected AbstractAlertTreeNode(IAlertTreeNode parentNode) {
+		this.parentNode = parentNode;
+	}
 
 	@Override
 	public void addAlert(IScanAlert alert) {
@@ -52,7 +57,15 @@ abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 	public String getImage() {
 		return null;
 	}
-	
+
+	@Override
+	public IScanInstance getScanInstance() {
+		if (parentNode != null) {
+			return parentNode.getScanInstance();
+		}
+		return null;
+	}
+
 	protected synchronized IAlertTreeNode getNodeForAlert(IScanAlert alert) {
 		final String key = createKeyForAlert(alert);
 		if(key == null) {

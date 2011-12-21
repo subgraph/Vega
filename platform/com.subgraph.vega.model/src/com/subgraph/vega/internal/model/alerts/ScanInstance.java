@@ -30,12 +30,14 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanExceptionEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
+import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanInstance implements IScanInstance, Activatable {
 	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
 	private final ModelProperties properties;
+	private transient IScan scan;
 	private Date startTime;
 	private int scanStatus;	
 	private transient EventListenerManager eventManager;
@@ -63,6 +65,11 @@ public class ScanInstance implements IScanInstance, Activatable {
 	public long getScanId() {
 		activate(ActivationPurpose.READ);
 		return scanId;
+	}
+
+	@Override
+	public IScan getScan() {
+		return scan;
 	}
 
 	@Override
@@ -172,6 +179,12 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
+	public boolean isActive() {
+		activate(ActivationPurpose.READ);
+		return (scanStatus == SCAN_PROBING || scanStatus == SCAN_STARTING || scanStatus == SCAN_AUDITING);
+	}
+	
+	@Override
 	public int getScanCompletedCount() {
 		return activeScanCompletedCount;
 	}
@@ -179,6 +192,11 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public int getScanTotalCount() {
 		return activeScanTotalCount;
+	}
+
+	@Override
+	public void setScan(IScan scan) {
+		this.scan = scan;
 	}
 
 	@Override
@@ -304,4 +322,5 @@ public class ScanInstance implements IScanInstance, Activatable {
 		
 		this.activator = activator;			
 	}
+
 }
