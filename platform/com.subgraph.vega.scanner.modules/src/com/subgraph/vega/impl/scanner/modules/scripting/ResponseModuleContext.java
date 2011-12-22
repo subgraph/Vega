@@ -116,8 +116,7 @@ public class ResponseModuleContext implements IModuleContext {
 		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] ");
 		final IRequestLog requestLog = workspace.getRequestLog();
 		
-		try {
-			scanInstance.lock();
+		synchronized(scanInstance) {
 			if(key != null && scanInstance.hasAlertKey(key)) {
 				return;
 			}
@@ -136,8 +135,6 @@ public class ResponseModuleContext implements IModuleContext {
 				alert.setStringProperty("message", message);
 			}
 			scanInstance.addAlert(alert);
-		} finally {
-			scanInstance.unlock();
 		}
 	}
 

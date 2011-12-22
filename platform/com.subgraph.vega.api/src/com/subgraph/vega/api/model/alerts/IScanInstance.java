@@ -55,6 +55,4 @@ public interface IScanInstance extends IModelProperties {
 	
 	void addScanEventListenerAndPopulate(IEventHandler listener);
 	void removeScanEventListener(IEventHandler listener);
-	void lock();
-	void unlock();
 }

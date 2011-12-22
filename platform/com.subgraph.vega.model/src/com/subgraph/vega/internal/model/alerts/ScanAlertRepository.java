@@ -51,7 +51,7 @@ public class ScanAlertRepository implements IScanAlertRepository {
 					final ScanInstance scan = (ScanInstance) ob;
 					scan.setTransientState(database, alertFactory);
 					final int status = scan.getScanStatus();
-					if(status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
+					if(status != IScanInstance.SCAN_CONFIG && status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
 						scan.updateScanStatus(IScanInstance.SCAN_CANCELLED);
 					}
 				}
@@ -73,18 +73,18 @@ public class ScanAlertRepository implements IScanAlertRepository {
 	}
 
 	@Override
-	public void addActiveScanInstance(IScanInstance scanInstance) {
+	public synchronized void addActiveScanInstance(IScanInstance scanInstance) {
 		activeScanInstanceList.add(scanInstance);
 		scanInstanceEventManager.fireEvent(new ActiveScanInstanceEvent(scanInstance));
 	}
 
 	@Override
-	public void removeActiveScanInstance(IScanInstance scanInstance) {
+	public synchronized void removeActiveScanInstance(IScanInstance scanInstance) {
 		activeScanInstanceList.remove(scanInstance);
 	}
 
 	@Override
-	public List<IScanInstance> getAllActiveScanInstances() {
+	public synchronized List<IScanInstance> getAllActiveScanInstances() {
 		return new ArrayList<IScanInstance>(activeScanInstanceList);
 	}
 

@@ -19,10 +19,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.params.HttpProtocolParams;
 
+import com.subgraph.vega.api.events.IEvent;
+import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.WorkspaceCloseEvent;
+import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
@@ -36,35 +40,64 @@ import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class Scan implements IScan {
 	private final Scanner scanner;
-	private final IScanInstance scanInstance;
-	private final IWorkspace workspace; /** Workspace the scanInstance is locked to */
-	private IScannerConfig config = new ScannerConfig();
-	private volatile ScanProbe scanProbe;
-	private IHttpRequestEngine requestEngine;
-	private ScannerTask scannerTask;
-	private Thread scannerThread;
+	private final IEventHandler workspaceListener;
+	private final IScannerConfig config;
+	private IScanInstance scanInstance; // guarded by this
+	private IWorkspace workspace; // guarded by this
+	private ScanProbe scanProbe; // guarded by this
+	private IHttpRequestEngine requestEngine; // guarded by this
+	private ScannerTask scannerTask; // guarded by this
+	private Thread scannerThread; // guarded by this
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private List<IBasicModuleScript> basicModules;
 
-	public static Scan createScan(Scanner scanner, IScanInstance scanInstance, IWorkspace workspace) {
-		final Scan scan = new Scan(scanner, scanInstance, workspace);
-		scanInstance.setScan(scan);
+	/**
+	 * Instantiate a scan.
+	 * @param scanner Scanner the scan will be run with.
+	 * @param workspace Workspace to be used for the scan.
+	 * @return Scan.
+	 */
+	public static Scan createScan(Scanner scanner, IWorkspace workspace) {
+		if (workspace == null) {
+			return null;
+		}
+		final Scan scan = new Scan(scanner);
+		scan.setWorkspace(workspace);
+		scan.reloadModules();
 		return scan;
 	}
 
-	/**
-	 * @param scanner Scanner the scan will be run with.
-	 * @param scanInstance Scan instance for this scan.
-	 * @param workspace Workspace the IScanInstance was created in. Workspace lock count must be increased by 1 and will
-	 * be decreased when this scan finishes.
-	 */
-	private Scan(Scanner scanner, IScanInstance scanInstance, IWorkspace workspace) {
+	private Scan(Scanner scanner) {
 		this.scanner = scanner;
-		this.scanInstance = scanInstance;
-		this.workspace = workspace;
-		reloadModules();
+		workspaceListener = new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if (event instanceof WorkspaceCloseEvent || event instanceof WorkspaceResetEvent) {
+					handleWorkspaceCloseOrReset();
+				}
+			}
+		};
+		config = new ScannerConfig();
 	}
 
+	private void setWorkspace(IWorkspace workspace) {
+		synchronized(this) {
+			workspace.lock();
+			this.workspace = workspace;
+			workspace.getModel().addWorkspaceListener(workspaceListener);
+			scanInstance = workspace.getScanAlertRepository().createNewScanInstance();
+			scanInstance.setScan(this);
+		}
+	}
+
+	private void handleWorkspaceCloseOrReset() {
+		synchronized(this) {
+			scanInstance = null;
+			workspace.getModel().removeWorkspaceListener(workspaceListener);
+			workspace = null;
+		}
+	}
+	
 	@Override
 	public IScannerConfig getConfig() {
 		return config;
@@ -72,74 +105,103 @@ public class Scan implements IScan {
 
 	@Override
 	public List<IScannerModule> getModuleList() {
-		reloadModules();
-		final List<IScannerModule> moduleList = new ArrayList<IScannerModule>();
-		moduleList.addAll(responseProcessingModules);
-		moduleList.addAll(basicModules);
-		return moduleList;
+		synchronized(this) {
+			reloadModules();
+			final List<IScannerModule> moduleList = new ArrayList<IScannerModule>();
+			moduleList.addAll(responseProcessingModules);
+			moduleList.addAll(basicModules);
+			return moduleList;
+		}
 	}
 
 	@Override
 	public IScanProbeResult probeTargetUri(URI uri) {
-		final int scanStatus = scanInstance.getScanStatus();
-		if (scanStatus != IScanInstance.SCAN_CONFIG) {
-			if (scanStatus != IScanInstance.SCAN_PROBING) {
-				throw new IllegalStateException("Unable to run a probe for a scan that is already running or complete");
-			} else {
-				if (scanProbe != null) {
-					throw new IllegalStateException("Another probe is already in progress");
-				}
+		synchronized(this) {
+			if (scanInstance == null) {
+				throw new IllegalStateException("Scan is detached from workspace; scan instance was lost. A new scan must be created");
 			}
-		} else {
-			requestEngine = createRequestEngine(config);
-			workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
+
+			synchronized(scanInstance) {
+				final int scanStatus = scanInstance.getScanStatus();
+				if (scanStatus != IScanInstance.SCAN_CONFIG) {
+					if (scanStatus != IScanInstance.SCAN_PROBING) {
+						throw new IllegalStateException("Unable to run a probe for a scan that is already running or complete");
+					} else {
+						if (scanProbe != null) {
+							throw new IllegalStateException("Another probe is already in progress");
+						}
+					}
+				} else {
+					requestEngine = createRequestEngine(config);
+					workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
+				}
+				
+				scanInstance.updateScanStatus(IScanInstance.SCAN_PROBING);
+			}
+			
+			scanProbe = new ScanProbe(uri, requestEngine);
+			final IScanProbeResult probeResult = scanProbe.runProbe();
+			scanProbe = null;
+			return probeResult;
 		}
-		
-		scanInstance.updateScanStatus(IScanInstance.SCAN_PROBING);
-		scanProbe = new ScanProbe(uri, requestEngine);
-		final IScanProbeResult probeResult = scanProbe.runProbe();
-		scanProbe = null;
-		return probeResult;
 	}
 
 	@Override
 	public void startScan() {
-		if (config.getBaseURI() == null) {
-			throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
-		}
-
-		final int scanStatus = scanInstance.getScanStatus();
-		if (scanStatus != IScanInstance.SCAN_CONFIG) {
-			if (scanStatus != IScanInstance.SCAN_PROBING) {
-				throw new IllegalStateException("Scan is already running or complete");
-			} else {
-				if (scanProbe != null) {
-					throw new IllegalStateException("A scan probe is in progress");
-				}
+		synchronized(this) {
+			if (scanInstance == null) {
+				throw new IllegalStateException("Scan is detached from workspace; scan instance was lost. A new scan must be created");
 			}
-		} else {
-			requestEngine = createRequestEngine(config);
-			workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
-		}
 
-		scanInstance.updateScanStatus(IScanInstance.SCAN_STARTING);
-		reloadModules();
-		scannerTask = new ScannerTask(this);
-		scannerThread = new Thread(scannerTask);
-		scannerThread.start();
+			if (config.getBaseURI() == null) {
+				throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
+			}
+
+			synchronized(scanInstance) {
+				final int scanStatus = scanInstance.getScanStatus();
+				if (scanStatus != IScanInstance.SCAN_CONFIG) {
+					if (scanStatus != IScanInstance.SCAN_PROBING) {
+						throw new IllegalStateException("Scan is already running or complete");
+					} else {
+						if (scanProbe != null) {
+							throw new IllegalStateException("A scan probe is in progress");
+						}
+					}
+				} else {
+					requestEngine = createRequestEngine(config);
+					workspace.getScanAlertRepository().addActiveScanInstance(scanInstance);
+				}
+
+				scanInstance.updateScanStatus(IScanInstance.SCAN_STARTING);
+			}
+
+			reloadModules();
+			scannerTask = new ScannerTask(this);
+			scannerThread = new Thread(scannerTask);
+			scannerThread.start();
+		}
 	}
 
 	@Override
 	public void stopScan() {
-		if(scanProbe != null) {
-			scanProbe.abort();
-		}
+		synchronized(this) {
+			if(scannerTask != null) {
+				scannerTask.stop();
+			} else {
+				if(scanProbe != null) {
+					scanProbe.abort();
+				}
 
-		if(scannerTask != null) {
-			scannerTask.stop();
-		} else {
-			scanInstance.updateScanStatus(IScanInstance.SCAN_CANCELLED);
-			doFinish();
+				if (scanInstance != null) {
+					synchronized(scanInstance) {
+						if (scanInstance.getScanStatus() != IScanInstance.SCAN_CONFIG) {
+							scanInstance.updateScanStatus(IScanInstance.SCAN_CANCELLED);
+						}
+					}
+				}
+
+				doFinish();
+			}
 		}
 	}
 
@@ -186,30 +248,32 @@ public class Scan implements IScan {
 		return scanner;
 	}
 
-	public IScanInstance getScanInstance() {
+	public synchronized IScanInstance getScanInstance() {
 		return scanInstance;
 	}
 
-	public IWorkspace getWorkspace() {
+	public synchronized IWorkspace getWorkspace() {
 		return workspace;
 	}
 
-	public List<IResponseProcessingModule> getResponseModules() {
+	public synchronized List<IResponseProcessingModule> getResponseModules() {
 		return responseProcessingModules;
 	}
 	
-	public 	List<IBasicModuleScript> getBasicModules() {
+	public synchronized List<IBasicModuleScript> getBasicModules() {
 		return basicModules;
 	}
 
-	public IHttpRequestEngine getRequestEngine() {
+	public synchronized IHttpRequestEngine getRequestEngine() {
 		return requestEngine;
 	}
 
 	public void doFinish() {
-		scanInstance.setScan(null);
-		workspace.getScanAlertRepository().removeActiveScanInstance(null);
-		workspace.unlock();
+		synchronized(this) {
+			scanInstance.setScan(null);
+			workspace.getScanAlertRepository().removeActiveScanInstance(scanInstance);
+			workspace.unlock();
+		}
 	}
 	
 }

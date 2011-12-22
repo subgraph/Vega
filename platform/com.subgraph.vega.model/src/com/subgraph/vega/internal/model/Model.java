@@ -106,7 +106,7 @@ public class Model implements IModel {
 	}
 	
 	private boolean openWorkspaceEntry(IWorkspaceEntry entry) {
-		IWorkspace workspace = new Workspace(entry, conditionSetChangeEventManager, workspaceEventManager, console, htmlParser, xmlRepository);
+		IWorkspace workspace = new Workspace(this, entry, conditionSetChangeEventManager, workspaceEventManager, console, htmlParser, xmlRepository);
 		if(!workspace.open()) {
 			logger.warning("Failed to open workspace at path "+ entry.getPath());
 			return false;

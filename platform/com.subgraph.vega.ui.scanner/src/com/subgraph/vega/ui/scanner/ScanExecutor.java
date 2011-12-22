@@ -49,6 +49,7 @@ public class ScanExecutor {
 			return maybeLaunchScanFromWizard(shell, wizard, scanner, scan);
 		} else {
 			// REVISIT: delete the scan so the ID can be used in the future?
+			scan.stopScan(); // stop to unlock workspace
 		}
 		return null;
 	}

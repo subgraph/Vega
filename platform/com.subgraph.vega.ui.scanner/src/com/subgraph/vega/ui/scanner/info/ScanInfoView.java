@@ -147,7 +147,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 			return;
 		}
 		if(!dashboard.getDisplay().isDisposed()) {
-			dashboard.getDisplay().syncExec(new Runnable() {
+			dashboard.getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					dashboard.displayScanInstance(scan);
