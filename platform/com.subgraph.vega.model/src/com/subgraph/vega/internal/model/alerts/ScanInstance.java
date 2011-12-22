@@ -37,6 +37,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private final ModelProperties properties;
 	private transient IScan scan;
 	private Date startTime;
+	private Date stopTime;
 	private int scanStatus;	
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
@@ -72,6 +73,12 @@ public class ScanInstance implements IScanInstance, Activatable {
 	public synchronized Date getStartTime() {
 		activate(ActivationPurpose.READ);
 		return startTime;
+	}
+
+	@Override
+	public Date getStopTime() {
+		activate(ActivationPurpose.READ);
+		return stopTime;
 	}
 
 	@Override
@@ -205,6 +212,10 @@ public class ScanInstance implements IScanInstance, Activatable {
 		if (status == SCAN_PROBING || status == SCAN_STARTING) {
 			if (startTime == null) {
 				startTime = new Date();
+			}
+		} else if (status == SCAN_COMPLETED || status == SCAN_CANCELLED) {
+			if (stopTime == null) {
+				stopTime = new Date();
 			}
 		}
 		this.scanStatus = status;

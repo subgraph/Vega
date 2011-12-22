@@ -43,6 +43,13 @@ public interface IScanInstance extends IModelProperties {
 	 * @return Scan start time, or null.
 	 */
 	Date getStartTime();
+
+	/**
+	 * Get the scan stop time. Returns null until state is SCAN_COMPLETED or SCAN_CANCELLED.
+	 * @return Scan start time, or null.
+	 */
+	Date getStopTime();
+	
 	int getScanStatus();
 	boolean isActive();
 	boolean isComplete();
