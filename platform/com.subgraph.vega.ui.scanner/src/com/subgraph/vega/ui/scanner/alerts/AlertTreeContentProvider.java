@@ -57,20 +57,18 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		synchronized(this) {
 			this.viewer = (TreeViewer) viewer;
+			if(newInput instanceof IWorkspace)
+				setNewModelAndViewer((IWorkspace) newInput);
+			else
+				setNullModel();		
 		}
-		if(newInput instanceof IWorkspace)
-			setNewModelAndViewer((IWorkspace) newInput);
-		else
-			setNullModel();		
 	}
 
 	private void setNullModel() {
 		tree = null;
 		workspace = null;
 		lastStatusMap.clear();
-		synchronized(this) {
-			activeList.clear();
-		}
+		activeList.clear();
 	}
 	
 	private void setNewModelAndViewer(IWorkspace newWorkspace) {
@@ -83,9 +81,7 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 			}
 
 			lastStatusMap.clear();
-			synchronized(this) {
-				activeList.clear();
-			}
+			activeList.clear();
 			workspace = newWorkspace;
 			if(newWorkspace == null) {
 				return;

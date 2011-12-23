@@ -94,7 +94,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
 		activate(ActivationPurpose.READ);
-		return alertFactory.createAlert(key, type, scanId, requestId);
+		return alertFactory.createAlert(key, type, this, requestId);
 	}
 
 	@Override

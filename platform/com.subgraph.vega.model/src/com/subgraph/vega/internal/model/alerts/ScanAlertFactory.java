@@ -18,6 +18,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert.Severity;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.xml.IXmlRepository;
 
 public class ScanAlertFactory {
@@ -28,7 +29,7 @@ public class ScanAlertFactory {
 		this.xmlRepository = xmlRepository;
 	}
 	
-	ScanAlert createAlert(String key, String name, long scanId, long requestId) {
+	ScanAlert createAlert(String key, String name, IScanInstance scanInstance, long requestId) {
 		Document doc = xmlRepository.getDocument("alerts/"+ name +".xml");
 		if(doc == null)
 			doc = xmlRepository.getDocument("alerts/default.xml");
@@ -41,7 +42,7 @@ public class ScanAlertFactory {
 			return null;
 		final Severity severity = parseSeverity(alert);
 		final String title = parseTitle(alert);
-		return new ScanAlert(key, name, title, severity, scanId, requestId);
+		return new ScanAlert(key, name, title, severity, scanInstance, requestId);
 	}
 	
 

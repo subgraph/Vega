@@ -16,6 +16,7 @@ import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanAlert implements IScanAlert, Activatable {
@@ -24,7 +25,7 @@ public class ScanAlert implements IScanAlert, Activatable {
 	private final Severity severity;
 	private final String title;
 	private final String key;
-	private final long scanId;
+	private final IScanInstance scanInstance;
 	private final long requestId;
 	private String templateName = "main";
 	private String resource;
@@ -32,13 +33,13 @@ public class ScanAlert implements IScanAlert, Activatable {
 	
 	private transient Activator activator;
 	
-	ScanAlert(String key, String name, String title, Severity severity, long scanId, long requestId) {
+	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
 		this.key = key;
 		this.name = name;
 		this.title = title;
 		this.severity = severity;
 		this.properties = new ModelProperties();
-		this.scanId = scanId;
+		this.scanInstance = scanInstance;
 		this.requestId = requestId;
 	}
 	
@@ -138,9 +139,15 @@ public class ScanAlert implements IScanAlert, Activatable {
 	}
 
 	@Override
+	public IScanInstance getScanInstance() {
+		activate(ActivationPurpose.READ);
+		return scanInstance;
+	}
+	
+	@Override
 	public long getScanId() {
 		activate(ActivationPurpose.READ);
-		return scanId;
+		return scanInstance.getScanId();
 	}
 
 	@Override

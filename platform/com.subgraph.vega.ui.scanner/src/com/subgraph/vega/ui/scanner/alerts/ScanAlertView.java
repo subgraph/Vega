@@ -34,6 +34,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScan;
@@ -161,13 +162,21 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				final IAlertTreeNode node = (IAlertTreeNode)((IStructuredSelection) viewer.getSelection()).getFirstElement();
-				if (node != null) {
-					final IScanInstance scanInstance = node.getScanInstance();
-					if (scanInstance != null) {
-						setScanSelectionIsActive(scanInstance.isActive());
+				final Object selection = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
+				if (selection != null) {
+					if (selection instanceof IAlertTreeNode) {
+						final IAlertTreeNode node = (IAlertTreeNode) selection;
+						if (node != null) {
+							final IScanInstance scanInstance = node.getScanInstance();
+							if (scanInstance != null) {
+								setScanSelectionIsActive(scanInstance.isActive());
+							} else {
+								setScanSelectionIsActive(false);
+							}
+						}
 					} else {
-						setScanSelectionIsActive(false);
+						final IScanAlert node = (IScanAlert) selection;
+						setScanSelectionIsActive(node.getScanInstance().isActive());
 					}
 				} else {
 					setScanSelectionIsActive(false);
