@@ -34,12 +34,14 @@ import com.subgraph.vega.impl.scanner.urls.UriParser;
 public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final Scan scan;
+	private final IScanInstance scanInstance;
 	private IContentAnalyzer contentAnalyzer;
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
 	ScannerTask(Scan scan) {
 		this.scan = scan;
+		this.scanInstance = scan.getScanInstance();
 		logger.setLevel(Level.ALL);
 	}
 	
@@ -56,7 +58,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	@Override
 	public void run() {
-		final IScanInstance scanInstance = scan.getScanInstance();
 		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
 		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
 		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
@@ -120,7 +121,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scan.getScanInstance());
+		UriParser uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance);
 		URI baseURI = scan.getConfig().getBaseURI();
 		uriParser.processUri(baseURI);
 		currentCrawler.start();
@@ -136,11 +137,11 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 
 	@Override
 	public void progressUpdate(int completed, int total) {
-		scan.getScanInstance().updateScanProgress(completed, total);
+		scanInstance.updateScanProgress(completed, total);
 	}
 
 	@Override
 	public void exceptionThrown(HttpUriRequest request, Throwable exception) {
-		scan.getScanInstance().notifyScanException(request, exception);
+		scanInstance.notifyScanException(request, exception);
 	}
 }
