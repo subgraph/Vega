@@ -162,6 +162,7 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 			lastStatusMap.put(scan.getScanId(), -1);
 			scan.addScanEventListenerAndPopulate(this);
 			AlertScanNode scanNode = tree.addScan(scan);
+			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(scanNode));
 		}
 	}
