@@ -140,10 +140,12 @@ public class Scan implements IScan {
 			}
 			
 			scanProbe = new ScanProbe(uri, requestEngine);
-			final IScanProbeResult probeResult = scanProbe.runProbe();
-			scanProbe = null;
-			return probeResult;
 		}
+		final IScanProbeResult probeResult = scanProbe.runProbe();
+		synchronized(this) {
+			scanProbe = null;
+		}
+		return probeResult;
 	}
 
 	@Override
