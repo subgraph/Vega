@@ -40,7 +40,7 @@ public class TagTableLabelProvider implements ILabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		return ((TagModifier) element).getTagMod().getName();
+		return ((TagModifier) element).getName();
 	}
 
 }

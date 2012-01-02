@@ -13,10 +13,9 @@ package com.subgraph.vega.ui.tags.taggableeditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.ColorSelector;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -59,8 +58,10 @@ import com.subgraph.vega.internal.ui.tags.taggableeditor.TagTableContentProvider
 import com.subgraph.vega.internal.ui.tags.taggableeditor.TagTableLabelProvider;
 import com.subgraph.vega.internal.ui.tags.taggableeditor.TagTableSearchFilter;
 import com.subgraph.vega.ui.tags.Activator;
+import com.subgraph.vega.ui.tags.tageditor.TagEditorDialog;
+import com.subgraph.vega.ui.tagsl.taggablepopup.ITagModifierValidator;
 
-public class TaggableEditorDialog extends TitleAreaDialog {
+public class TaggableEditorDialog extends TitleAreaDialog implements ITagModifierValidator {
 	protected static final String IStructuredSelection = null;
 	private final ITaggable taggable;
 	private ITagModel tagModel;
@@ -72,14 +73,12 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 	private CheckboxTableViewer tagTableViewer;
 	private TagTableCheckStateManager checkStateManager;
 	private TagTableSearchFilter tagTableSearchFilter;
-	private boolean tagModified;
+	private Button createButton;
+	private Button editButton;
 	private Text tagNameText;
 	private Text tagDescText;
 	private ColorSelector nameColorSelector;
 	private ColorSelector rowColorSelector;
-	private Button tagButtonClear;
-	private Button tagButtonRestore;
-	private Button tagButtonSave;
 
 	static public TaggableEditorDialog createDialog(Shell parentShell, ITaggable taggable) {
 		final TaggableEditorDialog dialog = new TaggableEditorDialog(parentShell, taggable);
@@ -112,7 +111,6 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		};
 		checkStateManager = new TagTableCheckStateManager(); 
 		tagTableSearchFilter = new TagTableSearchFilter();
-		tagModified = false;
 	}
 
 	private void initialize() {
@@ -138,7 +136,7 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		super.create();
 		setTitle("Select Tags");
 		setMessage("Tags can be used to signify a result as noteworthy and to simplify searching for it. Select " +
-			       "which tags apply to this result or create and edit tags below.");
+			       "which tags apply to this result.");
 	}
 	
 	@Override
@@ -150,10 +148,10 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 	    parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 	    createTagsArea(parentComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
-		createTagEditArea(parentComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
+	    createTagInfoArea(parentComposite).setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		for (ITag tag: tagModel.getAllTags()) {
-			TagModifier tagModifier = new TagModifier(tag, tagModel.createTag(tag));
+			TagModifier tagModifier = new TagModifier(tag);
 			tagList.add(tagModifier);
 			for (ITag tagged: taggable.getAllTags()) {
 				if (tagModifier.getTagOrig() == tagged) {
@@ -171,12 +169,6 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 
 	@Override
 	protected void okPressed() {
-		if (tagModified) {
-			if (confirmLoseTagModification() == false) {
-				return;
-			}
-		}
-		
 		for (TagModifier tagModifier: tagList) {
 			if (tagModifier.isModified()) {
 				tagModifier.store(tagModel);
@@ -195,12 +187,6 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 
 	@Override
 	protected void cancelPressed() {
-		if (tagModified) {
-			if (confirmLoseTagModification() == false) {
-				return;
-			}
-		}
-
 		int tagModifiedCnt = 0;
 		for (TagModifier tagModifier: tagList) {
 			if (tagModifier.isModified()) {
@@ -249,10 +235,12 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		final Control tagTableControl = createTagTable(rootControl, gd, 7);
 		tagTableControl.setLayoutData(gd);
-		
+
+		createTagAreaButtonsControl(rootControl).setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 1, 1));
+
 		return rootControl;
 	}
-
+	
 	private ModifyListener createTagFilterModifyListener() {
 		return new ModifyListener() {
 			@Override
@@ -285,36 +273,77 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (event.getSelection().isEmpty() == false) {
+				boolean isEmpty = event.getSelection().isEmpty(); 
+				editButton.setEnabled(!isEmpty);
+				if (isEmpty == false) {
 					final TagModifier tagModifier = (TagModifier)((IStructuredSelection) event.getSelection()).getFirstElement();
-					if (tagModifier != tagSelected) {
-						if (tagModified) {
-							if (confirmLoseTagModification() == false) {
-								tagTableViewer.setSelection(new StructuredSelection(tagSelected), true);
-								return;
-							}
-						}
-						setTagSelected(tagModifier);
-					}
+					setTagSelected(tagModifier);
 				}
 			}
 		};
 	}
 
-	private Group createTagEditArea(Composite parent) {
+	private Composite createTagAreaButtonsControl(Composite parent) {
+		final Composite rootControl = new Composite(parent, SWT.NONE);
+		rootControl.setLayout(new GridLayout(2, false));
+
+		createButton = new Button(rootControl, SWT.PUSH);
+		createButton.setText("Create");
+		createButton.addSelectionListener(createSelectionListenerCreateButton());
+
+		editButton = new Button(rootControl, SWT.PUSH);
+		editButton.setText("Edit");
+		editButton.addSelectionListener(createSelectionListenerEditButton());
+		editButton.setEnabled(false);
+
+		return rootControl;
+	}
+
+	private SelectionListener createSelectionListenerCreateButton() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TagModifier tag = new TagModifier(tagModel.createTag());
+				TagEditorDialog dialog = TagEditorDialog.createDialog(getShell(), tag, TaggableEditorDialog.this);
+				if (dialog.open() == IDialogConstants.OK_ID) {
+					tagList.add(tag);
+					tagTableViewer.refresh();
+					tagTableViewer.setSelection(new StructuredSelection(tag));
+					setTagSelected(tag);
+				}
+			}
+		};
+	}
+
+	private SelectionListener createSelectionListenerEditButton() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final TagModifier tag = (TagModifier)((IStructuredSelection) tagTableViewer.getSelection()).getFirstElement();
+				if (tag != null) {
+					TagEditorDialog dialog = TagEditorDialog.createDialog(getShell(), tag, TaggableEditorDialog.this);
+					if (dialog.open() == IDialogConstants.OK_ID) {
+						tagTableViewer.refresh();
+						setTagSelected(tag);
+					}
+				}
+			}
+		};
+	}
+	
+	private Group createTagInfoArea(Composite parent) {
 		final Group rootControl = new Group(parent, SWT.NONE);
 		rootControl.setLayout(new GridLayout(1, false));
 		rootControl.setText("Tag Information");
 
-		createTagEditNameControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
-		createTagEditDescControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
-		createTagEditColorControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
-		createTagEditButtonControl(rootControl).setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 1, 1));
+		createTagInfoNameControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
+		createTagInfoDescControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
+		createTagInfoColorControl(rootControl).setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		return rootControl;
 	}
-	
-	private Composite createTagEditNameControl(Composite parent) {
+
+	private Composite createTagInfoNameControl(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(createGaplessGridLayout(2, false));
 		
@@ -324,17 +353,12 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 
 		tagNameText = new Text(rootControl, SWT.BORDER | SWT.SINGLE);
 		tagNameText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		tagNameText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				tagModified = true;
-			}
-		});
-		
+		tagNameText.setEnabled(false);
+
 		return rootControl;
 	}
 
-	private Composite createTagEditDescControl(Composite parent) {
+	private Composite createTagInfoDescControl(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(createGaplessGridLayout(1, false));
 		
@@ -346,43 +370,26 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		GridData tagDescTextGd = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		tagDescTextGd.heightHint = tagDescTextFm.getHeight() * 5;
 		tagDescText.setLayoutData(tagDescTextGd);
-		tagDescText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				tagModified = true;
-			}
-		});
+		tagDescText.setEditable(false);
 
 		return rootControl;
 	}
 	
-	private Composite createTagEditColorControl(Composite parent) {
+	private Composite createTagInfoColorControl(Composite parent) {
 		final Composite rootControl = new Composite(parent, SWT.NONE);
 		rootControl.setLayout(createGaplessGridLayout(2, false));
 
 		Label label = new Label(rootControl, SWT.NONE);
 		label.setText("Name color:");
 		nameColorSelector = new ColorSelector(rootControl);
-		nameColorSelector.addListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals("colorValue")) {
-					tagModified = true;
-				}
-			}
-		});
+		nameColorSelector.setColorValue(new RGB(0, 0, 0));
+		nameColorSelector.setEnabled(false);
 
 		label = new Label(rootControl, SWT.NONE);
 		label.setText("Row background color:");
 		rowColorSelector = new ColorSelector(rootControl);
-		rowColorSelector.addListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals("colorValue")) {
-					tagModified = true;
-				}
-			}
-		});
+		rowColorSelector.setColorValue(new RGB(255, 255, 255));
+		rowColorSelector.setEnabled(false);
 		
 		return rootControl;
 	}
@@ -391,87 +398,9 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		return new RGB((color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff);
 	}
 
-	private int rgbToTagColor(RGB rgb) {
-		return (rgb.red << 16) | (rgb.green << 8) | rgb.blue; 
-	}
-
-	private Composite createTagEditButtonControl(Composite parent) {
-		final Composite rootControl = new Composite(parent, SWT.NONE);
-		rootControl.setLayout(new GridLayout(3, false));
-
-		tagButtonClear = new Button(rootControl, SWT.PUSH);
-		tagButtonClear.setText("Clear");
-		tagButtonClear.addSelectionListener(createSelectionListenerButtonTagClear());
-
-		tagButtonRestore = new Button(rootControl, SWT.PUSH);
-		tagButtonRestore.setText("Restore");
-		tagButtonRestore.addSelectionListener(createSelectionListenerButtonTagRestore());
-
-		tagButtonSave = new Button(rootControl, SWT.PUSH);
-		tagButtonSave.setText("Save");
-		tagButtonSave.addSelectionListener(createSelectionListenerButtonTagSave());
-
-		return rootControl;
-	}
-
-	private SelectionListener createSelectionListenerButtonTagClear() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				tagTableViewer.setSelection(null, false);
-				setTagSelected(null);
-			}
-		};
-	}
-	
-	private SelectionListener createSelectionListenerButtonTagRestore() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setTagSelected(tagSelected);
-			}
-		};
-	}
-
-	private SelectionListener createSelectionListenerButtonTagSave() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				final String name = tagNameText.getText().trim();
-				if (name.isEmpty()) {
-					setErrorMessage("Tag name cannot be empty");
-					return;
-				}
-				for (TagModifier tagModifier: tagList) {
-					if (tagModifier != tagSelected && tagModifier.getTagMod().getName().equalsIgnoreCase(name)) {
-						setErrorMessage("A tag of that name already exists");
-						return;
-					}
-				}
-				setErrorMessage(null);
-
-				if (tagSelected == null) {
-					tagSelected = new TagModifier(null, tagModel.createTag());
-					tagList.add(tagSelected);
-				}
-				final ITag tagMod = tagSelected.getTagMod(); 
-				tagMod.setName(name);
-				tagMod.setDescription(tagDescText.getText().trim());
-				tagMod.setNameColor(rgbToTagColor(nameColorSelector.getColorValue()));
-				tagMod.setRowColor(rgbToTagColor(rowColorSelector.getColorValue()));
-				tagSelected.setModified();
-
-				tagTableViewer.refresh();
-				tagTableViewer.setSelection(null, false);
-				setTagSelected(null);
-			}
-		};
-	}
-
-	private void setTagSelected(TagModifier tagModifier) {
-		this.tagSelected = tagModifier;
-		if (tagModifier != null) {
-			final ITag tag = tagModifier.getTagMod(); 
+	private void setTagSelected(TagModifier tag) {
+		this.tagSelected = tag;
+		if (tag != null) {
 			tagNameText.setText(tag.getName());
 			if (tag.getDescription() != null) {
 				tagDescText.setText(tag.getDescription());
@@ -486,19 +415,6 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 			nameColorSelector.setColorValue(new RGB(0, 0, 0));
 			rowColorSelector.setColorValue(new RGB(255, 255, 255));
 		}
-		// set this after: setting text above triggers modification listeners
-		tagModified = false;
-	}
-
-	private boolean confirmLoseTagModification() {
-		MessageBox messageDialog = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
-		messageDialog.setText("Warning");
-		messageDialog.setMessage("Changes were made to the tag. Proceed without saving?");
-		if (messageDialog.open() == SWT.CANCEL) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	private boolean confirmLoseTagModifications(int cnt) {
@@ -510,6 +426,20 @@ public class TaggableEditorDialog extends TitleAreaDialog {
 		} else {
 			return true;
 		}
+	}
+
+	@Override
+	public String validate(TagModifier modifier) {
+		final String name = modifier.getName();
+		if (name.isEmpty()) {
+			return "Tag name cannot be empty";
+		}
+		for (TagModifier tagModifier: tagList) {
+			if (tagModifier != tagSelected && tagModifier.getName().equalsIgnoreCase(name)) {
+				return "A tag of that name already exists";
+			}
+		}
+		return null;
 	}
 
 }

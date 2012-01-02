@@ -23,7 +23,7 @@ public class TagTableSearchFilter extends ViewerFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (matchFilter != null) {
-			return ((TagModifier) element).getTagMod().getName().contains(matchFilter);
+			return ((TagModifier) element).getName().contains(matchFilter);
 		}
 		return true;
 	}
