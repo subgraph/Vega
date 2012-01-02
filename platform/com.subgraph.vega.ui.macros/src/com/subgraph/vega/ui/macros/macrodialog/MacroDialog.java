@@ -33,7 +33,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -69,8 +68,6 @@ import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.macros.Activator;
 
 public class MacroDialog extends TitleAreaDialog {
-	private static final int MIN_DIALOG_WIDTH = 700; // Minimum dialog width (in dialog units)
-	private static final int MIN_DIALOG_HEIGHT = 300; // Minimum dialog height (in dialog units)
 	private IHttpMacroModel macroModel;
 	private IHttpMacro macro;
 	private IHttpRequestBuilder requestBuilder;
@@ -164,14 +161,6 @@ public class MacroDialog extends TitleAreaDialog {
 		return dialogArea;
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		Point shellSize = super.getInitialSize();
-		return new Point(
-				Math.max(convertHorizontalDLUsToPixels(MIN_DIALOG_WIDTH), shellSize.x),
-				Math.max(convertVerticalDLUsToPixels(MIN_DIALOG_HEIGHT), shellSize.y));
-	}
-
 	private Composite createMacroArea(Composite parent) {
 		final Group rootControl = new Group(parent, SWT.NONE);
 		rootControl.setLayout(new GridLayout(2, false));
@@ -244,7 +233,7 @@ public class MacroDialog extends TitleAreaDialog {
 		final ColumnLayoutData[] layoutData = {
 			new ColumnPixelData(120, true, true),
 			new ColumnPixelData(60, true, true),
-			new ColumnWeightData(100, 100, true),
+			new ColumnWeightData(100, 500, true),
 			new ColumnPixelData(50, true, true),
 		};
 		final ColumnLabelProvider providerList[] = {
