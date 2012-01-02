@@ -435,7 +435,7 @@ public class TaggableEditorDialog extends TitleAreaDialog implements ITagModifie
 			return "Tag name cannot be empty";
 		}
 		for (TagModifier tagModifier: tagList) {
-			if (tagModifier != tagSelected && tagModifier.getName().equalsIgnoreCase(name)) {
+			if (tagModifier != modifier && tagModifier.getName().equalsIgnoreCase(name)) {
 				return "A tag of that name already exists";
 			}
 		}
