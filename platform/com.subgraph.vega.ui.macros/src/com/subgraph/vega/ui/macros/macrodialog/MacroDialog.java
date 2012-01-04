@@ -39,8 +39,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -84,11 +86,24 @@ public class MacroDialog extends TitleAreaDialog {
 	private IHttpBuilderPart requestBuilderPartCurr;
 	private boolean requestIsEditable;
 	
-	public MacroDialog(Shell parentShell) {
-		this(parentShell, null);
+	public static MacroDialog createDialog(Shell parentShell) {
+		return createDialog(parentShell, null);
 	}
 
-	public MacroDialog(Shell parentShell, IHttpMacro macro) {
+	static public MacroDialog createDialog(Shell parentShell, IHttpMacro macro) {
+		final MacroDialog dialog = new MacroDialog(parentShell, macro);
+		dialog.create();
+		dialog.getShell().addListener(SWT.Traverse, new Listener() {
+        	public void handleEvent(Event e) {
+        		if (e.detail == SWT.TRAVERSE_ESCAPE) {
+        			e.doit = false;
+        		}
+        	}
+        });
+		return dialog;
+	}
+	
+	private MacroDialog(Shell parentShell, IHttpMacro macro) {
 		super(parentShell);
 		IWorkspace currentWorkspace = Activator.getDefault().getModel().addWorkspaceListener(new IEventHandler() {
 			@Override
@@ -134,7 +149,19 @@ public class MacroDialog extends TitleAreaDialog {
 
 	@Override
 	protected void okPressed() {
-		macro.setName(macroNameText.getText());
+		final String macroName = macroNameText.getText().trim();
+		if (macroName.isEmpty()) {
+			setErrorMessage("The macro name cannot be empty");
+			return;
+		}
+		final IHttpMacro macroStored = macroModel.getMacroByName(macroName); 
+		if (macroStored != null && macroStored != macro) {
+			setErrorMessage("A macro by that name already exists");
+			return;
+		}
+
+		setErrorMessage(null);		
+		macro.setName(macroName);
 		macroModel.store(macro);
 		super.okPressed();
 	}
@@ -176,7 +203,7 @@ public class MacroDialog extends TitleAreaDialog {
 		GridData requestPortGd = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
 		requestPortGd.widthHint = macroNameTextFm.getAverageCharWidth() * 50;
 		macroNameText.setLayoutData(requestPortGd);
-		
+
 		return rootControl;
 	}
 
@@ -292,27 +319,30 @@ public class MacroDialog extends TitleAreaDialog {
 		addItemButton = new Button(rootControl, SWT.PUSH);
 		addItemButton.setText("add item");
 		addItemButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		addItemButton.addSelectionListener(createButtonAddItemSelectionListener());
+		addItemButton.addSelectionListener(createAddItemButtonSelectionListener());
 
 		moveUpButton = new Button(rootControl, SWT.PUSH);
 		moveUpButton.setText("move up");
 		moveUpButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		moveUpButton.setEnabled(false);
+		moveUpButton.addSelectionListener(createMoveUpButtonSelectionListener());
 
 		moveDownButton = new Button(rootControl, SWT.PUSH);
 		moveDownButton.setText("move down");
 		moveDownButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		moveDownButton.setEnabled(false);
+		moveDownButton.addSelectionListener(createMoveDownButtonSelectionListener());
 
 		removeButton = new Button(rootControl, SWT.PUSH);
 		removeButton.setText("remove");
 		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		removeButton.setEnabled(false);
-		
+		removeButton.addSelectionListener(createRemoveButtonSelectionListener());
+
 		return rootControl;
 	}
 
-	private SelectionListener createButtonAddItemSelectionListener() {
+	private SelectionListener createAddItemButtonSelectionListener() {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -324,6 +354,58 @@ public class MacroDialog extends TitleAreaDialog {
 					}
 					macroItemTableViewer.refresh();
 				}
+			}
+		};
+	}
+
+	private SelectionListener createMoveUpButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) macroItemTableViewer.getSelection();
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					int idx = macro.indexOfMacroItem((IHttpMacroItem) i.next());
+					if (idx != 0) {
+						macro.swapMacroItems(idx - 1, idx);
+					} else {
+						break;
+					}
+				}
+				macroItemTableViewer.refresh();
+			}
+		};
+	}
+
+	private SelectionListener createMoveDownButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) macroItemTableViewer.getSelection();
+				int idx[] = new int[selection.size()];
+				int offset = 1;
+				for (Iterator<?> i = selection.iterator(); i.hasNext(); offset++) {
+					idx[idx.length - offset] = macro.indexOfMacroItem((IHttpMacroItem) i.next());
+				}
+
+				if (idx[0] + 1 != macro.macroItemsSize()) {
+					for (int i = 0; i < idx.length; i++) {
+						macro.swapMacroItems(idx[i], idx[i] + 1);
+					}
+				}
+				macroItemTableViewer.refresh();
+			}
+		};
+	}
+
+	private SelectionListener createRemoveButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) macroItemTableViewer.getSelection();
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					macro.removeMacroItem((IHttpMacroItem) i.next());
+				}
+				macroItemTableViewer.refresh();
 			}
 		};
 	}

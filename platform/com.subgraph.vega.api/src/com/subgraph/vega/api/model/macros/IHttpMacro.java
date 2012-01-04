@@ -12,7 +12,6 @@ package com.subgraph.vega.api.model.macros;
 
 import java.util.Collection;
 
-import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 
 /**
@@ -37,10 +36,36 @@ public interface IHttpMacro {
 	 * @return
 	 */
 	IHttpMacroItem createMacroItem(IRequestLogRecord record);
+
+	/**
+	 * Remove a macro item.
+	 * @param item Macro item.
+	 */
+	void removeMacroItem(IHttpMacroItem item);
 	
 	/**
 	 * Get the macro items comprising this macro. The collection is ordered by item execution order.
 	 * @return Macro items. 
 	 */
 	Collection<IHttpMacroItem> getMacroItems();
+
+	/**
+	 * Returns the number of macro items in this macro.
+	 * @return The number of macro items.
+	 */
+	int macroItemsSize();
+	
+	/**
+	 * Get the array index of a macro item.
+	 * @param item Macro item.
+	 * @return Array index, or -1.
+	 */
+	int indexOfMacroItem(IHttpMacroItem item);
+	
+	/**
+	 * Swap macro items at two positions.
+	 * @return Swapped macro items. 
+	 */
+	void swapMacroItems(int idx1, int idx2);
+	
 }

@@ -52,11 +52,38 @@ public class HttpMacro implements IHttpMacro, Activatable {
 	}
 
 	@Override
+	public void removeMacroItem(IHttpMacroItem item) {
+		activate(ActivationPurpose.READ);
+		macroItemList.remove(item);
+	}
+
+	@Override
 	public Collection<IHttpMacroItem> getMacroItems() {
 		activate(ActivationPurpose.READ);
 		return new ArrayList<IHttpMacroItem>(macroItemList);
 	}
 
+	@Override
+	public int macroItemsSize() {
+		activate(ActivationPurpose.READ);
+		return macroItemList.size();
+	}
+
+	@Override
+	public int indexOfMacroItem(IHttpMacroItem item) {
+		activate(ActivationPurpose.READ);
+		return macroItemList.indexOf(item);
+	}
+
+	@Override
+	public void swapMacroItems(int idx1, int idx2) {
+		activate(ActivationPurpose.READ);
+		if (idx1 < macroItemList.size() && idx2 < macroItemList.size() && idx1 != idx2) {
+			final IHttpMacroItem tmp = macroItemList.set(idx1, macroItemList.get(idx2));
+			macroItemList.set(idx2, tmp);
+		}
+	}
+	
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if (activator != null) {

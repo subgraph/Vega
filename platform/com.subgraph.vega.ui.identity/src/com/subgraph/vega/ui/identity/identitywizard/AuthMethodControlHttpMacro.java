@@ -125,7 +125,7 @@ public class AuthMethodControlHttpMacro extends Composite implements IAuthMethod
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MacroDialog dialog = new MacroDialog(getShell());
+				MacroDialog dialog = MacroDialog.createDialog(getShell());
 				if (dialog.open() == Window.OK) {
 					macrosTableViewer.refresh();
 					macrosTableViewer.setSelection(new StructuredSelection(dialog.getMacro()), true);

@@ -21,7 +21,7 @@ public class CreateMacro extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		MacroDialog dialog = new MacroDialog(HandlerUtil.getActiveWorkbenchWindow(event).getShell());
+		MacroDialog dialog = MacroDialog.createDialog(HandlerUtil.getActiveWorkbenchWindow(event).getShell());
 		dialog.open();
 		return null;
 	}
