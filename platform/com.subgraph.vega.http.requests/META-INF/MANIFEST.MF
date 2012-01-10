@@ -32,4 +32,5 @@ Import-Package: com.subgraph.vega.api.events,
  org.apache.http.util;version="4.0.0",
  org.w3c.dom.html2
 Service-Component: OSGI-INF/request-engine-factory.xml
-Export-Package: com.subgraph.vega.http.requests.custom
+Export-Package: com.subgraph.vega.http.requests.builder,
+ com.subgraph.vega.http.requests.custom

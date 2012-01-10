@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.internal.http.requests;
+package com.subgraph.vega.http.requests.builder;
 
 import java.util.ArrayList;
 import java.util.Iterator;

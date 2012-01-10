@@ -26,6 +26,8 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
+import com.subgraph.vega.http.requests.builder.HttpRequestBuilder;
+import com.subgraph.vega.http.requests.builder.HttpResponseBuilder;
 
 public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
