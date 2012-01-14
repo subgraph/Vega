@@ -189,7 +189,11 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setHostPort(int port) {
-		this.hostPort = port;
+		if (port != -1) {
+			this.hostPort = port;
+		} else {
+			this.hostPort = 80;
+		}
 	}
 
 	@Override

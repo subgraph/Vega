@@ -22,8 +22,6 @@ import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestTask;
-import com.subgraph.vega.api.http.requests.IHttpResponse;
-import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroItem;
 

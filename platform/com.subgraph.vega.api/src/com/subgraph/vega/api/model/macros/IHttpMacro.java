@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.macros;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
@@ -34,8 +36,10 @@ public interface IHttpMacro {
 	 * Create an IHttpMacroItem and add it to this macro.
 	 * @param record IRequestLogRecord to create the item for.
 	 * @return
+	 * @throws IOException 
+	 * @throws URISyntaxException 
 	 */
-	IHttpMacroItem createMacroItem(IRequestLogRecord record);
+	IHttpMacroItem createMacroItem(IRequestLogRecord record) throws URISyntaxException, IOException;
 
 	/**
 	 * Remove a macro item.

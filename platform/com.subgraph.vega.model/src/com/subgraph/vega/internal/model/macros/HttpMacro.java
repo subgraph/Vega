@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.macros;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -44,7 +46,7 @@ public class HttpMacro implements IHttpMacro, Activatable {
 	}
 
 	@Override
-	public IHttpMacroItem createMacroItem(IRequestLogRecord record) {
+	public IHttpMacroItem createMacroItem(IRequestLogRecord record) throws URISyntaxException, IOException {
 		activate(ActivationPurpose.READ);
 		HttpMacroItem macroItem = new HttpMacroItem(record);
 		macroItemList.add(macroItem);

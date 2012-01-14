@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.macros.macrodialog;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -68,6 +69,7 @@ import com.subgraph.vega.ui.http.builder.HeaderEditor;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
 import com.subgraph.vega.ui.http.builder.RequestEditor;
 import com.subgraph.vega.ui.macros.Activator;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class MacroDialog extends TitleAreaDialog {
 	private IHttpMacroModel macroModel;
@@ -350,7 +352,17 @@ public class MacroDialog extends TitleAreaDialog {
 				if (dialog.open() == IDialogConstants.OK_ID) {
 					List<IRequestLogRecord> selectionList = dialog.getSelectionList();
 					for (Iterator<IRequestLogRecord> iter = selectionList.iterator(); iter.hasNext();) {
-						macro.createMacroItem(iter.next());
+						try {
+							macro.createMacroItem(iter.next());
+						} catch (URISyntaxException ex) {
+							ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the URI");
+							ex.printStackTrace();
+							continue;
+						} catch (IOException ex) {
+							ErrorDialog.displayError(getShell(), null);
+							ex.printStackTrace();
+							continue;
+						}
 					}
 					macroItemTableViewer.refresh();
 				}
@@ -453,7 +465,8 @@ public class MacroDialog extends TitleAreaDialog {
 						requestBuilderPartCurr.processContents();
 					} catch (Exception ex) {
 						macroItemTabFolder.setSelection(macroItemTabFolderItem);
-//						displayExceptionError(ex); XXX
+						ErrorDialog.displayError(getShell(), "An unexpected error occurred processing the request");
+						ex.printStackTrace();
 						return;
 					}
 				}
@@ -469,9 +482,9 @@ public class MacroDialog extends TitleAreaDialog {
 	private void setMacroItemSelected(IHttpMacroItem macroItem) {
 		if (macroItem != null) {
 			try {
-				requestBuilder.setFromRequest(macroItem.getRequestLogRecord());
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
+				macroItem.setRequestBuilder(requestBuilder, null);
+			} catch (Exception e) {
+				ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
 				e.printStackTrace();
 				return;
 			}

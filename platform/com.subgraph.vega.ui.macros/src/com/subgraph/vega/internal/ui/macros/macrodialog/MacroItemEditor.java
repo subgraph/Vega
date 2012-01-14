@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.ui.macros.macrodialog;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnLayoutData;
@@ -17,10 +19,14 @@ import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,14 +37,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.subgraph.vega.api.http.requests.IHttpMessageBuilder;
+import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.model.macros.IHttpMacroItem;
 import com.subgraph.vega.api.model.macros.IHttpMacroItemParam;
 import com.subgraph.vega.ui.http.builder.BuilderParseException;
 import com.subgraph.vega.ui.http.builder.IHttpBuilderPart;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class MacroItemEditor extends Composite implements IHttpBuilderPart {
-	private IHttpMessageBuilder messageBuilder;
+	private IHttpRequestBuilder requestBuilder;
 	private IHttpMacroItem macroItem;
 	private Button useCookiesButton;
 	private Button keepCookiesButton;
@@ -49,9 +56,9 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 	private Button moveUpButton;
 	private Button moveDownButton;
 
-	public MacroItemEditor(Composite parent, IHttpMessageBuilder messageBuilder) {
+	public MacroItemEditor(Composite parent, IHttpRequestBuilder requestBuilder) {
 		super(parent, SWT.NONE);
-		this.messageBuilder = messageBuilder;
+		this.requestBuilder = requestBuilder;
 		setLayout(new GridLayout(1, false));
 
 		createConfigGroup(this).setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
@@ -75,6 +82,13 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 
 	@Override
 	public void refresh() {
+		try {
+			macroItem.updateFromRequestBuilder(requestBuilder);
+		} catch (Exception e) {
+			ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
+			e.printStackTrace();
+			return;
+		}
 		if (macroItem != null) {
 			useCookiesButton.setSelection(macroItem.getUseCookies());
 			keepCookiesButton.setSelection(macroItem.getKeepCookies());
@@ -87,6 +101,15 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 
 	@Override
 	public void processContents() throws BuilderParseException {
+		try {
+			macroItem.setRequestBuilder(requestBuilder, null);
+		} catch (Exception e) {
+			ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
+			e.printStackTrace();
+			return;
+		}
+		macroItem.setUseCookies(useCookiesButton.getSelection());
+		macroItem.setKeepCookies(keepCookiesButton.getSelection());
 	}
 
 	public void setMacroItem(IHttpMacroItem macroItem) {
@@ -200,21 +223,82 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 		createButton = new Button(rootControl, SWT.PUSH);
 		createButton.setText("create");
 		createButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-//		createButton.addSelectionListener(createSelectionListenerCreateButton());
+		createButton.addSelectionListener(createCreateButtonSelectionListener());
 		removeButton = new Button(rootControl, SWT.PUSH);
 		removeButton.setText("remove");
 		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-//		removeButton.addSelectionListener(createSelectionListenerRemoveButton());
+		removeButton.addSelectionListener(createRemoveButtonSelectionListener());
 		moveUpButton = new Button(rootControl, SWT.PUSH);
 		moveUpButton.setText("move up");
 		moveUpButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-//		moveUpButton.addSelectionListener(createSelectionListenerMoveUpButton());
+		moveUpButton.addSelectionListener(createMoveUpButtonSelectionListener());
 		moveDownButton = new Button(rootControl, SWT.PUSH);
 		moveDownButton.setText("move down");
 		moveDownButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-//		moveDownButton.addSelectionListener(createSelectionListenerMoveDownButton());
+		moveDownButton.addSelectionListener(createMoveDownButtonSelectionListener());
 		
 		return rootControl;
 	}
 
+	private SelectionListener createCreateButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+			}
+		};
+	}
+	
+	private SelectionListener createRemoveButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) paramsTableViewer.getSelection();
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					macroItem.removeParam((IHttpMacroItemParam) i.next());
+				}
+				paramsTableViewer.refresh();
+			}
+		};
+	}
+
+	private SelectionListener createMoveUpButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) paramsTableViewer.getSelection();
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					int idx = macroItem.indexOfParam((IHttpMacroItemParam) i.next());
+					if (idx != 0) {
+						macroItem.swapParams(idx - 1, idx);
+					} else {
+						break;
+					}
+				}
+				paramsTableViewer.refresh();
+			}
+		};
+	}
+
+	private SelectionListener createMoveDownButtonSelectionListener() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) paramsTableViewer.getSelection();
+				int idx[] = new int[selection.size()];
+				int offset = 1;
+				for (Iterator<?> i = selection.iterator(); i.hasNext(); offset++) {
+					idx[idx.length - offset] = macroItem.indexOfParam((IHttpMacroItemParam) i.next());
+				}
+
+				if (idx[0] + 1 != macroItem.paramsSize()) {
+					for (int i = 0; i < idx.length; i++) {
+						macroItem.swapParams(idx[i], idx[i] + 1);
+					}
+				}
+				paramsTableViewer.refresh();
+			}
+		};
+	}
+	
 }
