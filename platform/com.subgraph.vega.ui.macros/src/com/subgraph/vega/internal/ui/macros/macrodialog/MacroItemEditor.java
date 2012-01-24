@@ -83,7 +83,9 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 	@Override
 	public void refresh() {
 		try {
-			macroItem.updateFromRequestBuilder(requestBuilder);
+			if (macroItem != null) {
+				macroItem.updateFromRequestBuilder(requestBuilder);
+			}
 		} catch (Exception e) {
 			ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
 			e.printStackTrace();
@@ -101,15 +103,17 @@ public class MacroItemEditor extends Composite implements IHttpBuilderPart {
 
 	@Override
 	public void processContents() throws BuilderParseException {
-		try {
-			macroItem.setRequestBuilder(requestBuilder, null);
-		} catch (Exception e) {
-			ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
-			e.printStackTrace();
-			return;
+		if (macroItem != null) {
+			try {
+				macroItem.setRequestBuilder(requestBuilder, null);
+			} catch (Exception e) {
+				ErrorDialog.displayError(getShell(), "An unexpected error occurred while processing the request");
+				e.printStackTrace();
+				return;
+			}
+			macroItem.setUseCookies(useCookiesButton.getSelection());
+			macroItem.setKeepCookies(keepCookiesButton.getSelection());
 		}
-		macroItem.setUseCookies(useCookiesButton.getSelection());
-		macroItem.setKeepCookies(keepCookiesButton.getSelection());
 	}
 
 	public void setMacroItem(IHttpMacroItem macroItem) {
