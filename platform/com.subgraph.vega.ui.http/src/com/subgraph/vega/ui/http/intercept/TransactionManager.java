@@ -332,7 +332,7 @@ public class TransactionManager {
 		synchronized(this) {
 			if (info.getCurrentSerial() == currentSerial) {
 				if (requestStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {
-					HttpUriRequest request = info.getRequestBuilder().buildRequest();
+					HttpUriRequest request = info.getRequestBuilder().buildRequest(true);
 					currentTransaction.setRequest(request);
 					currentTransaction.doForward();
 				} else if (responseStatus == TransactionManager.TransactionStatus.STATUS_PENDING) {

@@ -135,7 +135,7 @@ public class RequestEditView extends ViewPart {
 
 		HttpUriRequest uriRequest;
 		try {
-			uriRequest = requestBuilder.buildRequest();
+			uriRequest = requestBuilder.buildRequest(true);
 		} catch (Exception e) {
 			displayExceptionError(e);
 			return;

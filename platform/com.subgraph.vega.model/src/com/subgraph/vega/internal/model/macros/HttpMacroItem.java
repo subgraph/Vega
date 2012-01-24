@@ -170,7 +170,7 @@ public class HttpMacroItem implements IHttpMacroItem, Activatable {
 	public HttpUriRequest createRequest(IHttpMacroContext context) throws UnsupportedEncodingException, URISyntaxException {
 		final HttpRequestBuilder builder = new HttpRequestBuilder();
 		setRequestBuilder(builder, context);
-		return builder.buildRequest();
+		return builder.buildRequest(false);
 	}
 
 	@Override

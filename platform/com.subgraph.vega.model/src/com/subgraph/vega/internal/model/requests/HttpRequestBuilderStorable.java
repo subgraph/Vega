@@ -263,9 +263,9 @@ public class HttpRequestBuilderStorable extends HttpRequestBuilder implements IH
 	}
 
 	@Override
-	public HttpUriRequest buildRequest() throws URISyntaxException {
+	public HttpUriRequest buildRequest(boolean setHeadersEntity) throws URISyntaxException {
 		activate(ActivationPurpose.READ);
-		return super.buildRequest();
+		return super.buildRequest(setHeadersEntity);
 	}
 
 	@Override

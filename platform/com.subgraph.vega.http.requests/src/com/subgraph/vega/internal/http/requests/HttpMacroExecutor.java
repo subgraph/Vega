@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
@@ -24,6 +25,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroItem;
+import com.subgraph.vega.http.requests.builder.HttpRequestBuilder;
 
 public class HttpMacroExecutor implements IHttpMacroExecutor {
 	private final IHttpRequestEngine requestEngine;
@@ -66,7 +68,12 @@ public class HttpMacroExecutor implements IHttpMacroExecutor {
 			return null;
 		}
 		IHttpMacroItem macroItem = macroItemIterator.next();
-		HttpUriRequest request = macroItem.createRequest(macroContext);
+		final HttpRequestBuilder builder = new HttpRequestBuilder();
+		macroItem.setRequestBuilder(builder,  macroContext);
+		// hack: remove content headesr
+		builder.removeHeaders(HTTP.CONTENT_LEN);
+		builder.removeHeaders(HTTP.CONTENT_TYPE);
+		HttpUriRequest request = builder.buildRequest(false);
 		return requestEngine.sendRequest(request, context);
 	}
 
@@ -76,7 +83,12 @@ public class HttpMacroExecutor implements IHttpMacroExecutor {
 			return null;
 		}
 		IHttpMacroItem macroItem = macroItemIterator.next();
-		HttpUriRequest request = macroItem.createRequest(macroContext);
+		final HttpRequestBuilder builder = new HttpRequestBuilder();
+		macroItem.setRequestBuilder(builder,  macroContext);
+		// hack: remove content headesr
+		builder.removeHeaders(HTTP.CONTENT_LEN);
+		builder.removeHeaders(HTTP.CONTENT_TYPE);
+		HttpUriRequest request = builder.buildRequest(false);
 		return requestEngine.sendRequest(request);
 	}
 	

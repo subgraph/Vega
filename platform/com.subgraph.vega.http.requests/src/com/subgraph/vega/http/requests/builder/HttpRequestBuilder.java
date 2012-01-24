@@ -256,7 +256,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	}
 
 	@Override
-	public synchronized HttpUriRequest buildRequest() throws URISyntaxException {
+	public synchronized HttpUriRequest buildRequest(boolean setHeadersEntity) throws URISyntaxException {
 		if (host == null || host.length() == 0) {
 			throw new IllegalArgumentException("Invalid host");
 		}
@@ -293,7 +293,9 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 		}
 		request.setParams(params);
 
-		setHeadersEntity();
+		if (setHeadersEntity) {
+			setHeadersEntity();
+		}
 		IHttpHeaderBuilder[] headers = getHeaders();
 		for (IHttpHeaderBuilder h: headers) {
 			request.addHeader(h.buildHeader());
