@@ -19,32 +19,47 @@ import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 
 /**
- * Provides a modifiable snapshot of the transaction held by the TransactionManager.
+ * Provides a modifiable snapshot of a transaction held by the TransactionManager. The information contained here is
+ * used to display information in the UI.
  */
 public class TransactionInfo {
+	private int currentSerial; // Serial of the pending transaction
+
 	private int requestTransactionSerial;
 	private final IHttpRequestBuilder requestBuilder;
 	private boolean requestHasContent;
 	private TransactionManager.TransactionStatus requestStatus;
 	private String requestStatusMessage;
-	private int requestSerial;
+
 	private int responseTransactionSerial;
 	private final IHttpResponseBuilder responseBuilder;
 	private boolean responseHasContent;
 	private TransactionManager.TransactionStatus responseStatus;
 	private String responseStatusMessage;
-	private int responseSerial;
 	
 	public TransactionInfo(IHttpRequestBuilder requestBuilder, IHttpResponseBuilder responseBuilder) {
+		currentSerial = -1;
 		requestTransactionSerial = -1;
 		this.requestBuilder = requestBuilder;
 		requestHasContent = false;
 		setRequestStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);
-		requestSerial = -1;
+		responseTransactionSerial = -1;
 		this.responseBuilder = responseBuilder;
 		responseHasContent = false;
 		setResponseStatus(TransactionManager.TransactionStatus.STATUS_INACTIVE);
-		responseSerial = -1;
+	}
+
+	public void setCurrentSerial(int serial) {
+		this.currentSerial = serial;
+	}
+
+	public int getCurrentSerial() {
+		return currentSerial;
+	}
+	
+	public boolean isPending() {
+		return (requestStatus == TransactionManager.TransactionStatus.STATUS_PENDING ||
+				responseStatus == TransactionManager.TransactionStatus.STATUS_PENDING);
 	}
 
 	public void setRequestTransactionSerial(int requestTransactionSerial) {
@@ -110,14 +125,6 @@ public class TransactionInfo {
 		return requestStatusMessage;
 	}
 	
-	public void setRequestSerial(int serial) {
-		this.requestSerial = serial;
-	}
-
-	public int getRequestSerial() {
-		return requestSerial;
-	}
-
 	public void setResponseTransactionSerial(int responseTransactionSerial) {
 		this.responseTransactionSerial = responseTransactionSerial;
 	}
@@ -165,13 +172,5 @@ public class TransactionInfo {
 	public String getResponseStatusMessage() {
 		return responseStatusMessage;
 	}
-	
-	public void setResponseSerial(int serial) {
-		this.responseSerial = serial;
-	}
 
-	public int getResponseSerial() {
-		return responseSerial;
-	}
-	
 }

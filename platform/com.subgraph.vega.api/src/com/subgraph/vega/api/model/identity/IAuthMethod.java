@@ -26,6 +26,11 @@ public interface IAuthMethod {
 		 * NTLM and NTLMv2. IAuthMethodNtlm.
 		 */
 		AUTH_METHOD_NTLM,
+		
+		/**
+		 * HTTP macro.
+		 */
+		AUTH_METHOD_HTTP_MACRO,
 	}
 
 	/**

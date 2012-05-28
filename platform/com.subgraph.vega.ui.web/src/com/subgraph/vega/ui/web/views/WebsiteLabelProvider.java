@@ -75,6 +75,12 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 	}
 	
 	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+
+	@Override
 	public Color getForeground(Object element) {
 		if(element instanceof IWebEntity) {
 			IWebEntity we = (IWebEntity) element;

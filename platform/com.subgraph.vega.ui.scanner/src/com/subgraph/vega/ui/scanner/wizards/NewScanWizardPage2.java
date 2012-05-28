@@ -29,15 +29,14 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class NewScanWizardPage2 extends WizardPage {
 	static private final String VEGA_LOGO = "icons/vega_small.png";
-	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 	private Table cookiesTable;
 	private Table exclusionsTable;
 	
-	public NewScanWizardPage2() {
+	public NewScanWizardPage2(ImageCache imageCache) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("Cookie and Exclusions");

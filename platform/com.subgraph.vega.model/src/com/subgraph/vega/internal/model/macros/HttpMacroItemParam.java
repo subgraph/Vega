@@ -19,12 +19,21 @@ public class HttpMacroItemParam implements IHttpMacroItemParam, Activatable {
 	private transient Activator activator;
 	private String name;
 	private ValueSource source;
+	private ValueSetIn setIn;
 	private String value;
 	
-	public HttpMacroItemParam(String name) {
+	public HttpMacroItemParam(String name, ValueSetIn setIn) {
 		this.name = name;
+		this.setIn = setIn;
 	}
 
+	public HttpMacroItemParam(String name, String value, ValueSetIn setIn) {
+		this.name = name;
+		this.source = IHttpMacroItemParam.ValueSource.SOURCE_LITERAL;
+		this.value = value;
+		this.setIn = setIn;
+	}
+	
 	@Override
 	public String getName() {
 		activate(ActivationPurpose.READ);
@@ -42,6 +51,19 @@ public class HttpMacroItemParam implements IHttpMacroItemParam, Activatable {
 	public ValueSource getValueSource() {
 		activate(ActivationPurpose.READ);
 		return source;
+	}
+
+	@Override
+	public void setSetIn(ValueSetIn setIn) {
+		activate(ActivationPurpose.READ);
+		this.setIn = setIn;
+		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public ValueSetIn getSetIn() {
+		activate(ActivationPurpose.READ);
+		return setIn;
 	}
 
 	@Override

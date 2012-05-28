@@ -12,6 +12,7 @@ package com.subgraph.vega.ui.scanner.info;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -146,7 +147,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 			return;
 		}
 		if(!dashboard.getDisplay().isDisposed()) {
-			dashboard.getDisplay().syncExec(new Runnable() {
+			dashboard.getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					dashboard.displayScanInstance(scan);
@@ -213,8 +214,10 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 			return;
 		}
 		
-		final IScanInstance activeScanInstance = workspace.getScanAlertRepository().addActiveScanInstanceListener(this);
-		setActiveScanInstance(activeScanInstance);
+		final List<IScanInstance> activeScanInstanceList = workspace.getScanAlertRepository().addActiveScanInstanceListener(this);
+		if (activeScanInstanceList.size() != 0) {
+			setActiveScanInstance(activeScanInstanceList.get(0));
+		}
 		currentWorkspace = workspace;
 	}
 	

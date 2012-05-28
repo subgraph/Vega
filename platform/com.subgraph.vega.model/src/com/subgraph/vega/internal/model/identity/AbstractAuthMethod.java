@@ -25,6 +25,7 @@ public abstract class AbstractAuthMethod implements IAuthMethod, Activatable {
 	
 	@Override
 	public AuthMethodType getType() {
+		activate(ActivationPurpose.READ);
 		return type;
 	}
 

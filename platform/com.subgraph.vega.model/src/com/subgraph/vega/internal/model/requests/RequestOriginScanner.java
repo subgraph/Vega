@@ -29,4 +29,9 @@ public class RequestOriginScanner extends RequestOrigin implements IRequestOrigi
 		return scanInstance;
 	}
 
+	@Override
+	public String toString() {
+		return "Scan ID " + scanInstance.getScanId();
+	}
+
 }

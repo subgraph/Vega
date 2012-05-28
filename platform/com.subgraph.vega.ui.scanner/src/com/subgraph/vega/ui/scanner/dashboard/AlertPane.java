@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlert.Severity;
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class AlertPane extends Composite {
 	private final static String ALERT_HIGH = "icons/alert_high.png";
@@ -43,7 +43,12 @@ public class AlertPane extends Composite {
 		reset();
 	}
 	
-	
+	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+
 	private void addSeverityCells(Color background) {
 		for(Severity s: Severity.values()) {
 			if(s.equals(Severity.UNKNOWN))

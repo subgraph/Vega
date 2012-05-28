@@ -48,8 +48,8 @@ public class ScanExecutor {
 			}
 			return maybeLaunchScanFromWizard(shell, wizard, scanner, scan);
 		} else {
-			// REVISIT lame
-			scan.stopScan();
+			// REVISIT: delete the scan so the ID can be used in the future?
+			scan.stopScan(); // stop to unlock workspace
 		}
 		return null;
 	}
@@ -60,15 +60,10 @@ public class ScanExecutor {
 			return null;
 		}
 
-		scanner.lock(scan);
 		final IScannerConfig config = scan.getConfig();
 		config.setBaseURI(targetUri);
 		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);
 		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetUri));
-//		config.setBasicUsername(wizard.getBasicUsername());
-//		config.setBasicPassword(wizard.getBasicPassword());
-//		config.setBasicRealm(wizard.getBasicRealm());
-//		config.setBasicDomain(wizard.getBasicDomain());
 		config.setScanIdentity(wizard.getScanIdentity());
 		config.setExclusions(wizard.getExclusions());
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();

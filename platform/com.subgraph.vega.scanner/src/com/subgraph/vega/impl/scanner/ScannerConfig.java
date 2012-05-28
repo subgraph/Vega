@@ -29,12 +29,6 @@ public class ScannerConfig implements IScannerConfig {
 	private List<Cookie> cookieList;
 	private List<String> modulesList;
 	private List<String> exclusions;
-//	private String basicUsername;
-//	private String basicPassword;
-//	private String basicRealm;
-//	private String basicDomain;
-//	private String ntlmUsername;
-//	private String ntlmPassword;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
 	private int maxRequestsPerSecond = DEFAULT_MAX_REQUEST_PER_SECOND;
@@ -45,247 +39,186 @@ public class ScannerConfig implements IScannerConfig {
 	private int maxParameterCount = DEFAULT_MAX_PARAMETER_COUNT;
 	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
 	private int maxResponseKilobytes = DEFAULT_MAX_RESPONSE_KILOBYTES;
-	
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
 
 	@Override
-	public void setBaseURI(URI baseURI) {
+	public synchronized void setBaseURI(URI baseURI) {
 		this.baseURI = baseURI;
 	}
 
 	@Override
-	public void setUserAgent(String userAgent) {
+	public synchronized void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
 	}
 
 	@Override
-	public void setScanIdentity(IIdentity scanIdentity) {
+	public synchronized void setScanIdentity(IIdentity scanIdentity) {
 		this.scanIdentity = scanIdentity;
 	}
 
 	@Override
-	public void setCookieList(List<Cookie> list) {
+	public synchronized void setCookieList(List<Cookie> list) {
 		cookieList = list;
 	}
 	
 	@Override
-	public void setModulesList(List<String> modules) {
+	public synchronized void setModulesList(List<String> modules) {
 		modulesList = modules;
 	}
 
 	@Override
-	public void setExclusions(List<String> exclusionsList) {
+	public synchronized void setExclusions(List<String> exclusionsList) {
 		exclusions = exclusionsList;
 	}
 
-//	@Override
-//	public void setBasicUsername(String username) {
-//		basicUsername = username;
-//	}
-//
-//	@Override
-//	public void setBasicPassword(String password) {
-//		basicPassword = password;
-//	}
-//
-//	@Override
-//	public void setBasicRealm(String realm) {
-//		basicRealm = realm;
-//	}
-//
-//	@Override
-//	public void setBasicDomain(String domain) {
-//		basicDomain = domain;
-//	}
-//
-//	@Override
-//	public void setNtlmUsername(String username) {
-//		ntlmUsername = username;
-//	}
-//
-//	@Override
-//	public void setNtlmPassword(String password) {
-//		ntlmPassword = password;
-//	}
-
 	@Override
- 	public URI getBaseURI() {
+ 	public synchronized URI getBaseURI() {
 		return baseURI;
 	}
 
 	@Override
-	public String getUserAgent() {
+	public synchronized String getUserAgent() {
 		return userAgent;
 	}
 
 	@Override
-	public IIdentity getScanIdentity() {
+	public synchronized IIdentity getScanIdentity() {
 		return scanIdentity;
 	}
 
 	@Override
-	public List<Cookie> getCookieList() {
+	public synchronized List<Cookie> getCookieList() {
 		return cookieList;
 	}
 
 	@Override
-	public List<String> getModulesList() {
+	public synchronized List<String> getModulesList() {
 		return modulesList;
 	}
 
 	@Override
-	public List<String> getExclusions() {
+	public synchronized List<String> getExclusions() {
 		return exclusions;
 	}
 
-//	@Override
-//	public String getBasicUsername() {
-//		return basicUsername;
-//	}
-//
-//	@Override
-//	public String getBasicPassword() {
-//		return basicPassword;
-//	}
-//
-//	@Override
-//	public String getBasicRealm() {
-//		return basicRealm;
-//	}
-//
-//	@Override
-//	public String getBasicDomain() {
-//		return basicDomain;
-//	}
-//
-//	@Override
-//	public String getNtlmUsername() {
-//		return ntlmUsername;
-//	}
-//
-//	@Override
-//	public String getNtlmPassword() {
-//		return ntlmPassword;
-//	}
-
 	@Override
-	public void setLogAllRequests(boolean flag) {
+	public synchronized void setLogAllRequests(boolean flag) {
 		logAllRequests = flag;
 	}
 
 	@Override
-	public boolean getLogAllRequests() {
+	public synchronized boolean getLogAllRequests() {
 		return logAllRequests;
 	}
 
 	@Override
-	public void setDisplayDebugOutput(boolean flag) {
+	public synchronized void setDisplayDebugOutput(boolean flag) {
 		displayDebugOutput = flag;
 	}
 
 	@Override
-	public boolean getDisplayDebugOutput() {
+	public synchronized boolean getDisplayDebugOutput() {
 		return displayDebugOutput;
 	}
 
 	@Override
-	public boolean getDirectoryInjectionChecksFlag() {
+	public synchronized boolean getDirectoryInjectionChecksFlag() {
 		return true;
 	}
 
 	@Override
-	public boolean getNonParameterFileInjectionChecksFlag() {
+	public synchronized boolean getNonParameterFileInjectionChecksFlag() {
 		return false;
 	}
 
-	public IFormCredential createFormCredential(String username, String password) {
+	public synchronized IFormCredential createFormCredential(String username, String password) {
 		final IFormCredential credential = new FormCredential(username, password);
 		formCredentials.add(credential);
 		return credential;
 	}
 
 	@Override
-	public List<IFormCredential> getFormCredentials() {
+	public synchronized List<IFormCredential> getFormCredentials() {
 		return formCredentials;
 	}
 
 	@Override
-	public void setMaxRequestsPerSecond(int rps) {
+	public synchronized void setMaxRequestsPerSecond(int rps) {
 		maxRequestsPerSecond = rps;
 	}
 
 	@Override
-	public int getMaxRequestsPerSecond() {
+	public synchronized int getMaxRequestsPerSecond() {
 		return maxRequestsPerSecond;
 	}
 
 	@Override
-	public int getMaxDescendants() {
+	public synchronized int getMaxDescendants() {
 		return maxDescendants;
 	}
 
 	@Override
-	public int getMaxChildren() {
+	public synchronized int getMaxChildren() {
 		return maxChildren;
 	}
 
 	@Override
-	public int getMaxDepth() {
+	public synchronized int getMaxDepth() {
 		return maxDepth;
 	}
 
 	@Override
-	public void setMaxDescendants(int value) {
+	public synchronized void setMaxDescendants(int value) {
 		maxDescendants = value;
 	}
 
 	@Override
-	public void setMaxChildren(int value) {
+	public synchronized void setMaxChildren(int value) {
 		maxChildren = value;
 	}
 
 	@Override
-	public void setMaxDepth(int value) {
+	public synchronized void setMaxDepth(int value) {
 		maxDepth = value;
 	}
 
 	@Override
-	public int getMaxDuplicatePaths() {
+	public synchronized int getMaxDuplicatePaths() {
 		return maxDuplicatePaths;
 	}
 
 	@Override
-	public void setMaxDuplicatePaths(int value) {
+	public synchronized void setMaxDuplicatePaths(int value) {
 		maxDuplicatePaths = value;
 	}
 
 	@Override
-	public void setMaxParameterCount(int value) {
+	public synchronized void setMaxParameterCount(int value) {
 		this.maxParameterCount = value;
 	}
 
 	@Override
-	public int getMaxParameterCount() {
+	public synchronized int getMaxParameterCount() {
 		return maxParameterCount;
 	}
 
 	@Override
-	public void setMaxConnections(int value) {
+	public synchronized void setMaxConnections(int value) {
 		maxConnections = value;
 	}
 
 	@Override
-	public int getMaxConnections() {
+	public synchronized int getMaxConnections() {
 		return maxConnections;
 	}
 
 	@Override
-	public void setMaxResponseKilobytes(int kb) {
+	public synchronized void setMaxResponseKilobytes(int kb) {
 		maxResponseKilobytes = kb;
 	}
 
 	@Override
-	public int getMaxResponseKilobytes() {
+	public synchronized int getMaxResponseKilobytes() {
 		return maxResponseKilobytes;
 	}
 

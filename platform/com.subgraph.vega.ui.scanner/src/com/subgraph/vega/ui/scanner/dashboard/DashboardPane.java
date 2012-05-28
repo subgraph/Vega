@@ -15,6 +15,8 @@ import java.util.TimerTask;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -32,7 +34,7 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class DashboardPane extends Composite implements IEventHandler {
 	private static final RGB GREY_TEXT_COLOR = new RGB(200, 200, 200);
@@ -70,8 +72,18 @@ public class DashboardPane extends Composite implements IEventHandler {
 		toolkit.getColors().createColor("grey", GREY_TEXT_COLOR);
 		createDashboardForm();
 		renderOutput();
+		createDisposeListener();
 	}
-	
+
+	private void createDisposeListener() {
+		addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				imageCache.dispose();
+			}
+		});
+	}
+
 	public void displayScanInstance(IScanInstance scanInstance) {
 		if(this.scanInstance == scanInstance) {
 			return;

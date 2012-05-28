@@ -44,6 +44,7 @@ public class HttpProxyListener implements IHttpProxyListener {
 	private IHttpProxyListenerConfig config;
 	private final ProxyTransactionManipulator transactionManipulator;
 	private final HttpInterceptor interceptor;
+	private final IHttpRequestEngine requestEngine;
 	private final List<IHttpInterceptProxyEventHandler> eventHandlers;
 	private ServerSocket serverSocket;
 	private HttpParams params;
@@ -56,6 +57,7 @@ public class HttpProxyListener implements IHttpProxyListener {
 		this.config = config;
 		this.transactionManipulator = transactionManipulator;
 		this.interceptor = interceptor;
+		this.requestEngine = requestEngine;
 		this.eventHandlers = new ArrayList<IHttpInterceptProxyEventHandler>();
 
 		this.params = new BasicHttpParams();
@@ -79,6 +81,11 @@ public class HttpProxyListener implements IHttpProxyListener {
 	@Override
 	public IHttpProxyListenerConfig getConfig() {
 		return config;
+	}
+
+	@Override
+	public IHttpRequestEngine getRequestEngine() {
+		return requestEngine;
 	}
 
 	@Override

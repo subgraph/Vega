@@ -81,7 +81,8 @@ public class CrawlerPane extends Composite {
 	
 	private void renderProgress() {
 		switch(scannerStatus) {
-		case IScanInstance.SCAN_IDLE:
+		case IScanInstance.SCAN_CONFIG:
+		case IScanInstance.SCAN_PROBING:
 		case IScanInstance.SCAN_STARTING:
 		case IScanInstance.SCAN_AUDITING:
 			progressPane.setProgressBarValue((int) crawlerPercent);

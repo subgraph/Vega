@@ -14,18 +14,27 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class AlertTreeLabelProvider extends LabelProvider {
 	private final static String ALERT_ITEM = "icons/alert_item.png";
-
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
+	private final AlertTreeContentProvider contentProvider;
 
-	private boolean activeBlinkState;
+	public AlertTreeLabelProvider(AlertTreeContentProvider contentProvider) {
+		super();
+		this.contentProvider = contentProvider;
+	}
 	
+	@Override
+	public void dispose() {
+		imageCache.dispose();
+		super.dispose();
+	}
+
+	@Override
 	public String getText(Object element) {
 		if(element instanceof IAlertTreeNode) {
 			final IAlertTreeNode node = (IAlertTreeNode) element;
@@ -42,11 +51,12 @@ public class AlertTreeLabelProvider extends LabelProvider {
 		}
 	}
 	
+	@Override
 	public Image getImage(Object element) {
 		if(element instanceof AlertScanNode) {
-			AlertScanNode node = (AlertScanNode) element;
-			if(node.getScanInstance() != null && node.getScanInstance().getScanStatus() == IScanInstance.SCAN_AUDITING) {
-				activeBlinkState = !activeBlinkState;
+			final AlertScanNode node = (AlertScanNode) element;
+			if (node.getScanInstance().isActive()) {
+				final boolean activeBlinkState = contentProvider.isBlinkStateActive();
 				if(activeBlinkState) {
 					return imageCache.get(node.getImage());
 				} else {

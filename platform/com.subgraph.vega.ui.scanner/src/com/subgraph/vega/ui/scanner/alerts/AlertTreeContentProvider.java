@@ -10,8 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.scanner.alerts;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -23,26 +27,26 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.ActiveScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
-import com.subgraph.vega.api.model.alerts.NewScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertTree;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class AlertTreeContentProvider implements ITreeContentProvider, IEventHandler {
-
-	private final Timer blinkTimer = new Timer();
-	private AlertTree tree;
-	private TreeViewer viewer;
-	private IWorkspace workspace;
-	private IScanInstance activeScan;
-	private IScanInstance proxyInstance;
-	private int lastStatus;
-	
+	private static final long BLINK_INTERVAL = 1000; // interval in milliseconds for active scan icon blink 
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
+	private final Timer blinkTimer = new Timer();
+	private final Map<Long, Integer> lastStatusMap = new TreeMap<Long, Integer>(); /** Map of active scan statuses, keyed by scan ID */
+	private AlertTree tree;
+	private TreeViewer viewer; // guarded by this
+	private IWorkspace workspace;
+	private IScanInstance proxyInstance;
+	private List<AlertScanNode> activeList = new ArrayList<AlertScanNode>(); // guarded by this
+	private boolean activeBlinkState; // guarded by this
 
 	@Override
 	public void dispose() {		
@@ -51,18 +55,23 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if(newInput instanceof IWorkspace)
-			setNewModelAndViewer((IWorkspace) newInput, viewer);
-		else
-			setNullModel();		
+		synchronized(this) {
+			this.viewer = (TreeViewer) viewer;
+			if(newInput instanceof IWorkspace)
+				setNewModelAndViewer((IWorkspace) newInput);
+			else
+				setNullModel();		
+		}
 	}
 
 	private void setNullModel() {
 		tree = null;
 		workspace = null;
+		lastStatusMap.clear();
+		activeList.clear();
 	}
 	
-	private void setNewModelAndViewer(IWorkspace newWorkspace, Viewer newViewer) {
+	private void setNewModelAndViewer(IWorkspace newWorkspace) {
 		if(newWorkspace != workspace) {
 			if(workspace != null) {
 				workspace.getScanAlertRepository().removeActiveScanInstanceListener(this);
@@ -71,21 +80,27 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 				proxyInstance.removeScanEventListener(this);
 			}
 
+			lastStatusMap.clear();
+			activeList.clear();
 			workspace = newWorkspace;
 			if(newWorkspace == null) {
 				return;
 			}
 			
 			tree = new AlertTree(workspace);
-			this.viewer = (TreeViewer) newViewer;
 			for(IScanInstance scan: workspace.getScanAlertRepository().getAllScanInstances()) {
-				tree.addScan(scan);
-				for(IScanAlert alert: scan.getAllAlerts()) {
-					tree.addAlert(alert);
+				if (scan.getScanStatus() != IScanInstance.SCAN_CONFIG) {
+					tree.addScan(scan);
+					for(IScanAlert alert: scan.getAllAlerts()) {
+						tree.addAlert(alert);
+					}
 				}
 			}
-			setActiveScan(workspace.getScanAlertRepository().addActiveScanInstanceListener(this));
+			for (IScanInstance scanInstance: workspace.getScanAlertRepository().addActiveScanInstanceListener(this)) {
+				addActiveScan(scanInstance);
+			}
 			proxyInstance = workspace.getScanAlertRepository().getProxyScanInstance();
+			lastStatusMap.put(proxyInstance.getScanId(), -1);
 			proxyInstance.addScanEventListenerAndPopulate(this);
 		}
 	}
@@ -128,49 +143,60 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 		}
 	}
 	
-	private void handleNewScanInstance(NewScanInstanceEvent event) {
-		if(tree != null) {
-			tree.addScan(event.getScanInstance());
-			refreshViewer();
-		}
-	}
-
-	private void handleActiveScanInstance(ActiveScanInstanceEvent event) {
-		if(tree != null && event.getScanInstance() != null) {
-			setActiveScan(event.getScanInstance());
+	private void handleActiveScanInstance(final ActiveScanInstanceEvent event) {
+		synchronized(this) {
+			if (viewer != null) {
+				viewer.getControl().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						if (tree != null && event.getScanInstance() != null) {
+							addActiveScan(event.getScanInstance());
+						}
+					}
+				});
+			}
 		}
 	}
 	
-	private void setActiveScan(IScanInstance scan) {
-		if(activeScan != null) {
-			activeScan.removeScanEventListener(this);
-		}
-	
-		lastStatus = 0;
-		
+	private void addActiveScan(IScanInstance scan) {
 		if(scan != null) {
-			activeScan = scan;
-			activeScan.addScanEventListenerAndPopulate(this);
-
-			AlertScanNode scanNode = tree.getScanNode(scan.getScanId());
+			lastStatusMap.put(scan.getScanId(), -1);
+			scan.addScanEventListenerAndPopulate(this);
+			AlertScanNode scanNode = tree.addScan(scan);
+			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(scanNode));
 		}
 	}
 
 	private void handleScanStatusChange(ScanStatusChangeEvent event) {
-		if(event.getStatus() != lastStatus) {
-			lastStatus = event.getStatus();
-			if(event.getStatus() == IScanInstance.SCAN_AUDITING) {
-				AlertScanNode scanNode = tree.getScanNode(activeScan.getScanId());
-				blinkTimer.scheduleAtFixedRate(createBlinkTask(scanNode), 0, 500);
+		final int lastStatus = lastStatusMap.get(event.getScanInstance().getScanId());
+		final int status = event.getStatus();
+		if (lastStatus != status) {
+			final long scanId = event.getScanInstance().getScanId();  
+			lastStatusMap.put(scanId, status);
+			if (scanId != IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
+				if (event.getScanInstance().isActive() == true) {
+					final AlertScanNode scanNode = tree.getScanNode(event.getScanInstance().getScanId());
+					synchronized(this) {
+						if (!activeList.contains(scanNode)) {
+							activeList.add(scanNode);
+							if (activeList.size() == 1) {
+								blinkTimer.scheduleAtFixedRate(createBlinkTask(), 0, BLINK_INTERVAL);
+							}
+						}
+					}
+				} else if (event.getScanInstance().isComplete() == true) {
+					synchronized(this) {
+						activeList.remove(tree.getScanNode(scanId));
+					}
+				}
 			}
 			refreshViewer();
 		}
 	}
 
 	private void refreshViewer() {
-		if(viewer != null && !viewer.getControl().isDisposed()) {
-			synchronized(viewer) {
+		synchronized(this) {
+			if (viewer != null && !viewer.getControl().isDisposed()) {
 				viewer.getControl().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
@@ -185,8 +211,6 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	public void handleEvent(IEvent event) {
 		if(event instanceof NewScanAlertEvent) {
 			handleNewScanAlert((NewScanAlertEvent) event);
-		} else if(event instanceof NewScanInstanceEvent) {
-			handleNewScanInstance((NewScanInstanceEvent) event);
 		} else if(event instanceof ActiveScanInstanceEvent) {
 			handleActiveScanInstance((ActiveScanInstanceEvent) event);
 		} else if(event instanceof ScanStatusChangeEvent) {
@@ -194,29 +218,43 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 		}
 	}
 	
-	private TimerTask createBlinkTask(final AlertScanNode scanNode) {
+	private TimerTask createBlinkTask() {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				if(scanNode.getScanInstance().getScanStatus() == IScanInstance.SCAN_AUDITING) {
-					updateScanNode(scanNode);
-				} else {
-					this.cancel();
-				}				
+				synchronized(AlertTreeContentProvider.this) {
+					if (activeList.size() != 0) {
+						activeBlinkState = !activeBlinkState;
+					} else {
+						activeBlinkState = false;
+						cancel();
+					}
+					updateScanNodes();
+				}
 			}
 		};
 	}
 	
-	private void updateScanNode(final AlertScanNode node) {
+	/**
+	 * Must be invoked within a synchronized block.
+	 */
+	private void updateScanNodes() {
 		if(viewer != null && !viewer.getControl().isDisposed()) {
-			synchronized(viewer) {
-				viewer.getControl().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
+			viewer.getControl().getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					for (AlertScanNode node: activeList) {
 						viewer.update(node, null);
 					}
-				});
-			}
+				}
+			});
 		}
 	}
+
+	public boolean isBlinkStateActive() {
+		synchronized(this) {
+			return activeBlinkState;
+		}
+	}
+	
 }

@@ -12,6 +12,8 @@ package com.subgraph.vega.ui.http.requestlogviewer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -33,7 +35,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
@@ -49,6 +50,7 @@ public class RequestResponseViewer extends Composite {
 	private final static String DOWN_ICON = "icons/down.png";
 	private final static String CONFIG_ICON = "icons/configure.png";
 	
+	private IEventHandler workspaceListener;
 	private final SashForm parentForm;
 	private final ImageCache imageCache;
 	private final Menu optionsMenu;
@@ -80,20 +82,34 @@ public class RequestResponseViewer extends Composite {
 		fd.top = new FormAttachment(0);
 		toolbarComposite.setLayoutData(fd);
 		setTabbedMode();
-
-		IModel model = Activator.getDefault().getModel();
-		model.addWorkspaceListener(new IEventHandler() {
+		
+		workspaceListener = new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
 				if (event instanceof WorkspaceCloseEvent || event instanceof WorkspaceResetEvent) {
 					handleWorkspaceCloseOrReset();
 				}
 			}
+		};
+		Activator.getDefault().getModel().addWorkspaceListener(workspaceListener);
+
+		createDisposeListener();
+	}
+
+	private void createDisposeListener() {
+		addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				Activator.getDefault().getModel().removeWorkspaceListener(workspaceListener);
+				removeDisposeListener(this);
+			}
 		});
 	}
 
 	private void handleWorkspaceCloseOrReset() {
-		clearViewers();
+		if (!isDisposed()) {
+			clearViewers();
+		}
 	}
 
 	private Composite createToolbarComposite(Composite parent) {
@@ -321,8 +337,10 @@ public class RequestResponseViewer extends Composite {
 	}
 	
 	public void setCurrentRecord(IRequestLogRecord record) {
-		currentRecord = record;
-		processCurrentTransaction();
+		if (currentRecord != record) {
+			currentRecord = record;
+			processCurrentTransaction();
+		}
 	}
 	
 	private void processCurrentTransaction() {

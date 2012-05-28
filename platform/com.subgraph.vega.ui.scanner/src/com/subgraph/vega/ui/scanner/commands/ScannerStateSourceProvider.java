@@ -16,76 +16,41 @@ import java.util.Map;
 import org.eclipse.ui.AbstractSourceProvider;
 import org.eclipse.ui.ISources;
 
-import com.subgraph.vega.api.events.IEvent;
-import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.scanner.IScanner;
-import com.subgraph.vega.api.scanner.LockStatusEvent;
-import com.subgraph.vega.ui.scanner.Activator;
-
-public class ScannerStateSourceProvider extends AbstractSourceProvider implements IEventHandler {
-	final static String SCANNER_STATE = "vega.scannerState";
-	final static String SCANNER_RUNNING = "running";
-	final static String SCANNER_IDLE = "idle";
-	
-	private boolean isRunning = false;
-
-	public ScannerStateSourceProvider() {
-		final IScanner scanner = Activator.getDefault().getScanner();
-		scanner.addLockStatusListener(this);
-	}
+public class ScannerStateSourceProvider extends AbstractSourceProvider {
+	public final static String SCAN_SELECTION_STATE = "vega.scanSelectionState"; 
+	public final static String SCAN_ACTIVE = "active";
+	public final static String SCAN_IDLE = "idle";
+	private boolean isScanActive = false;
 	
 	@Override
 	public void dispose() {
-		Activator.getDefault().getScanner().removeLockStatusListener(this);
 	}
 
 	@Override
 	synchronized public Map<?,?> getCurrentState() {
 		Map<String, String> stateMap = new HashMap<String, String>(1);
-		stateMap.put(SCANNER_STATE, getCurrentScannerState());
+		stateMap.put(SCAN_SELECTION_STATE, getCurrentScanSelectionState());
 		return stateMap;
 	}
 
-	synchronized void setScannerRunning() {
-		setScannerState(true);
-	}
-	
-	synchronized void setScannerStopped() {
-		setScannerState(false);
-	}
-	
-	private void setScannerState(boolean state) {
-		if(state != isRunning) {
-			isRunning = state;
-			fireSourceChanged(ISources.WORKBENCH, SCANNER_STATE, getCurrentScannerState());
+	public synchronized void setScanSelectionIsActive(boolean isActive) {
+		if (isScanActive != isActive) {
+			isScanActive = isActive;
+			fireSourceChanged(ISources.WORKBENCH, SCAN_SELECTION_STATE, getCurrentScanSelectionState());
 		}
 	}
-	
-	private String getCurrentScannerState() {
-		if(isRunning)
-			return SCANNER_RUNNING;
-		else
-			return SCANNER_IDLE;
+
+	private String getCurrentScanSelectionState() {
+		if (isScanActive) {
+			return SCAN_ACTIVE;
+		} else {
+			return SCAN_IDLE;
+		}
 	}
 
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[] { SCANNER_STATE };
+		return new String[] { SCAN_SELECTION_STATE, };
 	}
 
-	@Override
-	public void handleEvent(IEvent event) {
-		if(event instanceof LockStatusEvent) {
-			handleLockStatus((LockStatusEvent) event);
-		}
-	}
-
-	private void handleLockStatus(LockStatusEvent event) {
-		Activator.getDefault().setCurrentScan(event.getScan());
-		if (event.getScan() != null) {
-			setScannerRunning();
-		} else {
-			setScannerStopped();
-		}
-	}
 }

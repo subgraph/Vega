@@ -10,10 +10,14 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import java.util.List;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
 
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public interface IHttpRequestEngine {
@@ -48,23 +52,55 @@ public interface IHttpRequestEngine {
 	 * @param modifier IHttpRequestModifier.
 	 */
 	void addRequestModifier(IHttpRequestModifier modifier);
-	
-	/**
-	 * Send a request, specifying the HttpContext. The HttpContext should use this request engine's HttpContext as its
-	 * parent. 
-	 * @param request Request to send.
-	 * @param context HTTP context.
-	 * @return IHttpResponse Response.
-	 * @throws RequestEngineException
-	 */
-	IHttpResponse sendRequest(HttpUriRequest request, HttpContext context) throws RequestEngineException;
 
 	/**
-	 * Send a request without providing a HttpContext. A HttpContext is automatically generated for the request with
-	 * this request engine's HttpContext as its parent.
-	 * @param request Request to send.
-	 * @return IHttpResponse Response.
-	 * @throws RequestEngineException
+	 * Register an event listener to watch for requests as they are executed by this request engine. Fires:
+	 * 	- RequestTaskStartEvent
+	 *  - RequestTaskStopEvent
+	 * @param listener Event listener.
 	 */
-	IHttpResponse sendRequest(HttpUriRequest request) throws RequestEngineException;
+	void addRequestListener(IEventHandler listener);
+
+	/**
+	 * Deregister a request event listener.
+	 * @param listener Event listener.
+	 */
+	void removeRequestListener(IEventHandler listener);
+
+	/**
+	 * Obtain a list of requests in progress.
+	 * @return List of requests in progress.
+	 */
+	IHttpRequestTask[] getRequestList();
+
+	/**
+	 * Send a request, returning the request task managing request execution. The provided HttpContext should use this
+	 * request engine's HttpContext as its parent.
+	 * @param request Request to be send.
+	 * @param context HTTP execution context.
+	 * @return Request task.
+	 */
+	IHttpRequestTask sendRequest(HttpUriRequest request, HttpContext context);
+
+	/**
+	 * Send a request, returning the request task managing request execution. A HttpContext is automatically generated
+	 * for the request using this request engine's HttpContext as its parent.
+	 * @param request Request to be send.
+	 * @return Request task.
+	 */
+	IHttpRequestTask sendRequest(HttpUriRequest request);
+	
+	/**
+	 * Create a macro context.
+	 * @return Macro context.
+	 */
+	IHttpMacroContext createMacroContext();
+	
+	/**
+	 * Create a macro executor to execute a macro with this request engine.
+	 * @param macro Macro to execute.
+	 * @param context Macro context.
+	 * @return Macro executor.
+	 */
+	IHttpMacroExecutor createMacroExecutor(IHttpMacro macro, IHttpMacroContext context);	
 }

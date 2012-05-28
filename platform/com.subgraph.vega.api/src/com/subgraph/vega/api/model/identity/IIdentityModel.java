@@ -12,6 +12,8 @@ package com.subgraph.vega.api.model.identity;
 
 import java.util.Collection;
 
+import com.subgraph.vega.api.events.IEventHandler;
+
 public interface IIdentityModel {
 	/**
 	 * Get all identities managed by the model.
@@ -36,7 +38,13 @@ public interface IIdentityModel {
 	 * @return IAuthMethodNtlm.
 	 */
 	IAuthMethodNtlm createAuthMethodNtlm();
-	
+
+	/**
+	 * Create an IAuthMethodHttpMacro instance with no fields set. The IAuthMethod is not associated with any identity.
+	 * @return IAuthMethodHttpMacro.
+	 */
+	IAuthMethodHttpMacro createAuthMethodHttpMacro();
+
 	/**
 	 * Store an identity in the workspace. The caller is responsible for ensuring an IIdentity with the same name does
 	 * not already exist.
@@ -56,4 +64,17 @@ public interface IIdentityModel {
 	 * @param name Identity, or null if none exists with the given name.
 	 */
 	IIdentity getIdentityByName(String name);
+
+	/**
+	 * Register an event listener to watch for changes to identities managed by the model. Fires:
+	 * 	- NewIdentityEvent
+	 * @param listener Event listener.
+	 */
+	void addChangeListener(IEventHandler listener);
+
+	/**
+	 * De4register a change event listener.
+	 * @param listener Event listener.
+	 */
+	void removeChangeListener(IEventHandler listener);
 }

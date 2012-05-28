@@ -12,8 +12,6 @@ package com.subgraph.vega.internal.model.alerts;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -30,35 +28,33 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanExceptionEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
+import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanInstance implements IScanInstance, Activatable {
 	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
 	private final ModelProperties properties;
-	private final Date startTime;
-	private int scanStatus;
-	
+	private transient IScan scan;
+	private Date startTime;
+	private Date stopTime;
+	private int scanStatus;	
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
 	private transient ScanAlertFactory alertFactory;
-	private transient Lock lock;
 	private transient int activeScanCompletedCount;
 	private transient int activeScanTotalCount;
-	
 	private transient Activator activator;
-	
-	ScanInstance(long scanId) {
+
+	public ScanInstance(long scanId) {
 		this.scanId = scanId;
-		this.scanStatus = SCAN_IDLE;
+		this.scanStatus = SCAN_CONFIG;
 		this.properties = new ModelProperties();
-		this.startTime = new Date();
 	}
 
-	void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
+	public synchronized void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
 		this.database = database;
 		this.alertFactory = alertFactory;
-		this.lock = new ReentrantLock();
 		this.eventManager = new EventListenerManager();
 	}
 
@@ -69,9 +65,20 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public Date getStartTime() {
+	public synchronized IScan getScan() {
+		return scan;
+	}
+
+	@Override
+	public synchronized Date getStartTime() {
 		activate(ActivationPurpose.READ);
 		return startTime;
+	}
+
+	@Override
+	public Date getStopTime() {
+		activate(ActivationPurpose.READ);
+		return stopTime;
 	}
 
 	@Override
@@ -87,11 +94,11 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
 		activate(ActivationPurpose.READ);
-		return alertFactory.createAlert(key, type, scanId, requestId);
+		return alertFactory.createAlert(key, type, this, requestId);
 	}
 
 	@Override
-	public void addAlert(IScanAlert alert) {
+	public synchronized void addAlert(IScanAlert alert) {
 		activate(ActivationPurpose.READ);
 		if(rejectDuplicateAlert(alert)) {
 			return;
@@ -102,7 +109,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public boolean hasAlertKey(String key) {
-		return getAlertByKey(key) != null;
+		return (getAlertByKey(key) != null);
 	}
 
 	@Override
@@ -111,21 +118,17 @@ public class ScanInstance implements IScanInstance, Activatable {
 			return null;
 		}
 		
-		synchronized (this) {
-			final List<ScanAlert> results = getAlertListForKey(key);
-			if(results.size() == 0) {
-				return null;
-			}
-			
-			if(results.size() > 1) {
-				logger.warning("Multiple alert model entries for key: "+ key);
-			}
-			
-			return results.get(0);
+		final List<ScanAlert> results = getAlertListForKey(key);
+		if(results.size() == 0) {
+			return null;
+		}			
+		if(results.size() > 1) {
+			logger.warning("Multiple alert model entries for key: "+ key);
 		}
+		return results.get(0);
 	}
 
-	private List<ScanAlert> getAlertListForKey(final String key) {
+	private synchronized List<ScanAlert> getAlertListForKey(final String key) {
 		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
@@ -137,7 +140,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public List<IScanAlert> getAllAlerts() {
+	public synchronized List<IScanAlert> getAllAlerts() {
 		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<IScanAlert>() {
 			private static final long serialVersionUID = 1L;
@@ -150,68 +153,79 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 
 	@Override
-	public void addScanEventListenerAndPopulate(IEventHandler listener) {
-		lock();
-		try {
-			for(IScanAlert alert: getAllAlerts()) {
-				listener.handleEvent(new NewScanAlertEvent(alert));
-			}
-			listener.handleEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
-			eventManager.addListener(listener);
-		} finally {
-			unlock();
+	public synchronized void addScanEventListenerAndPopulate(IEventHandler listener) {
+		for(IScanAlert alert: getAllAlerts()) {
+			listener.handleEvent(new NewScanAlertEvent(alert));
 		}
+		listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.addListener(listener);
 	}
 
 	@Override
-	public void removeScanEventListener(IEventHandler listener) {
+	public synchronized void removeScanEventListener(IEventHandler listener) {
 		eventManager.removeListener(listener);
 	}
 
 	@Override
-	public int getScanStatus() {
+	public synchronized int getScanStatus() {
 		activate(ActivationPurpose.READ);
 		return scanStatus;
 	}
 
 	@Override
-	public int getScanCompletedCount() {
+	public boolean isActive() {
+		int scanStatus = getScanStatus();
+		return (scanStatus == SCAN_PROBING || scanStatus == SCAN_STARTING || scanStatus == SCAN_AUDITING);
+	}
+	
+	@Override
+	public boolean isComplete() {
+		int scanStatus = getScanStatus();
+		return (scanStatus == SCAN_CANCELLED || scanStatus == SCAN_COMPLETED);
+	}
+
+	@Override
+	public synchronized int getScanCompletedCount() {
 		return activeScanCompletedCount;
 	}
 
 	@Override
-	public int getScanTotalCount() {
+	public synchronized int getScanTotalCount() {
 		return activeScanTotalCount;
 	}
 
 	@Override
-	public void updateScanProgress(int completedCount, int totalCount) {
-		activeScanCompletedCount = completedCount;
-		activeScanTotalCount = totalCount;
-		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	public synchronized void setScan(IScan scan) {
+		this.scan = scan;
 	}
 
 	@Override
-	public void updateScanStatus(int status) {
+	public synchronized void updateScanProgress(int completedCount, int totalCount) {
+		activeScanCompletedCount = completedCount;
+		activeScanTotalCount = totalCount;
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	}
+
+	@Override
+	public synchronized void updateScanStatus(int status) {
 		activate(ActivationPurpose.READ);
+		if (status == SCAN_PROBING || status == SCAN_STARTING) {
+			if (startTime == null) {
+				startTime = new Date();
+			}
+		} else if (status == SCAN_COMPLETED || status == SCAN_CANCELLED) {
+			if (stopTime == null) {
+				stopTime = new Date();
+			}
+		}
 		this.scanStatus = status;
-		eventManager.fireEvent(new ScanStatusChangeEvent(scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override
-	public void notifyScanException(HttpUriRequest request, Throwable exception) {
+	public synchronized void notifyScanException(HttpUriRequest request, Throwable exception) {
 		eventManager.fireEvent(new ScanExceptionEvent(request, exception));
-	}
-
-	@Override
-	public void lock() {
-		lock.lock();
-	}
-
-	@Override
-	public void unlock() {
-		lock.unlock();
 	}
 
 	@Override
@@ -274,7 +288,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 		}
 	}
 
-	private List<ScanAlert> getAlertListForResource(final String resource) {
+	private synchronized List<ScanAlert> getAlertListForResource(final String resource) {
 		activate(ActivationPurpose.READ);
 		return database.query(new Predicate<ScanAlert>() {
 			private static final long serialVersionUID = 1L;
@@ -304,4 +318,5 @@ public class ScanInstance implements IScanInstance, Activatable {
 		
 		this.activator = activator;			
 	}
+
 }

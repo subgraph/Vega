@@ -1,5 +1,5 @@
 /*******************************************************************************
-// * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2011 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,6 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
@@ -51,10 +50,8 @@ public class HttpProxyService implements IHttpProxyService {
 	private boolean isRunning = false;
 	private boolean isPassthrough = false;
 	private IModel model;
-
 	private IHttpRequestEngineFactory requestEngineFactory;
 	private IHttpRequestEngineConfig requestEngineConfig;
-
 	private IContentAnalyzerFactory contentAnalyzerFactory;
 	private IScannerModuleRegistry moduleRepository;
 	private IPathFinder pathFinder;
@@ -64,7 +61,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private Map<String, IHttpProxyListenerConfig> listenerConfigMap = new HashMap<String, IHttpProxyListenerConfig>();
 	private Map<String, HttpProxyListener> listenerMap = new ConcurrentHashMap<String, HttpProxyListener>();
 	private final IHttpInterceptProxyEventHandler listenerEventHandler;
-	private ProxyTransactionManipulator transactionManipulator;
+	private final ProxyTransactionManipulator transactionManipulator;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
 	private HttpClient httpClient;
@@ -159,7 +156,12 @@ public class HttpProxyService implements IHttpProxyService {
 
 	@Override
 	public IHttpProxyListenerConfig[] getListenerConfigs() {
-		return (IHttpProxyListenerConfig[]) listenerMap.values().toArray(new IHttpProxyListenerConfig[0]);
+		return listenerMap.keySet().toArray(new IHttpProxyListenerConfig[0]);
+	}
+
+	@Override
+	public IHttpProxyListener[] getListeners() {
+		return listenerMap.values().toArray(new IHttpProxyListener[0]);
 	}
 
 	@Override
@@ -205,11 +207,17 @@ public class HttpProxyService implements IHttpProxyService {
 		listener.registerEventHandler(listenerEventHandler);
 		listenerMap.put(config.toString(), listener);
 		listener.start();
+		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
+			handler.notifyStartListener(listener);
+		}
 	}
 	
 	private void stopListener(IHttpProxyListener listener) {
 		listener.unregisterEventHandler(listenerEventHandler);
 		listener.stop();
+		for (IHttpProxyServiceEventHandler handler: eventHandlers) {
+			handler.notifyStopListener(listener);
+		}
 	}
 	
 	private List<IResponseProcessingModule> loadModules() {

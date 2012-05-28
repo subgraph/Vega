@@ -11,13 +11,14 @@
 package com.subgraph.vega.ui.scanner.alerts.tree;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 public class AlertHostNode extends AbstractAlertTreeNode {
 	private final static String HOSTNAME_IMAGE = "icons/hostname.png";
-
 	private final String hostname;
-	
-	AlertHostNode(String hostname) {
+
+	AlertHostNode(IAlertTreeNode parentNode, String hostname) {
+		super(parentNode);
 		this.hostname = hostname;
 	}
 	
@@ -33,7 +34,7 @@ public class AlertHostNode extends AbstractAlertTreeNode {
 
 	@Override
 	protected AbstractAlertTreeNode createNodeForAlert(IScanAlert alert) {
-		return new AlertSeverityNode(alert.getSeverity());
+		return new AlertSeverityNode(this, alert.getSeverity());
 	}
 
 	@Override

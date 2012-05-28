@@ -20,31 +20,34 @@ public class AlertTree extends AbstractAlertTreeNode {
 	private final IWorkspace workspace;
 	
 	public AlertTree(IWorkspace workspace) {
+		super(null);
 		this.workspace = workspace;
 	}
 	
-	public synchronized void addScan(IScanInstance scan) {
+	public synchronized AlertScanNode addScan(IScanInstance scan) {
 		if(scan.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
 			if(scan.getAllAlerts().size() == 0) {
-				return;
+				return null;
 			}
 		}
 		final AlertScanNode scanNode = getScanNode(scan.getScanId());
 		if(scanNode.getScanInstance() == null) {
 			scanNode.setScanInstance(scan);
 		}
+		return scanNode;
 	}
 	
 	public synchronized AlertScanNode getScanNode(long scanId) {
 		final String key = Long.toString(scanId);
-		if(!nodeMap.containsKey(key)) {
-			final AlertScanNode scanNode = new AlertScanNode(scanId, workspace);
+		AlertScanNode node = (AlertScanNode) nodeMap.get(key);
+		if (node == null) {
+			node = new AlertScanNode(this, scanId, workspace);
 			if(scanId == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
-				scanNode.setScanInstance(workspace.getScanAlertRepository().getProxyScanInstance());
+				node.setScanInstance(workspace.getScanAlertRepository().getProxyScanInstance());
 			}
-			nodeMap.put(key, scanNode);
+			nodeMap.put(key, node);
 		}
-		return (AlertScanNode) nodeMap.get(key);
+		return node;
 	}
 
 	@Override

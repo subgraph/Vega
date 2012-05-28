@@ -16,16 +16,22 @@ import java.util.List;
 import com.db4o.ObjectContainer;
 import com.db4o.query.Predicate;
 
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.identity.IAuthMethodHttpMacro;
 import com.subgraph.vega.api.model.identity.IAuthMethodNtlm;
 import com.subgraph.vega.api.model.identity.IAuthMethodRfc2617;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
+import com.subgraph.vega.api.model.identity.NewIdentityEvent;
 
 public class IdentityModel implements IIdentityModel {
-	private ObjectContainer database;
+	private final ObjectContainer database;
+	private final EventListenerManager changeEventManager;
 
 	public IdentityModel(ObjectContainer database) {
 		this.database = database;
+		this.changeEventManager = new EventListenerManager();
 	}
 
 	@Override
@@ -49,8 +55,14 @@ public class IdentityModel implements IIdentityModel {
 	}
 
 	@Override
+	public IAuthMethodHttpMacro createAuthMethodHttpMacro() {
+		return new AuthMethodHttpMacro();
+	}
+
+	@Override
 	public void store(IIdentity identity) {
 		database.store(identity);
+		changeEventManager.fireEvent(new NewIdentityEvent(identity));
 	}
 
 	@Override
@@ -73,5 +85,14 @@ public class IdentityModel implements IIdentityModel {
 		return results.get(0);
 	}
 
+	@Override
+	public void addChangeListener(IEventHandler listener) {
+		changeEventManager.addListener(listener);
+	}
+
+	@Override
+	public void removeChangeListener(IEventHandler listener) {
+		changeEventManager.removeListener(listener);
+	}
 
 }

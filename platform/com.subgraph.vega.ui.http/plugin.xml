@@ -21,10 +21,10 @@
       </view>
       <view
             allowMultiple="false"
-            class="com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView"
-            icon="icons/interceptQueue_view.png"
-            id="com.subgraph.vega.views.intercept.queue"
-            name="Intercept Queue"
+            class="com.subgraph.vega.ui.http.statusview.StatusView"
+            icon="icons/proxy_status.png"
+            id="com.subgraph.vega.views.proxystatus"
+            name="Proxy Status"
             restorable="true">
       </view>
       <view
@@ -34,13 +34,6 @@
             id="com.subgraph.vega.views.requestEdit"
             name="Request Editor"
             restorable="false">
-      </view>
-      <view
-            allowMultiple="false"
-            class="com.subgraph.vega.ui.http.identities.IdentitiesView"
-            id="com.subgraph.vega.views.http.identities"
-            name="Identities"
-            restorable="true">
       </view>
    </extension>
    <extension
@@ -90,24 +83,37 @@
             commandId="com.subgraph.vega.commands.proxyConfigureModules">
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ForwardTransaction"
-            commandId="com.subgraph.vega.commands.popup.forwardTransaction">
-      </handler>
-      <handler
-            class="com.subgraph.vega.ui.http.commands.DropTransaction"
-            commandId="com.subgraph.vega.commands.popup.dropTransaction">
-      </handler>
-      <handler
             class="com.subgraph.vega.ui.http.commands.ProxyPassthrough"
             commandId="com.subgraph.vega.commands.proxyPassthrough">
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.ReplayRequest"
-            commandId="com.subgraph.vega.commands.popup.replayRequest">
+            class="com.subgraph.vega.ui.http.commands.InterceptForwardTransaction"
+            commandId="com.subgraph.vega.commands.interceptForward">
+         <enabledWhen>
+            <with
+                  variable="vega.interceptQueueState">
+               <equals
+                     value="pending">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.TagEdit"
-            commandId="com.subgraph.vega.commands.popup.tagEdit">
+            class="com.subgraph.vega.ui.http.commands.InterceptDropTransaction"
+            commandId="com.subgraph.vega.commands.interceptDrop">
+         <enabledWhen>
+            <with
+                  variable="vega.interceptQueueState">
+               <or>
+                  <equals
+                        value="pending">
+                  </equals>
+                  <equals
+                        value="requestSent">
+                  </equals>
+               </or>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -141,20 +147,6 @@
             name="Toggle HTTP proxy passthrough">
       </command>
       <category
-            id="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            name="HTTP Request View Popup">
-      </category>
-      <command
-            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.replayRequest"
-            name="Replay Request">
-      </command>
-      <command
-            categoryId="com.subgraph.vega.commands.httpRequestViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.tagEdit"
-            name="Edit Tags">
-      </command>
-      <category
             description="Commands for controlling the request editor"
             id="com.subgraph.vega.commands.requestEditorCategory"
             name="Request Editor Commands">
@@ -164,20 +156,6 @@
             description="Send the HTTP Request"
             id="com.subgraph.vega.commands.sendRequest"
             name="Send Request">
-      </command>
-      <category
-            id="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            name="Interception Queue View Popup">
-      </category>
-      <command
-            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.forwardTransaction"
-            name="Forward pending transaction">
-      </command>
-      <command
-            category="com.subgraph.vega.commands.interceptQueueViewPopupCategory"
-            id="com.subgraph.vega.commands.popup.dropTransaction"
-            name="Drop pending transaction">
       </command>
       <category
             id="com.subgraph.vega.commands.requestViewCategory"
@@ -197,6 +175,21 @@
             categoryId="com.subgraph.vega.commands.requestViewCategory"
             id="com.subgraph.vega.commands.resetRequestFilter"
             name="Reset Request View Filter">
+      </command>
+      <category
+            description="Commands for controlling the HTTP proxy interceptor"
+            id="com.subgraph.vega.commands.interceptCategory"
+            name="Proxy Interceptor Commands">
+      </category>
+      <command
+            categoryId="com.subgraph.vega.commands.interceptCategory"
+            id="com.subgraph.vega.commands.interceptForward"
+            name="Forward Transaction">
+      </command>
+      <command
+            categoryId="com.subgraph.vega.commands.interceptCategory"
+            id="com.subgraph.vega.commands.interceptDrop"
+            name="Drop Transaction">
       </command>
    </extension>
    <extension
@@ -268,38 +261,6 @@
          </toolbar>
       </menuContribution>
       <menuContribution
-            allPopups="false"
-            locationURI="popup:com.subgraph.vega.ui.http.requestlogviewer.popup">
-         <command
-               commandId="com.subgraph.vega.commands.popup.replayRequest"
-               label="Replay Request"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
-         </command>
-         <command
-               commandId="com.subgraph.vega.commands.popup.tagEdit"
-               label="Edit Tags"
-               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
-         </command>
-      </menuContribution>
-      <menuContribution
             locationURI="toolbar:com.subgraph.vega.views.requestEdit">
          <command
                commandId="com.subgraph.vega.commands.sendRequest"
@@ -333,34 +294,18 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView.tableViewerTransactions">
+            locationURI="toolbar:com.subgraph.vega.views.intercept">
          <command
-               commandId="com.subgraph.vega.commands.popup.forwardTransaction"
+               commandId="com.subgraph.vega.commands.interceptForward"
+               icon="icons/start_16x16.png"
                label="Forward Transaction"
                style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
          </command>
          <command
-               commandId="com.subgraph.vega.commands.popup.dropTransaction"
+               commandId="com.subgraph.vega.commands.interceptDrop"
+               icon="icons/stop_16x16.png"
                label="Drop Transaction"
                style="push">
-            <visibleWhen
-                  checkEnabled="true">
-               <with
-                     variable="selection">
-                  <count
-                        value="+">
-                  </count>
-               </with>
-            </visibleWhen>
          </command>
       </menuContribution>
     
@@ -371,6 +316,13 @@
             provider="com.subgraph.vega.ui.http.commands.ProxyStateSourceProvider">
          <variable
                name="vega.proxyState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
+      <sourceProvider
+            provider="com.subgraph.vega.ui.http.commands.InterceptQueueStateSourceProvider">
+         <variable
+               name="vega.interceptQueueState"
                priorityLevel="workbench">
          </variable>
       </sourceProvider>

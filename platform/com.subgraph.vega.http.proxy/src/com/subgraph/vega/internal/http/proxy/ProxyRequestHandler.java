@@ -33,6 +33,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
@@ -80,9 +81,16 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 				return;
 			}
 
-			HttpUriRequest uriRequest = transaction.getRequest();
+			final HttpUriRequest uriRequest = transaction.getRequest();
+			final IHttpRequestTask requestTask = requestEngine.sendRequest(uriRequest);
+			transaction.setRequestTask(requestTask);
 			transaction.signalForward();
-			IHttpResponse r = requestEngine.sendRequest(uriRequest);
+			IHttpResponse r = null;
+			try {
+				r = requestTask.get();
+			} finally {
+				transaction.setRequestTask(null);
+			}
 			if(r == null) {
 				response.setStatusCode(503);
 				transaction.signalComplete(false);

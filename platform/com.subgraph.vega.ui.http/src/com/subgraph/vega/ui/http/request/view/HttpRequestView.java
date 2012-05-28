@@ -38,8 +38,7 @@ public class HttpRequestView extends ViewPart {
 		parent.setLayout(new FillLayout());
 		final SashForm form = new SashForm(parent, SWT.VERTICAL);
 
-		requestLogViewer = new RequestLogViewer(form, getViewSite().getSecondaryId());
-		requestLogViewer.registerContextMenu(getSite());
+		requestLogViewer = new RequestLogViewer(form, getViewSite().getSecondaryId(), 0);
 
 		requestResponseViewer = new RequestResponseViewer(form);
 		requestLogViewer.setRequestResponseViewer(requestResponseViewer);

@@ -21,6 +21,7 @@ import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.NamedEventListenerManager;
 import com.subgraph.vega.api.html.IHTMLParser;
+import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IModelProperties;
 import com.subgraph.vega.api.model.IModelVersion;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -49,6 +50,7 @@ import com.subgraph.vega.internal.model.web.WebModel;
 
 public class Workspace implements IWorkspace {
 	private static final int BACKGROUND_COMMIT_INTERVAL = 10000;
+	private final IModel model;
 	private final IWorkspaceEntry workspaceEntry;
 	private final NamedEventListenerManager conditionChangeManager;
 	private final EventListenerManager eventManager;
@@ -76,7 +78,8 @@ public class Workspace implements IWorkspace {
 
 	private WorkspaceStatus workspaceStatus;
 
-	Workspace(IWorkspaceEntry entry, NamedEventListenerManager conditionChangeManager, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
+	Workspace(IModel model, IWorkspaceEntry entry, NamedEventListenerManager conditionChangeManager, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
+		this.model = model;
 		this.configurationFactory = new DatabaseConfigurationFactory();
 		this.workspaceEntry = entry;
 		this.conditionChangeManager = conditionChangeManager;
@@ -88,6 +91,11 @@ public class Workspace implements IWorkspace {
 		this.backgroundCommitTimer = new Timer();
 	}
 
+	@Override
+	public IModel getModel() {
+		return model;
+	}
+	
 	@Override
 	public boolean open() {
 		if(opened)

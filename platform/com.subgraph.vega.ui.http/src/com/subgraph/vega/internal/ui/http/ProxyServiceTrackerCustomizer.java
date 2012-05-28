@@ -16,6 +16,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;
 import com.subgraph.vega.api.http.proxy.IHttpInterceptorEventHandler;
+import com.subgraph.vega.api.http.proxy.IHttpProxyListener;
 import com.subgraph.vega.api.http.proxy.IHttpProxyService;
 import com.subgraph.vega.api.http.proxy.IHttpProxyServiceEventHandler;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
@@ -38,8 +39,16 @@ public class ProxyServiceTrackerCustomizer implements ServiceTrackerCustomizer<I
 			}
 
 			@Override
+			public void notifyStartListener(IHttpProxyListener listener) {
+			}
+
+			@Override
 			public void notifyStop() {
 				handleNotifyStop();
+			}
+
+			@Override
+			public void notifyStopListener(IHttpProxyListener listener) {
 			}
 
 			@Override

@@ -12,7 +12,6 @@ package com.subgraph.vega.impl.scanner;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
-import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
@@ -21,10 +20,8 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
-import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanner;
-import com.subgraph.vega.api.scanner.LockStatusEvent;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 
 public class Scanner implements IScanner {
@@ -34,9 +31,6 @@ public class Scanner implements IScanner {
 	private IScannerModuleRegistry moduleRegistry;
 	private IWorkspace currentWorkspace;
 	private IContentAnalyzerFactory contentAnalyzerFactory;
-	private final Object lock = new Object();
-	private final EventListenerManager lockStatusEventManager = new EventListenerManager();
-	private IScan lockedScan;
 
 	protected void activate() {
 		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
@@ -70,55 +64,12 @@ public class Scanner implements IScanner {
 
 	@Override
 	public IScan createScan() {
-		currentWorkspace.lock();
-		IScanInstance scanInstance = currentWorkspace.getScanAlertRepository().createNewScanInstance();
-		return new Scan(this, scanInstance, currentWorkspace);
+		return Scan.createScan(this, currentWorkspace);
 	}
 
 	@Override
 	public void runDomTests() {
 		moduleRegistry.runDomTests();
-	}
-
-	@Override
-	public void addLockStatusListener(IEventHandler listener) {
-		synchronized (lock) {
-			lockStatusEventManager.addListener(listener);
-			listener.handleEvent(new LockStatusEvent(lockedScan));
-		}
-	}
-
-	@Override
-	public void removeLockStatusListener(IEventHandler listener) {
-		synchronized (lock) {
-			lockStatusEventManager.removeListener(listener);	
-		}
-	}
-
-	@Override
-	public boolean lock(IScan scan) {
-		synchronized (lock) {
-			if (lockedScan != null) {
-				return false;
-			}
-			lockedScan = scan;
-			lockStatusEventManager.fireEvent(new LockStatusEvent(lockedScan));
-			return true;
-		}
-	}
-
-	@Override
-	public synchronized void unlock() {
-		synchronized(lock) {
-			lockedScan = null;
-			lockStatusEventManager.fireEvent(new LockStatusEvent(lockedScan));
-		}
-	}
-
-	public boolean isLocked(IScan scan) {
-		synchronized(lock) {
-			return (lockedScan != null && lockedScan == scan);
-		}
 	}
 	
 	protected void setCrawlerFactory(IWebCrawlerFactory crawlerFactory) {

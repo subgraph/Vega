@@ -55,6 +55,7 @@ public class HttpRequestParser extends ParserBase {
 		final ParserCursor bufCursor = new ParserCursor(0, buf.length()); 
 		final LineParser parser = new BasicLineParser();
 
+		stripLeadingWhitspace(buf, bufCursor);
 		if (parseRequestLine(parser, builder, buf, bufCursor) < 0) {
 			return;
 		}

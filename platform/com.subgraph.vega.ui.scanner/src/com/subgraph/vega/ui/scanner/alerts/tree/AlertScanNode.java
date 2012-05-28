@@ -18,21 +18,19 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 public class AlertScanNode extends AbstractAlertTreeNode {
 	private final static String SCAN_IMAGE = "icons/scanner.png";
 	private final static String PROXY_IMAGE = "icons/proxy.png";
-
-
 	private final static String NO_HOSTNAME = "No Hostname";
-	
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	private final IWorkspace workspace;
 	private final long scanId;
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-	
 	private IScanInstance scanInstance;
 	
-	AlertScanNode(long scanId, IWorkspace workspace) {
+	AlertScanNode(IAlertTreeNode parentNode, long scanId, IWorkspace workspace) {
+		super(parentNode);
 		this.workspace = workspace;
 		this.scanId = scanId;
 	}
@@ -41,6 +39,7 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 		this.scanInstance = scanInstance;
 	}
 
+	@Override
 	public IScanInstance getScanInstance() {
 		return scanInstance;
 	}
@@ -48,7 +47,7 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 	@Override
 	public String getLabel() {
 		if(scanId == -1) {
-			return "Proxy  ";
+			return "Proxy";
 		} else if(scanInstance == null) {
 			return "Scan [id: #"+ Long.toString(scanId) +"]  ";
 		} else {
@@ -58,12 +57,14 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 
 	private String renderScanInstance() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append(dateFormat.format(scanInstance.getStartTime()));
+		if (scanInstance.getStartTime() != null) {
+			sb.append(dateFormat.format(scanInstance.getStartTime()));
+		}
 
 		sb.append(" [");
 		switch(scanInstance.getScanStatus()) {
-		case IScanInstance.SCAN_IDLE:
-			sb.append("Idle");
+		case IScanInstance.SCAN_PROBING:
+			sb.append("Probing");
 			break;
 		case IScanInstance.SCAN_STARTING:
 			sb.append("Starting");
@@ -84,8 +85,9 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 
 	@Override
 	protected AbstractAlertTreeNode createNodeForAlert(IScanAlert alert) {
-		return new AlertHostNode(createKeyForAlert(alert));
+		return new AlertHostNode(this, createKeyForAlert(alert));
 	}
+
 	@Override
 	public String getImage() {
 		if(scanId == -1) {

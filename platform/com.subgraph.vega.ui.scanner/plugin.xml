@@ -137,9 +137,9 @@
             commandId="com.subgraph.vega.ui.scanner.stopscan">
          <enabledWhen>
             <with
-                  variable="vega.scannerState">
+                  variable="vega.scanSelectionState">
                <equals
-                     value="running">
+                     value="active">
                </equals>
             </with>
          </enabledWhen>
@@ -147,14 +147,6 @@
       <handler
             class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             commandId="com.subgraph.vega.ui.scanner.startnewscan">
-         <enabledWhen>
-            <with
-                  variable="vega.scannerState">
-               <equals
-                     value="idle">
-               </equals>
-            </with>
-         </enabledWhen>
       </handler>
       <handler
             class="com.subgraph.vega.ui.scanner.commands.ExpandAllAlerts"

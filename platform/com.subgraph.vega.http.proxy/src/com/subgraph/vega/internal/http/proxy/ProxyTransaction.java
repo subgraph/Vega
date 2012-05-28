@@ -20,6 +20,7 @@ import org.apache.http.protocol.HttpContext;
 import com.subgraph.vega.api.http.proxy.IProxyTransaction;
 import com.subgraph.vega.api.http.proxy.IProxyTransactionEventHandler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public class ProxyTransaction implements IProxyTransaction {
@@ -29,6 +30,7 @@ public class ProxyTransaction implements IProxyTransaction {
 	private HttpUriRequest request;
 	private IHttpResponse response;
     private HttpInterceptor interceptor; 
+    private IHttpRequestTask requestTask;
     private boolean isPending = false;
     private boolean doForward = false;
     private Lock lock = new ReentrantLock();
@@ -150,13 +152,17 @@ public class ProxyTransaction implements IProxyTransaction {
 				isPending = false;
 				doForward = false;
 				cv.signal();
+			} else {
+				if (requestTask != null) {
+					requestTask.abort();
+				}
 			}
 		}
 		finally {
 			lock.unlock();
 		}
 	}
-
+	
 	/**
 	 * Signal that the pending transaction is about to be forwarded.
 	 */
@@ -168,7 +174,6 @@ public class ProxyTransaction implements IProxyTransaction {
 
 	/**
 	 * Signal that the transaction is complete.
-	 * 
 	 * @param dropped Boolean indicating whether the transaction was dropped.
 	 */
 	public synchronized void signalComplete(boolean dropped) {
@@ -176,5 +181,13 @@ public class ProxyTransaction implements IProxyTransaction {
 			eventHandler.notifyComplete(dropped);
 		}		
 	}
-	
+
+	/**
+	 * Set the task being used to send a request.
+	 * @param requestTask Request task.
+	 */
+	public synchronized void setRequestTask(IHttpRequestTask requestTask) {
+		this.requestTask = requestTask;
+	}
+
 }

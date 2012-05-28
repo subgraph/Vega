@@ -22,7 +22,8 @@ public class AlertSeverityNode extends AbstractAlertTreeNode {
 	
 	private final Severity severity;
 		
-	AlertSeverityNode(Severity severity) {
+	AlertSeverityNode(IAlertTreeNode parentNode, Severity severity) {
+		super(parentNode);
 		this.severity = severity;
 	}
 
@@ -73,7 +74,7 @@ public class AlertSeverityNode extends AbstractAlertTreeNode {
 
 	@Override
 	protected IAlertTreeNode createNodeForAlert(IScanAlert alert) {
-		return new AlertTitleNode(alert.getTitle());
+		return new AlertTitleNode(this, alert.getTitle());
 	}
 
 	@Override

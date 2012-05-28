@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.subgraph.vega.http.requests
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.subgraph.vega.api.html,
+Import-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.html,
  com.subgraph.vega.api.http.requests,
+ com.subgraph.vega.api.model.macros,
  com.subgraph.vega.api.model.requests,
  com.subgraph.vega.api.model.tags,
  org.apache.http;version="4.0.0",
@@ -30,4 +32,5 @@ Import-Package: com.subgraph.vega.api.html,
  org.apache.http.util;version="4.0.0",
  org.w3c.dom.html2
 Service-Component: OSGI-INF/request-engine-factory.xml
-Export-Package: com.subgraph.vega.http.requests.custom
+Export-Package: com.subgraph.vega.http.requests.builder,
+ com.subgraph.vega.http.requests.custom

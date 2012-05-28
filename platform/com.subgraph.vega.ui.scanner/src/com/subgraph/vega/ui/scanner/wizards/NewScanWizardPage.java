@@ -37,12 +37,11 @@ import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
-import com.subgraph.vega.ui.util.ImageCache;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class NewScanWizardPage extends WizardPage {
 	static private final String VEGA_LOGO = "icons/vega_small.png";
 	static private final Object emptyIdentity = new Object();
-	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 	private final String targetValue;
 	private final List<IScannerModule> modules;
 	private final List<Object> identities;
@@ -51,7 +50,7 @@ public class NewScanWizardPage extends WizardPage {
 	private Text scanTarget;
 	private ComboViewer scanIdentityViewer;
 
-	public NewScanWizardPage(String targetValue, Collection<IIdentity> identities, List<IScannerModule> modules) {
+	public NewScanWizardPage(ImageCache imageCache, String targetValue, Collection<IIdentity> identities, List<IScannerModule> modules) {
 		super("Create a New Scan");
 		setTitle("Create a New Scan");
 		setDescription("New Scan Parameters");

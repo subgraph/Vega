@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.alerts;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -35,8 +36,7 @@ public class ScanAlertRepository implements IScanAlertRepository {
 	private final Object scanInstanceLock = new Object();
 	private final ScanAlertFactory alertFactory;
 	private final EventListenerManager scanInstanceEventManager;
-	
-	private IScanInstance activeScanInstance;
+	private final List<IScanInstance> activeScanInstanceList;
 	
 	public ScanAlertRepository(ObjectContainer db, IXmlRepository xmlRepository) {
 		this.database = db;
@@ -51,19 +51,20 @@ public class ScanAlertRepository implements IScanAlertRepository {
 					final ScanInstance scan = (ScanInstance) ob;
 					scan.setTransientState(database, alertFactory);
 					final int status = scan.getScanStatus();
-					if(status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
+					if(status != IScanInstance.SCAN_CONFIG && status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
 						scan.updateScanStatus(IScanInstance.SCAN_CANCELLED);
 					}
 				}
 			}
 		});
 		getProxyScanInstance();
+		activeScanInstanceList = new ArrayList<IScanInstance>();
 	}
 
 	@Override
-	public IScanInstance addActiveScanInstanceListener(IEventHandler listener) {
+	public List<IScanInstance> addActiveScanInstanceListener(IEventHandler listener) {
 		scanInstanceEventManager.addListener(listener);
-		return activeScanInstance;
+		return getAllActiveScanInstances();
 	}
 
 	@Override
@@ -72,14 +73,19 @@ public class ScanAlertRepository implements IScanAlertRepository {
 	}
 
 	@Override
-	public void setActiveScanInstance(IScanInstance scanInstance) {
-		activeScanInstance = scanInstance;
+	public synchronized void addActiveScanInstance(IScanInstance scanInstance) {
+		activeScanInstanceList.add(scanInstance);
 		scanInstanceEventManager.fireEvent(new ActiveScanInstanceEvent(scanInstance));
 	}
 
 	@Override
-	public IScanInstance getActiveScanInstance() {
-		return activeScanInstance;
+	public synchronized void removeActiveScanInstance(IScanInstance scanInstance) {
+		activeScanInstanceList.remove(scanInstance);
+	}
+
+	@Override
+	public synchronized List<IScanInstance> getAllActiveScanInstances() {
+		return new ArrayList<IScanInstance>(activeScanInstanceList);
 	}
 
 	@Override

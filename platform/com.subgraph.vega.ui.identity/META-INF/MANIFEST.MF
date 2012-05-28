@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Identity
+Bundle-SymbolicName: com.subgraph.vega.ui.identity;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.subgraph.vega.ui.identity.Activator
+Bundle-Vendor: SUBGRAPH
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: com.subgraph.vega.api.events,
+ com.subgraph.vega.api.model,
+ com.subgraph.vega.api.model.identity,
+ com.subgraph.vega.api.model.macros,
+ com.subgraph.vega.ui.macros.macrodialog,
+ com.subgraph.vega.ui.util.images

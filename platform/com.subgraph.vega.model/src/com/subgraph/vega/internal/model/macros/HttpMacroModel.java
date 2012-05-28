@@ -16,14 +16,20 @@ import java.util.List;
 import com.db4o.ObjectContainer;
 import com.db4o.query.Predicate;
 
+import com.subgraph.vega.api.events.EventListenerManager;
+import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.identity.NewIdentityEvent;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroModel;
+import com.subgraph.vega.api.model.macros.NewMacroEvent;
 
 public class HttpMacroModel implements IHttpMacroModel {
 	private ObjectContainer database;
+	private final EventListenerManager changeEventManager;
 
 	public HttpMacroModel(ObjectContainer database) {
 		this.database = database;
+		this.changeEventManager = new EventListenerManager();
 	}
 
 	@Override
@@ -39,6 +45,7 @@ public class HttpMacroModel implements IHttpMacroModel {
 	@Override
 	public void store(IHttpMacro macro) {
 		database.store(macro);
+		changeEventManager.fireEvent(new NewMacroEvent(macro));
 	}
 
 	@Override
@@ -61,5 +68,14 @@ public class HttpMacroModel implements IHttpMacroModel {
 		return results.get(0);
 	}
 
+	@Override
+	public void addChangeListener(IEventHandler listener) {
+		changeEventManager.addListener(listener);
+	}
+
+	@Override
+	public void removeChangeListener(IEventHandler listener) {
+		changeEventManager.removeListener(listener);
+	}
 
 }

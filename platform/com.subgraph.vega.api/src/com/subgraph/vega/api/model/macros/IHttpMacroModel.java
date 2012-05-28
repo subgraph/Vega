@@ -12,6 +12,8 @@ package com.subgraph.vega.api.model.macros;
 
 import java.util.Collection;
 
+import com.subgraph.vega.api.events.IEventHandler;
+
 public interface IHttpMacroModel {
 	/**
 	 * Get all macros managed by the model.
@@ -44,4 +46,17 @@ public interface IHttpMacroModel {
 	 * @param name Macro, or null if none exists with the given name.
 	 */
 	IHttpMacro getMacroByName(String name);
+
+	/**
+	 * Register an event listener to watch for changes to identities managed by the model. Fires:
+	 * 	- NewMacroEvent
+	 * @param listener Event listener.
+	 */
+	void addChangeListener(IEventHandler listener);
+
+	/**
+	 * Deregister a change event listener.
+	 * @param listener Event listener.
+	 */
+	void removeChangeListener(IEventHandler listener);
 }

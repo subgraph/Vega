@@ -75,5 +75,5 @@ public  interface IHttpRequestBuilder extends IHttpMessageBuilder {
 
 	String getRequestLine();
 
-	HttpUriRequest buildRequest() throws URISyntaxException;
+	HttpUriRequest buildRequest(boolean setHeadersEntity) throws URISyntaxException;
 }

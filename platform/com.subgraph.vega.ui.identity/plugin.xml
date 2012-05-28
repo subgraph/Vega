@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="com.subgraph.vega.ui.identity.identitiesview.IdentitiesView"
+            icon="icons/identities.png"
+            id="com.subgraph.vega.views.identity.identities"
+            name="Identities"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.subgraph.vega.views.identity.identities">
+         <command
+               commandId="com.subgraph.vega.commands.createIdentity"
+               icon="icons/create_identity.png"
+               label="Create Identity"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Create an Identity"
+            id="com.subgraph.vega.commands.createIdentity"
+            name="Create Identity">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.subgraph.vega.ui.identity.commands.CreateIdentity"
+            commandId="com.subgraph.vega.commands.createIdentity">
+      </handler>
+   </extension>
+
+</plugin>

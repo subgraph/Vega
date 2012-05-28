@@ -10,8 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.proxy;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+
 public interface IHttpProxyListener {
 	IHttpProxyListenerConfig getConfig();
+	IHttpRequestEngine getRequestEngine();
 	void start();
 	void stop();
 	void registerEventHandler(IHttpInterceptProxyEventHandler handler);

@@ -10,7 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.http.requestlogviewer;
 
-import org.eclipse.jface.action.MenuManager;
+import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -21,13 +26,26 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -36,30 +54,48 @@ import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewContentProviderLazy;
 import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewLabelProvider;
 import com.subgraph.vega.ui.http.Activator;
+import com.subgraph.vega.ui.http.requesteditviewer.RequestEditView;
+import com.subgraph.vega.ui.tags.taggableeditor.TaggableEditorDialog;
+import com.subgraph.vega.ui.tagsl.taggablepopup.TaggablePopupDialog;
+import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class RequestLogViewer extends Composite {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestlogviewer.popup";
+	private static final int MAX_OPEN_EDITORS = 3; // Maximum number of editors to allow to open at once before prompting the user
 	private final String instanceId;
+	private final int heightInRows;
 	private TableViewer tableViewer;
+	private Menu tableMenu;
 	private RequestResponseViewer requestResponseViewer;
-//	private TaggablePopupDialog taggablePopupDialog;
+	private TaggablePopupDialog taggablePopupDialog;
 
 	/**
 	 * @param parent
 	 * @param instanceId A unique ID to differentiate between condition filter sets.
+	 * @param heightInRows Desired height of table in text rows, or 0 to fill available space. 
 	 */
-	public RequestLogViewer(SashForm parent, String instanceId) {
+	public RequestLogViewer(Composite parent, String instanceId, int heightInRows) {
 		super(parent, SWT.NONE);
 		this.instanceId = instanceId;
+		this.heightInRows = heightInRows;
 
-		final TableColumnLayout tcl = new TableColumnLayout();
-		setLayout(tcl);
-		createTable(tcl);
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.marginLeft = 0;
+		layout.marginTop = 0;
+		layout.marginRight = 0;
+		layout.marginBottom = 0;
+		setLayout(layout);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		createTable(gd).setLayoutData(gd);
+
 		tableViewer.setInput(Activator.getDefault().getModel());
 	}
 
 	public void setRequestResponseViewer(RequestResponseViewer requestResponseViewer) {
 		this.requestResponseViewer = requestResponseViewer;
+		tableMenu.setEnabled(this.requestResponseViewer != null && !tableViewer.getSelection().isEmpty());
 	}
 
 	public void focusOnRecord(long requestId) {
@@ -84,25 +120,26 @@ public class RequestLogViewer extends Composite {
 			requestResponseViewer.setDisplayResponse();
 		}
 	}
-	
-	public void registerContextMenu(IWorkbenchPartSite site) {
-		MenuManager menuManager = new MenuManager();
-		Menu menu = menuManager.createContextMenu(tableViewer.getTable());
-		tableViewer.getTable().setMenu(menu);
-		site.registerContextMenu(POPUP_REQUESTS_TABLE, menuManager, tableViewer);
-		site.setSelectionProvider(tableViewer);
-	}
 
-	private void createTable(TableColumnLayout tcl) {
-		tableViewer = new TableViewer(this, SWT.VIRTUAL | SWT.FULL_SELECTION);
+	private Composite createTable(GridData gd) {
+		final Composite rootControl = new Composite(this, SWT.NONE);
+		final TableColumnLayout tcl = new TableColumnLayout();
+		rootControl.setLayout(tcl);
+
+		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
-
 		tableViewer.setContentProvider(new HttpViewContentProviderLazy(instanceId));
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
-
-//		tableViewer.getTable().addMouseTrackListener(createTableMouseTrackListener());
-//		tableViewer.getTable().addMouseMoveListener(createMouseMoveListener());
+		final Table table = tableViewer.getTable();
+		table.setMenu(createTableMenu(table));
+		table.addMouseTrackListener(createTableMouseTrackListener());
+		table.addMouseMoveListener(createMouseMoveListener());
+		if (heightInRows != 0) {
+			gd.heightHint = table.getItemHeight() * heightInRows;
+		}
+		
+		return rootControl;
 	}
 	
 	private void createColumns(TableViewer viewer, TableColumnLayout layout) {
@@ -134,6 +171,7 @@ public class RequestLogViewer extends Composite {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				tableMenu.setEnabled(requestResponseViewer != null && !event.getSelection().isEmpty());
 				if (requestResponseViewer != null) { // REVISIT gross
 					IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 					if (selection.getFirstElement() instanceof IRequestLogRecord) {
@@ -145,43 +183,121 @@ public class RequestLogViewer extends Composite {
 			}
 		};
 	}
+
+	private Menu createTableMenu(Table table) {
+		tableMenu = new Menu(table);
+		tableMenu.setEnabled(false);
+		
+	    MenuItem replayMenuItem = new MenuItem(tableMenu, SWT.CASCADE);
+	    replayMenuItem.setText("Replay Request");
+	    replayMenuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				replayRequestSelection();
+			};
+	    });
+
+	    MenuItem tagEditMenuItem = new MenuItem(tableMenu, SWT.CASCADE);
+	    tagEditMenuItem.setText("Edit Tag");
+	    tagEditMenuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tagEditSelection();
+			};
+	    });
+
+		return tableMenu;
+	}
+
+	private void replayRequestSelection() {
+		IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
+		if (selection.size() > MAX_OPEN_EDITORS) {
+			MessageBox messageDialog = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+			messageDialog.setText("Warning");
+			messageDialog.setMessage(selection.size() + " replay editors will be opened. Proceed?");
+			if (messageDialog.open() == SWT.CANCEL) {
+				return;
+			}
+		}
+
+		int viewMode = IWorkbenchPage.VIEW_ACTIVATE;
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext(); ) {
+			IRequestLogRecord record = (IRequestLogRecord) iter.next();
+			String secondaryId = UUID.randomUUID().toString();
+			RequestEditView view;
+			try {
+				view = (RequestEditView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(RequestEditView.VIEW_ID, secondaryId, viewMode);
+			} catch (PartInitException e) {
+				ErrorDialog.displayExceptionError(getShell(), e);
+				return;
+			}
+
+			try {
+				view.setRequest(record);
+			} catch (URISyntaxException e) {
+				ErrorDialog.displayExceptionError(getShell(), e);
+				return;
+			}
+			viewMode = IWorkbenchPage.VIEW_VISIBLE;
+		}
+	}
+
+	private void tagEditSelection() {
+		final IRequestLogRecord record = (IRequestLogRecord)((IStructuredSelection) tableViewer.getSelection()).getFirstElement();
+		final Dialog dialog = TaggableEditorDialog.createDialog(getShell(), record);
+		if (dialog.open() == Window.OK) {
+			tableViewer.refresh();
+		}
+	}	
 	
-//	private MouseMoveListener createMouseMoveListener() {
-//		return new MouseMoveListener() {
-//			@Override
-//			public void mouseMove(MouseEvent e) {
-//				if (taggablePopupDialog != null) {
-//					taggablePopupDialog.close();
-//					taggablePopupDialog = null;
-//				}
-//			}
-//
-//		};
-//	}
-//	
-//	private MouseTrackListener createTableMouseTrackListener() {
-//		return new MouseTrackListener() {
-//			@Override
-//			public void mouseEnter(MouseEvent e) {
-//			}
-//
-//			@Override
-//			public void mouseExit(MouseEvent e) {
-//			}
-//
-//			@Override
-//			public void mouseHover(MouseEvent e) {
-//				Point pt = new Point(e.x, e.y);
-//				TableItem tableItem = tableViewer.getTable().getItem(pt);
-//				if (tableItem != null) {
-//					IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
-//					if (record.getTagCount() > 0) {
-//						taggablePopupDialog = new TaggablePopupDialog(tableViewer.getTable().getShell(), record, pt);
-//						taggablePopupDialog.open();
-//					}
-//				}			
-//			}
-//		};
-//	}
+	@SuppressWarnings("unchecked")
+	public List<IRequestLogRecord> getSelectionList() {
+		return ((IStructuredSelection) tableViewer.getSelection()).toList();
+	}
+	
+	private MouseMoveListener createMouseMoveListener() {
+		return new MouseMoveListener() {
+			@Override
+			public void mouseMove(MouseEvent e) {
+				if (taggablePopupDialog != null) {
+					taggablePopupDialog.close();
+					taggablePopupDialog = null;
+				}
+			}
+		};
+	}
+	
+	private MouseTrackListener createTableMouseTrackListener() {
+		return new MouseTrackListener() {
+			@Override
+			public void mouseEnter(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExit(MouseEvent e) {
+				if (taggablePopupDialog != null) {
+					taggablePopupDialog.close();
+					taggablePopupDialog = null;
+				}
+			}
+
+			@Override
+			public void mouseHover(MouseEvent e) {
+				if (taggablePopupDialog == null) {
+					Point pt = new Point(e.x, e.y);
+					Table table = tableViewer.getTable();
+					TableItem tableItem = table.getItem(pt);
+					if (tableItem != null) {
+						IRequestLogRecord record = (IRequestLogRecord) tableItem.getData();
+						if (record.getTagCount() > 0) {
+							Point origin = tableViewer.getTable().getDisplay().map(table.getParent(), null, e.x, e.y);
+							taggablePopupDialog = new TaggablePopupDialog(table.getShell(), record, origin);
+							taggablePopupDialog.open();
+						}
+					}
+				}
+			}
+		};
+	}
 
 }

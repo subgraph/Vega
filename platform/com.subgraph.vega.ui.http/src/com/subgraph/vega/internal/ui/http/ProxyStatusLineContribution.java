@@ -39,7 +39,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.intercept.InterceptView;
-import com.subgraph.vega.ui.http.intercept.queue.InterceptQueueView;
+import com.subgraph.vega.ui.http.statusview.StatusView;
 
 public class ProxyStatusLineContribution extends ContributionItem {
 	private final static int BLINK_INTERVAL = 500;
@@ -151,7 +151,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 			@Override
 			public void partHidden(IWorkbenchPartReference partRef) {
 				final IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof InterceptView || part instanceof InterceptQueueView) {
+				if (part instanceof InterceptView || part instanceof StatusView) {
 					synchronized (alertBlinkTimer) {
 						lastViewChange = new Date();
 						viewCnt--;
@@ -162,7 +162,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 			@Override
 			public void partVisible(IWorkbenchPartReference partRef) {
 				final IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof InterceptView || part instanceof InterceptQueueView) {
+				if (part instanceof InterceptView || part instanceof StatusView) {
 					synchronized (alertBlinkTimer) {
 						lastViewChange = new Date();
 						viewCnt++;
@@ -210,7 +210,7 @@ public class ProxyStatusLineContribution extends ContributionItem {
 					IViewReference references[] = pages[pageIdx].getViewReferences();
 					for (int referenceIdx = 0; referenceIdx < references.length; referenceIdx++) {
 						IViewPart part = references[referenceIdx].getView(false);
-						if (part instanceof InterceptView || part instanceof InterceptQueueView) {
+						if (part instanceof InterceptView || part instanceof StatusView) {
 							if (pages[pageIdx].isPartVisible(part) == true) {
 								cnt++;
 							}

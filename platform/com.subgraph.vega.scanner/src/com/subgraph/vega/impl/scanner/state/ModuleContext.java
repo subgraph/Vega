@@ -255,8 +255,7 @@ public class ModuleContext implements IInjectionModuleContext {
 		debug("Publishing Alert: ("+ type + ") ["+ request.getRequestLine().getUri() + "] ");
 		final IScanInstance scan = scanState.getScanInstance();
 		final IRequestLog requestLog = scanState.getRequestLog();
-		try {
-			scan.lock();
+		synchronized(scan) {
 			if(key != null && scan.hasAlertKey(key))
 				return;
 			final long requestId = requestLog.addRequestResponse(response);
@@ -271,8 +270,6 @@ public class ModuleContext implements IInjectionModuleContext {
 			if(message != null)
 				alert.setStringProperty("message", message);
 			scan.addAlert(alert);
-		} finally {
-			scan.unlock();
 		}
 	}
 	
