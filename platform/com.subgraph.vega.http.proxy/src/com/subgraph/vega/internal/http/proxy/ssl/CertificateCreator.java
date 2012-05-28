@@ -48,7 +48,6 @@ import sun.security.x509.KeyUsageExtension;
 import sun.security.x509.NetscapeCertTypeExtension;
 import sun.security.x509.SubjectKeyIdentifierExtension;
 import sun.security.x509.X500Name;
-import sun.security.x509.X500Signer;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 
@@ -179,7 +178,7 @@ public class CertificateCreator {
 		try {
 			final Date notBefore = new Date();
 			final Date notAfter = new Date(notBefore.getTime() + DEFAULT_VALIDITY);
-			final X500Signer signer = createCertificateSigner(issuer, issuerPrivateKey);
+			final CertificateSigner signer = createCertificateSigner(issuer, issuerPrivateKey);
 			final CertificateValidity validity = new CertificateValidity(notBefore, notAfter);
 			final X509CertInfo info = createCertificateInfo(subject, subjectPublic, issuer, issuerPublicKey, validity, signer);
 			final CertificateExtensions extensions = (isCaCert) ? (getCACertificateExtensions()) : (getCertificateExtensions(subjectPublic, issuerPublicKey));
@@ -192,14 +191,14 @@ public class CertificateCreator {
 		}
 	}
 
-	private X500Signer createCertificateSigner(X500Principal issuer, PrivateKey issuerPrivate) throws IOException, GeneralSecurityException {
+	private CertificateSigner createCertificateSigner(X500Principal issuer, PrivateKey issuerPrivate) throws IOException, GeneralSecurityException {
 		final X500Name issuerName = new X500Name(issuer.getName());
 		final Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
 		signature.initSign(issuerPrivate);
-		return new X500Signer(signature, issuerName);
+		return new CertificateSigner(signature, issuerName);
 	}
 
-	private X509CertInfo createCertificateInfo(X500Principal subject, PublicKey subjectPublic, X500Principal issuer, PublicKey issuerPublic, CertificateValidity validity, X500Signer signer) throws IOException, GeneralSecurityException {
+	private X509CertInfo createCertificateInfo(X500Principal subject, PublicKey subjectPublic, X500Principal issuer, PublicKey issuerPublic, CertificateValidity validity, CertificateSigner signer) throws IOException, GeneralSecurityException {
 		final BigInteger serialNumber = getNextSerialNumber();
 		final X500Name subjectName = new X500Name(subject.getName());
 		final X509CertInfo info = new X509CertInfo();
