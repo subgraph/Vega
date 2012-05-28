@@ -38,7 +38,7 @@ import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
-import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
+import com.subgraph.vega.ui.httpeditor.HttpMessageEditor;
 import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class RequestResponseViewer extends Composite {
@@ -57,8 +57,8 @@ public class RequestResponseViewer extends Composite {
 	private SashForm sashForm;
 	private TabFolder tabFolder;
 	private Composite rootComposite;
-	private HttpMessageViewer requestViewer;
-	private HttpMessageViewer responseViewer;
+	private HttpMessageEditor requestViewer;
+	private HttpMessageEditor responseViewer;
 	private IRequestLogRecord currentRecord;
 	
 	private boolean displayImages = true;
@@ -267,9 +267,9 @@ public class RequestResponseViewer extends Composite {
 	}
 	
 	private void createMessageViewers(Composite parent) {
-		requestViewer = new HttpMessageViewer(parent);
+		requestViewer = new HttpMessageEditor(parent);
 		requestViewer.setEditable(false);
-		responseViewer = new HttpMessageViewer(parent);
+		responseViewer = new HttpMessageEditor(parent);
 		responseViewer.setEditable(false);
 		setDisplayImageState(displayImages);
 		setDisplayImagesAsHexState(displayImagesAsHex);

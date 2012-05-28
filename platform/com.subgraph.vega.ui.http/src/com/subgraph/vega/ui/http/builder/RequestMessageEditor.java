@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
+import com.subgraph.vega.ui.httpeditor.HttpMessageEditor;
 import com.subgraph.vega.ui.httpeditor.parser.HttpRequestParser;
-import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 
 /**
  * Manages visual components to edit a HTTP request message.
@@ -28,7 +28,7 @@ import com.subgraph.vega.ui.httpviewer.HttpMessageViewer;
 public class RequestMessageEditor extends Composite implements IHttpBuilderPart {
 	private final IHttpRequestBuilder builder;
 	private final HttpRequestParser requestParser;
-	private HttpMessageViewer messageViewer;
+	private HttpMessageEditor messageViewer;
 
 	public RequestMessageEditor(Composite parent, final IHttpRequestBuilder builder) {
 		super(parent, SWT.NONE);
@@ -36,7 +36,7 @@ public class RequestMessageEditor extends Composite implements IHttpBuilderPart 
 		this.builder = builder;
 		requestParser = new HttpRequestParser(this.builder, false);
 
-		messageViewer = new HttpMessageViewer(this);
+		messageViewer = new HttpMessageEditor(this);
 		messageViewer.setEditable(true);
 		messageViewer.setDisplayImages(true);
 		messageViewer.setDisplayImagesAsHex(true);
