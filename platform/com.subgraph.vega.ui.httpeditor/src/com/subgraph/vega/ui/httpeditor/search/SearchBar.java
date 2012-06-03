@@ -52,7 +52,7 @@ class SearchBar implements ControlListener, KeyListener {
 	}
 	
 	private Shell createShell(Shell parentShell) {
-		final Shell shell = new Shell(parentShell, SWT.NO_TRIM | SWT.ON_TOP);
+		final Shell shell = new Shell(parentShell, SWT.NO_TRIM);
 		shell.setLayout(new FillLayout());
 		shell.addShellListener(new ShellAdapter() {
 			@Override
