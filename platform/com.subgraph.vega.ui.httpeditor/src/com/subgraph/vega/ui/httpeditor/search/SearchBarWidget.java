@@ -229,7 +229,7 @@ class SearchBarWidget extends Composite implements ModifyListener {
 		}
 
 		searchText.setBackground(searchTextBackground);
-		searchText.setToolTipText("( "+ (currentSearch.getCurrentIndex() + 1) + " of " + 
+		searchText.setToolTipText("("+ (currentSearch.getCurrentIndex() + 1) + " of " + 
 		currentSearch.getResultCount() + ") results");
 	}
 	
