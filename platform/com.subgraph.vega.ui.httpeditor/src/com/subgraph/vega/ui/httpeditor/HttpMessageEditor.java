@@ -27,11 +27,12 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.ui.httpeditor.search.SearchBarManager;
 
 public class HttpMessageEditor extends Composite {
-	
 	
 	private final Colors colors;
 	private final Composite rootComposite;
@@ -39,6 +40,7 @@ public class HttpMessageEditor extends Composite {
 	private final ProjectionViewer viewer;
 	private final AnnotationModel viewerAnnotationModel;
 	private final ProjectionSupport projectionSupport;
+	private final SearchBarManager searchBarManager;
 	private final HttpMessageDocumentFactory messageDocumentFactory;
 
 	private final BinaryEntityManager bem;
@@ -60,6 +62,7 @@ public class HttpMessageEditor extends Composite {
 		projectionSupport = new ProjectionSupport(viewer,new ProjectionAnnotationAccess(), colors);
 		projectionSupport.install();
 		messageDocumentFactory = new HttpMessageDocumentFactory();
+		searchBarManager = new SearchBarManager(viewer, colors);
 		layout(true);
 		rootComposite.layout(true, true);
 				
@@ -78,7 +81,6 @@ public class HttpMessageEditor extends Composite {
 		return c;
 	}
 
-	
 	private ProjectionViewer createSourceViewer(Composite parent, AnnotationModel annotationModel) {
 		final CompositeRuler ruler = new CompositeRuler();
 		final ProjectionViewer sv = new ProjectionViewer(parent, ruler, null, false, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
@@ -94,8 +96,8 @@ public class HttpMessageEditor extends Composite {
 	}
 	
 	public void clearContent() {
-		
 		bem.clear();
+		searchBarManager.clearDocument();
 		activeDocument = null;
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
@@ -164,31 +166,25 @@ public class HttpMessageEditor extends Composite {
 	
 	public void displayHttpRequest(HttpRequest request) {
 		clearContent();
-		
 		activeDocument = messageDocumentFactory.createForRequest(request);
-		
 		displayNewDocument();
 	}
 	
 	public void displayHttpRequest(IHttpRequestBuilder builder) {
 		clearContent();
 		activeDocument = messageDocumentFactory.createForRequest(builder);
-		
 		displayNewDocument();
 	}
 	
 	public void displayHttpResponse(HttpResponse response) {
 		clearContent();
 		activeDocument = messageDocumentFactory.createForResponse(response);
-		
 		displayNewDocument();
-		
 	}
 	
 	public void displayHttpResponse(IHttpResponseBuilder builder) {
 		clearContent();
 		activeDocument = messageDocumentFactory.createForResponse(builder);
-		
 		displayNewDocument();
 	}
 	
@@ -206,12 +202,13 @@ public class HttpMessageEditor extends Composite {
 		if(activeDocument == null) {
 			return;
 		}
+		final AnnotationModel model = new AnnotationModel();
 		viewer.disableProjection();
-		viewer.setDocument(activeDocument.getDocument(), new AnnotationModel());
+		viewer.setDocument(activeDocument.getDocument(), model);
 		viewer.enableProjection();
 		activeDocument.addProjectionAnnotations(viewer.getProjectionAnnotationModel());
 		bem.displayNewDocument(activeDocument);
 		activeDocument.setHeaderDecodeState(urlDecode);
+		searchBarManager.setDocument(activeDocument.getDocument(), model);
 	}
-	
 }

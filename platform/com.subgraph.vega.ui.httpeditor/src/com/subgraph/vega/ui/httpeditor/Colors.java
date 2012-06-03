@@ -25,6 +25,9 @@ public class Colors implements ISharedTextColors {
 		int b = rgb & 0xFF;
 		return new RGB(r, g, b);
 	}
+	public static RGB HIGHLIGHT_SEARCH_MATCH = c(0xFFFF99);
+	public static RGB NO_SEARCH_RESULT_TEXT_BACKGROUND = c(0xFF7070);
+	
 	public static RGB HEADER_NAME = c(0x79693E);
 	public static RGB REQUEST_VERB = c(0x3F3415);
 	public static RGB HTTP_VERSION = c(0x4D4122);
