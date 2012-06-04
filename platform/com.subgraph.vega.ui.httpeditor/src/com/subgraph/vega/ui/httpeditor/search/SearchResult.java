@@ -46,6 +46,7 @@ class SearchResult {
 		if(matches.isEmpty()) {
 			throw new RuntimeException("Trying to get first match on empty search result");
 		}
+		currentIndex = 0;
 		return matches.get(0);
 	}
 	

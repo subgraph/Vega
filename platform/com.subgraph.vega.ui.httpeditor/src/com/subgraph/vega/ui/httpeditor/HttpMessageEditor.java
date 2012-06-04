@@ -23,14 +23,13 @@ import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
-import com.subgraph.vega.ui.httpeditor.search.SearchBarManager;
+import com.subgraph.vega.ui.httpeditor.search.SearchBar;
 
 public class HttpMessageEditor extends Composite {
 	
@@ -40,7 +39,8 @@ public class HttpMessageEditor extends Composite {
 	private final ProjectionViewer viewer;
 	private final AnnotationModel viewerAnnotationModel;
 	private final ProjectionSupport projectionSupport;
-	private final SearchBarManager searchBarManager;
+
+
 	private final HttpMessageDocumentFactory messageDocumentFactory;
 
 	private final BinaryEntityManager bem;
@@ -49,7 +49,7 @@ public class HttpMessageEditor extends Composite {
 	
 	public HttpMessageEditor(Composite parent) {
 		super(parent, SWT.NONE);
-		setLayout(new FillLayout());
+		
 		setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		sashForm = new SashForm(this, SWT.VERTICAL);
 		
@@ -62,12 +62,10 @@ public class HttpMessageEditor extends Composite {
 		projectionSupport = new ProjectionSupport(viewer,new ProjectionAnnotationAccess(), colors);
 		projectionSupport.install();
 		messageDocumentFactory = new HttpMessageDocumentFactory();
-		searchBarManager = new SearchBarManager(viewer, colors);
+		SearchBar.create(this, viewer, colors);
 		layout(true);
 		rootComposite.layout(true, true);
-				
 		bem = new BinaryEntityManager(viewer, sashForm, rootComposite);
-
 	}
 	
 	private Composite createRootComposite(Composite parent) {
@@ -97,7 +95,7 @@ public class HttpMessageEditor extends Composite {
 	
 	public void clearContent() {
 		bem.clear();
-		searchBarManager.clearDocument();
+		//searchBarManager.clearDocument();
 		activeDocument = null;
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
@@ -209,6 +207,5 @@ public class HttpMessageEditor extends Composite {
 		activeDocument.addProjectionAnnotations(viewer.getProjectionAnnotationModel());
 		bem.displayNewDocument(activeDocument);
 		activeDocument.setHeaderDecodeState(urlDecode);
-		searchBarManager.setDocument(activeDocument.getDocument(), model);
 	}
 }
