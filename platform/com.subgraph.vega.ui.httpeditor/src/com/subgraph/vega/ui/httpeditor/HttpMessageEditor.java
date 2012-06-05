@@ -11,13 +11,20 @@
 package com.subgraph.vega.ui.httpeditor;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.TextViewerUndoManager;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
@@ -27,6 +34,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
@@ -60,6 +68,7 @@ public class HttpMessageEditor extends Composite {
 		viewer = createSourceViewer(rootComposite, viewerAnnotationModel);
 		viewer.getTextWidget().setWrapIndent(20);
 		viewer.configure(new Configuration(colors));
+		createViewerActions(viewer);
 		projectionSupport = new ProjectionSupport(viewer,new ProjectionAnnotationAccess(), colors);
 		projectionSupport.install();
 		messageDocumentFactory = new HttpMessageDocumentFactory();
@@ -83,11 +92,41 @@ public class HttpMessageEditor extends Composite {
 	private ProjectionViewer createSourceViewer(Composite parent, AnnotationModel annotationModel) {
 		final CompositeRuler ruler = new CompositeRuler();
 		final ProjectionViewer sv = new ProjectionViewer(parent, ruler, null, false, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		final TextViewerUndoManager undoManager = new TextViewerUndoManager(8);
+		undoManager.connect(sv);
 		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		sv.getControl().setLayoutData(gd);
 		return sv;
 	}
 
+	private void createViewerActions(TextViewer viewer) {
+		final List<TextViewerAction> actions = new ArrayList<TextViewerAction>();
+		final MenuManager menuManager = new MenuManager();
+		actions.add(createMenuAction(menuManager, viewer, ITextOperationTarget.CUT, "Cut"));
+		actions.add(createMenuAction(menuManager, viewer, ITextOperationTarget.COPY, "Copy"));
+		actions.add(createMenuAction(menuManager, viewer, ITextOperationTarget.PASTE, "Paste"));
+		actions.add(createMenuAction(menuManager, viewer, ITextOperationTarget.UNDO, "Undo"));
+		actions.add(createMenuAction(menuManager, viewer, ITextOperationTarget.REDO, "Redo"));
+		
+		menuManager.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				for(TextViewerAction a: actions) {
+					a.update();
+				}
+			}
+		});
+		final Menu menu = menuManager.createContextMenu(viewer.getTextWidget());
+		viewer.getTextWidget().setMenu(menu);
+	}
+	
+	private TextViewerAction createMenuAction(MenuManager menuManager, TextViewer viewer, int operationCode, String text) {
+		final TextViewerAction action = new TextViewerAction(viewer, operationCode);
+		action.setText(text);
+		menuManager.add(action);
+		return action;
+	}
+	
 	public void dispose() {
 		colors.dispose();
 		bem.dispose();
