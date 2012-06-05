@@ -11,6 +11,7 @@
 package com.subgraph.vega.ui.httpeditor;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
@@ -81,7 +82,7 @@ public class HttpMessageEditor extends Composite {
 
 	private ProjectionViewer createSourceViewer(Composite parent, AnnotationModel annotationModel) {
 		final CompositeRuler ruler = new CompositeRuler();
-		final ProjectionViewer sv = new ProjectionViewer(parent, ruler, null, false, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		final ProjectionViewer sv = new ProjectionViewer(parent, ruler, null, false, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		sv.getControl().setLayoutData(gd);
 		return sv;
@@ -95,7 +96,6 @@ public class HttpMessageEditor extends Composite {
 	
 	public void clearContent() {
 		bem.clear();
-		//searchBarManager.clearDocument();
 		activeDocument = null;
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
@@ -162,6 +162,10 @@ public class HttpMessageEditor extends Composite {
 		bem.displayImagesAsHex(flag);
 	}
 	
+	public void setWordwrapLines(boolean flag) {
+		viewer.getTextWidget().setWordWrap(flag);
+	}
+	
 	public void displayHttpRequest(HttpRequest request) {
 		clearContent();
 		activeDocument = messageDocumentFactory.createForRequest(request);
@@ -179,7 +183,7 @@ public class HttpMessageEditor extends Composite {
 		activeDocument = messageDocumentFactory.createForResponse(response);
 		displayNewDocument();
 	}
-	
+
 	public void displayHttpResponse(IHttpResponseBuilder builder) {
 		clearContent();
 		activeDocument = messageDocumentFactory.createForResponse(builder);
@@ -202,7 +206,10 @@ public class HttpMessageEditor extends Composite {
 		}
 		final AnnotationModel model = new AnnotationModel();
 		viewer.disableProjection();
+		final boolean wwflag = viewer.getTextWidget().getWordWrap();
+		if(wwflag) viewer.getTextWidget().setWordWrap(false);
 		viewer.setDocument(activeDocument.getDocument(), model);
+		if(wwflag) viewer.getTextWidget().setWordWrap(true);
 		viewer.enableProjection();
 		activeDocument.addProjectionAnnotations(viewer.getProjectionAnnotationModel());
 		bem.displayNewDocument(activeDocument);

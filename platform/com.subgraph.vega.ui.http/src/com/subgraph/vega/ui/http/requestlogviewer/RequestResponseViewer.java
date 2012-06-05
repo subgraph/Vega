@@ -67,7 +67,8 @@ public class RequestResponseViewer extends Composite {
 	private boolean displayImagesAsHex = false;
 	private boolean urlDecodeState = false;
 	private boolean hideState = false;
-
+	private boolean wordWrapLines = false;
+	
 	public RequestResponseViewer(SashForm parentForm) {
 		super(parentForm, SWT.NONE);
 		setLayout(new FormLayout());
@@ -202,6 +203,9 @@ public class RequestResponseViewer extends Composite {
 		final MenuItem decodeItem = new MenuItem(menu, SWT.CHECK);
 		decodeItem.setText("Remove URL encoding");
 		
+		final MenuItem wordwrapItem = new MenuItem(menu, SWT.CHECK);
+		wordwrapItem.setText("Word wrap lines");
+		
 		displayImagesItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -228,7 +232,17 @@ public class RequestResponseViewer extends Composite {
 				setUrlDecodeState(value);
 				urlDecodeState  = value;
 			}
-		});		
+		});
+		
+		wordwrapItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean value = wordwrapItem.getSelection();
+				setWordwrapState(value);
+				wordWrapLines = value;
+			}
+		});
+		
 		return menu;
 	}
 	
@@ -245,6 +259,11 @@ public class RequestResponseViewer extends Composite {
 	private void setUrlDecodeState(boolean value) {
 		requestViewer.setDecodeUrlEncoding(value);
 		responseViewer.setDecodeUrlEncoding(value);
+	}
+
+	private void setWordwrapState(boolean value) {
+		requestViewer.setWordwrapLines(value);
+		responseViewer.setWordwrapLines(value);
 	}
 
 	private void toggleHideState() {
@@ -290,6 +309,7 @@ public class RequestResponseViewer extends Composite {
 		setDisplayImageState(displayImages);
 		setDisplayImagesAsHexState(displayImagesAsHex);
 		setUrlDecodeState(urlDecodeState);
+		setWordwrapState(wordWrapLines);
 	}
 
 	public void setDisplayResponse() {
