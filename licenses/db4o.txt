@@ -1,0 +1,76 @@
+============================================================
+Notices for file(s):
+  /Vega/platform/com.subgraph.vega.model/lib/db4o-8.0.184.15484-all-java5.jar
+
+Vega uses db4o under the dOCL.
+http://community.versant.com/Blogs/db4o/tabid/197/entryid/1044/Default.aspx
+
+License text from http://www.versant.com/products/New_db4o/Open_Source_Licensing/dOCL.aspx
+------------------------------------------------------------
+
+db4o Object Database
+db4o is the open source object database that enables Java and .NET developers to store and retrieve any application object with only one line of code.
+db4o Free/Libre and Open Source Compatibility Software License Agreement (dOCL)
+December 2006
+
+PLEASE READ THE FOLLOWING TERMS AND CONDITIONS CAREFULLY BEFORE DOWNLOADING, INSTALLING, DISTRIBUTING, LICENSING, OR USING THE SOFTWARE (DEFINED BELOW). THE TERMS AND CONDITIONS OF THIS SOFTWARE LICENSE AGREEMENT ("AGREEMENT") GOVERN USE OF THE SOFTWARE UNLESS YOU AND DB4OBJECTS, INC. ("DB4OBJECTS") HAVE EXECUTED A SEPARATE AGREEMENT.
+
+Versant licenses the Software (as defined in Section 1) pursuant to (1) this Agreement, (2) a commercial, royalty-based license agreement, and (3) the GNU General Public License v2.0 ("GPL"). You may choose to license the Software pursuant to any of the three agreements. Except for any software or other code licensed pursuant to the free/libre and open source software ("FLOSS") licenses set forth in Section 4, where your software is a Derivative Work (defined below) of the Software, this Agreement requires you to distribute and license your software pursuant to the GPL.
+
+In order for this Agreement to become effective, you must register your software. Register your software by sending an email to community@db4o.com. Please provide your email address or developer website username and your software title. There, you will be asked to provide a short description of your software, release notes, and a link to all versions of your software in binary and/or source code form, whichever is required by the applicable FLOSS license.
+
+1. Subject
+"Software" means the current version of the db4o database engine software and all patches, bug fixes, error corrections and future versions. Software does not mean add-on packages which are not part of the db4o database engine such as Hibernate or Bloat, which you would license directly from their respective vendors.
+
+2. Redistribution License
+Subject to your compliance with the terms and conditions of this Agreement, Versant grants you a non-exclusive and non-transferable license to:
+a. create a Derivative Work (defined below) of the Software by combining it with your software (thereby creating a "FLOSS Application");
+b. sublicense to your end users perpetually, pursuant to the terms of the GPL, those portions of the Software or your FLOSS Application that were not licensed pursuant to a FLOSS License prior to your accepting this Agreement; and
+c. download, install, distribute, license, and use updates of the Software on these same terms and conditions.
+You may obtain copies of the Software by download from the Versant website. Software governed by this Agreement and Software governed by the GPL are obtained from the same source. For this reason, portions of the Software may be flagged as governed by the GPL license. However, the terms under which Versant licenses the Software to you depend on your choice of license, regardless of any GPL notices contained in the Software.
+
+3. Derivative Works
+For the purpose of this Agreement, software is deemed a derivative work of the Software ("Derivative Work") where it is based on the Software, including without limitation in the following circumstances:
+a. the software is compiled against the Software;
+b. the software contains specific references to the Software;
+c. the software requires the Software to work; or
+d. the software uses the proprietary API to the Software.
+
+4. Free/Libre and Open Source Software Licenses
+Where your FLOSS Application contains software components that were licensed pursuant to one of the FLOSS licenses set forth below ("FLOSS Licenses"), you may distribute such software components subject to that pre-existing FLOSS License.
+a. GNU Library (or "Lesser") General Public License (LGPL), versions 2.0 and 2.1
+b. Apache Software License, versions 1.0, 1.1, or 2.0
+c. BSD License, as copyrighted on July 22, 1999
+d. Eclipse Public License, version 1.0
+e. MIT/X11 License
+f. Mozilla Public License, version 1.1
+g. Microsoft Public License (Ms-PL)
+h. Microsoft Reciprocal License (Ms-RL)
+i. Code Project Open 1.02 License
+For the avoidance of doubt, any works that are merely aggregated with the Software or your FLOSS Application on a volume of storage or distribution medium and that can reasonably be considered independent and separate works are not Derivative Works of the Software or your FLOSS Application, and are outside the scope of this Agreement.
+
+5. Ownership
+The Software is licensed, not sold. You own the media on which the Software is recorded, but Versant retains ownership of the Software, including all intellectual property rights therein. The Software is protected by United States copyright law and international treaties. You will not delete or in any manner alter the copyright, trademark, or other proprietary rights notices or markings appearing on the Software as delivered to you.
+
+6. Publicity
+Versant may publicize your use of the Software in the FLOSS Application as part of Versant's efforts to market the Software.
+
+7. Term
+This Agreement remains effective for as long as your FLOSS Application is listed in our Projects section. You may terminate it at any time by destroying all copies of the Software in your possession or control. This Agreement will automatically terminate without notice if you breach any term of this Agreement. Upon termination, you must promptly destroy all copies of the Software in your possession or control.
+
+8. Warranty Disclaimer
+VERSANT MAKES NO REPRESENTATION OR WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NONINFRINGEMENT. VERSANT DOES NOT WARRANT THAT THE SOFTWARE IS ERROR FREE OR THAT YOU WILL BE ABLE TO OPERATE THE SOFTWARE WITHOUT PROBLEMS OR INTERRUPTION. Versant does not guarantee the permanent availability of the Versant website.
+
+9. Limitation of Liability
+IN NO EVENT WILL VERSANT BE LIABLE TO YOU FOR ANY DAMAGES, INCLUDING WITHOUT LIMITATION ANY SPECIAL, INCIDENTAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF USE, DATA, BUSINESS, OR PROFITS) OR FOR THE COST OF PROCURING SUBSTITUTE PRODUCTS ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT OR THE USE OR PERFORMANCE OF THE SOFTWARE, WHETHER SUCH LIABILITY ARISES FROM ANY CLAIM BASED UPON CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR OTHERWISE, AND WHETHER OR NOT VERSANT HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH LOSS OR DAMAGE. THE FOREGOING LIMITATIONS WILL SURVIVE AND APPLY EVEN IF ANY LIMITED REMEDY SPECIFIED IN THIS AGREEMENT IS FOUND TO HAVE FAILED OF ITS ESSENTIAL PURPOSE.
+
+10. Export Law
+You agree to comply fully with all U.S. export laws and regulations to ensure that neither the Software nor any technical data related thereto nor any direct product thereof are exported or re-exported directly or indirectly in violation of, or used for any purposes prohibited by, such laws and regulations.
+
+11. General
+This Agreement will be governed by and construed in accordance with the laws of the State of California, without regard to or application of conflicts of law rules or principles. The United Nations Convention on Contracts for the International Sale of Goods will not apply. You may not assign or transfer this Agreement or any rights granted hereunder, by operation of law or otherwise, without Versant's prior written consent, and any attempt by you to do so, without such consent, will be void and of no effect. Except as expressly set forth in this Agreement, the exercise by either party of any of its remedies under this Agreement will be without prejudice to its other remedies under this Agreement or otherwise. The failure by either party to enforce any provision of this Agreement will not constitute a waiver of future enforcement of that or any other provision. Any waiver, modification, or amendment of any provision of this Agreement will be effective only if in writing and signed by authorized representatives of both parties. If any provision of this Agreement is held to be unenforceable or invalid, that provision will be enforced to the maximum extent possible and the other provisions will remain in full force and effect. This Agreement is the complete and exclusive understanding and agreement between the parties regarding its subject matter, and supersedes all proposals, understandings, or communications between the parties, oral or written, regarding its subject matter, unless you and Versant have executed a separate agreement.
+
+Contact Information
+If you have any questions regarding this Agreement, you may contact Versant at 255 Shoreline Drive, Suite 450, Redwood City, CA 94065, United States, community@db4o.com.
+
+BY REGISTERING YOUR SOFTWARE YOU HAVE INDICATED THAT YOU UNDERSTAND THIS AGREEMENT AND ACCEPT ALL OF ITS TERMS. IF YOU DO NOT ACCEPT ALL THE TERMS OF THIS AGREEMENT, THEN VERSANT IS UNWILLING TO LICENSE THE SOFTWARE TO YOU UNDER THESE TERMS.
