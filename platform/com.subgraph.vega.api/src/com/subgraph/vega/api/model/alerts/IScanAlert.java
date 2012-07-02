@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.alerts;
 
+import java.util.Collection;
+
 import com.subgraph.vega.api.model.IModelProperties;
 
 public interface IScanAlert extends IModelProperties {
@@ -25,4 +27,5 @@ public interface IScanAlert extends IModelProperties {
 	IScanInstance getScanInstance();
 	long getScanId();
 	long getRequestId();
+	Collection<String> getRegexHighlightStrings();
 }

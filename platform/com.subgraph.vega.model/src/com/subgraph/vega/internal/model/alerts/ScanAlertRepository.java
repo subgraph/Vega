@@ -11,6 +11,7 @@
 package com.subgraph.vega.internal.model.alerts;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ import com.db4o.query.Predicate;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.alerts.ActiveScanInstanceEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanInstanceEvent;
@@ -149,5 +151,16 @@ public class ScanAlertRepository implements IScanAlertRepository {
 				throw new IllegalStateException("Unable to generate unique random scan id");
 			}
 		}
+	}
+
+	@Override
+	public Collection<IScanAlert> getAlertsByRequestId(final long requestId) {
+		return database.query(new Predicate<IScanAlert>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean match(IScanAlert alert) {
+				return (alert.getRequestId() == requestId);
+			}
+		});
 	}
 }

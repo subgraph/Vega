@@ -33,13 +33,12 @@ public class DatabaseConfigurationFactory {
 		configuration.common().objectClass(RequestLogRecord.class).objectField("requestOrigin").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("hostname").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("requestMethod").indexed(true);
-//		configuration.common().objectClass(RequestLogRecord.class).objectField("requestHeaders").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("responseCode").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("responseLength").indexed(true);
-//		configuration.common().objectClass(RequestLogRecord.class).objectField("responseHeaders").indexed(true);
 		configuration.common().objectClass(RequestLogRecord.class).objectField("tagList").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("key").indexed(true);
 		configuration.common().objectClass(ScanAlert.class).objectField("resource").indexed(true);
+		configuration.common().objectClass(ScanAlert.class).objectField("requestId").indexed(true);
 		configuration.common().objectClass(Tag.class).objectField("name").indexed(true);
 
 		configuration.common().weakReferences(false);

@@ -10,6 +10,9 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.alerts;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.db4o.activation.ActivationPurpose;
@@ -27,13 +30,14 @@ public class ScanAlert implements IScanAlert, Activatable {
 	private final String key;
 	private final IScanInstance scanInstance;
 	private final long requestId;
+	private final List<String> regexHighlights;
 	private String templateName = "main";
 	private String resource;
 	private final ModelProperties properties;
 	
 	private transient Activator activator;
 	
-	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
+	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId, List<String> regexHighlights) {
 		this.key = key;
 		this.name = name;
 		this.title = title;
@@ -41,6 +45,11 @@ public class ScanAlert implements IScanAlert, Activatable {
 		this.properties = new ModelProperties();
 		this.scanInstance = scanInstance;
 		this.requestId = requestId;
+		this.regexHighlights = regexHighlights;
+	}
+	
+	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
+		this(key, name, title, severity, scanInstance, requestId, null);
 	}
 	
 	@Override
@@ -156,6 +165,15 @@ public class ScanAlert implements IScanAlert, Activatable {
 		return requestId;
 	}
 	
+	@Override
+	public Collection<String> getRegexHighlightStrings() {
+		activate(ActivationPurpose.READ);
+		if(regexHighlights == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableCollection(new ArrayList<String>(regexHighlights));
+	}
+
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if(activator != null) {

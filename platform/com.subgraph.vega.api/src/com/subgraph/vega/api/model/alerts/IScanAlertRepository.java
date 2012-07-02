@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.alerts;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.subgraph.vega.api.events.IEventHandler;
@@ -25,4 +26,5 @@ public interface IScanAlertRepository {
 	IScanInstance createNewScanInstance();
 	IScanInstance getScanInstanceByScanId(long scanId);
 	IScanInstance getProxyScanInstance();
+	Collection<IScanAlert> getAlertsByRequestId(long requestId);
 }
