@@ -37,6 +37,7 @@ function run(request, response, ctx) {
       if (res) {
         for (j = 0; j < res.length; j++) {
           if (output.indexOf(res[j]) < 0) {
+            ctx.addStringHighlight(res[j]);
             output.push(res[j]);
           }
         }
