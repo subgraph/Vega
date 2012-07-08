@@ -13,6 +13,8 @@ package com.subgraph.vega.impl.scanner.modules.scripting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -31,10 +33,15 @@ public class ResponseModuleContext implements IModuleContext {
 
 	private final IWorkspace workspace;
 	private final IScanInstance scanInstance;
+	private final List<String> stringHighlights;
+	private final List<String> regexHighlights;
+
 	
 	ResponseModuleContext(IWorkspace workspace, IScanInstance scanInstance) {
 		this.workspace = workspace;
 		this.scanInstance = scanInstance;
+		this.stringHighlights = new ArrayList<String>();
+		this.regexHighlights = new ArrayList<String>();
 	}
 
 	@Override
@@ -134,6 +141,13 @@ public class ResponseModuleContext implements IModuleContext {
 			if(message != null) {
 				alert.setStringProperty("message", message);
 			}
+			for(String hl: stringHighlights) {
+				alert.addStringMatchHighlight(hl);
+			}
+			for(String hl: regexHighlights) {
+				alert.addRegexHighlight(hl);
+			}
+			
 			scanInstance.addAlert(alert);
 		}
 	}
@@ -171,5 +185,20 @@ public class ResponseModuleContext implements IModuleContext {
 	@Override
 	public List<String> propertyKeys() {
 		return scanInstance.propertyKeys();
+	}
+
+	@Override
+	public void addStringHighlight(String str) {
+		stringHighlights.add(str);
+	}
+
+	@Override
+	public void addRegexHighlight(String regex) {
+		try {
+			Pattern.compile(regex);
+			regexHighlights.add(regex);
+		} catch (PatternSyntaxException e) {
+			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
+		}
 	}
 }

@@ -17,8 +17,10 @@ import java.util.List;
 
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
+import com.db4o.collections.ActivatableArrayList;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertHighlight;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.internal.model.ModelProperties;
 
@@ -30,14 +32,14 @@ public class ScanAlert implements IScanAlert, Activatable {
 	private final String key;
 	private final IScanInstance scanInstance;
 	private final long requestId;
-	private final List<String> regexHighlights;
+	private final List<IScanAlertHighlight> alertHighlights;
 	private String templateName = "main";
 	private String resource;
 	private final ModelProperties properties;
 	
 	private transient Activator activator;
 	
-	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId, List<String> regexHighlights) {
+	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
 		this.key = key;
 		this.name = name;
 		this.title = title;
@@ -45,11 +47,7 @@ public class ScanAlert implements IScanAlert, Activatable {
 		this.properties = new ModelProperties();
 		this.scanInstance = scanInstance;
 		this.requestId = requestId;
-		this.regexHighlights = regexHighlights;
-	}
-	
-	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
-		this(key, name, title, severity, scanInstance, requestId, null);
+		this.alertHighlights = new ActivatableArrayList<IScanAlertHighlight>();
 	}
 	
 	@Override
@@ -166,12 +164,23 @@ public class ScanAlert implements IScanAlert, Activatable {
 	}
 	
 	@Override
-	public Collection<String> getRegexHighlightStrings() {
+	public void addStringMatchHighlight(String matchStr) {
 		activate(ActivationPurpose.READ);
-		if(regexHighlights == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableCollection(new ArrayList<String>(regexHighlights));
+		alertHighlights.add(new ScanAlertHighlight(matchStr, false));
+		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public void addRegexHighlight(String regex) {
+		activate(ActivationPurpose.READ);
+		alertHighlights.add(new ScanAlertHighlight(regex, true));
+		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public Collection<IScanAlertHighlight> getHighlights() {
+		activate(ActivationPurpose.READ);
+		return Collections.unmodifiableCollection(new ArrayList<IScanAlertHighlight>(alertHighlights));
 	}
 
 	@Override

@@ -12,6 +12,7 @@ package com.subgraph.vega.ui.httpeditor;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -38,6 +39,8 @@ import org.eclipse.swt.widgets.Menu;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
+import com.subgraph.vega.api.model.alerts.IScanAlertHighlight;
+import com.subgraph.vega.ui.httpeditor.highlights.AlertHighlighter;
 import com.subgraph.vega.ui.httpeditor.search.SearchBar;
 
 public class HttpMessageEditor extends Composite {
@@ -49,8 +52,9 @@ public class HttpMessageEditor extends Composite {
 	private final AnnotationModel viewerAnnotationModel;
 	private final ProjectionSupport projectionSupport;
 
-
+	
 	private final HttpMessageDocumentFactory messageDocumentFactory;
+	private final AlertHighlighter alertHighlighter;
 
 	private final BinaryEntityManager bem;
 	private HttpMessageDocument activeDocument;
@@ -76,6 +80,7 @@ public class HttpMessageEditor extends Composite {
 		layout(true);
 		rootComposite.layout(true, true);
 		bem = new BinaryEntityManager(viewer, sashForm, rootComposite);
+		alertHighlighter = new AlertHighlighter(viewer, colors);
 	}
 	
 	private Composite createRootComposite(Composite parent) {
@@ -133,9 +138,18 @@ public class HttpMessageEditor extends Composite {
 		super.dispose();
 	}
 	
+	public void addAlertHighlights(Collection<IScanAlertHighlight> highlights) {
+		alertHighlighter.addAlertHighlights(highlights);
+	}
+	
+	public void displayAlertHighlights() {
+		alertHighlighter.displayHighlights();
+	}
+	
 	public void clearContent() {
 		bem.clear();
 		activeDocument = null;
+		alertHighlighter.clearHighlights();
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
 	}

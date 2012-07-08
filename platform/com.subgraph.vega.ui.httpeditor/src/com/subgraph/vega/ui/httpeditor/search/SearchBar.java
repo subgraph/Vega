@@ -10,20 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.httpeditor.search;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationPainter;
-import org.eclipse.jface.text.source.IAnnotationAccess;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.SWT;
@@ -45,6 +33,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.ui.httpeditor.Colors;
+import com.subgraph.vega.ui.httpeditor.highlights.MatchHighlighter;
 
 public class SearchBar extends Composite implements ModifyListener, KeyListener, VerifyKeyListener, ITextInputListener {
 	
@@ -58,22 +47,19 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	
 	private final static String ANNOTATION_MATCH = "httpeditor.search_match";
 	
-	private final ProjectionViewer viewer;
-	private final Colors colors;
+	private final MatchHighlighter highlighter;
+	private final Color noResultBackground;
 	private final Text searchText;
 	private final Color searchTextBackground;
 	private final Button previousMatch;
 	private final Button nextMatch;
 	
-	private SearchResult currentSearch;
-	private Annotation currentAnnotation;
-	
 	private SearchBar(Composite parent, ProjectionViewer viewer, Colors colors) {
 		super(parent, SWT.NONE);
 		setLayout(new RowLayout(SWT.HORIZONTAL));
-		configureViewer(viewer, colors);
-		this.viewer = viewer;
-		this.colors = colors;
+		configureViewer(viewer);
+		this.highlighter = new MatchHighlighter(viewer, colors.get(Colors.HIGHLIGHT_SEARCH_MATCH), ANNOTATION_MATCH, true);
+		this.noResultBackground = colors.get(Colors.NO_SEARCH_RESULT_TEXT_BACKGROUND);
 		searchText = createSearchText();
 		searchTextBackground = searchText.getBackground();
 		nextMatch = createNextMatchButton();
@@ -82,8 +68,8 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		setVisible(false);
 	}
 
-	private void configureViewer(SourceViewer viewer, Colors colors) {
-		attachHighlightPainter(viewer, colors);
+
+	private void configureViewer(SourceViewer viewer) {
 		viewer.addTextInputListener(this);
 		viewer.prependVerifyKeyListener(this);
 	}
@@ -131,34 +117,34 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	private void handleKeyEnter() {
 		if(searchText.getText().isEmpty()) {
 			return;
-		} else if(currentSearch == null) {
+		} else if (!highlighter.isActive()) {
 			performSearch(searchText.getText());
-		}else if(currentSearch.hasNext()) {
+		} else if (highlighter.hasNextMatch()) {
 			handleNextMatch();
-		} else if(currentSearch.getResultCount() > 1) {
+		} else if (highlighter.getMatchCount() > 1) {
 			handleFirstMatch();
 		}
 	}
 	
 	private void handleFirstMatch() {
-		if(currentSearch!= null && currentSearch.getResultCount() != 0) {
-			setAnnotation(currentSearch.getFirstMatch());
+		if(highlighter.isActive() && highlighter.getMatchCount() != 0) {
+			highlighter.displayFirstMatch();
 		}
 		enableButtonsForSearchState();
 		summarizeSearchResult();
 	}
 
 	private void handleNextMatch() {
-		if(currentSearch != null && currentSearch.hasNext()) {
-			setAnnotation(currentSearch.getNextMatch());
+		if(highlighter.isActive() && highlighter.hasNextMatch()) {
+			highlighter.displayNextMatch();
 		}
 		enableButtonsForSearchState();
 		summarizeSearchResult();
 	}
 	
 	private void handlePreviousMatch() {
-		if(currentSearch != null && currentSearch.hasPrevious()) {
-			setAnnotation(currentSearch.getPreviousMatch());
+		if(highlighter.isActive() && highlighter.hasPreviousMatch()) {
+			highlighter.displayPreviousMatch();
 		}
 		enableButtonsForSearchState();
 		summarizeSearchResult();
@@ -168,19 +154,19 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		if(nextMatch.isDisposed() || previousMatch.isDisposed()) {
 			return;
 		}
-		if(currentSearch == null) {
+		if(!highlighter.isActive()) {
 			nextMatch.setEnabled(false);
 			previousMatch.setEnabled(false);
 			return;
 		}
-		nextMatch.setEnabled(currentSearch.hasNext());
-		previousMatch.setEnabled(currentSearch.hasPrevious());
+		nextMatch.setEnabled(highlighter.hasNextMatch());
+		previousMatch.setEnabled(highlighter.hasPreviousMatch());
 	}
 
 	@Override
 	public void modifyText(ModifyEvent e) {
 		if(searchText.getText().isEmpty()) {
-			currentSearch = null;
+			highlighter.clearMatches();
 			enableButtonsForSearchState();
 			summarizeSearchResult();
 			return;
@@ -189,110 +175,26 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	}
 	
 	private void performSearch(String query) {
-		clearCurrentSearch();
-		final List<IRegion> matches = findAllMatches(query);
-		currentSearch = new SearchResult(matches);
+		highlighter.clearMatches();
+		highlighter.searchMatches(query, false);
 		handleFirstMatch();
 	}
 
-	private void setAnnotation(IRegion location) {
-		clearAnnotation();
-		viewer.getProjectionAnnotationModel().expandAll(location.getOffset(), location.getLength());
-		final IAnnotationModel model = viewer.getAnnotationModel();
-		if(model != null) {
-			final Position pos = new Position(location.getOffset(), location.getLength());
-			currentAnnotation = new Annotation(ANNOTATION_MATCH, false, "");
-			model.addAnnotation(currentAnnotation, pos);
-			revealDocumentRegion(location);
-		}
-	}
-
-	private void revealDocumentRegion(IRegion region) {
-		final int startLine = getStartLineForMatch(region);
-		final int endLine = getEndLineForMatch(region);
-		if(!isLineVisible(startLine) || !isLineVisible(endLine)) {
-			viewer.setTopIndex(startLine);
-		}
-	}
-	
-	private boolean isLineVisible(int line) {
-		return viewer.getTopIndex() <= line && viewer.getBottomIndex() >= line; 
-	}
-	
-	private int getStartLineForMatch(IRegion region) {
-		return getLineForOffset(region.getOffset());
-	}
-	
-	private int getEndLineForMatch(IRegion region) {
-		return getLineForOffset(region.getOffset() + region.getLength() - 1);
-	}
-	
-	private int getLineForOffset(int offset) {
-		try {
-			final IDocument document = viewer.getDocument();
-			if(document != null) {
-				final int documentLine = document.getLineOfOffset(offset);
-				return viewer.modelLine2WidgetLine(documentLine);
-			} else {
-				return 0;
-			}
-		} catch (BadLocationException e) {
-			throw new RuntimeException("Bad location calculating line of search result", e);
-		}
-	}
-	
-	private void clearAnnotation() {
-		if(currentAnnotation != null) {
-			final IAnnotationModel model = viewer.getAnnotationModel();
-			if(model != null) {
-				model.removeAnnotation(currentAnnotation);
-			}
-		}
-		currentAnnotation = null;
-	}
-	
-	private List<IRegion> findAllMatches(String query) {
-		final IDocument document = viewer.getDocument();
-		if(query.isEmpty() || document == null) {
-			return Collections.emptyList();
-		}
-		
-		final FindReplaceDocumentAdapter search = new FindReplaceDocumentAdapter(document);
-		final ArrayList<IRegion> results = new ArrayList<IRegion>();
-		int offset = 0;
-		while(true) {
-			if(offset >= document.getLength()) {
-				return results;
-			}
-			
-			try {
-				IRegion match = search.find(offset, query, true, false, false, false);
-				if(match == null) {
-					return results;
-				}
-				results.add(match);
-				offset = match.getOffset() + match.getLength();
-			} catch (BadLocationException e) {
-				throw new RuntimeException("Bad location while performing search", e);
-			}
-		}
-	}
-
 	private void summarizeSearchResult() {
-		if(currentSearch == null) {
+		if(!highlighter.isActive()) {
 			clearResultSummary();
 			return;
 		}
-
-		if(currentSearch.getResultCount() == 0) {
+		
+		if(highlighter.getMatchCount() == 0) {
 			searchText.setToolTipText("No results found.");
-			searchText.setBackground(colors.get(Colors.NO_SEARCH_RESULT_TEXT_BACKGROUND));
+			searchText.setBackground(noResultBackground);
 			return;
 		}
 
 		searchText.setBackground(searchTextBackground);
-		searchText.setToolTipText("("+ (currentSearch.getCurrentIndex() + 1) + " of " + 
-		currentSearch.getResultCount() + ") results");
+		searchText.setToolTipText("("+ (highlighter.getCurrentIndex() + 1) + " of " +
+				highlighter.getMatchCount() + ") results");
 	}
 	
 	private void clearResultSummary() {
@@ -303,37 +205,9 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	}
 
 	private void clearCurrentSearch() {
-		clearAnnotation();
+		highlighter.clearMatches();
 		clearResultSummary();
-		currentSearch = null;
 		enableButtonsForSearchState();
-	}
-	
-	private void attachHighlightPainter(SourceViewer viewer, Colors colors) {
-		final AnnotationPainter painter = new AnnotationPainter(viewer, createAnnotationAccess());
-		painter.addHighlightAnnotationType(ANNOTATION_MATCH);
-		painter.setAnnotationTypeColor(ANNOTATION_MATCH, colors.get(Colors.HIGHLIGHT_SEARCH_MATCH));
-		viewer.addPainter(painter);
-		viewer.addTextPresentationListener(painter);
-	}
-	
-	private IAnnotationAccess createAnnotationAccess() {
-		return new IAnnotationAccess() {
-			@Override
-			public boolean isTemporary(Annotation annotation) {
-				return true;
-			}
-			
-			@Override
-			public boolean isMultiLine(Annotation annotation) {
-				return true;
-			}
-			
-			@Override
-			public Object getType(Annotation annotation) {
-				return annotation.getType();
-			}
-		};
 	}
 
 	@Override

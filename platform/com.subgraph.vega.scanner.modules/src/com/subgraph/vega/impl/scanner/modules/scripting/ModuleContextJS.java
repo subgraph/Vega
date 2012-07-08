@@ -25,8 +25,8 @@ import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class ModuleContextJS {
+
 	private final IInjectionModuleContext context;
-	
 
 	ModuleContextJS(IInjectionModuleContext context) {
 		this.context = context;
@@ -161,6 +161,14 @@ public class ModuleContextJS {
 		return new CrawlerCallbackWrapper(callback);
 	}
 	
+	public void addStringHighlight(String str) {
+		context.addStringHighlight(str);
+	}
+
+	public void addRegexHighlight(String regex) {
+		context.addRegexHighlight(regex);
+	}
+
 	public void alert(String type, HttpUriRequest request, ResponseJS response) {
 		alert(type, request, response, null);
 	}

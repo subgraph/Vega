@@ -19,6 +19,8 @@ import com.subgraph.vega.api.model.IModelProperties;
 public interface IModuleContext extends IModelProperties {
 	void error(HttpUriRequest request, IHttpResponse response, String message);
 	void debug(String msg);
+	void addStringHighlight(String str);
+	void addRegexHighlight(String regex);
 	void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties);
 	void publishAlert(String type, String message, HttpRequest request, IHttpResponse response, Object ...properties);
 }

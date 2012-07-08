@@ -10,8 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.state;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -33,6 +36,9 @@ public class ModuleContext implements IInjectionModuleContext {
 	private final IPathState pathState;
 	private final int currentIndex;
 	private final ModuleContextState contextState;
+	private final List<String> stringHighlights;
+	private final List<String> regexHighlights;
+
 
 	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState, int index) {
 		this.scanState = scanState;
@@ -40,6 +46,9 @@ public class ModuleContext implements IInjectionModuleContext {
 		this.pathState = pathState;
 		currentIndex = index;
 		contextState = new ModuleContextState();
+		this.stringHighlights = new ArrayList<String>();
+		this.regexHighlights = new ArrayList<String>();
+
 	}
 
 	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState) {
@@ -52,6 +61,8 @@ public class ModuleContext implements IInjectionModuleContext {
 		pathState = ctx.pathState;
 		contextState = ctx.contextState;
 		currentIndex = index;
+		this.stringHighlights = new ArrayList<String>(ctx.stringHighlights);
+		this.regexHighlights = new ArrayList<String>(ctx.regexHighlights);
 	}
 
 	@Override
@@ -269,6 +280,14 @@ public class ModuleContext implements IInjectionModuleContext {
 			}
 			if(message != null)
 				alert.setStringProperty("message", message);
+			
+			for(String hl: stringHighlights) {
+				alert.addStringMatchHighlight(hl);
+			}
+			for(String hl: regexHighlights) {
+				alert.addRegexHighlight(hl);
+			}
+
 			scan.addAlert(alert);
 		}
 	}
@@ -310,5 +329,20 @@ public class ModuleContext implements IInjectionModuleContext {
 	@Override
 	public List<String> propertyKeys() {
 		return scanState.getScanInstance().propertyKeys();
+	}
+	
+	@Override
+	public void addStringHighlight(String str) {
+		stringHighlights.add(str);
+	}
+
+	@Override
+	public void addRegexHighlight(String regex) {
+		try {
+			Pattern.compile(regex);
+			regexHighlights.add(regex);
+		} catch (PatternSyntaxException e) {
+			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
+		}
 	}
 }

@@ -27,5 +27,7 @@ public interface IScanAlert extends IModelProperties {
 	IScanInstance getScanInstance();
 	long getScanId();
 	long getRequestId();
-	Collection<String> getRegexHighlightStrings();
+	void addStringMatchHighlight(String matchStr);
+	void addRegexHighlight(String regex);
+	Collection<IScanAlertHighlight> getHighlights();
 }

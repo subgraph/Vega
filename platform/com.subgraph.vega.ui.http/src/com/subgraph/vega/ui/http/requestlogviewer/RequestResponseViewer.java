@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.http.requestlogviewer;
 
+import java.util.Collection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -35,8 +37,10 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
+import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.httpeditor.HttpMessageEditor;
@@ -363,6 +367,13 @@ public class RequestResponseViewer extends Composite {
 		}
 	}
 	
+	private void addResponseHighlights(Collection<IScanAlert> alerts) {
+		for(IScanAlert a: alerts) {
+			responseViewer.addAlertHighlights(a.getHighlights());
+		}
+		responseViewer.displayAlertHighlights();
+		
+	}
 	private void processCurrentTransaction() {
 		if(currentRecord == null) {
 			clearViewers();
@@ -370,6 +381,13 @@ public class RequestResponseViewer extends Composite {
 		}
 		requestViewer.displayHttpRequest(currentRecord.getRequest());
 		responseViewer.displayHttpResponse(currentRecord.getResponse());
+		IWorkspace workspace = Activator.getDefault().getModel().getCurrentWorkspace();
+		if(workspace != null) {
+			final Collection<IScanAlert> alerts = workspace.getScanAlertRepository().getAlertsByRequestId(currentRecord.getRequestId());
+			if(!alerts.isEmpty()) {
+				addResponseHighlights(alerts);
+			}
+		}
 	}
 
 	private void clearViewers() {
