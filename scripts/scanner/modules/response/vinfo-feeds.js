@@ -5,7 +5,6 @@ var module = {
 
 function run(request, response, ctx) {
   var output = "";
-  var highlights = [];
   var res = 0;
   var rss = new RegExp("<link.*rel=.*rss.*?>", "ig");
   var atom = new RegExp("<link.*rel=.*xml.*?>", "ig");
