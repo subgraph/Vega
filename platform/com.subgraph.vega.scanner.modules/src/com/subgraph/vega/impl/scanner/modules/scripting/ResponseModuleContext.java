@@ -201,4 +201,10 @@ public class ResponseModuleContext implements IModuleContext {
 			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
 		}
 	}
+	
+	@Override
+	public void reset() {
+		stringHighlights.clear();
+		regexHighlights.clear();
+	}
 }

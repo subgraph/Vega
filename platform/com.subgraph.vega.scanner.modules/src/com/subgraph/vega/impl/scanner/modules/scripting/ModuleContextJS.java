@@ -169,6 +169,10 @@ public class ModuleContextJS {
 		context.addRegexHighlight(regex);
 	}
 
+	public void reset () {
+		context.reset();
+	}
+
 	public void alert(String type, HttpUriRequest request, ResponseJS response) {
 		alert(type, request, response, null);
 	}
