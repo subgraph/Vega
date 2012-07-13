@@ -40,7 +40,9 @@ import org.eclipse.swt.widgets.Menu;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.http.requests.IHttpResponseBuilder;
 import com.subgraph.vega.api.model.alerts.IScanAlertHighlight;
-import com.subgraph.vega.ui.httpeditor.highlights.AlertHighlighter;
+import com.subgraph.vega.ui.httpeditor.highlights.CornerLayout;
+import com.subgraph.vega.ui.httpeditor.highlights.CornerLayoutData;
+import com.subgraph.vega.ui.httpeditor.highlights.HighlightBar;
 import com.subgraph.vega.ui.httpeditor.search.SearchBar;
 
 public class HttpMessageEditor extends Composite {
@@ -54,7 +56,7 @@ public class HttpMessageEditor extends Composite {
 
 	
 	private final HttpMessageDocumentFactory messageDocumentFactory;
-	private final AlertHighlighter alertHighlighter;
+	private final HighlightBar highlightBar;
 
 	private final BinaryEntityManager bem;
 	private HttpMessageDocument activeDocument;
@@ -76,11 +78,17 @@ public class HttpMessageEditor extends Composite {
 		projectionSupport = new ProjectionSupport(viewer,new ProjectionAnnotationAccess(), colors);
 		projectionSupport.install();
 		messageDocumentFactory = new HttpMessageDocumentFactory();
-		SearchBar.create(this, viewer, colors);
+		
+		final SearchBar sb = new SearchBar(this, viewer, colors);
+		sb.setLayoutData(CornerLayoutData.createTopRight());
+		
+		highlightBar = new HighlightBar(this, viewer, colors);
+		highlightBar.setLayoutData(CornerLayoutData.createBottomRight());
+
+		setLayout(new CornerLayout(viewer.getTextWidget()));
 		layout(true);
 		rootComposite.layout(true, true);
 		bem = new BinaryEntityManager(viewer, sashForm, rootComposite);
-		alertHighlighter = new AlertHighlighter(viewer, colors);
 	}
 	
 	private Composite createRootComposite(Composite parent) {
@@ -139,17 +147,17 @@ public class HttpMessageEditor extends Composite {
 	}
 	
 	public void addAlertHighlights(Collection<IScanAlertHighlight> highlights) {
-		alertHighlighter.addAlertHighlights(highlights);
+		highlightBar.addAlertHighlights(highlights);
 	}
 	
 	public void displayAlertHighlights() {
-		alertHighlighter.displayHighlights();
+		highlightBar.displayHighlights();
 	}
 	
 	public void clearContent() {
 		bem.clear();
 		activeDocument = null;
-		alertHighlighter.clearHighlights();
+		highlightBar.clearHighlights();
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
 	}

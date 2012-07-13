@@ -15,6 +15,7 @@ import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -26,46 +27,40 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.ui.httpeditor.Colors;
+import com.subgraph.vega.ui.httpeditor.highlights.MatchChangeListener;
 import com.subgraph.vega.ui.httpeditor.highlights.MatchHighlighter;
+import com.subgraph.vega.ui.httpeditor.highlights.NavigationButtons;
 
-public class SearchBar extends Composite implements ModifyListener, KeyListener, VerifyKeyListener, ITextInputListener {
+public class SearchBar extends Composite implements ModifyListener, KeyListener, VerifyKeyListener, ITextInputListener, MatchChangeListener {
 	
-	public static void create(Composite parent, ProjectionViewer viewer, Colors colors) {
-		new SearchBar(parent, viewer, colors);
-		parent.setLayout(new SearchBarLayout(viewer.getTextWidget()));
-	}
-
 	private static final int KEY_ESC = 27;
 	private static final int KEY_F = 102;
 	
 	private final static String ANNOTATION_MATCH = "httpeditor.search_match";
 	
+	private final StyledText textControl;
 	private final MatchHighlighter highlighter;
 	private final Color noResultBackground;
 	private final Text searchText;
 	private final Color searchTextBackground;
-	private final Button previousMatch;
-	private final Button nextMatch;
+	private final NavigationButtons buttons;
 	
-	private SearchBar(Composite parent, ProjectionViewer viewer, Colors colors) {
+	public SearchBar(Composite parent, ProjectionViewer viewer, Colors colors) {
 		super(parent, SWT.NONE);
 		setLayout(new RowLayout(SWT.HORIZONTAL));
 		configureViewer(viewer);
+		this.textControl = viewer.getTextWidget();
 		this.highlighter = new MatchHighlighter(viewer, colors.get(Colors.HIGHLIGHT_SEARCH_MATCH), ANNOTATION_MATCH, true);
 		this.noResultBackground = colors.get(Colors.NO_SEARCH_RESULT_TEXT_BACKGROUND);
 		searchText = createSearchText();
 		searchTextBackground = searchText.getBackground();
-		nextMatch = createNextMatchButton();
-		previousMatch = createPreviousMatchButton();
+		buttons = new NavigationButtons(this, highlighter, this);
 		pack();
-		setVisible(false);
+		hideSearchBar();
 	}
 
 
@@ -87,32 +82,6 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		});
 		return t;
 	}
-	
-	private Button createNextMatchButton() {
-		return createArrowButton(SWT.DOWN, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				handleNextMatch();
-			}
-		});
-	}
-	
-	private Button createPreviousMatchButton() {
-		return createArrowButton(SWT.UP, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				handlePreviousMatch();
-			}
-		});
-	}
-	
-	private Button createArrowButton(int flags, Listener listener) {
-		final Button b = new Button(this, SWT.ARROW | flags);
-		b.addListener(SWT.Selection, listener);
-		b.addKeyListener(this);
-		b.setEnabled(false);
-		return b;
-	}
 
 	private void handleKeyEnter() {
 		if(searchText.getText().isEmpty()) {
@@ -120,7 +89,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		} else if (!highlighter.isActive()) {
 			performSearch(searchText.getText());
 		} else if (highlighter.hasNextMatch()) {
-			handleNextMatch();
+			buttons.handleNextMatch();
 		} else if (highlighter.getMatchCount() > 1) {
 			handleFirstMatch();
 		}
@@ -130,44 +99,15 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		if(highlighter.isActive() && highlighter.getMatchCount() != 0) {
 			highlighter.displayFirstMatch();
 		}
-		enableButtonsForSearchState();
+		buttons.enableButtonsForMatchState();
 		summarizeSearchResult();
-	}
-
-	private void handleNextMatch() {
-		if(highlighter.isActive() && highlighter.hasNextMatch()) {
-			highlighter.displayNextMatch();
-		}
-		enableButtonsForSearchState();
-		summarizeSearchResult();
-	}
-	
-	private void handlePreviousMatch() {
-		if(highlighter.isActive() && highlighter.hasPreviousMatch()) {
-			highlighter.displayPreviousMatch();
-		}
-		enableButtonsForSearchState();
-		summarizeSearchResult();
-	}
-	
-	private void enableButtonsForSearchState() {
-		if(nextMatch.isDisposed() || previousMatch.isDisposed()) {
-			return;
-		}
-		if(!highlighter.isActive()) {
-			nextMatch.setEnabled(false);
-			previousMatch.setEnabled(false);
-			return;
-		}
-		nextMatch.setEnabled(highlighter.hasNextMatch());
-		previousMatch.setEnabled(highlighter.hasPreviousMatch());
 	}
 
 	@Override
 	public void modifyText(ModifyEvent e) {
 		if(searchText.getText().isEmpty()) {
 			highlighter.clearMatches();
-			enableButtonsForSearchState();
+			buttons.enableButtonsForMatchState();
 			summarizeSearchResult();
 			return;
 		}
@@ -207,7 +147,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	private void clearCurrentSearch() {
 		highlighter.clearMatches();
 		clearResultSummary();
-		enableButtonsForSearchState();
+		buttons.enableButtonsForMatchState();
 	}
 
 	@Override
@@ -231,6 +171,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	private void toggleSearchBar() {
 		if(isVisible()) {
 			hideSearchBar();
+			textControl.setFocus();
 		} else {
 			displaySearchBar();
 		}
@@ -239,14 +180,16 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	private void hideSearchBar() {
 		clearCurrentSearch();
 		setVisible(false);
+		getParent().layout(true);
 	}
 	
 	private void displaySearchBar() {
 		setVisible(true);
-		getParent().layout();
+		pack();
+		getParent().layout(true);
 		setFocus();
 	}
-
+	
 	@Override
 	public void verifyKey(VerifyEvent event) {
 		if(isEventCtrlF(event)) {
@@ -254,6 +197,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 		}
 		if(isEventEscape(event)) {
 			hideSearchBar();
+			textControl.setFocus();
 		}
 	}
 
@@ -266,5 +210,11 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+	}
+
+
+	@Override
+	public void matchChanged() {
+		summarizeSearchResult();
 	}
 }
