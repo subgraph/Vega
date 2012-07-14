@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.6"?>
-
-<target name="vega" sequenceNumber="5">
+<?pde version="3.6"?><target name="vega" sequenceNumber="6">
 <locations>
 <location path="${project_loc}/extra-bundles" type="Directory"/>
 <location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.rcp.sdk.id" version="3.7.0.I20110613-1736"/>
-<repository location="http://download.eclipse.org/releases/indigo"/>
+<unit id="org.eclipse.rcp.sdk.id" version="3.8.0.I20120608-1200"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.8"/>
 </location>
 </locations>
 </target>

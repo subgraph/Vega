@@ -45,4 +45,4 @@ Import-Package: com.google.common.base;version="1.6.0",
 Service-Component: OSGI-INF/model.xml
 Bundle-ClassPath: lib/db4o-8.0.184.15484-all-java5.jar,
  .
-Require-Bundle: org.apache.http.core
+Require-Bundle: org.apache.httpcomponents.httpcore;bundle-version="4.2.1"
