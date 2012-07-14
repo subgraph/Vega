@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
-import java.util.List;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
