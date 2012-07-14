@@ -2,7 +2,7 @@
 <project name="vega.pde-build">
 
 	<property name="basebuilderdir" value="${basedir}/build/buildpack/org.eclipse.releng.basebuilder" />
-        <property name="pde.build" value="org.eclipse.pde.build_3.7.0.v20110418" />
+        <property name="pde.build" value="org.eclipse.pde.build_3.8.0.v20120119-1950" />
 	<property name="buildfile" value="${basebuilderdir}/plugins/${pde.build}/scripts/productBuild/productBuild.xml" />
 	<property name="launcher" value="${basebuilderdir}/plugins/org.eclipse.equinox.launcher.jar" />
 	<property name="builder" location="build/config" />
