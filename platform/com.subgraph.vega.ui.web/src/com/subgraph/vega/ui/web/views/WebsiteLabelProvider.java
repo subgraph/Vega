@@ -17,8 +17,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+import com.subgraph.vega.api.model.scope.ITargetScopeManager;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
+import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebResponse;
 import com.subgraph.vega.ui.tree.web.WebModelAdapter;
 import com.subgraph.vega.ui.util.ImageCache;
@@ -27,6 +29,7 @@ import com.subgraph.vega.ui.web.Activator;
 public class WebsiteLabelProvider extends LabelProvider implements IColorProvider {
 	private final static Color UNVISITED_COLOR = new Color(
 			Display.getCurrent(), new RGB(180, 180, 180));
+	private final static Color IN_SCOPE_BACKGROUND = new Color(Display.getCurrent(), new RGB(230, 230, 250));
 
 	private final static String WEBSITE = "icons/websites.png";
 
@@ -51,7 +54,11 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 
 	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 	private final WebModelAdapter webAdapter = new WebModelAdapter();
+	private ITargetScopeManager scopeManager;
 	
+	void setTargetScopeManager(ITargetScopeManager scopeManager) {
+		this.scopeManager = scopeManager;
+	}
 	public String getText(Object element) { 
 		return webAdapter.getLabel(element);
 	}
@@ -91,7 +98,27 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 
 	@Override
 	public Color getBackground(Object element) {
+		if(element instanceof IWebEntity) {
+			if(isInScope((IWebEntity) element)) {
+				return IN_SCOPE_BACKGROUND;
+			}
+		}
 		return null;
+	}
+	
+	private boolean isInScope(IWebEntity entity) {
+		if(scopeManager == null) {
+			return false;
+		} else if(entity instanceof IWebHost) {
+			return scopeManager.getActiveScope().filter(((IWebHost)entity).getUri());
+		} else if(entity instanceof IWebPath) {
+			return scopeManager.getActiveScope().filter(((IWebPath)entity).getUri());
+		} else if(entity instanceof IWebResponse){
+			IWebPath path = ((IWebResponse)entity).getPathEntity();
+			return scopeManager.getActiveScope().filter(path.getUri());
+		} else {
+			return false;
+		}
 	}
 
 	private Image getMimeImage(String contentType) {

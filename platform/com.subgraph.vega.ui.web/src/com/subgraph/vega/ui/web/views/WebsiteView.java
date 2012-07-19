@@ -10,7 +10,13 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.web.views;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,6 +35,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
+import com.subgraph.vega.api.model.scope.ITargetScopeManager;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.ui.web.Activator;
 
@@ -47,12 +54,23 @@ public class WebsiteView extends ViewPart implements IDoubleClickListener {
 	}
 	private TreeViewer viewer;
 	private DrillDownAdapter drillDown;
+	private WebsiteLabelProvider labelProvider;
+	private ITargetScopeManager scopeManager;
+	private IEventHandler scopeChangeHandler;
+	private AbstractScopeAction addAction;
+	private AbstractScopeAction excludeAction;
+	
+	private ViewerFilter scopeFilter;
+	private boolean filterUnvisited;
+	private boolean filterByScope;
 
 	@Override
 	public void createPartControl(Composite parent) {
+		scopeChangeHandler = createScopeChangeHandler();
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new WebsiteContentProvider());
-		viewer.setLabelProvider(new WebsiteLabelProvider());
+		labelProvider = new WebsiteLabelProvider();
+		viewer.setLabelProvider(labelProvider);
 		final IModel model = Activator.getDefault().getModel();
 		if(model != null) {
 			final IWorkspace currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
@@ -67,33 +85,91 @@ public class WebsiteView extends ViewPart implements IDoubleClickListener {
 						handleWorkspaceReset((WorkspaceResetEvent) event);
 				}
 			});
-			if(currentWorkspace != null)
+			if(currentWorkspace != null) {
+				setScopeManager(currentWorkspace.getTargetScopeManager());
 				viewer.setInput(currentWorkspace);
+			}
 		}
 
+		scopeFilter = new ScopeFilter(model);
 		viewer.setSorter(new Sorter());
 		viewer.addDoubleClickListener(this);
+		final MenuManager menuManager = new MenuManager("");
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(createMenuListener());
+		addAction = new AddScopeAction(viewer, model);
+		excludeAction = new ExcludeScopeAction(viewer, model);
+		viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
 		getSite().setSelectionProvider(viewer);
 		drillDown = new DrillDownAdapter(viewer);
 		contributeToActionBars();		
 	}
 
-	public void setHideUnvisitedSites(boolean value) {
-		if(value) {
-			viewer.setFilters(new ViewerFilter[] { new UnvisitedFilter() });
-		} else {
-			viewer.setFilters(new ViewerFilter[0]);
+	private void setScopeManager(ITargetScopeManager scopeManager) {
+		if(this.scopeManager != null) {
+			this.scopeManager.removeActiveScopeChangeListener(scopeChangeHandler);
+		}
+		this.scopeManager = scopeManager;
+		labelProvider.setTargetScopeManager(scopeManager);
+		if(scopeManager != null) {
+			scopeManager.addActiveScopeChangeListener(scopeChangeHandler);
 		}
 	}
+
+	private IEventHandler createScopeChangeHandler() {
+		return new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				viewer.refresh();
+			}
+		};
+	}
+	public void setHideUnvisitedSites(boolean value) {
+		filterUnvisited = value;
+		setFiltersForFlags();
+	}
+	
+	public void setFilterByScope(boolean value) {
+		filterByScope = value;
+		setFiltersForFlags();
+	}
+	
+	private void setFiltersForFlags() {
+		final List<ViewerFilter> filters = new ArrayList<ViewerFilter>();
+		if(filterUnvisited) {
+			filters.add(new UnvisitedFilter());
+		}
+		if(filterByScope) {
+			filters.add(scopeFilter);
+		}
+		viewer.setFilters(filters.toArray(new ViewerFilter[0]));
+	}
+	private IMenuListener createMenuListener() {
+		return new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				if(addAction.isEnabledForSelection()) {
+					manager.add(addAction);
+				}
+				if(excludeAction.isEnabledForSelection()) {
+					manager.add(excludeAction);
+				}
+			}
+		};
+	}
+
 	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
+		setScopeManager(event.getWorkspace().getTargetScopeManager());
 		viewer.setInput(event.getWorkspace());
 	}
 	
 	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
+		setScopeManager(null);
 		viewer.setInput(null);
 	}
 	
 	private void handleWorkspaceReset(WorkspaceResetEvent event) {
+		setScopeManager(event.getWorkspace().getTargetScopeManager());
 		viewer.setInput(null);
 		viewer.setInput(event.getWorkspace());
 	}

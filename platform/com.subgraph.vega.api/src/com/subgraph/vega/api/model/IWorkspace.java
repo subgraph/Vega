@@ -16,6 +16,7 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
 import com.subgraph.vega.api.model.macros.IHttpMacroModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.scope.ITargetScopeManager;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.variables.IVariableModel;
 import com.subgraph.vega.api.model.web.IWebModel;
@@ -32,6 +33,7 @@ public interface IWorkspace extends IModelProperties {
 	IRequestLog getRequestLog();
 	IHttpConditionManager getHttpConditionMananger();
 	IHTMLParser getHTMLParser();
+	ITargetScopeManager getTargetScopeManager();
 	void consoleWrite(String output);
 	void consoleError(String output);
 	boolean open();

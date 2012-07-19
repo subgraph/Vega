@@ -21,6 +21,10 @@
             id="com.subgraph.vega.ui.command.hideUnvisited"
             name="Hide Unvisited Sites">
       </command>
+      <command
+            id="com.subgraph.vega.ui.command.filterByScope"
+            name="Filter By Scope">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -43,6 +47,12 @@
                label="Hide Unvisited Sites"
                style="toggle"
                tooltip="Hide unvisited websites and paths">
+         </command>
+         <command
+               commandId="com.subgraph.vega.ui.command.filterByScope"
+               icon="icons/scope.png"
+               label="Filter By Scope"
+               style="toggle">
          </command>
       </menuContribution>
    </extension>
@@ -80,6 +90,10 @@
       <handler
             class="com.subgraph.vega.ui.web.commands.HideUnvisitedHandler"
             commandId="com.subgraph.vega.ui.command.hideUnvisited">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.web.commands.FilterByScopeHandler"
+            commandId="com.subgraph.vega.ui.command.filterByScope">
       </handler>
    </extension>
 

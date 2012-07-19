@@ -34,6 +34,7 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionManager;
 import com.subgraph.vega.api.model.identity.IIdentityModel;
 import com.subgraph.vega.api.model.macros.IHttpMacroModel;
 import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.scope.ITargetScopeManager;
 import com.subgraph.vega.api.model.tags.ITagModel;
 import com.subgraph.vega.api.model.variables.IVariableModel;
 import com.subgraph.vega.api.model.web.IWebModel;
@@ -44,6 +45,7 @@ import com.subgraph.vega.internal.model.conditions.HttpConditionManager;
 import com.subgraph.vega.internal.model.identity.IdentityModel;
 import com.subgraph.vega.internal.model.macros.HttpMacroModel;
 import com.subgraph.vega.internal.model.requests.RequestLog;
+import com.subgraph.vega.internal.model.scope.TargetScopeManager;
 import com.subgraph.vega.internal.model.tags.TagModel;
 import com.subgraph.vega.internal.model.variables.VariableModel;
 import com.subgraph.vega.internal.model.web.WebModel;
@@ -68,6 +70,7 @@ public class Workspace implements IWorkspace {
 	private IIdentityModel identityModel;
 	private IRequestLog requestLog;
 	private IScanAlertRepository scanAlerts;
+	private ITargetScopeManager targetScopeManager;
 	private HttpConditionManager conditionManager;
 
 	private ObjectContainer database;
@@ -78,7 +81,8 @@ public class Workspace implements IWorkspace {
 
 	private WorkspaceStatus workspaceStatus;
 
-	Workspace(IModel model, IWorkspaceEntry entry, NamedEventListenerManager conditionChangeManager, EventListenerManager eventManager, IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
+	Workspace(IModel model, IWorkspaceEntry entry, NamedEventListenerManager conditionChangeManager, EventListenerManager eventManager, 
+			IConsole console, IHTMLParser htmlParser, IXmlRepository xmlRepository) {
 		this.model = model;
 		this.configurationFactory = new DatabaseConfigurationFactory();
 		this.workspaceEntry = entry;
@@ -129,6 +133,7 @@ public class Workspace implements IWorkspace {
 			requestLog = new RequestLog(db);
 			scanAlerts = new ScanAlertRepository(db, xmlRepository);
 			conditionManager = new HttpConditionManager(db, conditionChangeManager);
+			targetScopeManager = new TargetScopeManager(db);
 			return db;
 		} catch (DatabaseFileLockedException e) {
 			e.printStackTrace();
@@ -277,6 +282,11 @@ public class Workspace implements IWorkspace {
 	}
 
 	@Override
+	public ITargetScopeManager getTargetScopeManager() {
+		return targetScopeManager;
+	}
+
+	@Override
 	public void consoleWrite(String output) {
 		console.write(output);
 	}
@@ -347,5 +357,4 @@ public class Workspace implements IWorkspace {
 			database.store(modelVersion);
 		}
 	}
-
 }
