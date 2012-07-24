@@ -38,6 +38,7 @@ function run(request, response, ctx) {
   for (var idx in testData) {
     var result = runTest(testData[idx], response);
     if (result) {
+      ctx.addStringHighlight(result);
       output += ("Possible " + testData[idx].type + " code: \n" + result);
     }
   }

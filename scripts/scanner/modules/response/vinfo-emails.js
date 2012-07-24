@@ -19,6 +19,7 @@ function run(request, response, ctx) {
     if (sr && emails.indexOf(sr[0]) == -1) {
       found = 0;
       for (i = 0; i < emails.length; i++) {
+        ctx.addStringHighlight(emails[i]);
         if (emails[i] == sr[0].toLowerCase()) {
           found = 1;
         }

@@ -13,6 +13,7 @@ function run(request, response, ctx) {
     var current = new RegExp("(<meta(?:(?!>)[\\s\\S])*" + keywords[i] + "[\\s\\S]*?>)", "ig");
     x = current.exec(response.bodyAsString);
     if (x) {
+      ctx.addStringHighlight(x[1]);
       output += x[1];
       output += "\n";
       res = 1;

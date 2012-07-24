@@ -24,6 +24,7 @@ function run(request, response, ctx) {
 
   while (res = regexp.exec(response.bodyAsString)) {
     if (luhncheck(res[0])) {
+      ctx.addStringHighlight(res[0]);
       cards.push(res[0]);
     }
   }

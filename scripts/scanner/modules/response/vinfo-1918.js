@@ -20,6 +20,7 @@ function run(request, response, ctx) {
 
   while (r = regex.exec(body)) {
     if (validateAddress(r[0]) && result.indexOf(r[0]) == -1) {
+      ctx.addStringHighlight(r[0]);
       result.push(r[0]);
     }
   }

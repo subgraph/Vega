@@ -67,6 +67,7 @@ function run(request, response, ctx) {
   }
 
   if (httpres) {
+    ctx.addStringHighlight(response.rawResponse.getStatusLine().toString());
     ctx.alert("vinfo-errorpages-http", request, response, {
       output: response.rawResponse.getStatusLine().toString(),
       resource: request.requestLine.uri,
