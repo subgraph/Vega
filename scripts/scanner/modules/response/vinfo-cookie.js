@@ -18,17 +18,15 @@ function run(request, response, ctx) {
     var params = new Array();
     params = cookies[i].getValue().split(";");
     for(var j=1; j<params.length; j++) {
-      if(params[j]==" secure" || params[j]==" Secure"){
+      if(params[j].toLowerCase()==" secure"){
         secure=1;
-      } else {
-        ctx.addStringHighlight(params[j]);
       }
-      if(params[j]==" httponly" || params[j]==" HttpOnly"){
+      if(params[j].toLowerCase()==" httponly"){
         httponly=1;
-      } else {
-        ctx.addStringHighlight(params[j]);
       }
     }
+
+    if(httponly!=1 || (secure!=1&&ssl==1)) { ctx.addStringHighlight(cookies[i].getValue()); }
 
     if(secure!=1&&ssl==1){
       ctx.alert("vinfo-cookie-secure", request, response, {
