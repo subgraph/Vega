@@ -123,15 +123,13 @@ public class ResponseAnalyzer {
 					checkJavascriptXSS(ctx, req, res, v);
 				}
 
-				if(n.contains("vvv"))
+				if(n.contains("vvv")) 
 					possibleXssAlert(ctx, req, res, n, n.indexOf("vvv"), "xss-inject", "Injected XSS tag into HTML attribute value");
-
 			}
 		}
 
-		if(tag.startsWith("vvv"))
+		if(tag.startsWith("vvv")) 
 			possibleXssAlert(ctx, req, res, tag, 0, "vinfo-xss-inject", "Injected XSS tag into HTML tag name");
-
 
 		if(tag.equals("style") || (tag.equals("script") && !remoteScript)) {
 			String content  = elem.getTextContent();
@@ -145,10 +143,14 @@ public class ResponseAnalyzer {
 		if(xids == null)
 			return;
 		final HttpUriRequest xssReq = ctx.getPathState().getXssRequest(xids[0], xids[1]);
-		if(xssReq != null)
+		if(xssReq != null) {
+			ctx.addStringHighlight(text);
 			alert(ctx, type, message, xssReq, res);
-		else
+		}
+		else {
+			ctx.addStringHighlight(text);
 			alert(ctx, type, message + " (from previous scan)", req, res);
+		}
 	}
 
 	private boolean match(String s, String ...options) {
@@ -264,11 +266,18 @@ public class ResponseAnalyzer {
 	}
 	
 	private void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
-		final String resource = request.getURI().toString();
 		final String key = createAlertKey(ctx, type, request);
+		String resource = request.getURI().toString();
+		
+		int i = resource.indexOf('?');
+
+		if (i != -1) {
+			resource = resource.substring(0, i);
+		}
+		
 		ctx.publishAlert(type, key, message, request, response, "resource", resource);
 	}
-		
+		 
 	private String createAlertKey(IInjectionModuleContext ctx, String type, HttpUriRequest request) {
 		if(ctx.getPathState().isParametric()) {
 			final String uri = stripQuery(request.getURI()).toString();
