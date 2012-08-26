@@ -278,6 +278,13 @@ public class ModuleContext implements IInjectionModuleContext {
 					logger.warning("Property key passed to publishAlert() is not a string");
 				}
 			}
+			if (pathState.isParametric()) {
+				if (pathState.getFuzzableParameter() != null) {
+					alert.setProperty("param", pathState.getFuzzableParameter().getName());
+				}
+			}
+			alert.setProperty("methods", request.getMethod());
+			
 			if(message != null)
 				alert.setStringProperty("message", message);
 			

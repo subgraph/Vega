@@ -13,6 +13,7 @@
 <@infobox 
   doc.alert.class ! "No class set." 
   vars.resource ! ""
+  vars.param ! ""
   vars.severity ! ""
   vars.severityCSS ! ""
 />
@@ -31,8 +32,8 @@
 
 <@detailsection
   vars.resource ! ""
+  vars.param ! ""
   vars.methods ! ""
-  vars.parameter ! ""
   vars.attackstring ! ""
 />
 
