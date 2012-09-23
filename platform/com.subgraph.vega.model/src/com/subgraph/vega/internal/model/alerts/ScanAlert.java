@@ -166,17 +166,24 @@ public class ScanAlert implements IScanAlert, Activatable {
 	@Override
 	public void addStringMatchHighlight(String matchStr) {
 		activate(ActivationPurpose.READ);
-		alertHighlights.add(new ScanAlertHighlight(matchStr, false));
+		alertHighlights.add(new ScanAlertHighlight(matchStr, false, false));
 		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override
 	public void addRegexHighlight(String regex) {
 		activate(ActivationPurpose.READ);
-		alertHighlights.add(new ScanAlertHighlight(regex, true));
+		alertHighlights.add(new ScanAlertHighlight(regex, true, true));
 		activate(ActivationPurpose.WRITE);
 	}
 
+	@Override
+	public void addRegexCaseInsensitiveHighlight(String regex) {
+		activate(ActivationPurpose.READ);
+		alertHighlights.add(new ScanAlertHighlight(regex, true, false));
+		activate(ActivationPurpose.WRITE);
+	
+	}
 	@Override
 	public Collection<IScanAlertHighlight> getHighlights() {
 		activate(ActivationPurpose.READ);
@@ -202,4 +209,6 @@ public class ScanAlert implements IScanAlert, Activatable {
 		
 		this.activator = activator;			
 	}
+
+
 }

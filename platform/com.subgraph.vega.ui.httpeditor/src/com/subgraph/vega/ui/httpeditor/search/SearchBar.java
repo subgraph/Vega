@@ -116,7 +116,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	
 	private void performSearch(String query) {
 		highlighter.clearMatches();
-		highlighter.searchMatches(query, false);
+		highlighter.searchMatches(query, false, false);
 		handleFirstMatch();
 	}
 

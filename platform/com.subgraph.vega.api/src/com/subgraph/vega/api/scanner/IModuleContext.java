@@ -21,6 +21,7 @@ public interface IModuleContext extends IModelProperties {
 	void debug(String msg);
 	void addStringHighlight(String str);
 	void addRegexHighlight(String regex);
+	void addRegexCaseInsensitiveHighlight(String regex);
 	void reset();
 	void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties);
 	void publishAlert(String type, String message, HttpRequest request, IHttpResponse response, Object ...properties);

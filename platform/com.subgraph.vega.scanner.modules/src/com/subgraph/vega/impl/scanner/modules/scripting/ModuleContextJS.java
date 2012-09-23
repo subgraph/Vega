@@ -169,6 +169,10 @@ public class ModuleContextJS {
 		context.addRegexHighlight(regex);
 	}
 
+	public void addRegexCaseInsensitiveHighlight(String regex) {
+		context.addRegexCaseInsensitiveHighlight(regex);
+	}
+	
 	public void reset () {
 		context.reset();
 	}

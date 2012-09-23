@@ -96,8 +96,8 @@ public class MatchHighlighter implements ITextInputListener {
 		isActive = false;
 	}
 	
-	public void searchMatches(String query, boolean isRegex) {
-		matchingRegions.addRegions( findAllMatches(query, isRegex) );
+	public void searchMatches(String query, boolean isRegex, boolean isCaseSensitive) {
+		matchingRegions.addRegions( findAllMatches(query, isRegex, isCaseSensitive) );
 		isActive = true;
 	}
 	
@@ -196,7 +196,7 @@ public class MatchHighlighter implements ITextInputListener {
 		};
 	}
 
-	private List<IRegion> findAllMatches(String query, boolean isRegex) {
+	private List<IRegion> findAllMatches(String query, boolean isRegex, boolean caseSensitive) {
 		final IDocument document = viewer.getDocument();
 		if(query.isEmpty() || document == null) {
 			return Collections.emptyList();
@@ -209,7 +209,7 @@ public class MatchHighlighter implements ITextInputListener {
 				return results;
 			}
 			try {
-				IRegion match = search.find(offset, query, true, false, false, isRegex);
+				IRegion match = search.find(offset, query, true, caseSensitive, false, isRegex);
 				if(match == null) {
 					return results;
 				}

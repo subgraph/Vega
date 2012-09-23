@@ -35,13 +35,14 @@ public class ResponseModuleContext implements IModuleContext {
 	private final IScanInstance scanInstance;
 	private final List<String> stringHighlights;
 	private final List<String> regexHighlights;
-
+	private final List<String> regexCaseInsensitiveHighlights;
 	
 	ResponseModuleContext(IWorkspace workspace, IScanInstance scanInstance) {
 		this.workspace = workspace;
 		this.scanInstance = scanInstance;
 		this.stringHighlights = new ArrayList<String>();
 		this.regexHighlights = new ArrayList<String>();
+		this.regexCaseInsensitiveHighlights = new ArrayList<String>();
 	}
 
 	@Override
@@ -147,7 +148,9 @@ public class ResponseModuleContext implements IModuleContext {
 			for(String hl: regexHighlights) {
 				alert.addRegexHighlight(hl);
 			}
-			
+			for (String hl: regexCaseInsensitiveHighlights) {
+				alert.addRegexCaseInsensitiveHighlight(hl);
+			}
 			scanInstance.addAlert(alert);
 		}
 	}
@@ -201,6 +204,17 @@ public class ResponseModuleContext implements IModuleContext {
 			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
 		}
 	}
+	
+	@Override 
+	public void addRegexCaseInsensitiveHighlight(String regex) {
+		try {
+			Pattern.compile(regex);
+			regexCaseInsensitiveHighlights.add(regex);
+		} catch (PatternSyntaxException e) {
+			logger.warning("Invalid regular expression '"+ regex +"' passed to addRegexCaseInsensitiveHighlights(): "+ e.getDescription());
+		}
+	}
+		
 	
 	@Override
 	public void reset() {

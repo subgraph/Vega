@@ -38,6 +38,7 @@ public class ModuleContext implements IInjectionModuleContext {
 	private final ModuleContextState contextState;
 	private final List<String> stringHighlights;
 	private final List<String> regexHighlights;
+	private final List<String> caseInsensitiveRegexHighlights;
 
 
 	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState, int index) {
@@ -48,6 +49,7 @@ public class ModuleContext implements IInjectionModuleContext {
 		contextState = new ModuleContextState();
 		this.stringHighlights = new ArrayList<String>();
 		this.regexHighlights = new ArrayList<String>();
+		this.caseInsensitiveRegexHighlights = new ArrayList<String>();
 
 	}
 
@@ -63,6 +65,7 @@ public class ModuleContext implements IInjectionModuleContext {
 		currentIndex = index;
 		this.stringHighlights = new ArrayList<String>(ctx.stringHighlights);
 		this.regexHighlights = new ArrayList<String>(ctx.regexHighlights);
+		this.caseInsensitiveRegexHighlights = new ArrayList<String>();
 	}
 
 	@Override
@@ -297,6 +300,9 @@ public class ModuleContext implements IInjectionModuleContext {
 			for(String hl: regexHighlights) {
 				alert.addRegexHighlight(hl);
 			}
+			for (String hl: caseInsensitiveRegexHighlights) {
+				alert.addRegexCaseInsensitiveHighlight(hl);
+			}
 
 			scan.addAlert(alert);
 		}
@@ -351,6 +357,16 @@ public class ModuleContext implements IInjectionModuleContext {
 		try {
 			Pattern.compile(regex);
 			regexHighlights.add(regex);
+		} catch (PatternSyntaxException e) {
+			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
+		}
+	}
+	
+	@Override
+	public void addRegexCaseInsensitiveHighlight(String regex) {		
+		try {
+			Pattern.compile(regex);
+			caseInsensitiveRegexHighlights.add(regex);
 		} catch (PatternSyntaxException e) {
 			logger.warning("Invalid regular expression '"+ regex +"' passed to addHighlightRegex(): "+ e.getDescription());
 		}
