@@ -149,7 +149,7 @@ public class ResponseAnalyzer {
 		}
 		else {
 			ctx.addStringHighlight(text);
-			alert(ctx, type, message + " (from previous scan)", req, res);
+			alert(ctx, "vinfo-xss-stored", message + " (from previous scan)", req, res);
 		}
 	}
 

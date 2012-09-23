@@ -1,5 +1,7 @@
 package com.subgraph.vega.ui.console;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -10,7 +12,10 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.console.IConsoleDisplay;
@@ -43,6 +48,7 @@ public class ConsoleView extends ViewPart implements IConsoleDisplay {
 		contextMenu = new MenuManager("#PopupMenu");
 		fillContextMenu(contextMenu);
 		output.setMenu(contextMenu.createContextMenu(output));
+		// createActions();
 		Activator.getDefault().getConsoleService().registerDisplay(this);
 	}
 
@@ -166,4 +172,17 @@ public class ConsoleView extends ViewPart implements IConsoleDisplay {
 			animateTitleImage();
 		}
 	}
+	/*
+    protected void createActions() {
+        IViewSite viewSite = getViewSite();
+        IActionBars actionBars = viewSite.getActionBars();
+//		ResourceBundle bundle = ConsoleResourceBundleMessages.getBundle();
+//        FindReplaceAction fraction = new FindReplaceAction(bundle, "find_replace_action_", this); //$NON-NLS-1$
+ //       actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), TestHandler);
+        actionBars.updateActionBars();
+
+    }
+    */
+   
+   
 }

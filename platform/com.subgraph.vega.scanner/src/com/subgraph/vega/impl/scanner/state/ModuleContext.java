@@ -283,7 +283,10 @@ public class ModuleContext implements IInjectionModuleContext {
 					alert.setProperty("param", pathState.getFuzzableParameter().getName());
 				}
 			}
+			
+			/*
 			alert.setProperty("methods", request.getMethod());
+			*/
 			
 			if(message != null)
 				alert.setStringProperty("message", message);

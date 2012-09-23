@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.6"?><target name="vega" sequenceNumber="6">
+<?pde version="3.8"?>
+
+<target name="vega" sequenceNumber="7">
 <locations>
 <location path="${project_loc}/extra-bundles" type="Directory"/>
-<location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<location includeAllPlatforms="true" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.rcp.sdk.id" version="3.8.0.I20120608-1200"/>
 <repository location="http://download.eclipse.org/eclipse/updates/3.8"/>
+</location>
+<location includeAllPlatforms="true" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.ui.workbench.texteditor" version="3.8.0.v20120523-1310"/>
 </location>
 </locations>
 </target>
