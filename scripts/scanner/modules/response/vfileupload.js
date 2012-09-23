@@ -9,7 +9,7 @@ function run(request, response, ctx) {
   if (response.document) {
     var input = jQuery("input:file", response.document);
     input.each(function() {
-    	ctx.debug(this.innerHTML);
+	ctx.debug("FOUND");
     	found++;
     });
   }
@@ -23,7 +23,8 @@ function run(request, response, ctx) {
       sub = sub.substring(0, index);
     }
 
-    ctx.addRegexHighlight("type=file");
+    ctx.addRegexCaseInsensitiveHighlight("type=file");
+
     (found > 1) ? match = "instances" : match = "instance";
     ctx.alert("vautocomplete", request, response, {
       "resource": request.requestLine.uri,
