@@ -184,6 +184,10 @@ public class PathStateManager {
 			xssRequests.put(xssId, request);
 		}
 	}
+	
+	public long getScanId() {
+		return scanInstance.getScanId();
+	}
 
 	public HttpUriRequest getXssRequest(int xssId, int scanId) {
 		synchronized(xssRequests) {

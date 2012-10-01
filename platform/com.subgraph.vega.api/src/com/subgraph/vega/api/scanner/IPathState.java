@@ -74,5 +74,6 @@ public interface IPathState {
 
 	boolean isIPSDetected();
 	void setIPSDetected();
+	long getScanId();
 
 }
