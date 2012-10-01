@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP Authentication over Unencrypted HTTP</title>
+	
+	<class>Configuration Error</class>
+	<severity>High</severity>		
+	
+	<impact>Disclosure of credentials to network eavesdropper.</impact>
+	<impact>Unauthorized access.</impact>
+	
+	<remediation>
+		Resources protected by HTTP authentication should only be accessible over HTTPS. 
+	</remediation>
+		
+	<discussion>
+		Vega detected a resource requiring HTTP authentication. This resource was available over HTTP. If a user were to authenticate to this resource over HTTP, the supplied credentials would be sent in cleatrtext and be vulnerable to eavesdropping. HTTPS will prevent unauthorized disclosure of HTTP authentication credentials.
+	</discussion>
+	
+	<references>
+		<url address="https://www.owasp.org/index.php/Top_10_2007-Insecure_Communications">OWASP Top 10 - 2007: Insecure Communications</url>
+	</references>
+	
+</alert>
