@@ -109,6 +109,13 @@ public class ModuleContext implements IInjectionModuleContext {
 		return contextState.getSavedResponse(index);
 	}
 
+	/* Added below method because of bug #547 */
+	
+	@Override
+	public String getSavedResponseBody(int index) {
+		return contextState.getSavedResponseBody(index);
+
+	}
 	@Override
 	public IPageFingerprint getSavedFingerprint(int index) {
 		return contextState.getSavedFingerprint(index);

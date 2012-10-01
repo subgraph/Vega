@@ -76,6 +76,15 @@ public class ModuleContextState {
 		return savedResponses[index];
 	}
 	
+	/* Added below method because of bug #547 */
+
+	public synchronized String getSavedResponseBody(int index) {
+		ensureCapacity(index);
+		final IHttpResponse response = savedResponses[index];
+		if(response != null)
+			return response.getBodyAsString();
+		return null;
+	}
 	public synchronized IPageFingerprint getSavedFingerprint(int index) {
 		ensureCapacity(index);
 		final IHttpResponse response = savedResponses[index];

@@ -73,6 +73,13 @@ public class ModuleContextJS {
 	public ResponseJS getSavedResponse(int index) {
 		return new ResponseJS(context.getSavedResponse(index));
 	}
+	
+	/* Added below method because of bug #547 */
+
+	public String getSavedResponseBody(int index) {
+		return context.getSavedResponseBody(index);
+
+	}
 
 	public IPageFingerprint getSavedFingerprint(int index) {
 		return context.getSavedFingerprint(index);

@@ -27,6 +27,8 @@ public interface IInjectionModuleContext extends IModuleContext {
 	void addRequestResponse(int index, HttpUriRequest request, IHttpResponse response);
 	HttpUriRequest getSavedRequest(int index);
 	IHttpResponse getSavedResponse(int index);
+	/* Added below method because of bug #547 */
+	String getSavedResponseBody(int index);
 	IPageFingerprint getSavedFingerprint(int index);
 	boolean isFingerprintMatch(int idx1, int idx2);
 	boolean isFingerprintMatch(int idx, IPageFingerprint fp);
@@ -50,4 +52,5 @@ public interface IInjectionModuleContext extends IModuleContext {
 	void analyzePage(HttpUriRequest request, IHttpResponse response);
 
 	List<String> getFileExtensionList();
+
 }
