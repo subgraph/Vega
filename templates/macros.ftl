@@ -51,7 +51,7 @@
 	</#if>
 </#macro>
 
-<#macro infobox class resource param severity severityCSS>
+<#macro infobox class resource param detectiontype severity severityCSS>
 <div class="section" id="infobox">
 	<h2>At a glance</h2>
 	<div class="content" id="sectioncontent">
@@ -73,6 +73,12 @@
                         <td><div class="tablefield">Parameter</div></td><td><a class="resourcelink" href="#">${param}</a></td>
                 </tr>
                 </#if>
+
+		<#if defined(detectiontype)>
+		<tr>
+			<td><div class="tablefield">Detection Type</div></td><td><a class="resourcelink" href="#">${detectiontype}</a></td>
+		</tr>
+		</#if>
 
   		<#if defined(severity) && defined(severityCSS)>
   			<tr>
