@@ -34,7 +34,7 @@ public class UnencodingLineFormatter extends BasicLineFormatter {
 	}
 
 	private boolean filterUnencodedChar(char c) {
-		return (c <= 0x20 || c >= 0x80 || "#%&=+;,!$?".indexOf(c) != -1);
+		return (c <= 0x19 || c >= 0x80 || "#%&=+;,!$?".indexOf(c) != -1);
 	}
 
 	private boolean isHexChar(char c) {
