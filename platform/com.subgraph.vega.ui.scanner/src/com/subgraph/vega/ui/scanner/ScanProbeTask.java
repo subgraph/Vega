@@ -61,7 +61,7 @@ public class ScanProbeTask implements Runnable {
 					return false;
 				}
 			}
-			scan.getConfig().setBaseURI(probeResult.getRedirectTarget());
+			
 			return true;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
 			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
@@ -72,6 +72,11 @@ public class ScanProbeTask implements Runnable {
 
 	private boolean isTrivialRedirect(URI original, URI redirect) {
 		final String originalStr = original.toString();
+		/* Do we ask the user or not? I will assume yes for now
+		 * if (original.getHost().equals(redirect.getHost()) && (original.getPort()  == redirect.getPort())) {
+			return true;
+		}
+		*/
 		if(originalStr.endsWith("/")) {
 			return false;
 		}

@@ -14,9 +14,11 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
+import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
@@ -36,6 +38,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private final Scan scan;
 	private final IScanInstance scanInstance;
 	private IContentAnalyzer contentAnalyzer;
+	private UriParser uriParser;
+	private UriFilter uriFilter;
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
 	
@@ -43,6 +47,19 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		this.scan = scan;
 		this.scanInstance = scan.getScanInstance();
 		logger.setLevel(Level.ALL);
+		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
+		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
+		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
+		uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance);
+		URI baseURI = scan.getConfig().getBaseURI();
+		URI redirectURI = scan.getRedirectURI();
+
+		/* ugly hack */
+		
+		if (redirectURI != null) { // && redirectURI.getHost().equals(baseURI.getHost())) {
+			uriParser.processUri(redirectURI);
+		} else
+			uriParser.processUri(baseURI);
 	}
 	
 	void stop() {
@@ -58,8 +75,8 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	@Override
 	public void run() {
-		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
-		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
+
+
 		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
 		if (handleMacroAuthentication()) {
 			runCrawlerPhase();
@@ -103,13 +120,38 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 				IHttpMacroExecutor executor = scan.getRequestEngine().createMacroExecutor(authMethodMacro.getMacro(), context);
 				while (executor.hasNext()) {
 					IHttpResponse response;
+					IContentAnalyzerResult result;
+					int status;
+					
 					try {
 						response = executor.sendNextRequest().get();
 					} catch (Exception e) {
 						logger.log(Level.WARNING, e.getMessage());
 						return false;
+					}		
+					result = contentAnalyzer.processResponse(response, true, false);
+/*
+					for(URI u: result.getDiscoveredURIs()) {
+						if(uriFilter.filter(u)) {
+							uriParser.processUri(u);
+						}
 					}
-					contentAnalyzer.processResponse(response, true, false);
+*/					
+
+					status = response.getResponseCode();
+					if (status == 301 || status == 302 || status == 303 || status == 307) {
+						Header locationHeader = response.getRawResponse().getFirstHeader("Location");
+						if (locationHeader == null) {
+							return false;
+						}
+						else {
+							URI newu = response.getRequestUri().resolve(locationHeader.getValue());
+							uriParser.processUri(newu);
+						}
+							
+					}
+					
+					
 				}
 			}
 		}
@@ -118,12 +160,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	private void runCrawlerPhase() {
 		logger.info("Starting crawling phase");
-		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
 		currentCrawler.registerProgressTracker(this);
-		
-		UriParser uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance);
-		URI baseURI = scan.getConfig().getBaseURI();
-		uriParser.processUri(baseURI);
 		currentCrawler.start();
 		try {
 			currentCrawler.waitFinished();
