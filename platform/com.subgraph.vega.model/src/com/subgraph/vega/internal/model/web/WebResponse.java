@@ -19,6 +19,7 @@ import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.model.web.IWebEntity;
+import com.subgraph.vega.api.model.web.IWebModelVisitor;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebResponse;
 
@@ -91,4 +92,9 @@ public class WebResponse extends WebEntity implements IWebResponse {
 		return parentPath;
 	}
 
+
+	@Override
+	public void accept(IWebModelVisitor visitor) {
+		visitor.visit(this);
+	}
 }

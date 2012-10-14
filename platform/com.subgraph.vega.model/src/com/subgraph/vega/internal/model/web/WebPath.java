@@ -30,6 +30,7 @@ import com.db4o.collections.ActivatableHashMap;
 import com.google.common.base.Objects;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.model.web.IWebEntity;
+import com.subgraph.vega.api.model.web.IWebModelVisitor;
 import com.subgraph.vega.api.model.web.IWebMountPoint;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.IWebPathParameters;
@@ -314,5 +315,19 @@ public class WebPath extends WebEntity implements IWebPath {
 	public PathType getPathType() {
 		activate(ActivationPurpose.READ);
 		return pathType;
+	}
+
+	@Override
+	public void accept(IWebModelVisitor visitor) {
+		visitor.visit(this);
+		for(IWebPath child: getChildPaths()) {
+			child.accept(visitor);
+		}
+		for(IWebResponse response: getGetResponses()) {
+			response.accept(visitor);
+		}
+		for(IWebResponse r: getPostResponses()) {
+			r.accept(visitor);
+		}
 	}
 }

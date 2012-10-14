@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
+import com.subgraph.vega.api.model.web.IWebModelVisitor;
 import com.subgraph.vega.api.model.web.IWebMountPoint;
 
 
@@ -139,5 +140,11 @@ public class WebHost extends WebEntity implements IWebHost {
 	public IWebEntity getParent() {
 		activate(ActivationPurpose.READ);
 		return null;
+	}
+
+	@Override
+	public void accept(IWebModelVisitor visitor) {
+		visitor.visit(this);
+		getRootPath().accept(visitor);
 	}
 }
