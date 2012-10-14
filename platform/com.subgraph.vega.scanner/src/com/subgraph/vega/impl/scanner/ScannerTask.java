@@ -26,6 +26,7 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.identity.IAuthMethod;
 import com.subgraph.vega.api.model.identity.IAuthMethodHttpMacro;
 import com.subgraph.vega.api.model.identity.IIdentity;
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
@@ -121,9 +122,11 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
 		currentCrawler.registerProgressTracker(this);
 		
-		UriParser uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance);
-		URI baseURI = scan.getConfig().getBaseURI();
-		uriParser.processUri(baseURI);
+		UriParser uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance, false);
+		final ITargetScope scanTargetScope = scan.getConfig().getScanTargetScope();
+		for(URI u: scanTargetScope.getScopeURIs()) {
+			uriParser.processUri(u);
+		}
 		currentCrawler.start();
 		try {
 			currentCrawler.waitFinished();

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,17 +17,18 @@ import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.identity.IIdentity;
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IFormCredential;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
-	private URI baseURI;
+
+	private ITargetScope scanTargetScope;
 	private String userAgent = IHttpRequestEngineFactory.DEFAULT_USER_AGENT;
 	private IIdentity scanIdentity;
 	private List<Cookie> cookieList;
 	private List<String> modulesList;
-	private List<String> exclusions;
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
 	private int maxRequestsPerSecond = DEFAULT_MAX_REQUEST_PER_SECOND;
@@ -40,11 +40,6 @@ public class ScannerConfig implements IScannerConfig {
 	private int maxConnections = DEFAULT_MAX_CONNECTIONS;
 	private int maxResponseKilobytes = DEFAULT_MAX_RESPONSE_KILOBYTES;
 	private final List<IFormCredential> formCredentials = new ArrayList<IFormCredential>();
-
-	@Override
-	public synchronized void setBaseURI(URI baseURI) {
-		this.baseURI = baseURI;
-	}
 
 	@Override
 	public synchronized void setUserAgent(String userAgent) {
@@ -67,16 +62,6 @@ public class ScannerConfig implements IScannerConfig {
 	}
 
 	@Override
-	public synchronized void setExclusions(List<String> exclusionsList) {
-		exclusions = exclusionsList;
-	}
-
-	@Override
- 	public synchronized URI getBaseURI() {
-		return baseURI;
-	}
-
-	@Override
 	public synchronized String getUserAgent() {
 		return userAgent;
 	}
@@ -94,11 +79,6 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public synchronized List<String> getModulesList() {
 		return modulesList;
-	}
-
-	@Override
-	public synchronized List<String> getExclusions() {
-		return exclusions;
 	}
 
 	@Override
@@ -222,5 +202,14 @@ public class ScannerConfig implements IScannerConfig {
 		return maxResponseKilobytes;
 	}
 
+	@Override
+	public void setScanTargetScope(ITargetScope scope) {
+		scanTargetScope = scope;
+	}
+
+	@Override
+	public ITargetScope getScanTargetScope() {
+		return scanTargetScope;
+	}
 }
 

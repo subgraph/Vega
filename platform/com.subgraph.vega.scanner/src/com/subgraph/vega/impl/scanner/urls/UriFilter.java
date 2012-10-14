@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 
 public class UriFilter {
@@ -25,9 +26,6 @@ public class UriFilter {
 
 	public UriFilter(IScannerConfig scannerConfig) {
 		this.scannerConfig = scannerConfig;
-		for (String exclusion: scannerConfig.getExclusions()) {
-			exclusionList.add(Pattern.compile(exclusion));
-		}
 		// REVISIT: we should really be merging identity config into scan config when scan starts
 		if (scannerConfig.getScanIdentity() != null) {
 			for (String exclusion: scannerConfig.getScanIdentity().getPathExclusions()) {
@@ -46,14 +44,14 @@ public class UriFilter {
 	}
 	
 	public boolean isAllowed(URI uri) {
-		return uri.toString().startsWith(scannerConfig.getBaseURI().toString());
+		final ITargetScope scanTargetScope = scannerConfig.getScanTargetScope();
+		return scanTargetScope.filter(uri) && !isExcluded(uri);
 	}
 
 	public synchronized boolean filter(URI uri) {
-		if(visitedURIs.contains(uri) || !uri.toString().startsWith(scannerConfig.getBaseURI().toString()) || isExcluded(uri))
+		if(visitedURIs.contains(uri) || !isAllowed(uri))
 			return false;
 		visitedURIs.add(uri);
 		return true;
 	}
-
 }
