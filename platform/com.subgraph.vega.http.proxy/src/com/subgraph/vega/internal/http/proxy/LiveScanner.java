@@ -38,12 +38,10 @@ public class LiveScanner {
 	}
 	
 	void setEnabled(boolean value) {
-		System.out.println("Set livescanner enabled: "+ value);
 		isEnabled = value;
 	}
 	
 	void processRequest(HttpUriRequest request) {
-		System.out.println("Process request: "+ request);
 		if(liveScan == null) {
 			throw new IllegalStateException("Cannot process request because no live scan is currently active");
 		}
@@ -59,7 +57,6 @@ public class LiveScanner {
 		if(liveScan != null) {
 			liveScan.stop();
 		}
-		System.out.println("creating live scan");
 		liveScan = scanner.createLiveScan(newWorkspace);
 	}
 	

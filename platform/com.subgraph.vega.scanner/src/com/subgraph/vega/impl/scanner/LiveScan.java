@@ -51,7 +51,6 @@ public class LiveScan implements ILiveScan {
 		if(!isStarted) {
 			start();
 		}
-		System.out.println("scanGetTarget(target="+ target + ", params= "+ parameters +")");
 		final URI uri = UriTools.stripQueryFromUri(target);
 		final IPathState ps = uriParser.processUri(uri);
 		ps.maybeAddParameters(parameters);
@@ -62,7 +61,6 @@ public class LiveScan implements ILiveScan {
 		if(!isStarted) {
 			start();
 		}
-		System.out.println("scanPostTarget(target="+ target + ", params= "+ parameters +")");
 		final URI uri = UriTools.stripQueryFromUri(target);
 		final IPathState ps = uriParser.processUri(uri);
 		ps.maybeAddPostParameters(parameters);
