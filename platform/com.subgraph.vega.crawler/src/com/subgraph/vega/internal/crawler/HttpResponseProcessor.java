@@ -29,17 +29,19 @@ public class HttpResponseProcessor implements Runnable {
 	private final CountDownLatch latch;
 	private final TaskCounter counter;
 	private final AtomicInteger outstandingTasks;
+	private final boolean stopOnEmptyQueue;
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
 
-	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter, AtomicInteger outstandingTasks) {
+	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter, AtomicInteger outstandingTasks, boolean stopOnEmptyQueue) {
 		this.crawler = crawler;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.latch = latch;
 		this.counter = counter;
 		this.outstandingTasks = outstandingTasks;
+		this.stopOnEmptyQueue = stopOnEmptyQueue;
 	}
 
 	@Override
@@ -102,8 +104,10 @@ public class HttpResponseProcessor implements Runnable {
 			}
 
 			if(outstandingTasks.decrementAndGet() <= 0) {
-				crawlerRequestQueue.add(CrawlerTask.createExitTask());
-				crawlerResponseQueue.add(CrawlerTask.createExitTask());
+				if(stopOnEmptyQueue) {
+					crawlerRequestQueue.add(CrawlerTask.createExitTask());
+					crawlerResponseQueue.add(CrawlerTask.createExitTask());
+				}
 				return;
 			}
 		}
