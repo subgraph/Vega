@@ -19,7 +19,7 @@ import java.util.List;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
-import org.apache.http.HttpMessage;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestFactory;
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolException;
@@ -40,7 +40,7 @@ import org.apache.http.util.CharArrayBuffer;
  * request line URI when the connection is performing SSL MITM so the request still contains an absoluteURI as it would
  * for an ordinary proxy request.
  */
-public class VegaHttpRequestParser implements HttpMessageParser {
+public class VegaHttpRequestParser implements HttpMessageParser<HttpRequest> {
 	private final VegaHttpServerConnection conn;
     private final SessionInputBuffer sessionBuffer;
     private final HttpRequestFactory requestFactory;
@@ -73,7 +73,7 @@ public class VegaHttpRequestParser implements HttpMessageParser {
     }
     
     @Override
-    public HttpMessage parse() throws IOException, HttpException {
+    public HttpRequest parse() throws IOException, HttpException {
     	RequestLine requestLine;
         try {
         	requestLine = parseRequestLine(sessionBuffer);
@@ -111,7 +111,7 @@ public class VegaHttpRequestParser implements HttpMessageParser {
             }
         }
 
-        HttpMessage message = requestFactory.newHttpRequest(requestLine);
+        HttpRequest message = requestFactory.newHttpRequest(requestLine);
         message.setHeaders(headers);
         return message;
     }
