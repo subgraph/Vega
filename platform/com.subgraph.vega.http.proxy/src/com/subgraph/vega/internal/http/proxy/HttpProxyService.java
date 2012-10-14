@@ -39,6 +39,7 @@ import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.paths.IPathFinder;
+import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.internal.http.proxy.ssl.ProxySSLInitializationException;
@@ -54,6 +55,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IHttpRequestEngineConfig requestEngineConfig;
 	private IContentAnalyzerFactory contentAnalyzerFactory;
 	private IScannerModuleRegistry moduleRepository;
+	private IScanner scanner;
 	private IPathFinder pathFinder;
 	private IContentAnalyzer contentAnalyzer;
 	private List<IResponseProcessingModule> responseProcessingModules;
@@ -62,6 +64,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private Map<String, HttpProxyListener> listenerMap = new ConcurrentHashMap<String, HttpProxyListener>();
 	private final IHttpInterceptProxyEventHandler listenerEventHandler;
 	private final ProxyTransactionManipulator transactionManipulator;
+	private LiveScanner liveScanner;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
 	private HttpClient httpClient;
@@ -79,6 +82,8 @@ public class HttpProxyService implements IHttpProxyService {
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
+		liveScanner = new LiveScanner(scanner, model);
+
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
 		} catch (ProxySSLInitializationException e) {
@@ -235,17 +240,21 @@ public class HttpProxyService implements IHttpProxyService {
 			}
 		}
 		try {
+			if(liveScanner.isEnabled()) {
+				liveScanner.processRequest(transaction.getRequest());
+			}
 			contentAnalyzer.processResponse(transaction.getResponse());
 		} catch (RuntimeException e) {
 			logger.log(Level.WARNING, "Exception processing transaction response: "+ e.getMessage(), e);
 		}
 	}
-
 	@Override
 	public void stop() {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
 		isRunning = false;
+		liveScanner.setEnabled(false);
+
 		for (Iterator<Map.Entry<String, HttpProxyListener>> iter = listenerMap.entrySet().iterator(); iter.hasNext();) {
 			final Map.Entry<String, HttpProxyListener> entry = iter.next();
 			stopListener(entry.getValue());
@@ -312,6 +321,14 @@ public class HttpProxyService implements IHttpProxyService {
 	protected void unsetPathFinder(IPathFinder pathFinder) {
 		this.pathFinder = null;
 	}
+	
+	protected void setScanner(IScanner scanner) {
+		this.scanner = scanner;
+	}
+	
+	protected void unsetScanner(IScanner scanner) {
+		this.scanner = null;
+	}
 
 	@Override
 	public List<IResponseProcessingModule> getResponseProcessingModules() {
@@ -323,4 +340,13 @@ public class HttpProxyService implements IHttpProxyService {
 		}
 	}
 
+	@Override
+	public boolean isLiveScan() {
+		return liveScanner.isEnabled();
+	}
+
+	@Override
+	public void setLiveScan(boolean enabled) {
+		liveScanner.setEnabled(enabled);
+	}
 }

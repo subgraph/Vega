@@ -9,4 +9,5 @@
    <reference bind="setModuleRepository" cardinality="1..1" interface="com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry" name="IScannerModuleRegistry" policy="static" unbind="unsetModuleRepository"/>
    <reference bind="setContentAnalyzerFactory" cardinality="1..1" interface="com.subgraph.vega.api.analysis.IContentAnalyzerFactory" name="IContentAnalyzerFactory" policy="static" unbind="unsetContentAnalyzerFactory"/>
    <reference bind="setPathFinder" cardinality="1..1" interface="com.subgraph.vega.api.paths.IPathFinder" name="IPathFinder" policy="static" unbind="unsetPathFinder"/>
+   <reference bind="setScanner" cardinality="1..1" interface="com.subgraph.vega.api.scanner.IScanner" name="IScanner" policy="static" unbind="unsetScanner"/>
 </scr:component>
