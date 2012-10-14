@@ -19,10 +19,12 @@ import org.eclipse.ui.ISources;
 public class ProxyStateSourceProvider extends AbstractSourceProvider {
 	final static String PROXY_STATE = "vega.proxyState";
 	final static String PASSTHROUGH_STATE = "vega.passthroughState";
+	final static String LIVESCAN_STATE = "vega.liveScanState";
 	final static String PROXY_ENABLED = "enabled";
 	final static String PROXY_DISABLED = "disabled";
 	private boolean isRunning = false;
 	private boolean isPassthrough = false;
+	private boolean isLiveScan = false;
 	
 	@Override
 	public void dispose() {		
@@ -30,15 +32,16 @@ public class ProxyStateSourceProvider extends AbstractSourceProvider {
 
 	@Override
 	public Map<?, ?> getCurrentState() {
-		Map<String, String> stateMap = new HashMap<String, String>(2);
+		Map<String, String> stateMap = new HashMap<String, String>(3);
 		stateMap.put(PROXY_STATE, getCurrentProxyState());
 		stateMap.put(PASSTHROUGH_STATE, getCurrentPassthroughState());
+		stateMap.put(LIVESCAN_STATE, getCurrentLiveScanState());
 		return stateMap;
 	}
 
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[] { PROXY_STATE, PASSTHROUGH_STATE };
+		return new String[] { PROXY_STATE, PASSTHROUGH_STATE, LIVESCAN_STATE };
 	}
 
 	void setProxyRunning(boolean enabled) {
@@ -52,6 +55,13 @@ public class ProxyStateSourceProvider extends AbstractSourceProvider {
 		if (isPassthrough != enabled) {
 			isPassthrough = enabled;
 			fireSourceChanged(ISources.WORKBENCH, PASSTHROUGH_STATE, getCurrentPassthroughState());
+		}
+	}
+	
+	void setProxyLiveScan(boolean enabled) {
+		if(isLiveScan != enabled) {
+			isLiveScan = enabled;
+			fireSourceChanged(ISources.WORKBENCH, LIVESCAN_STATE, getCurrentLiveScanState());
 		}
 	}
 
@@ -71,4 +81,11 @@ public class ProxyStateSourceProvider extends AbstractSourceProvider {
 		}
 	}
 	
+	private String getCurrentLiveScanState() {
+		if(isLiveScan) {
+			return PROXY_ENABLED;
+		} else {
+			return PROXY_DISABLED;
+		}
+	}
 }
