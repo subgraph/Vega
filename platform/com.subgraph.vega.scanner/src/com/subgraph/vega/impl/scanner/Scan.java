@@ -157,8 +157,8 @@ public class Scan implements IScan {
 				throw new IllegalStateException("Scan is detached from workspace; scan instance was lost. A new scan must be created");
 			}
 
-			if (config.getBaseURI() == null) {
-				throw new IllegalArgumentException("Cannot start scan because no baseURI was specified");
+			if (config.getScanTargetScope() == null) {
+				throw new IllegalArgumentException("Cannot start scan because no target was specified");
 			}
 
 			synchronized(scanInstance) {
@@ -212,7 +212,7 @@ public class Scan implements IScan {
 	private IHttpRequestEngine createRequestEngine(IScannerConfig config) {
 		final IHttpRequestEngineFactory requestEngineFactory = scanner.getHttpRequestEngineFactory();
 		final IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
-		if (config.getCookieList() != null) {
+		if (config.getCookieList() != null && !config.getCookieList().isEmpty()) {
 			CookieStore cookieStore = requestEngineConfig.getCookieStore();
 			for (Cookie c: config.getCookieList()) {
 				cookieStore.addCookie(c);

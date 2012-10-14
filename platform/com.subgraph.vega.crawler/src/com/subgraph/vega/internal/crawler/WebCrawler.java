@@ -37,6 +37,7 @@ public class WebCrawler implements IWebCrawler {
 	private final int requestThreadCount;
 	private final int responseThreadCount;
 
+	private boolean stopOnEmptyQueue = true;
 	volatile private CountDownLatch latch;
 	
 	volatile private boolean crawlerRunning;
@@ -64,7 +65,7 @@ public class WebCrawler implements IWebCrawler {
 		updateProgress();
 		
 		for(int i = 0; i < responseThreadCount; i++) {
-			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks);
+			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks, stopOnEmptyQueue);
 			responseProcessors.add(responseProcessor);
 			executor.execute(responseProcessor);
 		}
@@ -107,6 +108,11 @@ public class WebCrawler implements IWebCrawler {
 			counter.addNewTask();
 			requestQueue.add(task);
 		}
+	}
+	
+	@Override
+	public void setStopOnEmptyQueue(boolean value) {
+		stopOnEmptyQueue = value;
 	}
 
 	@Override

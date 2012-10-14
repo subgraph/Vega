@@ -115,6 +115,18 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.http.commands.LiveScanHandler"
+            commandId="com.subgraph.vega.commands.livescan">
+         <enabledWhen>
+            <with
+                  variable="vega.proxyState">
+               <equals
+                     value="enabled">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -191,6 +203,11 @@
             id="com.subgraph.vega.commands.interceptDrop"
             name="Drop Transaction">
       </command>
+      <command
+            categoryId="com.subgraph.vega.commands.proxyCategory"
+            id="com.subgraph.vega.commands.livescan"
+            name="Start Live Scan">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -248,6 +265,21 @@
                   icon="icons/passthrough.png"
                   style="toggle"
                   tooltip="Make proxy forward all transactions without processing or interception">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="com.subgraph.vega.perspectives.proxy">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.subgraph.vega.commands.livescan"
+                  icon="icons/live.png"
+                  style="toggle"
+                  tooltip="Start Live Scan">
                <visibleWhen
                      checkEnabled="false">
                   <with

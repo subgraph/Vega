@@ -10,7 +10,10 @@
  ******************************************************************************/
 package com.subgraph.vega.api.scanner;
 
+import com.subgraph.vega.api.model.IWorkspace;
+
 public interface IScanner {
 	IScan createScan();
+	ILiveScan createLiveScan(IWorkspace workspace);
 	void runDomTests();
 }

@@ -44,7 +44,7 @@ public class VegaHttpServerConnection extends SocketHttpServerConnection {
 	}
 
 	@Override
-    protected HttpMessageParser createRequestParser(final SessionInputBuffer buffer, final HttpRequestFactory requestFactory, final HttpParams params) {
+    protected HttpMessageParser<HttpRequest> createRequestParser(final SessionInputBuffer buffer, final HttpRequestFactory requestFactory, final HttpParams params) {
         return new VegaHttpRequestParser(this, buffer, new BasicLineParser(), requestFactory, params);
     }
 

@@ -19,7 +19,7 @@ import org.w3c.dom.html2.HTMLDocument;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.web.forms.IWebForm;
 
-public interface IWebModel {
+public interface IWebModel extends IWebModelVisitable {
 	void addChangeListenerAndPopulate(IEventHandler listener);
 	void removeChangeListener(IEventHandler listener);
 	Collection<IWebHost> getAllWebHosts();

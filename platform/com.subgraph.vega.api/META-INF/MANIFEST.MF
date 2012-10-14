@@ -36,5 +36,6 @@ Export-Package: com.subgraph.vega.api.analysis,
  com.subgraph.vega.api.paths,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.modules,
+ com.subgraph.vega.api.util,
  com.subgraph.vega.api.vuge,
  com.subgraph.vega.api.xml

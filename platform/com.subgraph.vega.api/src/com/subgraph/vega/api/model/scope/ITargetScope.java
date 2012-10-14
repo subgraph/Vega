@@ -4,6 +4,9 @@ import java.net.URI;
 import java.util.Collection;
 
 public interface ITargetScope {
+	
+	long getScopeId();
+	
 	/**
 	 * Returns the name of this scope instance.
 	 * 
@@ -147,4 +150,12 @@ public interface ITargetScope {
 	 * @return true if this is the active scope.
 	 */
 	boolean isActiveScope();
+
+	void setReadOnly(boolean value);
+		
+	boolean isReadOnly();
+	
+	boolean isDetached();
+	
+	boolean isEmpty();
 }

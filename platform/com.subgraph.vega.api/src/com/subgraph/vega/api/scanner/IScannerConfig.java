@@ -10,12 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.api.scanner;
 
-import java.net.URI;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.model.identity.IIdentity;
+import com.subgraph.vega.api.model.scope.ITargetScope;
 
 public interface IScannerConfig {
 	final static int DEFAULT_MAX_DESCENDANTS = 8192;
@@ -27,7 +27,7 @@ public interface IScannerConfig {
 	final static int DEFAULT_MAX_CONNECTIONS = 16;
 	final static int DEFAULT_MAX_RESPONSE_KILOBYTES = 1024;
 
-	void setBaseURI(URI baseURI);
+	void setScanTargetScope(ITargetScope scope);
 
 	/**
 	 * Set the website identity the scan will be performed as. 
@@ -44,7 +44,7 @@ public interface IScannerConfig {
 //	void setNtlmUsername(String username);
 //	void setNtlmPassword(String password);
 	void setModulesList(List<String> modules);
-	void setExclusions(List<String> exclusions); // in addition to those specified for the scan identity
+
 	void setLogAllRequests(boolean flag);
 	void setDisplayDebugOutput(boolean flag);
 	void setMaxRequestsPerSecond(int rps);
@@ -63,7 +63,7 @@ public interface IScannerConfig {
 //	String getBasicDomain();
 //	String getNtlmUsername();
 //	String getNtlmPassword();
-	URI getBaseURI();
+	ITargetScope getScanTargetScope();
 	String getUserAgent();
 
 	/**
@@ -73,7 +73,7 @@ public interface IScannerConfig {
 	IIdentity getScanIdentity();
 	
 	List<String> getModulesList();
-	List<String> getExclusions();
+
 	IFormCredential createFormCredential(String username, String password) ; // XXX
 	List<IFormCredential> getFormCredentials(); // XXX
 	boolean getLogAllRequests();

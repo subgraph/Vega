@@ -15,21 +15,26 @@ import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.model.scope.ActiveScopeChangedEvent;
 import com.subgraph.vega.api.model.scope.ITargetScope;
+import com.subgraph.vega.api.util.UriTools;
 
 public class TargetScope implements ITargetScope, Activatable {
 
+	private final long id;
 	private final Set<URI> scopeURIs;
 	private final Set<String> exclusionPatterns;
 	private final Set<URI> exclusionURIs;
 	private final boolean isDefault;
 	private String name;
 	private boolean isActiveScope;
+	private boolean isReadOnly;
+	private boolean isDetached;
 
 	private transient EventListenerManager scopeChangedListeners;
 	private transient List<Pattern> compiledPatterns;
 	private transient Activator activator;
 	
-	TargetScope(boolean isDefault, EventListenerManager scopeChangeListeners) {
+	TargetScope(long id, boolean isDefault, EventListenerManager scopeChangeListeners) {
+		this.id = id;
 		this.name = "";
 		this.isDefault = isDefault;
 		this.scopeURIs = new ActivatableHashSet<URI>();
@@ -39,14 +44,27 @@ public class TargetScope implements ITargetScope, Activatable {
 	}
 	
 	@Override
+	public long getScopeId() {
+		activate(ActivationPurpose.READ);
+		return id;
+	}
+
+	@Override
 	public String getName() {
 		activate(ActivationPurpose.READ);				
 		return name;
 	}
 
+	private void checkReadOnly() {
+		if(isReadOnly) {
+			throw new IllegalStateException("Attempt to modify TargetScope instance which is marked Read Only");
+		}
+	}
+
 	@Override
 	public void setName(String name) {
-		activate(ActivationPurpose.READ);				
+		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		this.name = name;
 		activate(ActivationPurpose.WRITE);
 		notifyIfActiveScope();
@@ -55,6 +73,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public synchronized void addScopeURI(URI uri) {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (scopeURIs) {
 			scopeURIs.add(uri);	
 		}
@@ -64,7 +83,8 @@ public class TargetScope implements ITargetScope, Activatable {
 
 	@Override
 	public synchronized void removeScopeURI(URI uri, boolean removeContained) {
-		activate(ActivationPurpose.READ);				
+		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (scopeURIs) {
 			scopeURIs.remove(uri);
 			if(removeContained) {
@@ -78,15 +98,10 @@ public class TargetScope implements ITargetScope, Activatable {
 	private void removeContainedURIs(URI base) {
 		final List<URI> current = new ArrayList<URI>(scopeURIs);
 		for(URI u: current) {
-			if(uriContains(base, u)) {
+			if(UriTools.doesBaseUriContain(base, u)) {
 				scopeURIs.remove(u);
 			}
 		}
-	}
-
-	private boolean uriContains(URI base, URI uri) {
-		final String baseString = base.toString();
-		return uri.toString().startsWith(baseString);
 	}
 
 	@Override
@@ -100,6 +115,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public void addExclusionPattern(String pattern) {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (exclusionPatterns) {
 			exclusionPatterns.add(pattern);
 			compiledPatterns = compilePatterns();
@@ -111,6 +127,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public void addExclusionURI(URI uri) {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (exclusionURIs) {
 			exclusionURIs.add(uri);
 		}
@@ -121,6 +138,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public void removeExclusionPattern(String pattern) {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized(exclusionPatterns) {
 			exclusionPatterns.remove(pattern);
 			compiledPatterns = compilePatterns();
@@ -132,6 +150,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public void removeExclusionURI(URI uri) {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (exclusionURIs) {
 			exclusionURIs.remove(uri);
 		}
@@ -166,7 +185,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		
 		synchronized (exclusionURIs) {
 			for(URI u: exclusionURIs) {
-				if(uriContains(u, uri)) {
+				if(UriTools.doesBaseUriContain(u, uri)) {
 					return true;
 				}
 			}
@@ -179,7 +198,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		activate(ActivationPurpose.READ);
 		synchronized (scopeURIs) {
 			for(URI u: scopeURIs) {
-				if(uriContains(u, uri)) {
+				if(UriTools.doesBaseUriContain(u, uri)) {
 					return true;
 				}
 			}
@@ -195,6 +214,7 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public void clear() {
 		activate(ActivationPurpose.READ);
+		checkReadOnly();
 		synchronized (scopeURIs) {
 			synchronized (exclusionPatterns) {
 				scopeURIs.clear();
@@ -207,14 +227,53 @@ public class TargetScope implements ITargetScope, Activatable {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return scopeURIs.isEmpty();
+	}
+	
+	@Override
 	public boolean isActiveScope() {
 		activate(ActivationPurpose.READ);
 		return isActiveScope;
 	}
 
 	
+	@Override
+	public void setReadOnly(boolean value) {
+		activate(ActivationPurpose.READ);
+		isReadOnly = value;
+		activate(ActivationPurpose.WRITE);
+	}
+
+	public void setDetached(boolean value) {
+		activate(ActivationPurpose.READ);
+		if(value && isActiveScope) {
+			throw new IllegalStateException("Cannot detach the active scope.");
+		}
+		if(value && isDefault) {
+			throw new IllegalStateException("Cannot detach the default scope");
+		}
+		
+		isDetached = value;
+		activate(ActivationPurpose.WRITE);
+	}
+
+	@Override
+	public boolean isReadOnly() {
+		activate(ActivationPurpose.READ);
+		return isReadOnly;
+	}
+
+	@Override
+	public boolean isDetached() {
+		return isDetached;
+	}
+
 	public void setIsActiveScope(boolean flag) {
 		activate(ActivationPurpose.READ);
+		if(flag && isDetached) {
+			throw new IllegalStateException("Cannot use a detached scope as the active scope");
+		}
 		isActiveScope = flag;
 		activate(ActivationPurpose.WRITE);
 	}
@@ -275,4 +334,5 @@ public class TargetScope implements ITargetScope, Activatable {
 		}
 		this.activator = activator;			
 	}
+
 }

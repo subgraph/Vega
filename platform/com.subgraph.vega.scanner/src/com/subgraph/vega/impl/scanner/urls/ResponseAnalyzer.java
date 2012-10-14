@@ -11,7 +11,6 @@
 package com.subgraph.vega.impl.scanner.urls;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.http.client.methods.HttpUriRequest;
 import org.w3c.dom.Attr;
@@ -27,6 +26,7 @@ import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.util.UriTools;
 import com.subgraph.vega.impl.scanner.forms.FormProcessor;
 
 public class ResponseAnalyzer {
@@ -35,11 +35,13 @@ public class ResponseAnalyzer {
 	private final UriParser uriParser;
 	private final UriFilter uriFilter;
 	private final FormProcessor formProcessor;
+	private final boolean isLiveScan;
 
-	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter) {
+	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter, boolean isLiveScan) {
 		this.contentAnalyzer = contentAnalyzer;
 		this.uriParser = uriParser;
 		this.uriFilter = uriFilter;
+		this.isLiveScan = isLiveScan;
 		this.formProcessor = new FormProcessor(config, uriFilter, uriParser);
 	}
 
@@ -51,8 +53,11 @@ public class ResponseAnalyzer {
 
 	}
 	public void analyzePage(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
-
+		
 		final IContentAnalyzerResult result = contentAnalyzer.processResponse(res, false, true);
+		if(isLiveScan) {
+			return;
+		}
 		for(URI u: result.getDiscoveredURIs()) {
 			if(uriFilter.filter(u))
 				uriParser.processUri(u);
@@ -284,18 +289,11 @@ public class ResponseAnalyzer {
 		 
 	private String createAlertKey(IInjectionModuleContext ctx, String type, HttpUriRequest request) {
 		if(ctx.getPathState().isParametric()) {
-			final String uri = stripQuery(request.getURI()).toString();
+			final String uri = UriTools.stripQueryFromUri(request.getURI()).toString();
 			return type + ":" + uri + ":" + ctx.getPathState().getFuzzableParameter().getName();
 		} else {
 			return type + ":" + request.getURI();
 		}
 	}
-	
-	private URI stripQuery(URI uri) {
-		try {
-			return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
+
 }

@@ -159,7 +159,9 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 	}
 	public void showDashboard() {
 		stackLayout.topControl = dashboard;
-		contentPanel.layout();
+		if(!contentPanel.isDisposed()) {
+			contentPanel.layout();
+		}
 	}
 	
 	@Override

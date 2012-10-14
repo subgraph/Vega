@@ -31,6 +31,7 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.web.IWebEntity;
 import com.subgraph.vega.api.model.web.IWebHost;
 import com.subgraph.vega.api.model.web.IWebModel;
+import com.subgraph.vega.api.model.web.IWebModelVisitor;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.model.web.NewWebEntityEvent;
 import com.subgraph.vega.api.model.web.forms.IWebForm;
@@ -182,5 +183,12 @@ public class WebModel implements IWebModel {
 	public Collection<IWebForm> parseForms(IWebPath source,
 			HTMLDocument document) {
 		return formParser.parseForms(source, document);
+	}
+
+	@Override
+	public void accept(IWebModelVisitor visitor) {
+		for(IWebHost host: getAllWebHosts()) {
+				host.accept(visitor);
+		}
 	}
 }

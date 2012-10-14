@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
-import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
 import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
@@ -114,7 +113,7 @@ public class NewScanWizardPage extends WizardPage {
 	}
 
 	private void createModulesPart(Composite parent) {
-		Label modulesLabel = new Label(container, SWT.NULL);
+		Label modulesLabel = new Label(container, SWT.NONE);
 		modulesLabel.setText("Select the modules to run:");
 		
 		viewer = new CheckboxTreeViewer(container, SWT.BORDER| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);

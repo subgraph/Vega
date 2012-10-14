@@ -28,6 +28,7 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.identity.IAuthMethod;
 import com.subgraph.vega.api.model.identity.IAuthMethodHttpMacro;
 import com.subgraph.vega.api.model.identity.IIdentity;
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
@@ -38,28 +39,36 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private final Scan scan;
 	private final IScanInstance scanInstance;
 	private IContentAnalyzer contentAnalyzer;
-	private UriParser uriParser;
+	private final UriParser uriParser;
 	private UriFilter uriFilter;
+	private final ITargetScope scanTargetScope;
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
+	
 	
 	ScannerTask(Scan scan) {
 		this.scan = scan;
 		this.scanInstance = scan.getScanInstance();
-		logger.setLevel(Level.ALL);
 		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
 		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
 		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
-		uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance);
-		URI baseURI = scan.getConfig().getBaseURI();
-		URI redirectURI = scan.getRedirectURI();
+		uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance, false);
+		scanTargetScope = scan.getConfig().getScanTargetScope();
+
+		logger.setLevel(Level.ALL);
+
+//		URI redirectURI = scan.getRedirectURI();
 
 		/* ugly hack */
-		
-		if (redirectURI != null) { // && redirectURI.getHost().equals(baseURI.getHost())) {
+	/*	
+		if (redirectURI != null) && redirectURI.getHost().equals(baseURI.getHost())) 
 			uriParser.processUri(redirectURI);
 		} else
-			uriParser.processUri(baseURI);
+
+			for(URI u: scanTargetScope.getScopeURIs()) {
+				uriParser.processUri(u);
+			}
+	*/
 	}
 	
 	void stop() {
@@ -130,14 +139,6 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 						return false;
 					}		
 					result = contentAnalyzer.processResponse(response, true, false);
-/*
-					for(URI u: result.getDiscoveredURIs()) {
-						if(uriFilter.filter(u)) {
-							uriParser.processUri(u);
-						}
-					}
-*/					
-
 					status = response.getResponseCode();
 					if (status == 301 || status == 302 || status == 303 || status == 307) {
 						Header locationHeader = response.getRawResponse().getFirstHeader("Location");
@@ -146,7 +147,9 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 						}
 						else {
 							URI newu = response.getRequestUri().resolve(locationHeader.getValue());
-							uriParser.processUri(newu);
+							if (uriFilter.filter(newu)) {	
+								uriParser.processUri(newu);
+							}
 						}
 							
 					}
@@ -161,6 +164,10 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	private void runCrawlerPhase() {
 		logger.info("Starting crawling phase");
 		currentCrawler.registerProgressTracker(this);
+		
+		for(URI u: scanTargetScope.getScopeURIs()) {
+			uriParser.processUri(u);
+		}
 		currentCrawler.start();
 		try {
 			currentCrawler.waitFinished();
