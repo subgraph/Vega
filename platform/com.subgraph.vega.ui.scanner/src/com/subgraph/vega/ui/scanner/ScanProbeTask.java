@@ -15,6 +15,7 @@ import java.net.URI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
@@ -22,52 +23,70 @@ import com.subgraph.vega.api.scanner.IScanProbeResult.ProbeResultType;
 public class ScanProbeTask implements Runnable {
 
 	private final Shell shell;
-	private final URI targetURI;
 	private final IScan scan;
+	private volatile boolean cancelScan;
 	
 	
-	ScanProbeTask(Shell shell, URI targetURI, IScan scan) {
+	ScanProbeTask(Shell shell, IScan scan) {
 		this.shell = shell;
-		this.targetURI = targetURI;
 		this.scan = scan;
 	}
 
 	@Override
 	public void run() {
-		final IScanProbeResult probeResult = scan.probeTargetUri(targetURI);
-		shell.getDisplay().asyncExec(new Runnable() {
+		final ITargetScope scanScope = scan.getConfig().getScanTargetScope();
+		for(URI uri: scanScope.getScopeURIs()) {
+			if(cancelScan) {
+				scan.stopScan();
+				return;
+			}
+			processTargetURI(uri);
+		}
+		if(cancelScan) {
+			scan.stopScan();
+		} else {
+			scan.startScan();
+		}
+	}
+
+	private void processTargetURI(final URI uri) {
+		final IScanProbeResult probeResult = scan.probeTargetUri(uri);
+		shell.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				if(processProbeResult(probeResult)) {
-					scan.startScan();
-				} else {
-					scan.stopScan();
+				if(!processProbeResult(uri, probeResult)) {
+					cancelScan = true;
 				}
 			}
 		});
 	}
 
-	private boolean processProbeResult(IScanProbeResult probeResult) {
+	private boolean processProbeResult(URI uri, IScanProbeResult probeResult) {
 		if(probeResult.getProbeResultType() == ProbeResultType.PROBE_CONNECT_FAILED) {
 			MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
 			return false;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
 			final URI redirectURI = probeResult.getRedirectTarget();
-			if(!isTrivialRedirect(targetURI, redirectURI)) {
-				String message = "Target address "+ targetURI + " redirects to address "+ redirectURI + "\n\n"+
+			if(!isTrivialRedirect(uri, redirectURI)) {
+				String message = "Target address "+ uri + " redirects to address "+ redirectURI + "\n\n"+
 						"Would you like to scan "+ redirectURI +" instead?";
 				boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
 				if(!doit) {
 					return false;
 				}
 			}
-			scan.getConfig().setBaseURI(probeResult.getRedirectTarget());
+			replaceScopeURI(scan.getConfig().getScanTargetScope(), uri, redirectURI);
 			return true;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
 			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
 			return false;
 		}
 		return true;
+	}
+	
+	private void replaceScopeURI(ITargetScope scope, URI remove, URI add) {
+		scope.removeScopeURI(remove, false);
+		scope.addScopeURI(add);
 	}
 
 	private boolean isTrivialRedirect(URI original, URI redirect) {
@@ -77,5 +96,4 @@ public class ScanProbeTask implements Runnable {
 		}
 		return (redirect.toString().equals(originalStr + "/"));
 	}
-
 }

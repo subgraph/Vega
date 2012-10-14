@@ -15,6 +15,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
@@ -26,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.model.identity.IIdentity;
+import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.ui.scanner.preferences.IPreferenceConstants;
@@ -42,10 +44,6 @@ public class ScanExecutor {
 		NewScanWizard wizard = new NewScanWizard(target, identities, scan.getModuleList());
 		WizardDialog dialog = new NewWizardDialog(shell, wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
-			if(wizard.isDomTest()) {
-				runDomTest();
-				return null;
-			}
 			return maybeLaunchScanFromWizard(shell, wizard, scanner, scan);
 		} else {
 			// REVISIT: delete the scan so the ID can be used in the future?
@@ -55,17 +53,17 @@ public class ScanExecutor {
 	}
 	
 	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner, IScan scan) {
-		URI targetUri = wizard.getScanHostURI();
-		if(targetUri == null) {
+
+		final ITargetScope scanTargetScope = wizard.getScanTargetScope();
+		if(scanTargetScope == null) {
 			return null;
 		}
 
 		final IScannerConfig config = scan.getConfig();
-		config.setBaseURI(targetUri);
+		config.setScanTargetScope(scanTargetScope);
 		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);
-		config.setCookieList(getCookieList(wizard.getCookieStringList(), targetUri));
+		config.setCookieList(getCookieListForScope(wizard.getCookieStringList(), scanTargetScope));
 		config.setScanIdentity(wizard.getScanIdentity());
-		config.setExclusions(wizard.getExclusions());
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 		config.setLogAllRequests(preferences.getBoolean(IPreferenceConstants.P_LOG_ALL_REQUESTS));
 		config.setDisplayDebugOutput(preferences.getBoolean(IPreferenceConstants.P_DISPLAY_DEBUG_OUTPUT));
@@ -76,12 +74,20 @@ public class ScanExecutor {
 		config.setMaxDuplicatePaths(preferences.getInt(IPreferenceConstants.P_MAX_SCAN_DUPLICATE_PATHS));
 		config.setMaxResponseKilobytes(preferences.getInt(IPreferenceConstants.P_MAX_RESPONSE_LENGTH));
 
-		final Thread probeThread = new Thread(new ScanProbeTask(shell, targetUri, scan));
+		final Thread probeThread = new Thread(new ScanProbeTask(shell, scan));
 		probeThread.start();
 
 		return wizard.getTargetField();
 	}
 
+	private List<Cookie> getCookieListForScope(List<String> cookieStringList, ITargetScope scope) {
+		final List<Cookie> cookies = new ArrayList<Cookie>();
+		for(URI uri: scope.getScopeURIs()) {
+			cookies.addAll(getCookieList(cookieStringList, uri));
+		}
+		return cookies;
+	}
+	
 	// gross hack
 	private List<Cookie> getCookieList(List<String> cookieStringList, URI uri) {
 		if (cookieStringList.size() != 0) {
@@ -111,13 +117,6 @@ public class ScanExecutor {
 			}
 			return cookieList;
 		}
-		return null;
-	}
-	
-	private void runDomTest() {
-		IScanner scanner = Activator.getDefault().getScanner();
-		if(scanner != null) {
-			scanner.runDomTests();
-		}
+		return Collections.emptyList();
 	}
 }
