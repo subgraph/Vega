@@ -15,6 +15,15 @@ public interface ITargetScopeManager {
 	ITargetScope createNewScope();
 	
 	/**
+	 * Create and return a new scope instance which is a duplicate of
+	 * the scope parameter.
+	 * 
+	 * @param scope The scope instance to duplicate.
+	 * @return A new scope instance which is a duplicate of the scope parameter.
+	 */
+	ITargetScope createDuplicatedScope(ITargetScope scope);
+	
+	/**
 	 * Remove the specified scope instance from the manager.  The
 	 * default scope cannot be removed.  This method will return 
 	 * false if passed the default scope or a scope instance not
@@ -69,8 +78,9 @@ public interface ITargetScopeManager {
 	 * properties of the active scope are modified.
 	 * 
 	 * @param listener The event handler to register.
+	 * @return The currently active target scope
 	 */
-	void addActiveScopeChangeListener(IEventHandler listener);
+	ITargetScope addActiveScopeChangeListener(IEventHandler listener);
 	
 	/**
 	 * Removes an event handler registered with {@link #addActiveScopeChangeListener(IEventHandler)}.
@@ -78,4 +88,7 @@ public interface ITargetScopeManager {
 	 * @param listener The event handler to remove.
 	 */
 	void removeActiveScopeChangeListener(IEventHandler listener);
+	
+	void setScopeDetached(ITargetScope scope);
+	void setScopeAttached(ITargetScope scope);
 }

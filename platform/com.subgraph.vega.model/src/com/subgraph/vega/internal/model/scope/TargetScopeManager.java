@@ -1,5 +1,6 @@
 package com.subgraph.vega.internal.model.scope;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,12 +19,14 @@ import com.subgraph.vega.api.model.scope.ITargetScopeManager;
 
 public class TargetScopeManager implements ITargetScopeManager {
 	private final ObjectContainer database;
+	private final TargetScopeId scopeId;
 	private final EventListenerManager scopeChangeListeners;
 	private ITargetScope activeScope;
 	private ITargetScope defaultScope;
 	
 	public TargetScopeManager(ObjectContainer database) {
 		this.database = database;
+		this.scopeId = getTargetScopeId(database);
 		scopeChangeListeners = new EventListenerManager();
 		final EventRegistry registry = EventRegistryFactory.forObjectContainer(database);
 		registry.activating().addListener(new EventListener4<CancellableObjectEventArgs>() {
@@ -42,19 +45,49 @@ public class TargetScopeManager implements ITargetScopeManager {
 		activeScope = findActiveScope();
 	}
 	
+	private TargetScopeId getTargetScopeId(ObjectContainer database) {
+		List<TargetScopeId> result = database.query(TargetScopeId.class);
+		if(result.size() == 0) {
+			final TargetScopeId tsi = new TargetScopeId();
+			database.store(tsi);
+			return tsi;
+		} else if(result.size() == 1) {
+			return result.get(0);
+		} else {
+			throw new IllegalStateException("Database corrupted, found multiple TargetScopeId instances");
+		}
+	}
+
 	@Override
 	public ITargetScope createNewScope() {
 		return createNewScope("New Scope");
 	}
 	
+	@Override
+	public ITargetScope createDuplicatedScope(ITargetScope scope) {
+		final ITargetScope newScope = createNewScope(scope.getName());
+		for(URI u: scope.getScopeURIs()) {
+			newScope.addScopeURI(u);
+		}
+		for(URI u: scope.getExclusionURIs()) {
+			newScope.addExclusionURI(u);
+		}
+		for(String s: scope.getExclusionPatterns()) {
+			newScope.addExclusionPattern(s);
+		}
+		return newScope;
+	}
+
 	private ITargetScope createNewScope(String name) {
-		final ITargetScope scope = new TargetScope(false, scopeChangeListeners);
+		final long id = scopeId.allocateId();
+		final ITargetScope scope = new TargetScope(id, false, scopeChangeListeners);
 		scope.setName(name);
 		return scope;
 	}
 	
 	private ITargetScope createDefaultScope() {
-		final ITargetScope scope = new TargetScope(true, scopeChangeListeners);
+		final long id = scopeId.allocateId();
+		final ITargetScope scope = new TargetScope(id, true, scopeChangeListeners);
 		((TargetScope)scope).setIsActiveScope(true);
 		scope.setName("Default Scope");
 		database.store(scope);
@@ -98,15 +131,34 @@ public class TargetScopeManager implements ITargetScopeManager {
 		if(scope == activeScope || !database.ext().isStored(scope)) {
 			return;
 		}
-		((TargetScope)activeScope).setIsActiveScope(false);
-		((TargetScope)scope).setIsActiveScope(true);
-		activeScope = scope;
-		scopeChangeListeners.fireEvent(new ActiveScopeChangedEvent(activeScope));
+		synchronized (this) {
+			((TargetScope)activeScope).setIsActiveScope(false);
+			((TargetScope)scope).setIsActiveScope(true);
+			activeScope = scope;
+			
+			scopeChangeListeners.fireEvent(new ActiveScopeChangedEvent(activeScope));
+		}
 	}
 
 	@Override
-	public void addActiveScopeChangeListener(IEventHandler listener) {
-		scopeChangeListeners.addListener(listener);
+	public void setScopeDetached(ITargetScope scope) {
+		if(scope.isActiveScope()) {
+			setActiveScope(defaultScope);
+		}
+		((TargetScope)scope).setDetached(true);
+	}
+
+	@Override
+	public void setScopeAttached(ITargetScope scope) {
+		((TargetScope)scope).setDetached(false);
+	}
+
+	@Override
+	public ITargetScope addActiveScopeChangeListener(IEventHandler listener) {
+		synchronized (this) {
+			scopeChangeListeners.addListener(listener);
+			return activeScope;
+		}
 	}
 	
 	@Override
