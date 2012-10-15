@@ -22,6 +22,7 @@ import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -176,7 +177,15 @@ public class PathStateManager {
 		}
 	}
 	public String createXssTag(String prefix, int xssId) {
-		return String.format("%s-->\">'>'\"<vvv%06dv%06d>", prefix, xssId, scanInstance.getScanId());
+		if(scanInstance.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
+			return formatXssTag(prefix, xssId, 0);
+		} else {
+			return formatXssTag(prefix, xssId, scanInstance.getScanId());
+		}
+	}
+
+	private String formatXssTag(String prefix, int xssId, long scanId) {
+		return String.format("%s-->\">'>'\"<vvv%06dv%06d>", prefix, xssId, scanId);
 	}
 
 	public void registerXssRequest(HttpUriRequest request, int xssId) {
@@ -187,10 +196,19 @@ public class PathStateManager {
 
 	public HttpUriRequest getXssRequest(int xssId, int scanId) {
 		synchronized(xssRequests) {
-			if(scanId == scanInstance.getScanId() && xssId < currentXssId)
+			if(isValidXssId(xssId, scanId)) {
 				return xssRequests.get(xssId);
-			else
+			} else {
 				return null;
+			}
+		}
+	}
+	
+	private boolean isValidXssId(int xssId, int scanId) {
+		if(scanId == 0 && scanInstance.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID && xssId < currentXssId) {
+			return true;
+		} else {
+			return scanId == scanInstance.getScanId() && xssId < currentXssId;
 		}
 	}
 
