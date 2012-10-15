@@ -2,6 +2,8 @@ package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -28,7 +30,7 @@ import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
 public class LiveScan implements ILiveScan {
-	
+	private final Logger logger = Logger.getLogger("scanner");
 	private final IWorkspace workspace;
 	private final Scanner scanner;
 	private final IScanInstance scanInstance;
@@ -44,8 +46,9 @@ public class LiveScan implements ILiveScan {
 		this.config = new ScannerConfig();
 		config.setDisplayDebugOutput(true);
 		config.setLogAllRequests(true);
+		logger.setLevel(Level.ALL);
 	}
-	
+
 	@Override
 	public void scanGetTarget(URI target, List<NameValuePair> parameters) {
 		if(!isStarted) {
