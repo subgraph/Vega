@@ -67,7 +67,7 @@ public class HighlightBar extends Composite implements MatchChangeListener {
 	
 	public void addAlertHighlights(Collection<IScanAlertHighlight> highlights) {
 		for(IScanAlertHighlight h: highlights) {
-			highlighter.searchMatches(h.getMatchString(), h.isRegularExpression());
+			highlighter.searchMatches(h.getMatchString(), h.isRegularExpression(), h.isCaseSensitive());
 		}
 	}
 	

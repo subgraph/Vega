@@ -51,7 +51,7 @@
 	</#if>
 </#macro>
 
-<#macro infobox class resource severity severityCSS>
+<#macro infobox class resource param detectiontype severity severityCSS>
 <div class="section" id="infobox">
 	<h2>At a glance</h2>
 	<div class="content" id="sectioncontent">
@@ -67,6 +67,18 @@
   			<td><div class="tablefield">Resource</div></td><td><a class="resourcelink" href="#">${resource}</a></td>
   		</tr>
   		</#if>
+
+	        <#if defined(param)>
+                <tr>
+                        <td><div class="tablefield">Parameter</div></td><td><a class="resourcelink" href="#">${param}</a></td>
+                </tr>
+                </#if>
+
+		<#if defined(detectiontype)>
+		<tr>
+			<td><div class="tablefield">Detection Type</div></td><td><a class="resourcelink" href="#">${detectiontype}</a></td>
+		</tr>
+		</#if>
 
   		<#if defined(severity) && defined(severityCSS)>
   			<tr>
@@ -109,8 +121,8 @@
   </#if>
 </#macro>
 
-<#macro detailsection resource methods parameter attackstring>
-  <#if defined(resource) || defined(methods) || defined(parameter) || defined(attackstring)>
+<#macro detailsection resource param methods attackstring>
+  <#if defined(resource) || defined(methods) || defined(param) || defined(attackstring)>
 	<div class="section" id="detailsection">
 	  <h2>Detailed Findings</h2>
 		<div class="content" id="sectioncontent">
@@ -125,9 +137,9 @@
 	  			<td><div class="tablefield">Methods</div></td><td>${methods}</td>
 			  </tr>
   			</#if>
-  			<#if defined(parameter)>
+  			<#if defined(param)>
   			  <tr>
-	  			<td><div class="tablefield">Parameter</div></td><td><span class="parameter">${parameter}</span></td>
+	  			<td><div class="tablefield">Parameter</div></td><td><span class="parameter">${param}</span></td>
 			  </tr>
   			</#if>
   			<#if defined(attackstring)>

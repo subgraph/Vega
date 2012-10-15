@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Session Cookie SECURE FLAG not set </title>
+
+<class>Information</class>
+<severity>High</severity>
+<discussion>
+Vega has detected that requesting this cookie is created without the secure flag.
+</discussion>
+        <remediation>
+          When creating the cookie in the code, set the secure flag to true.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/HttpOnly">HttpOnly OWASP Reference</url>
+        </references>
+</alert>
+
+

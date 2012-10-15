@@ -54,10 +54,12 @@ function run(request, response, ctx) {
 
   while (resssn = ssn.exec(response.bodyAsString)) {
     if (isValidSSN(resssn[0])) {
+      ctx.addStringHighlight(resssn[0]);
       outputssn.push(resssn[0]);
       resultssn = 1;
     }
     if (luhncheck(resssn[0])) {
+      ctx.addStringHighlight(resssn[0]);
       outputsin.push(resssn[0]);
       resultsin = 1;
     }

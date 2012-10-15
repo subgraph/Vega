@@ -73,6 +73,13 @@ public class ModuleContextJS {
 	public ResponseJS getSavedResponse(int index) {
 		return new ResponseJS(context.getSavedResponse(index));
 	}
+	
+	/* Added below method because of bug #547 */
+
+	public String getSavedResponseBody(int index) {
+		return context.getSavedResponseBody(index);
+
+	}
 
 	public IPageFingerprint getSavedFingerprint(int index) {
 		return context.getSavedFingerprint(index);
@@ -169,6 +176,10 @@ public class ModuleContextJS {
 		context.addRegexHighlight(regex);
 	}
 
+	public void addRegexCaseInsensitiveHighlight(String regex) {
+		context.addRegexCaseInsensitiveHighlight(regex);
+	}
+	
 	public void reset () {
 		context.reset();
 	}

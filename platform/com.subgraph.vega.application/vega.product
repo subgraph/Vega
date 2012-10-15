@@ -6,7 +6,7 @@
    <aboutInfo>
       <image path="/com.subgraph.vega.application/icons/vega_small.png"/>
       <text>
-         Copyright 2011 Subgraph Technologies, Inc. http://www.subgraph.com
+         Copyright 2012 Subgraph Technologies, Inc. http://www.subgraph.com
       </text>
    </aboutInfo>
 
@@ -29,6 +29,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>

@@ -11,6 +11,9 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.io.IOException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -24,6 +27,7 @@ import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 
 public class ScanProbe {
+	private final Logger logger = Logger.getLogger("scanner");
 	private final static int MAX_REDIRECT_COUNT = 5;
 	private final URI targetURI;
 	private final IHttpRequestEngine requestEngine;
@@ -61,6 +65,7 @@ public class ScanProbe {
 		
 		while(redirectCount < MAX_REDIRECT_COUNT) {
 			URI location = getLocationURI(response);
+
 			if(location == null) {
 				final String msg = "Target address redirected to a location which could not be understood";
 				return ScanProbeResult.createRedirectFailedResult(msg);
@@ -98,17 +103,24 @@ public class ScanProbe {
 	
 	private URI getLocationURI(IHttpResponse response) {
 		final Header locationHeader = response.getRawResponse().getFirstHeader("Location");
+		
 		if(locationHeader == null) {
 			return null;
 		}
+		return response.getRequestUri().resolve(locationHeader.getValue());
+		/*
+		
 		final String location = locationHeader.getValue();
 		try {
 			return new URI(location);
 		} catch (URISyntaxException e) {
+			logger.log(Level.WARNING,"URI Syntax Exception on: "+locationHeader);
 			return null;
 		}
+		*/
 	}
-	
+	    
+		
 	void abort() {
 		final HttpGet get = currentRequest;
 		if(get != null) {

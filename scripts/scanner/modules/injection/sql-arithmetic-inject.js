@@ -1,5 +1,5 @@
 var module = {
-  name: "SQL Injection Arithmetic checks",
+  name: "Blind SQL Injection Arithmetic Evaluation Differential Checks",
   category: "Injection Modules"
 };
 
@@ -54,7 +54,7 @@ function isNumericParameter(ps) {
 
 function process(req, res, ctx) {
   if (ctx.hasModuleFailed()) return;
-
+  var ps = ctx.getPathState();
 
   if (res.fetchFail) {
     ctx.error(req, res, "During SQL injection checks");
@@ -66,30 +66,44 @@ function process(req, res, ctx) {
   if (ctx.incrementResponseCount() < 8) return;
 
   if (ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(0, 2)) {
+	var uri = String(ctx.getSavedRequest(0).requestLine.uri);
+	var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(0), ctx.getSavedResponse(0), {
       output: ctx.getSavedResponse(0).bodyAsString,
-      key: "vinfo-sql-inject:" + ctx.getSavedRequest(0).requestLine.uri,
-      resource: ctx.getSavedRequest(0).requestLine.uri
+      key: "vinfo-sql-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: "Blind Arithmetic Evaluation Differential"
+
     });
 
     ctx.responseChecks(0);
     ctx.responseChecks(2);
   }
   if (ctx.isFingerprintMatch(1, 6) && !ctx.isFingerprintMatch(6, 7)) {
+	var uri = String(ctx.getSavedRequest(7).requestLine.uri);
+	var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(7), ctx.getSavedResponse(7), {
       output: ctx.getSavedResponse(7).bodyAsString,
-      key: "vinfo-sql-inject:" + ctx.getSavedRequest(7).requestLine.uri,
-      resource: ctx.getSavedRequest(7).requestLine.uri
+      key: "vinfo-sql-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: "Blind Arithmetic Evaluation Differential"
     });
     ctx.responseChecks(6);
     ctx.responseChecks(7);
   }
 
   if (!ctx.isFingerprintMatch(3, 4) && !ctx.isFingerprintMatch(3, 5)) {
+	var uri = String(ctx.getSavedRequest(4).requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
+
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(4), ctx.getSavedResponse(4), {
       output: ctx.getSavedResponse(4).bodyAsString,
-      key: "vinfo-sql-inject:" + ctx.getSavedRequest(4).requestLine.uri,
-      resource: ctx.getSavedRequest(4).requestLine.uri
+      key: "vinfo-sql-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: "Blind Arithmetic Evaluation Differential"
     });
 
     ctx.responseChecks(3);

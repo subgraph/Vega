@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Cookie httponly FLAG not set </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that requesting this cookie is created without the httponly flag.
+</discussion>
+        <remediation>
+          When creating the cookie in the code, set the httponly flag to true.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/HttpOnly">HttpOnly OWASP Reference</url>
+        </references>
+</alert>

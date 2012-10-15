@@ -382,6 +382,10 @@ public class PathState implements IPathState {
 	}
 
 	@Override
+	public long getScanId() {
+		return pathStateManager.getScanId();
+	}
+	@Override
 	public int allocateXssId() {
 		return pathStateManager.allocateXssId();
 	}

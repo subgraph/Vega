@@ -14,6 +14,7 @@ function run(request, response, ctx) {
     var current = new RegExp("(<!--(?:(?!-->)[\\s\\S])*" + comments[i] + "[\\s\\S]*?-->)", "ig");
     x = current.exec(response.bodyAsString);
     if (x) {
+      ctx.addStringHighlight(x[1]);
       output += x[1];
       output += "\n";
       res = 1;

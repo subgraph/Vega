@@ -29,5 +29,6 @@ public interface IScanAlert extends IModelProperties {
 	long getRequestId();
 	void addStringMatchHighlight(String matchStr);
 	void addRegexHighlight(String regex);
+	void addRegexCaseInsensitiveHighlight(String regex);
 	Collection<IScanAlertHighlight> getHighlights();
 }

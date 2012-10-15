@@ -12,6 +12,7 @@ function run(request, response, ctx) {
     while (res = regexp.exec(resp)) {
       matchr = /(eval\(|microsoft\.xmlhttp|activexobject|msxml2\.xmlhttp|xmlhttprequest)/gim;
       if (res[1].match(matchr)) {
+        ctx.addStringHighlight(res[1]);
         output = res[1];
       }
     }

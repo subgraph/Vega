@@ -48,6 +48,7 @@ public class Scan implements IScan {
 	private IHttpRequestEngine requestEngine; // guarded by this
 	private ScannerTask scannerTask; // guarded by this
 	private Thread scannerThread; // guarded by this
+	private URI redirectURI = null;
 	private List<IResponseProcessingModule> responseProcessingModules;
 	private List<IBasicModuleScript> basicModules;
 
@@ -145,6 +146,7 @@ public class Scan implements IScan {
 		synchronized(this) {
 			scanProbe = null;
 		}
+		redirectURI = probeResult.getRedirectTarget();
 		return probeResult;
 	}
 
@@ -276,6 +278,10 @@ public class Scan implements IScan {
 			workspace.getScanAlertRepository().removeActiveScanInstance(scanInstance);
 			workspace.unlock();
 		}
+	}
+
+	public URI getRedirectURI() {
+		return redirectURI;
 	}
 	
 }

@@ -110,12 +110,12 @@ public class ResponseAnalyzer {
 				if(match(tag, "script") && match(n, "src"))
 					remoteScript = true;
 				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && !match(tag, "input")))) {
-					if(v.startsWith("vega://"))
+					if(v.startsWith("vega://"))	
 						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
 
 					if(v.startsWith("http://vega.invalid/") || v.startsWith("//vega.invalid/")) {
 						if(match(tag, "script", "link"))
-							alert(ctx, "vinfo-url-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
+							alert(ctx, "vinfo-xss-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
 						else if(match(tag, "a"))
 							alert(ctx, "vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
 						else
@@ -127,16 +127,18 @@ public class ResponseAnalyzer {
 				if((v != null) && (n.startsWith("on") || n.equals("style"))) {
 					checkJavascriptXSS(ctx, req, res, v);
 				}
+				
+				if (match(tag, "script", "frame", "iframe") && match(n, "src") && ((v != null) && (v.startsWith("javascript:") || v.startsWith("vbscript:")))) {
+					checkJavascriptXSS(ctx, req, res, v);
+				}
 
-				if(n.contains("vvv"))
-					possibleXssAlert(ctx, req, res, n, n.indexOf("vvv"), "xss-inject", "Injected XSS tag into HTML attribute value");
-
+				if(n.contains("vvv")) 
+					possibleXssAlert(ctx, req, res, n, n.indexOf("vvv"), "vinfo-xss-inject", "Injected XSS tag into HTML attribute value");
 			}
-		}
+		}	
 
-		if(tag.startsWith("vvv"))
+		if(tag.startsWith("vvv")) 
 			possibleXssAlert(ctx, req, res, tag, 0, "vinfo-xss-inject", "Injected XSS tag into HTML tag name");
-
 
 		if(tag.equals("style") || (tag.equals("script") && !remoteScript)) {
 			String content  = elem.getTextContent();
@@ -150,10 +152,14 @@ public class ResponseAnalyzer {
 		if(xids == null)
 			return;
 		final HttpUriRequest xssReq = ctx.getPathState().getXssRequest(xids[0], xids[1]);
-		if(xssReq != null)
+		if(xssReq != null) {
+			ctx.addStringHighlight(text);
 			alert(ctx, type, message, xssReq, res);
-		else
-			alert(ctx, type, message + " (from previous scan)", req, res);
+		}	
+		else {
+			ctx.addStringHighlight(text);
+			alert(ctx, "vinfo-xss-stored", message + " (from previous scan)", req, res);
+		}
 	}
 
 	private boolean match(String s, String ...options) {
@@ -269,11 +275,18 @@ public class ResponseAnalyzer {
 	}
 	
 	private void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
-		final String resource = request.getURI().toString();
 		final String key = createAlertKey(ctx, type, request);
+		String resource = request.getURI().toString();
+		
+		int i = resource.indexOf('?');
+
+		if (i != -1) {
+			resource = resource.substring(0, i);
+		}
+		
 		ctx.publishAlert(type, key, message, request, response, "resource", resource);
 	}
-		
+		 
 	private String createAlertKey(IInjectionModuleContext ctx, String type, HttpUriRequest request) {
 		if(ctx.getPathState().isParametric()) {
 			final String uri = UriTools.stripQueryFromUri(request.getURI()).toString();

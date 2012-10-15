@@ -13,9 +13,20 @@
 <@infobox 
   doc.alert.class ! "No class set." 
   vars.resource ! ""
+  vars.param ! ""
+  vars.detectiontype ! ""
   vars.severity ! ""
   vars.severityCSS ! ""
 />
+
+<#if vars.requestText??>
+  <div class="section" id="requestlink">
+        <h2>Request</h2>
+          <div class="content" id="sectioncontent">
+                <a href="#" onclick="linkClick('${vars.requestId}');"> ${vars.requestText} </a>
+          </div>
+  </div>
+</#if>
 
 <@discussion
   doc.alert.discussion
@@ -31,23 +42,14 @@
 
 <@detailsection
   vars.resource ! ""
+  vars.param ! ""
   vars.methods ! ""
-  vars.parameter ! ""
   vars.attackstring ! ""
 />
 
 <@outputsection
   vars.output ! ""
 />
-
-<#if vars.requestText??> 
-  <div class="section" id="requestlink">
-	<h2>Request</h2>
-	  <div class="content" id="sectioncontent">
-		<a href="#" onclick="linkClick('${vars.requestId}');"> ${vars.requestText} </a>
-	  </div>
-  </div>
-</#if>
 
 <#if doc.alert.external?size != 0>
   <div class="section" id="remrefsection">

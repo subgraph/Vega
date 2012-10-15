@@ -16,6 +16,7 @@ function run(request, response, ctx) {
     }
     if (!found) {
       if ((response.code != 401) && (response.code != 304) && (response.code != 404) && (response.code != 204)) {
+        ctx.addStringHighlight(request.requestLine.uri);
         ctx.alert("vinfo-blank", request, response, {
           resource: request.requestLine.uri,
           key: "vinfo-blank" + request.requestLine.uri

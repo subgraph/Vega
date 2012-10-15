@@ -31,7 +31,7 @@
          </property>
          <property
                name="aboutText"
-               value="Copyright 2011 Subgraph Technologies, Inc. http://www.subgraph.com">
+               value="Copyright 2012 Subgraph Technologies, Inc. http://www.subgraph.com">
          </property>
          <property
                name="preferenceCustomization"
