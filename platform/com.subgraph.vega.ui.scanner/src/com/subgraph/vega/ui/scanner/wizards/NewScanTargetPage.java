@@ -81,6 +81,11 @@ public class NewScanTargetPage extends WizardPage {
 		container.setLayout(new GridLayout(1, false));
 		createTargetGroup(container);
 		createScopeURIGroup(container);
+		if(targetUriText != null && !targetUriText.isEmpty()) {
+			scanTargetUriText.setText(targetUriText);
+			setUriScopeFromText(targetUriText);
+		}
+
 		refreshScopeCombo();
 		updatePage();
 		setControl(container);
@@ -120,10 +125,6 @@ public class NewScanTargetPage extends WizardPage {
 				setUriScopeFromText(scanTargetUriText.getText());
 			}
 		});
-		if(targetUriText != null && !targetUriText.isEmpty()) {
-			scanTargetUriText.setText(targetUriText);
-			setUriScopeFromText(targetUriText);
-		}
 		
 		radio.addListener(SWT.Selection, new Listener() {
 			@Override
