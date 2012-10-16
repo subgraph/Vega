@@ -87,7 +87,17 @@ public class TransactionViewer extends Composite {
 			updateViewerResponse();
 		}
 	}
-	
+
+	public void processChanges() {
+		if (isPending) {
+			try {
+				builderPartCurr.processContents();
+			} catch (Exception e) {
+				ErrorDialog.displayExceptionError(getShell(), e);
+			}
+		}
+	}
+
 	private GridLayout createLayout() {
 		final GridLayout layout = new GridLayout(2, false);
 		layout.marginWidth = 2;
@@ -199,14 +209,7 @@ public class TransactionViewer extends Composite {
 			public void widgetSelected(SelectionEvent event) {
 				final MenuItem menuItem = (MenuItem) event.widget;
 				final IHttpBuilderPart builderPart = (IHttpBuilderPart) menuItem.getData();
-				if (isPending != false) {
-					try {
-						builderPartCurr.processContents();
-					} catch (Exception e) {
-						ErrorDialog.displayExceptionError(getShell(), e);
-						return;
-					}
-				}
+				processChanges();
 				builderPartCurr = builderPart;
 				builderPartCurr.setEditable(isPending);
 				builderPartCurr.refresh();

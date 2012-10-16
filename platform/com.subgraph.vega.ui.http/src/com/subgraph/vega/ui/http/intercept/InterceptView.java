@@ -89,6 +89,8 @@ public class InterceptView extends ViewPart {
 
 	public void forwardTransaction() {
 		try {
+			transactionViewerRequest.processChanges();
+			transactionViewerResponse.processChanges();
 			transactionManager.forwardTransaction(transactionInfo);
 		} catch (Exception ex) {
 			ErrorDialog.displayExceptionError(parentComposite.getShell(), ex);
