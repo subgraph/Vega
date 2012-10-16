@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
-import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class RequestConsumer implements Runnable {
 	private final Logger logger = Logger.getLogger("crawler");
