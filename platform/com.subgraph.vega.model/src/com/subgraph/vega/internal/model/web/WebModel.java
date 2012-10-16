@@ -98,24 +98,23 @@ public class WebModel implements IWebModel {
 	@Override
 	public synchronized IWebPath getWebPathByUri(URI uri) {
 		final HttpHost host = uriToHost(uri);
-		if (host != null)
-		{
+		if (host != null) {
 			IWebHost wh = getWebHostByHttpHost(host);
-		
-			if(wh == null)
+			if(wh == null) {
 				wh = createWebHostFromHttpHost(host);
-			IWebPath path =  wh.addPath(uriToPath(uri));
-			return path;
+			}
+			return wh.addPath(uriToPath(uri));
+		} else {
+			return null;
 		}
-		else return null;
 	}
 
 	private HttpHost uriToHost(URI uri) {
-		if (uri.getHost() != null)
-		{
+		if (uri.getHost() != null) {
 			return new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+		} else {
+			return null;
 		}
-		else return null;
 	}
 
 	private String uriToPath(URI uri) {
