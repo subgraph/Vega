@@ -36,7 +36,6 @@ import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
-import com.subgraph.vega.api.model.tags.ITag;
 import com.subgraph.vega.internal.model.conditions.HttpConditionSet;
 
 public class RequestLog implements IRequestLog {

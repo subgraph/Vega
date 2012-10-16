@@ -12,11 +12,8 @@ package com.subgraph.vega.impl.scanner;
 
 import java.io.IOException;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;

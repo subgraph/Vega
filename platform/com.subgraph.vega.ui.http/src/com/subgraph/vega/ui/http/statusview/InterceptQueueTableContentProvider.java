@@ -11,7 +11,6 @@
 package com.subgraph.vega.ui.http.statusview;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.subgraph.vega.api.http.proxy.IHttpInterceptor;

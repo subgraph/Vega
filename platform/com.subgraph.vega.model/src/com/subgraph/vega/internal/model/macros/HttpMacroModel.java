@@ -18,7 +18,6 @@ import com.db4o.query.Predicate;
 
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
-import com.subgraph.vega.api.model.identity.NewIdentityEvent;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.macros.IHttpMacroModel;
 import com.subgraph.vega.api.model.macros.NewMacroEvent;
