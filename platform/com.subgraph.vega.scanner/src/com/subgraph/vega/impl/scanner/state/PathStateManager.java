@@ -224,6 +224,10 @@ public class PathStateManager {
 		return scanInstance;
 	}
 
+	public boolean isExcludedParameter(String name) {
+		return config.getExcludedParameterNames().contains(name);
+	}
+	
 	public void debug(String message) {
 		if(config.getDisplayDebugOutput())
 			logger.info(message);

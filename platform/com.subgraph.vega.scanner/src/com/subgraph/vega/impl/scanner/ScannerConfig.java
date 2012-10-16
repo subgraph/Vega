@@ -11,7 +11,11 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.cookie.Cookie;
 
@@ -24,11 +28,13 @@ import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
 
+	private final static String[] defaultExcludedParameters = { "XSRFToken" };
 	private ITargetScope scanTargetScope;
 	private String userAgent = IHttpRequestEngineFactory.DEFAULT_USER_AGENT;
 	private IIdentity scanIdentity;
 	private List<Cookie> cookieList;
 	private List<String> modulesList;
+	private final Set<String> excludedParameterNames = new HashSet<String>();
 	private boolean logAllRequests;
 	private boolean displayDebugOutput;
 	private int maxRequestsPerSecond = DEFAULT_MAX_REQUEST_PER_SECOND;
@@ -59,6 +65,22 @@ public class ScannerConfig implements IScannerConfig {
 	@Override
 	public synchronized void setModulesList(List<String> modules) {
 		modulesList = modules;
+	}
+
+	@Override
+	public synchronized void setExcludedParameterNames(Set<String> names) {
+		excludedParameterNames.clear();
+		excludedParameterNames.addAll(names);
+	}
+
+	@Override
+	public Set<String> getDefaultExcludedParameterNames() {
+		return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(defaultExcludedParameters)));
+	}
+
+	@Override
+	public synchronized Set<String> getExcludedParameterNames() {
+		return Collections.unmodifiableSet(new HashSet<String>(excludedParameterNames));
 	}
 
 	@Override

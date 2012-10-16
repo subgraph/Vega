@@ -53,12 +53,22 @@ public class PathStateParameterManager {
 		parametersToPathStates.put(names, pathStates);
 
 		for(int i = 0; i < plist.size(); i++)  {
-			PathState st = PathState.createParameterPathState(fileFetchProcessor,  pathState, plist, i);
-			pathStates.add(st);
+			if(!isExcludedParameter(plist.get(i))) {
+				addFuzzablePathState(pathStates, plist, i);
+			}
 		}
 		return pathStates;
 	}
-
+	
+	private boolean isExcludedParameter(NameValuePair parameter) {
+		return pathState.getPathStateManager().isExcludedParameter(parameter.getName());
+	}
+		
+	private void addFuzzablePathState(List<PathState> pathStates, List<NameValuePair> parameters, int index) {
+		final PathState ps = PathState.createParameterPathState(fileFetchProcessor, pathState, parameters, index);
+		pathStates.add(ps);
+	}
+	
 	private Set<String> getNameSetForParameterList(List<NameValuePair> plist) {
 		final Set<String> names = new HashSet<String>();
 		for(NameValuePair nvp: plist) {
@@ -100,9 +110,15 @@ public class PathStateParameterManager {
 		parametersToPostPathStates.put(names, pathStates);
 
 		for(int i = 0; i < plist.size(); i++) {
-			PathState ps = PathState.createPostParameterPathState(fileFetchProcessor, pathState, plist, i);
-			pathStates.add(ps);
+			if(!isExcludedParameter(plist.get(i))) {
+				addFuzzablePostPathState(pathStates, plist, i);
+			}
 		}
 		return pathStates;
+	}
+	
+	private void addFuzzablePostPathState(List<PathState> pathStates, List<NameValuePair> parameters, int index) {
+		final PathState ps = PathState.createPostParameterPathState(fileFetchProcessor, pathState, parameters, index);
+		pathStates.add(ps);
 	}
 }

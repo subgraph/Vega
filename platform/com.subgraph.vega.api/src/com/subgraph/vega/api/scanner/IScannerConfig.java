@@ -11,6 +11,7 @@
 package com.subgraph.vega.api.scanner;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.cookie.Cookie;
 
@@ -45,6 +46,7 @@ public interface IScannerConfig {
 //	void setNtlmPassword(String password);
 	void setModulesList(List<String> modules);
 
+	void setExcludedParameterNames(Set<String> names);
 	void setLogAllRequests(boolean flag);
 	void setDisplayDebugOutput(boolean flag);
 	void setMaxRequestsPerSecond(int rps);
@@ -73,6 +75,9 @@ public interface IScannerConfig {
 	IIdentity getScanIdentity();
 	
 	List<String> getModulesList();
+	
+	Set<String> getDefaultExcludedParameterNames();
+	Set<String> getExcludedParameterNames();
 
 	IFormCredential createFormCredential(String username, String password) ; // XXX
 	List<IFormCredential> getFormCredentials(); // XXX
