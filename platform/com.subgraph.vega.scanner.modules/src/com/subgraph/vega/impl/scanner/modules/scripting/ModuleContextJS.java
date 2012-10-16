@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
@@ -26,9 +27,11 @@ import com.subgraph.vega.api.scanner.IPathState;
 
 public class ModuleContextJS {
 
+	private final Scriptable scope;
 	private final IInjectionModuleContext context;
 
-	ModuleContextJS(IInjectionModuleContext context) {
+	ModuleContextJS(Scriptable scope, IInjectionModuleContext context) {
+		this.scope = scope;
 		this.context = context;
 	}
 
@@ -70,8 +73,11 @@ public class ModuleContextJS {
 		return context.getSavedRequest(index);
 	}
 
-	public ResponseJS getSavedResponse(int index) {
-		return new ResponseJS(context.getSavedResponse(index));
+	public Scriptable getSavedResponse(int index) {
+		final IHttpResponse r = context.getSavedResponse(index);
+		Object responseOb = Context.javaToJS(r, scope);
+		Object[] args = { responseOb };
+		return Context.getCurrentContext().newObject(scope, "Response", args);
 	}
 	
 	/* Added below method because of bug #547 */

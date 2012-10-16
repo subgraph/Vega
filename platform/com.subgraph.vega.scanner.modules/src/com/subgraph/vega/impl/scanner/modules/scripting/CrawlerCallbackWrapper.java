@@ -44,7 +44,7 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 		final Scriptable scope = callbackFunction.getParentScope();
 		try {
 			final Context cx = Context.enter();
-			final Object[] arguments = { request, createResponse(response, cx, scope), new ModuleContextJS(ctx) };
+			final Object[] arguments = { request, createResponse(response, cx, scope), new ModuleContextJS(scope, ctx) };
 			callbackFunction.call(cx, scope, scope, arguments);
 		} catch (WrappedException e) {
 			logger.log(Level.WARNING, new RhinoExceptionFormatter("Wrapped exception running module script", e).toString());

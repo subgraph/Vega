@@ -51,9 +51,9 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 	public void runScript(IPathState pathState) {
 		final IInjectionModuleContext ctx = pathState.createModuleContext();
 		try {
-			final Object[] args = new Object[] { new ModuleContextJS(ctx) };
 			Context cx = Context.enter();
 			Scriptable instance = module.createInstanceScope(cx);
+			final Object[] args = new Object[] { new ModuleContextJS(instance, ctx) };
 			final long startTS = System.currentTimeMillis();
 			module.runModule(cx, instance, args);
 			final long endTS = System.currentTimeMillis();
