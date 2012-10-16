@@ -111,7 +111,6 @@ public class NewScanWizard extends Wizard {
 		return (scanHostURI != null);
 		*/
 		
-		System.out.println("Performing finish");
 		scanIdentity = authPage.getScanIdentity();
 		cookieStringList = authPage.getCookieStringList();
 		scanTargetScope = targetPage.getScanTargetScope();
