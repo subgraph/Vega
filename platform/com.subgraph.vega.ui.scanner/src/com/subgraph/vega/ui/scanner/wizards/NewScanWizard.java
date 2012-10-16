@@ -30,16 +30,10 @@ public class NewScanWizard extends Wizard {
 	private NewScanTargetPage targetPage;
 	private NewScanModulesPage modulesPage;
 	private NewScanAuthPage authPage;
-	//private NewScanWizardPage page1;
-	//private NewScanWizardPage2 page2;
-	//private URI scanHostURI;
 	private ITargetScope scanTargetScope;
-	//private String validTargetField;
-	//private boolean isDomTest;
 	private IIdentity scanIdentity;
 	private List<String> cookieStringList;
 	private String targetFieldString;
-	//private List<String> exclusions;
 
 	public NewScanWizard(String target, Collection<IIdentity> identities, List<IScannerModule> modules) {
 		final IModel model = Activator.getDefault().getModel();
@@ -54,10 +48,6 @@ public class NewScanWizard extends Wizard {
 		
 		authPage = new NewScanAuthPage(identities);
 		authPage.setImageDescriptor(logo);
-		
-		//page1 = new NewScanWizardPage(imageCache, target, identities, modules);
-		
-		//page2 = new NewScanWizardPage2(imageCache);
 	}
 	
 	@Override
@@ -65,52 +55,15 @@ public class NewScanWizard extends Wizard {
 		addPage(targetPage);
 		addPage(modulesPage);
 		addPage(authPage);
-		//addPage(page1);
-		//addPage(page2);
 	}
 	
 	@Override 
 	public boolean canFinish() {
 		return targetPage.isTargetValid();
-		/*
-		final String scanHostText = page1.getScanTarget().trim();
-		if(scanHostText.isEmpty()) {
-			page1.setErrorMessage(null);
-			return false;
-		}
-
-		final URI target = createTargetURI(scanHostText);
-		if(target == null) {
-			page1.setErrorMessage("Target entered is not a valid host or URL");
-			return false;
-		} else {
-			page1.setErrorMessage(null);
-			return true;
-		}
-		*/
 	}
 	
 	@Override
 	public boolean performFinish() {
-		/*
-		String target = page1.getScanTarget();
-		if (target.equals("domtest")) {
-			isDomTest = true;
-			return true;
-		}
-		
-		scanIdentity = page1.getScanIdentity();
-		cookieStringList = page2.getCookieStringList();
-		exclusions = page2.getExclusions();
-
-		scanHostURI = createTargetURI(target);
-		if (scanHostURI != null) {
-			validTargetField = target;
-		}
-
-		return (scanHostURI != null);
-		*/
-		
 		scanIdentity = authPage.getScanIdentity();
 		cookieStringList = authPage.getCookieStringList();
 		scanTargetScope = targetPage.getScanTargetScope();
@@ -124,10 +77,6 @@ public class NewScanWizard extends Wizard {
 		super.dispose();
 	}
 	
-	//public URI getScanHostURI() {
-		//return scanHostURI;
-	//}
-	
 	public ITargetScope getScanTargetScope() {
 		return scanTargetScope;
 	}
@@ -140,28 +89,7 @@ public class NewScanWizard extends Wizard {
 		return cookieStringList;
 	}
 
-	//public boolean isDomTest() {
-//		return isDomTest;	
-//	}
-
 	public IIdentity getScanIdentity() { 
 		return scanIdentity;
 	}
-	
-//	public List<String> getExclusions() {
-//		return exclusions;
-//	}
-	/*
-	URI createTargetURI(String value) {
-		if (!(value.startsWith("http://") || value.startsWith("https://"))) {
-			value = "http://" + value;
-		}
-		try {
-			return new URI(value);
-		} catch (URISyntaxException e) {
-			return null;
-		}
-	}
-	*/
-
 }
