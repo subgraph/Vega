@@ -4,7 +4,7 @@ Bundle-Name: Httpeditor
 Bundle-SymbolicName: com.subgraph.vega.ui.httpeditor
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.model,
  com.subgraph.vega.api.model.alerts,
