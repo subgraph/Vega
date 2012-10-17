@@ -53,7 +53,7 @@ public class TitleAreaConfigDialog extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		final Composite dialogAreaComposite = (Composite) super.createDialogArea(parent);
-		content.createContents(parent);
+		content.createContents(dialogAreaComposite);
 		return dialogAreaComposite;
 	}
 }

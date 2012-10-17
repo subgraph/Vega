@@ -90,8 +90,9 @@ public class ConfigureInterceptionContent implements IConfigDialogContent {
 	public Composite createContents(Composite parent) {
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, true));
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createInterceptorOptions(composite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		createBreakpointsEditor(composite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		createBreakpointsEditor(composite).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		interceptor = Activator.getDefault().getProxyService().getInterceptor();
 		comboViewerInterceptorLevel.setSelection(new StructuredSelection(interceptor.getInterceptLevel(direction)));
 		setConditionSetInput();
@@ -201,7 +202,7 @@ public class ConfigureInterceptionContent implements IConfigDialogContent {
 		rootControl.setText("Breakpoints");
 		rootControl.setLayout(new GridLayout(2, false));
 
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		final Composite compTable = createTableBreakpoints(rootControl, gd, 7);
 		compTable.setLayoutData(gd);
 		final Composite compTableButtons = createTableBreakpointsButtons(rootControl);
