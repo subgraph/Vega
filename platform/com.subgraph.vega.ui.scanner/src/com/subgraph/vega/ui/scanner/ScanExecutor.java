@@ -41,7 +41,7 @@ public class ScanExecutor {
 		final IScan scan = scanner.createScan();
 		final Collection<IIdentity> identities = Activator.getDefault().getModel().getCurrentWorkspace().getIdentityModel().getAllIdentities();
 
-		NewScanWizard wizard = new NewScanWizard(target, identities, scan.getModuleList());
+		NewScanWizard wizard = new NewScanWizard(target, identities, scan.getModuleList(), scan.getConfig().getDefaultExcludedParameterNames());
 		WizardDialog dialog = new NewWizardDialog(shell, wizard);
 		if(dialog.open() == IDialogConstants.OK_ID) {
 			return maybeLaunchScanFromWizard(shell, wizard, scanner, scan);
@@ -64,6 +64,7 @@ public class ScanExecutor {
 		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);
 		config.setCookieList(getCookieListForScope(wizard.getCookieStringList(), scanTargetScope));
 		config.setScanIdentity(wizard.getScanIdentity());
+		config.setExcludedParameterNames(wizard.getExcludedParameterNames());
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 		config.setLogAllRequests(preferences.getBoolean(IPreferenceConstants.P_LOG_ALL_REQUESTS));
 		config.setDisplayDebugOutput(preferences.getBoolean(IPreferenceConstants.P_DISPLAY_DEBUG_OUTPUT));

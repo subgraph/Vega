@@ -12,6 +12,7 @@ package com.subgraph.vega.ui.scanner.wizards;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
@@ -30,12 +31,14 @@ public class NewScanWizard extends Wizard {
 	private NewScanTargetPage targetPage;
 	private NewScanModulesPage modulesPage;
 	private NewScanAuthPage authPage;
+	private NewScanParameterPage parameterPage;
 	private ITargetScope scanTargetScope;
 	private IIdentity scanIdentity;
 	private List<String> cookieStringList;
+	private Set<String> excludedParameterNames;
 	private String targetFieldString;
 
-	public NewScanWizard(String target, Collection<IIdentity> identities, List<IScannerModule> modules) {
+	public NewScanWizard(String target, Collection<IIdentity> identities, List<IScannerModule> modules, Set<String> defaultExcludeParameters) {
 		final IModel model = Activator.getDefault().getModel();
 		imageCache = new ImageCache(Activator.PLUGIN_ID);
 		final ImageDescriptor logo = ImageDescriptor.createFromImage(imageCache.get(VEGA_LOGO));
@@ -48,6 +51,9 @@ public class NewScanWizard extends Wizard {
 		
 		authPage = new NewScanAuthPage(identities);
 		authPage.setImageDescriptor(logo);
+		
+		parameterPage = new NewScanParameterPage(defaultExcludeParameters);
+		parameterPage.setImageDescriptor(logo);
 	}
 	
 	@Override
@@ -55,6 +61,7 @@ public class NewScanWizard extends Wizard {
 		addPage(targetPage);
 		addPage(modulesPage);
 		addPage(authPage);
+		addPage(parameterPage);
 	}
 	
 	@Override 
@@ -68,6 +75,7 @@ public class NewScanWizard extends Wizard {
 		cookieStringList = authPage.getCookieStringList();
 		scanTargetScope = targetPage.getScanTargetScope();
 		targetFieldString = targetPage.getUriTextIfValid();
+		excludedParameterNames = parameterPage.getExcludedParameterNames();
 		return scanTargetScope != null;
 	}
 
@@ -91,5 +99,9 @@ public class NewScanWizard extends Wizard {
 
 	public IIdentity getScanIdentity() { 
 		return scanIdentity;
+	}
+	
+	public Set<String> getExcludedParameterNames() {
+		return excludedParameterNames;
 	}
 }
