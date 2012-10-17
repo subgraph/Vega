@@ -20,7 +20,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.WorkspaceCloseEvent;
 import com.subgraph.vega.api.model.WorkspaceOpenEvent;
 import com.subgraph.vega.api.model.WorkspaceResetEvent;
-import com.subgraph.vega.api.scanner.ILiveScan;
+import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
@@ -69,8 +69,8 @@ public class Scanner implements IScanner {
 	}
 	
 	@Override
-	public ILiveScan createLiveScan(IWorkspace workspace) {
-		return new LiveScan(workspace, this);
+	public IProxyScan createProxyScan(IWorkspace workspace) {
+		return new ProxyScan(workspace, this);
 	}
 
 	@Override

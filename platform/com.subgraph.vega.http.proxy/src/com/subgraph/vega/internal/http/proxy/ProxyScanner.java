@@ -15,22 +15,22 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.scope.ITargetScope;
-import com.subgraph.vega.api.scanner.ILiveScan;
+import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScanner;
 
-public class LiveScanner {
+public class ProxyScanner {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
 	
 	private final IScanner scanner;
-	private final LiveScannerScopeTracker scopeTracker;
+	private final ProxyScannerScopeTracker scopeTracker;
 	
 	
-	private ILiveScan liveScan;
+	private IProxyScan proxyScan;
 	private boolean isEnabled = false;
 	
-	LiveScanner(IScanner scanner, IModel model) {
+	ProxyScanner(IScanner scanner, IModel model) {
 		this.scanner = scanner;
-		this.scopeTracker = new LiveScannerScopeTracker(model, this);
+		this.scopeTracker = new ProxyScannerScopeTracker(model, this);
 	}
 	
 	boolean isEnabled() {
@@ -42,26 +42,26 @@ public class LiveScanner {
 	}
 	
 	void processRequest(HttpUriRequest request) {
-		if(liveScan == null) {
-			throw new IllegalStateException("Cannot process request because no live scan is currently active");
+		if(proxyScan == null) {
+			throw new IllegalStateException("Cannot process request because no proxy scan is currently active");
 		}
 		if(request.getMethod().equalsIgnoreCase("GET")) {
-			handleLiveScanGetRequest(request);
+			handleProxyScanGetRequest(request);
 		} else if(request.getMethod().equalsIgnoreCase("POST")) {
-			handleLiveScanPostRequest(request);
+			handleProxyScanPostRequest(request);
 		}
 	}
 	
 	
 	void handleWorkspaceChanged(IWorkspace newWorkspace) {
-		if(liveScan != null) {
-			liveScan.stop();
+		if(proxyScan != null) {
+			proxyScan.stop();
 		}
-		liveScan = scanner.createLiveScan(newWorkspace);
+		proxyScan = scanner.createProxyScan(newWorkspace);
 	}
 	
 	
-	private void handleLiveScanGetRequest(HttpUriRequest request) {
+	private void handleProxyScanGetRequest(HttpUriRequest request) {
 		
 		final List<NameValuePair> params = URLEncodedUtils.parse(request.getURI(), "UTF-8");
 		if(params.isEmpty()) {
@@ -69,11 +69,11 @@ public class LiveScanner {
 		}
 		final URI target = request.getURI();
 		if(isTargetInScope(target)) {
-			liveScan.scanGetTarget(target, params);
+			proxyScan.scanGetTarget(target, params);
 		}
 	}
 	
-	private void handleLiveScanPostRequest(HttpUriRequest request) {
+	private void handleProxyScanPostRequest(HttpUriRequest request) {
 		if(!(request instanceof HttpEntityEnclosingRequest)) {
 			return;
 		}
@@ -90,7 +90,7 @@ public class LiveScanner {
 		}
 		final URI target = request.getURI();
 		if(isTargetInScope(target)) {
-			liveScan.scanPostTarget(target, params);
+			proxyScan.scanPostTarget(target, params);
 		}
 	}
 

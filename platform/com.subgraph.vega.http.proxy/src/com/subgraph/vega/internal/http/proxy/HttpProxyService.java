@@ -64,7 +64,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private Map<String, HttpProxyListener> listenerMap = new ConcurrentHashMap<String, HttpProxyListener>();
 	private final IHttpInterceptProxyEventHandler listenerEventHandler;
 	private final ProxyTransactionManipulator transactionManipulator;
-	private LiveScanner liveScanner;
+	private ProxyScanner proxyScanner;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
 	private HttpClient httpClient;
@@ -82,7 +82,7 @@ public class HttpProxyService implements IHttpProxyService {
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
-		liveScanner = new LiveScanner(scanner, model);
+		proxyScanner = new ProxyScanner(scanner, model);
 
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
@@ -240,8 +240,8 @@ public class HttpProxyService implements IHttpProxyService {
 			}
 		}
 		try {
-			if(liveScanner.isEnabled()) {
-				liveScanner.processRequest(transaction.getRequest());
+			if(proxyScanner.isEnabled()) {
+				proxyScanner.processRequest(transaction.getRequest());
 			}
 			contentAnalyzer.processResponse(transaction.getResponse());
 		} catch (RuntimeException e) {
@@ -253,7 +253,7 @@ public class HttpProxyService implements IHttpProxyService {
 		if(currentWorkspace == null)
 			throw new IllegalStateException("No workspace is open");
 		isRunning = false;
-		liveScanner.setEnabled(false);
+		proxyScanner.setEnabled(false);
 
 		for (Iterator<Map.Entry<String, HttpProxyListener>> iter = listenerMap.entrySet().iterator(); iter.hasNext();) {
 			final Map.Entry<String, HttpProxyListener> entry = iter.next();
@@ -341,12 +341,12 @@ public class HttpProxyService implements IHttpProxyService {
 	}
 
 	@Override
-	public boolean isLiveScan() {
-		return liveScanner.isEnabled();
+	public boolean isProxyScanEnabled() {
+		return proxyScanner.isEnabled();
 	}
 
 	@Override
-	public void setLiveScan(boolean enabled) {
-		liveScanner.setEnabled(enabled);
+	public void setProxyScanEnabled(boolean enabled) {
+		proxyScanner.setEnabled(enabled);
 	}
 }

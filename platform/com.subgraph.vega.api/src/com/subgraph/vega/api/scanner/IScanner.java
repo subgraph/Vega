@@ -14,6 +14,6 @@ import com.subgraph.vega.api.model.IWorkspace;
 
 public interface IScanner {
 	IScan createScan();
-	ILiveScan createLiveScan(IWorkspace workspace);
+	IProxyScan createProxyScan(IWorkspace workspace);
 	void runDomTests();
 }

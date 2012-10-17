@@ -35,13 +35,13 @@ public class ResponseAnalyzer {
 	private final UriParser uriParser;
 	private final UriFilter uriFilter;
 	private final FormProcessor formProcessor;
-	private final boolean isLiveScan;
+	private final boolean isProxyScan;
 
-	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter, boolean isLiveScan) {
+	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter, boolean isProxyScan) {
 		this.contentAnalyzer = contentAnalyzer;
 		this.uriParser = uriParser;
 		this.uriFilter = uriFilter;
-		this.isLiveScan = isLiveScan;
+		this.isProxyScan = isProxyScan;
 		this.formProcessor = new FormProcessor(config, uriFilter, uriParser);
 	}
 
@@ -55,7 +55,7 @@ public class ResponseAnalyzer {
 	public void analyzePage(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
 		
 		final IContentAnalyzerResult result = contentAnalyzer.processResponse(res, false, true);
-		if(isLiveScan) {
+		if(isProxyScan) {
 			return;
 		}
 		for(URI u: result.getDiscoveredURIs()) {

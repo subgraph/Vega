@@ -116,8 +116,8 @@
          </enabledWhen>
       </handler>
       <handler
-            class="com.subgraph.vega.ui.http.commands.LiveScanHandler"
-            commandId="com.subgraph.vega.commands.livescan">
+            class="com.subgraph.vega.ui.http.commands.ProxyScanHandler"
+            commandId="com.subgraph.vega.commands.proxyScan">
          <enabledWhen>
             <with
                   variable="vega.proxyState">
@@ -205,8 +205,8 @@
       </command>
       <command
             categoryId="com.subgraph.vega.commands.proxyCategory"
-            id="com.subgraph.vega.commands.livescan"
-            name="Start Live Scan">
+            id="com.subgraph.vega.commands.proxyScan"
+            name="Start Proxy Scan">
       </command>
    </extension>
    <extension
@@ -276,10 +276,10 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="com.subgraph.vega.commands.livescan"
-                  icon="icons/live.png"
+                  commandId="com.subgraph.vega.commands.proxyScan"
+                  icon="icons/proxy_scan.png"
                   style="toggle"
-                  tooltip="Start Live Scan">
+                  tooltip="Start Proxy Scan">
                <visibleWhen
                      checkEnabled="false">
                   <with

@@ -10,15 +10,15 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.scope.ActiveScopeChangedEvent;
 import com.subgraph.vega.api.model.scope.ITargetScope;
 
-public class LiveScannerScopeTracker {
+public class ProxyScannerScopeTracker {
 	
 	private final IEventHandler scopeChangeHandler;
-	private final LiveScanner liveScanner;
+	private final ProxyScanner proxyScanner;
 	private IWorkspace currentWorkspace;
 	private ITargetScope currentActiveScope;
 	
-	LiveScannerScopeTracker(IModel model, LiveScanner liveScanner) {
-		this.liveScanner = liveScanner;
+	ProxyScannerScopeTracker(IModel model, ProxyScanner proxyScanner) {
+		this.proxyScanner = proxyScanner;
 		this.scopeChangeHandler = createScopeChangeListener();
 		setCurrentWorkspace(model.addWorkspaceListener(createWorkspaceListener()));
 	}
@@ -70,7 +70,7 @@ public class LiveScannerScopeTracker {
 		final IWorkspace oldWorkspace = currentWorkspace;
 		currentWorkspace = workspace;
 		currentActiveScope = setScopeChangeListener(oldWorkspace, workspace);
-		liveScanner.handleWorkspaceChanged(workspace);
+		proxyScanner.handleWorkspaceChanged(workspace);
 	}
 	
 	private ITargetScope setScopeChangeListener(IWorkspace oldWorkspace, IWorkspace newWorkspace) {

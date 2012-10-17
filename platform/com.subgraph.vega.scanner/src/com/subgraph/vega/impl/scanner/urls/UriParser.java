@@ -42,12 +42,12 @@ public class UriParser {
 	private final ICrawlerResponseProcessor unknownProcessor;
 	private final PathStateManager pathStateManager;
 
-	public UriParser(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer, IScanInstance scanInstance, boolean isLiveScan) {
+	public UriParser(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, UriFilter filter, IContentAnalyzer contentAnalyzer, IScanInstance scanInstance, boolean isProxyScan) {
 		this.workspace = workspace;
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isLiveScan), scanInstance);
+		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isProxyScan), scanInstance);
 	}
 
 	public IPathState processUri(URI uri) {

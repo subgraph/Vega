@@ -21,7 +21,7 @@ import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
-import com.subgraph.vega.api.scanner.ILiveScan;
+import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
@@ -29,7 +29,7 @@ import com.subgraph.vega.api.util.UriTools;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
-public class LiveScan implements ILiveScan {
+public class ProxyScan implements IProxyScan {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final IWorkspace workspace;
 	private final Scanner scanner;
@@ -39,7 +39,7 @@ public class LiveScan implements ILiveScan {
 	private UriParser uriParser;
 	private boolean isStarted = false;
 	
-	LiveScan(IWorkspace workspace, Scanner scanner) {
+	ProxyScan(IWorkspace workspace, Scanner scanner) {
 		this.workspace = workspace;
 		this.scanner = scanner;
 		this.scanInstance = workspace.getScanAlertRepository().getScanInstanceByScanId(IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID);
@@ -77,7 +77,7 @@ public class LiveScan implements ILiveScan {
 		try {
 			crawler.stop();
 		} catch (InterruptedException e) {
-			throw new RuntimeException("Attempt to stop live scan crawler was interrupted", e);
+			throw new RuntimeException("Attempt to stop proxy scan crawler was interrupted", e);
 		}
 		crawler = null;
 		uriParser = null;

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 
-public interface ILiveScan {
+public interface IProxyScan {
 	void scanGetTarget(URI target, List<NameValuePair> parameters);
 	void scanPostTarget(URI target, List<NameValuePair> parameters);
 	void stop();

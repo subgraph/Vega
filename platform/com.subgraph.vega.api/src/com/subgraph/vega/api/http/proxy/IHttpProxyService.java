@@ -19,14 +19,14 @@ public interface IHttpProxyService {
 	void unregisterEventHandler(IHttpProxyServiceEventHandler handler);
 	boolean isRunning();
 	boolean isPassthrough();
-	boolean isLiveScan();
+	boolean isProxyScanEnabled();
 	IHttpProxyListenerConfig createListenerConfig();
 	void setListenerConfigs(IHttpProxyListenerConfig[] listenerConfigs);
 	IHttpProxyListener[] getListeners();
 	IHttpProxyListenerConfig[] getListenerConfigs();
 	int getListenerConfigsCount();
 	void setPassthrough(boolean enabled);
-	void setLiveScan(boolean enabled);
+	void setProxyScanEnabled(boolean enabled);
 	void start();
 	void stop();
 	IHttpProxyTransactionManipulator getTransactionManipulator();
