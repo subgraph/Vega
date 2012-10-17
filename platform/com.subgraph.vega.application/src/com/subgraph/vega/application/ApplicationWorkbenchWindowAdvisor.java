@@ -10,7 +10,10 @@
  ******************************************************************************/
 package com.subgraph.vega.application;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
@@ -20,9 +23,12 @@ import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+import org.eclipse.ui.internal.PerspectiveBarManager;
+import org.eclipse.ui.internal.WorkbenchWindow;
 
 import com.subgraph.vega.application.console.VegaConsoleView;
 
+@SuppressWarnings("restriction")
 public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
     public ApplicationWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
@@ -56,8 +62,24 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
     }
   
+	private void disablePerspectiveToolbarMenu() {
+    	final PerspectiveBarManager perspectiveBarManager = ((WorkbenchWindow)PlatformUI.getWorkbench().getActiveWorkbenchWindow()).getPerspectiveBar();
+    	if(perspectiveBarManager != null) {
+    		ToolBar toolbar = perspectiveBarManager.getControl();
+    		Listener[] listeners = toolbar.getListeners(SWT.MenuDetect);
+    		if(listeners == null) {
+    			return;
+    		}
+    		for(Listener l: listeners) {
+    			toolbar.removeListener(SWT.MenuDetect, l);
+    		}
+    	}
+    }
+   
     @Override
     public void postWindowOpen() {
+    	disablePerspectiveToolbarMenu();
+
     	final IWorkbenchWindow window = getWindowConfigurer().getWindow();
     	if(window == null) {
     		return;
