@@ -40,6 +40,7 @@ public class PathStateManager {
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
 	private final ResponseAnalyzer responseAnalyzer;
+	private final boolean isProxyScan;
 	private final ICrawlerResponseProcessor directoryFetchCallback = new DirectoryProcessor();
 	private final Wordlists wordlists = new Wordlists();
 
@@ -50,13 +51,14 @@ public class PathStateManager {
 
 	private final IScanInstance scanInstance;
 
-	public PathStateManager(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance) {
+	public PathStateManager(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance, boolean isProxyScan) {
 		this.config = config;
 		this.injectionModules = injectionModules;
 		this.workspace = workspace;
 		this.crawler = crawler;
 		this.responseAnalyzer = responseAnalyzer;
 		this.scanInstance = scanInstance;
+		this.isProxyScan = isProxyScan;
 	}
 
 	public List<IBasicModuleScript> getInjectionModules() {
@@ -71,6 +73,10 @@ public class PathStateManager {
 		synchronized(modelToScanState) {
 			return modelToScanState.containsKey(path);
 		}
+	}
+
+	public boolean isProxyScan() {
+		return isProxyScan;
 	}
 
 	/* called with modelToScanState lock */

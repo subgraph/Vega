@@ -172,6 +172,15 @@ public class PathState implements IPathState {
 		response = null;
 	}
 
+	public void requeueInitialFetch() {
+		if(lockedFlag) {
+			return;
+		}
+		final IInjectionModuleContext ctx = new ModuleContext(pathStateManager, requestBuilder, this, 0);
+		final HttpUriRequest req = createRequest();
+		submitRequest(req, initialFetchProcessor, ctx);
+	}
+
 	private void setLocked() {
 		lockedFlag = true;
 	}
@@ -421,6 +430,11 @@ public class PathState implements IPathState {
 			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
 				return;
 			} else if(pm.hasParameterList(parameters)) {
+				if(pathStateManager.isProxyScan()) {
+					for(PathState ps: pm.getStatesForParameterList(parameters)) {
+						ps.requeueInitialFetch();
+					}
+				}
 				return;
 			} else if(pathStateManager.hasExceededLimits(this)) {
 				return;
@@ -437,8 +451,13 @@ public class PathState implements IPathState {
 			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
 				return;
 			}
-			if(!pm.hasPostParameterList(parameters))
+			if(!pm.hasPostParameterList(parameters)) {
 				pm.addPostParameterList(parameters);
+			} else if(pathStateManager.isProxyScan()) {
+				for(PathState ps: pm.getStatesForPostParameterList(parameters)) {
+					ps.requeueInitialFetch();
+				}
+			}
 		}
 	}
 

@@ -47,7 +47,7 @@ public class UriParser {
 		this.directoryProcessor = new DirectoryProcessor();
 		this.fileProcessor = new FileProcessor();
 		this.unknownProcessor = new UnknownProcessor();
-		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isProxyScan), scanInstance);
+		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isProxyScan), scanInstance, isProxyScan);
 	}
 
 	public IPathState processUri(URI uri) {
