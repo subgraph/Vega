@@ -34,6 +34,8 @@ public class NewScanAuthPage extends WizardPage {
 
 	protected NewScanAuthPage(Collection<IIdentity> identities) {
 		super("Authentication");
+		setTitle("Authentication Options");
+		setDescription("Configure cookies and authentication identity to use during scan");
 		this.identities = new ArrayList<Object>(identities.size() + 1);
 		this.identities.add(emptyIdentity);
 		this.identities.addAll(identities);
