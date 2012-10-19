@@ -28,15 +28,17 @@ public class RequestConsumer implements Runnable {
 	private final BlockingQueue<CrawlerTask> crawlerRequestQueue;
 	private final BlockingQueue<CrawlerTask> crawlerResponseQueue;
 	private final CountDownLatch latch;
+	private final CrawlerPauseLock pauseLock;
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
 
-	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch) {
+	RequestConsumer(IHttpRequestEngine requestEngine, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, CrawlerPauseLock pauseLock) {
 		this.requestEngine = requestEngine;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
 		this.latch = latch;
+		this.pauseLock = pauseLock;
 	}
 
 	@Override
@@ -60,6 +62,7 @@ public class RequestConsumer implements Runnable {
 	
 	private void runLoop() throws InterruptedException {
 		while(!stop) {
+			pauseLock.checkIfPaused();
 			CrawlerTask task = (CrawlerTask) crawlerRequestQueue.take();
 			
 			if(task.isExitTask()) {

@@ -18,6 +18,9 @@ public interface IWebCrawler {
 	void setStopOnEmptyQueue(boolean value);
 	void registerProgressTracker(ICrawlerProgressTracker progress);
 	void start();
+	void pause();
+	void unpause();
+	boolean isPaused();
 	void stop() throws InterruptedException;
 	void waitFinished() throws InterruptedException;
 }

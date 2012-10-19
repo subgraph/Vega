@@ -30,11 +30,12 @@ public class HttpResponseProcessor implements Runnable {
 	private final TaskCounter counter;
 	private final AtomicInteger outstandingTasks;
 	private final boolean stopOnEmptyQueue;
+	private final CrawlerPauseLock pauseLock;
 	private volatile boolean stop;
 	private final Object requestLock = new Object();
 	private volatile HttpUriRequest activeRequest = null;
 
-	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter, AtomicInteger outstandingTasks, boolean stopOnEmptyQueue) {
+	HttpResponseProcessor(WebCrawler crawler, BlockingQueue<CrawlerTask> requestQueue, BlockingQueue<CrawlerTask> responseQueue, CountDownLatch latch, TaskCounter counter, AtomicInteger outstandingTasks, boolean stopOnEmptyQueue, CrawlerPauseLock pauseLock) {
 		this.crawler = crawler;
 		this.crawlerRequestQueue = requestQueue;
 		this.crawlerResponseQueue = responseQueue;
@@ -42,6 +43,7 @@ public class HttpResponseProcessor implements Runnable {
 		this.counter = counter;
 		this.outstandingTasks = outstandingTasks;
 		this.stopOnEmptyQueue = stopOnEmptyQueue;
+		this.pauseLock = pauseLock;
 	}
 
 	@Override
@@ -66,8 +68,10 @@ public class HttpResponseProcessor implements Runnable {
 		}
 	}
 
+
 	private void runLoop() throws InterruptedException {
 		while(!stop) {
+			pauseLock.checkIfPaused();
 			CrawlerTask task = crawlerResponseQueue.take();
 			if(task.isExitTask()) {
 				crawlerRequestQueue.add(CrawlerTask.createExitTask());

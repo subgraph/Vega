@@ -36,6 +36,7 @@ public class WebCrawler implements IWebCrawler {
 	private final List<ICrawlerProgressTracker> eventHandlers;
 	private final int requestThreadCount;
 	private final int responseThreadCount;
+	private final CrawlerPauseLock pauseLock;
 
 	private boolean stopOnEmptyQueue = true;
 	volatile private CountDownLatch latch;
@@ -53,6 +54,7 @@ public class WebCrawler implements IWebCrawler {
 		this.requestConsumers = new ArrayList<RequestConsumer>(requestThreadCount);
 		this.responseProcessors = new ArrayList<HttpResponseProcessor>(responseThreadCount);
 		this.eventHandlers = new ArrayList<ICrawlerProgressTracker>();
+		this.pauseLock = new CrawlerPauseLock();
 	}
 	
 	@Override
@@ -65,13 +67,13 @@ public class WebCrawler implements IWebCrawler {
 		updateProgress();
 		
 		for(int i = 0; i < responseThreadCount; i++) {
-			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks, stopOnEmptyQueue);
+			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks, stopOnEmptyQueue, pauseLock);
 			responseProcessors.add(responseProcessor);
 			executor.execute(responseProcessor);
 		}
 		
 		for(int i = 0; i < requestThreadCount; i++) {
-			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch);
+			RequestConsumer consumer = new RequestConsumer(requestEngine, requestQueue, responseQueue, latch, pauseLock);
 			requestConsumers.add(consumer);
 			executor.execute(consumer);
 		}
@@ -79,17 +81,41 @@ public class WebCrawler implements IWebCrawler {
 	}
 	
 	public synchronized void stop() throws InterruptedException {
+		synchronized (pauseLock) {
+			if(pauseLock.isPaused()) {
+				pauseLock.unpauseCrawler();
+			}
+		}
+
 		for(HttpResponseProcessor responseProcessor: responseProcessors)
 			responseProcessor.stop();
+		
 		for(RequestConsumer consumer: requestConsumers)
 			consumer.stop();
+		
 		requestQueue.clear();
 		requestQueue.put(CrawlerTask.createExitTask());
 		responseQueue.clear();
 		responseQueue.put(CrawlerTask.createExitTask());
+		
 		latch.await();
 	}
 	
+	@Override
+	public void pause() {
+		pauseLock.pauseCrawler();
+	}
+	
+	@Override
+	public void unpause() {
+		pauseLock.unpauseCrawler();
+	}
+
+	@Override
+	public boolean isPaused() {
+		return pauseLock.isPaused();
+	}
+
 	public void waitFinished() throws InterruptedException {
 		latch.await();
 	}
