@@ -10,34 +10,13 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.scanner.commands;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.subgraph.vega.api.scanner.IScan;
-import com.subgraph.vega.ui.scanner.alerts.ScanAlertView;
-import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
-public class StopScannerHandler extends AbstractHandler {
-
+public class StopScannerHandler extends AbstractScanHandler {
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ScanAlertView view;
-		try {
-			view = (ScanAlertView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(ScanAlertView.ID);
-		} catch (PartInitException e) {
-			Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-			ErrorDialog.displayExceptionError(shell, e);
-			return null;
-		}
-		final IScan scan = view.getSelection();
-		if (scan != null) {
-			scan.stopScan();
-		}
-		return null;
+	protected void runCommand(ExecutionEvent event, IScan selectedScan) {
+		selectedScan.stopScan();
 	}
-
 }

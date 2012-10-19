@@ -77,6 +77,18 @@
             allPopups="false"
             locationURI="toolbar:com.subgraph.vega.views.alert">
          <command
+               commandId="com.subgraph.vega.ui.scanner.pausescan"
+               icon="icons/scan_pause.png"
+               label="Pause Scan"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.ui.scanner.unpausescan"
+               icon="icons/scan_unpause.png"
+               label="Unpause Scan"
+               style="push">
+         </command>
+         <command
                commandId="com.subgraph.vega.ui.scanner.expandallalerts"
                icon="icons/expandall.png"
                label="Expand All"
@@ -111,6 +123,14 @@
       <command
             id="com.subgraph.vega.ui.scanner.editscope"
             name="Edit Scope">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.pausescan"
+            name="Pause Scan">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.scanner.unpausescan"
+            name="Unpause Scan">
       </command>
    </extension>
    <extension
@@ -175,6 +195,30 @@
             class="com.subgraph.vega.ui.scanner.commands.EditScopeHandler"
             commandId="com.subgraph.vega.ui.scanner.editscope">
       </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.PauseScanHandler"
+            commandId="com.subgraph.vega.ui.scanner.pausescan">
+         <enabledWhen>
+            <with
+                  variable="vega.pauseState">
+               <equals
+                     value="pauseable">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.UnpauseScanHandler"
+            commandId="com.subgraph.vega.ui.scanner.unpausescan">
+         <enabledWhen>
+            <with
+                  variable="vega.pauseState">
+               <equals
+                     value="paused">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -182,6 +226,13 @@
             provider="com.subgraph.vega.ui.scanner.commands.ScannerStateSourceProvider">
          <variable
                name="vega.scannerState"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
+      <sourceProvider
+            provider="com.subgraph.vega.ui.scanner.commands.PauseStateSourceProvider">
+         <variable
+               name="vega.pauseState"
                priorityLevel="workbench">
          </variable>
       </sourceProvider>

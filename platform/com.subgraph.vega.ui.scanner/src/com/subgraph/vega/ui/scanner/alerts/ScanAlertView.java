@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 
@@ -37,20 +38,28 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.model.alerts.ScanPauseStateChangedEvent;
+import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
+import com.subgraph.vega.ui.scanner.commands.PauseStateSourceProvider;
 import com.subgraph.vega.ui.scanner.commands.ScannerStateSourceProvider;
 
 public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 	public final static String ID = "com.subgraph.vega.views.alert";
 	private final Logger logger = Logger.getLogger("scan-alert-view");
+	
+	private IEventHandler scanEventHandler;
 	private TreeViewer viewer;
 	private IWorkspace currentWorkspace;
+	private IScanInstance selectedScanInstance;
+	
 	
 	@Override
 	public void createPartControl(Composite parent) {
+		scanEventHandler = createScanEventHandler();
 		viewer = new TreeViewer(parent);
 		final AlertTreeContentProvider contentProvider = new AlertTreeContentProvider();
 		viewer.setContentProvider(contentProvider);
@@ -111,6 +120,20 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		}
 	}
 
+	private IEventHandler createScanEventHandler() {
+		return new IEventHandler() {
+			@Override
+			public void handleEvent(IEvent event) {
+				if(event instanceof ScanPauseStateChangedEvent) {
+					updateSourceProviders(selectedScanInstance);
+				} else if(event instanceof ScanStatusChangeEvent) {
+					updateSourceProviders(selectedScanInstance);
+				}
+			}
+			
+		};
+	}
+
 	public void expandAll() {
 		if (viewer != null) {
 			viewer.expandAll();
@@ -162,27 +185,53 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		return new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				final Object selection = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
-				if (selection != null) {
-					if (selection instanceof IAlertTreeNode) {
-						final IAlertTreeNode node = (IAlertTreeNode) selection;
-						if (node != null) {
-							final IScanInstance scanInstance = node.getScanInstance();
-							if (scanInstance != null) {
-								setScanSelectionIsActive(scanInstance.isActive());
-							} else {
-								setScanSelectionIsActive(false);
-							}
-						}
-					} else {
-						final IScanAlert node = (IScanAlert) selection;
-						setScanSelectionIsActive(node.getScanInstance().isActive());
-					}
-				} else {
-					setScanSelectionIsActive(false);
-				}
+				handleSelection((IStructuredSelection) viewer.getSelection());
 			}
 		};
+	}
+	
+	private void handleSelection(IStructuredSelection selection) {
+		final Object item = selection.getFirstElement();
+		if(item instanceof IAlertTreeNode) {
+			setSelectedScanInstance( ((IAlertTreeNode) item).getScanInstance() );
+		} else if(item instanceof IScanAlert) {
+			setSelectedScanInstance( ((IScanAlert)item).getScanInstance() );
+		} else {
+			setSelectedScanInstance(null);
+		}
+	}
+	
+	private void setSelectedScanInstance(IScanInstance scanInstance) {
+		if(selectedScanInstance != null) {
+			selectedScanInstance.removeScanEventListener(scanEventHandler);
+		} 
+		selectedScanInstance = scanInstance;
+		if(selectedScanInstance != null) {
+			selectedScanInstance.addScanEventListenerAndPopulate(scanEventHandler);
+		} 
+		updateSourceProviders(scanInstance);
+	}
+
+	private void updateSourceProviders(IScanInstance scanInstance) {
+		final ISourceProviderService sps = (ISourceProviderService) PlatformUI.getWorkbench().getService(ISourceProviderService.class);
+		updatePauseStateSourceProvider((PauseStateSourceProvider) sps.getSourceProvider(PauseStateSourceProvider.PAUSE_STATE), scanInstance);
+		updateScannerStateSourceProvider((ScannerStateSourceProvider) sps.getSourceProvider(ScannerStateSourceProvider.SCAN_SELECTION_STATE), scanInstance);
+	}
+	
+	private void updatePauseStateSourceProvider(PauseStateSourceProvider provider, IScanInstance scanInstance) {
+		if(provider != null) {
+			provider.setSelectedScan(scanInstance);
+		}
+	}
+	
+	private void updateScannerStateSourceProvider(ScannerStateSourceProvider provider, IScanInstance scanInstance) {
+		if(provider != null) {
+			if(scanInstance != null) {
+				provider.setScanSelectionIsActive(scanInstance.isActive());
+			} else {
+				provider.setScanSelectionIsActive(false);
+			}
+		}
 	}
 	
 	@Override
@@ -199,12 +248,6 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		}
 	}
 
-	private void setScanSelectionIsActive(boolean isActive) {
-		ISourceProviderService sourceProviderService = (ISourceProviderService) getViewSite().getWorkbenchWindow().getService(ISourceProviderService.class);
-		ScannerStateSourceProvider provider = (ScannerStateSourceProvider) sourceProviderService.getSourceProvider(ScannerStateSourceProvider.SCAN_SELECTION_STATE);
-		provider.setScanSelectionIsActive(isActive);
-	}
-
 	public IScan getSelection() {
 		final IAlertTreeNode node = (IAlertTreeNode)((IStructuredSelection) viewer.getSelection()).getFirstElement();
 		if (node != null) {
@@ -215,5 +258,4 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		}
 		return null;
 	}
-
 }
