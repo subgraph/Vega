@@ -31,7 +31,7 @@ public class AlertItemRow extends Composite {
 		layout.marginHeight = 0;
 		setLayout(layout);
 		setBackground(parent.getBackground());
-		final Label label = new Label(this, SWT.NONE);
+		final Label label = new Label(this, SWT.WRAP);
 		label.setText(title);
 		label.setBackground(parent.getBackground());
 		GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, false);
