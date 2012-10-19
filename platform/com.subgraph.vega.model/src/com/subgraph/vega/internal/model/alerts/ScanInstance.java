@@ -27,6 +27,7 @@ import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanExceptionEvent;
+import com.subgraph.vega.api.model.alerts.ScanPauseStateChangedEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.internal.model.ModelProperties;
@@ -44,6 +45,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private transient ScanAlertFactory alertFactory;
 	private transient int activeScanCompletedCount;
 	private transient int activeScanTotalCount;
+	private transient boolean isPaused;
 	private transient Activator activator;
 
 	public ScanInstance(long scanId) {
@@ -226,6 +228,17 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public synchronized void notifyScanException(HttpUriRequest request, Throwable exception) {
 		eventManager.fireEvent(new ScanExceptionEvent(request, exception));
+	}
+
+	@Override
+	public void notifyScanPauseState(boolean isPaused) {
+		this.isPaused = isPaused;
+		eventManager.fireEvent(new ScanPauseStateChangedEvent(isPaused));
+	}
+	
+	@Override 
+	public boolean isScanPaused() {
+		return isPaused;
 	}
 
 	@Override

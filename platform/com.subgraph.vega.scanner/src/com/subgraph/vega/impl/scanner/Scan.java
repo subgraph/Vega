@@ -283,5 +283,27 @@ public class Scan implements IScan {
 	public URI getRedirectURI() {
 		return redirectURI;
 	}
-	
+
+	@Override
+	public void pauseScan() {
+		if(scannerTask != null) {
+			scannerTask.pauseScan();
+		}
+	}
+
+	@Override
+	public void unpauseScan() {
+		if(scannerTask != null) {
+			scannerTask.unpauseScan();
+		}
+	}
+
+	@Override
+	public boolean isPausedScan() {
+		if(scannerTask != null) {
+			return scannerTask.isPaused();
+		} else {
+			return false;
+		}
+	}
 }

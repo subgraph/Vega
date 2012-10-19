@@ -44,4 +44,8 @@ public interface IScan {
 	 * Stop the scan.
 	 */
 	void stopScan();
+	
+	void pauseScan();
+	void unpauseScan();
+	boolean isPausedScan();
 }

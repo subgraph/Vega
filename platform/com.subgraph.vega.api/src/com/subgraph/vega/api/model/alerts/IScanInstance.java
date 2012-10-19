@@ -59,6 +59,8 @@ public interface IScanInstance extends IModelProperties {
 	void updateScanProgress(int completedCount, int totalCount);
 	void updateScanStatus(int status);
 	void notifyScanException(HttpUriRequest request, Throwable exception);
+	void notifyScanPauseState(boolean isPaused);
+	boolean isScanPaused();
 	
 	void addScanEventListenerAndPopulate(IEventHandler listener);
 	void removeScanEventListener(IEventHandler listener);

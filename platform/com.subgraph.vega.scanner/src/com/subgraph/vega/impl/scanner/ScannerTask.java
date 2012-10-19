@@ -179,6 +179,31 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		logger.info("Crawler finished");
 	}
 
+	void pauseScan() {
+		final IWebCrawler crawler = currentCrawler;
+		if(crawler != null) {
+			crawler.pause();
+			scanInstance.notifyScanPauseState(true);
+		}
+	}
+
+	void unpauseScan() {
+		final IWebCrawler crawler = currentCrawler;
+		if(crawler != null) {
+			crawler.unpause();
+			scanInstance.notifyScanPauseState(false);
+		}
+	}
+	
+	boolean isPaused() {
+		final IWebCrawler crawler = currentCrawler;
+		if(crawler != null) {
+			return crawler.isPaused();
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	public void progressUpdate(int completed, int total) {
 		scanInstance.updateScanProgress(completed, total);
