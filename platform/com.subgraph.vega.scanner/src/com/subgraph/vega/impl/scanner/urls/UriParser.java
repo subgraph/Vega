@@ -53,11 +53,12 @@ public class UriParser {
 	public IPathState processUri(URI uri) {
 		final HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 		final IWebHost webHost = getWebHost(host);
-		IWebPath path = webHost.getRootPath();
+		final IWebPath rootPath = webHost.getRootPath();
+		IWebPath path = rootPath;
 		final boolean hasTrailingSlash = uri.getPath().endsWith("/");
 
 		String[] parts = uri.getPath().split("/");
-		IWebPath childPath;
+		IWebPath childPath = null;
 		for(int i = 1; i < parts.length; i++) {
 			synchronized(path) {
 				childPath = path.getChildPath(parts[i]);
@@ -67,6 +68,13 @@ public class UriParser {
 				processPath(childPath, uri, (i == (parts.length - 1)), hasTrailingSlash);
 			}
 			path = childPath;
+		}
+		
+		if(path == rootPath && uri.getQuery() != null) {
+			final PathState ps = pathStateManager.getStateForPath(rootPath);
+			synchronized (pathStateManager) {
+				ps.maybeAddParameters(URLEncodedUtils.parse(uri, "UTF-8"));
+			}
 		}
 		return pathStateManager.getStateForPath(path);
 	}
@@ -94,19 +102,23 @@ public class UriParser {
 
 	private void processPath(IWebPath webPath, URI uri, boolean isLast, boolean hasTrailingSlash) {
 		if(!isLast || (isLast && hasTrailingSlash)) {
-			processDirectory(webPath);
+			processDirectory(webPath, uri);
 		} else if(uri.getQuery() != null) {
+			webPath.setPathType(PathType.PATH_FILE);
 			processPathWithQuery(webPath, uri);
 		} else {
 			processUnknown(webPath);
 		}
 	}
 
-	private void processDirectory(IWebPath webPath) {
+	private void processDirectory(IWebPath webPath, URI uri) {
 		synchronized(pathStateManager) {
 			if(!pathStateManager.hasSeenPath(webPath)) {
 				webPath.setPathType(PathType.PATH_DIRECTORY);
-				pathStateManager.createStateForPath(webPath, directoryProcessor);
+				final PathState ps = pathStateManager.createStateForPath(webPath, directoryProcessor);
+				if(uri.getQuery() != null) {
+					ps.maybeAddParameters(URLEncodedUtils.parse(uri, "UTF-8"));
+				}
 				return;
 			}
 			if(webPath.getPathType() != PathType.PATH_DIRECTORY) {
@@ -115,6 +127,7 @@ public class UriParser {
 			}
 		}
 	}
+
 
 	private void processPathWithQuery(IWebPath path, URI uri) {
 		path.setPathType(PathType.PATH_FILE);
