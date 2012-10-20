@@ -111,8 +111,8 @@ public class HttpResponseProcessor implements Runnable {
 				if(stopOnEmptyQueue) {
 					crawlerRequestQueue.add(CrawlerTask.createExitTask());
 					crawlerResponseQueue.add(CrawlerTask.createExitTask());
+					return;
 				}
-				return;
 			}
 		}
 	}
