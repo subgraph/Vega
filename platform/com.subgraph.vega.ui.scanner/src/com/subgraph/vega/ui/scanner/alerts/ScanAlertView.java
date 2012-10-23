@@ -72,7 +72,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 		}
 		scopeTracker = new ScopeTracker(viewer);
 		WorkspaceTracker.create(model, this, scopeTracker);
-		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveTracker(viewer));
+		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveTracker(getSite().getPage(), viewer));
 		partListener = createPartListener();
 		getSite().getPage().addPartListener(partListener);
 	}

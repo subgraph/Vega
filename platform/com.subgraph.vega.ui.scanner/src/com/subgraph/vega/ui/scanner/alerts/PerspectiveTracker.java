@@ -8,9 +8,12 @@ import org.eclipse.ui.IWorkbenchPage;
 public class PerspectiveTracker implements IPerspectiveListener {
 	private final StructuredViewer viewer;
 	private final ProxyPerspectiveFilter proxyPerspectiveFilter;
-	public PerspectiveTracker(StructuredViewer viewer) {
+	public PerspectiveTracker(IWorkbenchPage page, StructuredViewer viewer) {
 		this.viewer = viewer;
 		this.proxyPerspectiveFilter = new ProxyPerspectiveFilter();
+		if(page.getPerspective() != null) {
+			perspectiveActivated(page, page.getPerspective());
+		}
 	}
 	
 	@Override
