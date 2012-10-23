@@ -40,6 +40,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private Date startTime;
 	private Date stopTime;
 	private int scanStatus;	
+	private transient Object alertLock;
 	private transient EventListenerManager eventManager;
 	private transient ObjectContainer database;
 	private transient ScanAlertFactory alertFactory;
@@ -55,9 +56,15 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	public synchronized void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
+		this.alertLock = new Object();
 		this.database = database;
 		this.alertFactory = alertFactory;
 		this.eventManager = new EventListenerManager();
+	}
+
+	@Override
+	public Object getAlertLock() {
+		return alertLock;
 	}
 
 	@Override
@@ -100,13 +107,15 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public synchronized void addAlert(IScanAlert alert) {
-		activate(ActivationPurpose.READ);
-		if(rejectDuplicateAlert(alert)) {
-			return;
+	public void addAlert(IScanAlert alert) {
+		synchronized(alertLock) {
+			activate(ActivationPurpose.READ);
+			if(rejectDuplicateAlert(alert)) {
+				return;
+			}
+			database.store(alert);
+			eventManager.fireEvent(new NewScanAlertEvent(alert));
 		}
-		database.store(alert);
-		eventManager.fireEvent(new NewScanAlertEvent(alert));
 	}
 
 	@Override
@@ -130,41 +139,47 @@ public class ScanInstance implements IScanInstance, Activatable {
 		return results.get(0);
 	}
 
-	private synchronized List<ScanAlert> getAlertListForKey(final String key) {
+	private List<ScanAlert> getAlertListForKey(final String key) {
 		activate(ActivationPurpose.READ);
-		return database.query(new Predicate<ScanAlert>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(ScanAlert alert) {
-				return key.equals(alert.getKey()) && alert.getScanId() == scanId;
-			}			
-		});
-	}
-
-	@Override
-	public synchronized List<IScanAlert> getAllAlerts() {
-		activate(ActivationPurpose.READ);
-		return database.query(new Predicate<IScanAlert>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(IScanAlert alert) {
-				return alert.getScanId() == scanId;
-			}			
-		});
-	}
-
-
-	@Override
-	public synchronized void addScanEventListenerAndPopulate(IEventHandler listener) {
-		for(IScanAlert alert: getAllAlerts()) {
-			listener.handleEvent(new NewScanAlertEvent(alert));
+		synchronized(alertLock) {
+			return database.query(new Predicate<ScanAlert>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(ScanAlert alert) {
+					return key.equals(alert.getKey()) && alert.getScanId() == scanId;
+				}			
+			});
 		}
-		listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
-		eventManager.addListener(listener);
 	}
 
 	@Override
-	public synchronized void removeScanEventListener(IEventHandler listener) {
+	public List<IScanAlert> getAllAlerts() {
+		activate(ActivationPurpose.READ);
+		synchronized (alertLock) {
+			return database.query(new Predicate<IScanAlert>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(IScanAlert alert) {
+					return alert.getScanId() == scanId;
+				}			
+			});
+		}
+	}
+
+
+	@Override
+	public void addScanEventListenerAndPopulate(IEventHandler listener) {
+		synchronized(alertLock) {
+			for(IScanAlert alert: getAllAlerts()) {
+				listener.handleEvent(new NewScanAlertEvent(alert));
+			}
+			listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+			eventManager.addListener(listener);
+		}
+	}
+
+	@Override
+	public void removeScanEventListener(IEventHandler listener) {
 		eventManager.removeListener(listener);
 	}
 
@@ -301,15 +316,17 @@ public class ScanInstance implements IScanInstance, Activatable {
 		}
 	}
 
-	private synchronized List<ScanAlert> getAlertListForResource(final String resource) {
+	private List<ScanAlert> getAlertListForResource(final String resource) {
 		activate(ActivationPurpose.READ);
-		return database.query(new Predicate<ScanAlert>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public boolean match(ScanAlert alert) {
-				return resource.equals(alert.getResource()) && alert.getScanId() == scanId;
-			}
-		});
+		synchronized(alertLock) {
+			return database.query(new Predicate<ScanAlert>() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public boolean match(ScanAlert alert) {
+					return resource.equals(alert.getResource()) && alert.getScanId() == scanId;
+				}
+			});
+		}
 	}
 
 	@Override

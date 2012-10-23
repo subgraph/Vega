@@ -81,12 +81,45 @@
                icon="icons/scan_pause.png"
                label="Pause Scan"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="com.subgraph.vega.perspectives.scanner">
+                  </equals>
+               </with>
+            </visibleWhen>
          </command>
          <command
                commandId="com.subgraph.vega.ui.scanner.unpausescan"
                icon="icons/scan_unpause.png"
                label="Unpause Scan"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="com.subgraph.vega.perspectives.scanner">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="com.subgraph.vega.commands.alertScopeFilter"
+               icon="icons/scope.png"
+               label="Filter by Current Scope"
+               style="toggle">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="com.subgraph.vega.perspectives.proxy">
+                  </equals>
+               </with>
+            </visibleWhen>
          </command>
          <command
                commandId="com.subgraph.vega.ui.scanner.expandallalerts"
@@ -131,6 +164,10 @@
       <command
             id="com.subgraph.vega.ui.scanner.unpausescan"
             name="Unpause Scan">
+      </command>
+      <command
+            id="com.subgraph.vega.commands.alertScopeFilter"
+            name="Filter by Current Scope">
       </command>
    </extension>
    <extension
@@ -218,6 +255,10 @@
                </equals>
             </with>
          </enabledWhen>
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.scanner.commands.AlertScopeFilterHandler"
+            commandId="com.subgraph.vega.commands.alertScopeFilter">
       </handler>
    </extension>
    <extension

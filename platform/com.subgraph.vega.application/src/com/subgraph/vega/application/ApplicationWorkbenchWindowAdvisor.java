@@ -90,10 +90,15 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     		return;
     	}
 
-    	final IViewReference consoleReference = activePage.findViewReference(VegaConsoleView.ID);
-    	if(consoleReference != null) {
+    	forceActivate(activePage, VegaConsoleView.ID);
+    	forceActivate(activePage, "com.subgraph.vega.views.alert");
+    }
+    
+    private void forceActivate(IWorkbenchPage page, String viewID) {
+    	final IViewReference viewReference = page.findViewReference(viewID);
+    	if(viewReference != null) {
     		// force activation
-    		consoleReference.getView(true);
+    		viewReference.getView(true);
     	}
     }
 }

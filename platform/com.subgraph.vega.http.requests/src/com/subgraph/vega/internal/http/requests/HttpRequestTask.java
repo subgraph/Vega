@@ -116,13 +116,16 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 			rateLimit.maybeDelayRequest();
 
 		requestEngine.addRequestInProgress(this);
-		final long start = System.currentTimeMillis();
-		final long elapsed;
+		long elapsed;
+		final Date start = new Date();
 		final HttpResponse httpResponse;
 		try {
 			httpResponse = client.execute(request, context);
 		} finally {
-			elapsed = System.currentTimeMillis() - start;
+			elapsed = getElapsedTimeFromContext(context);
+			if(elapsed == -1) {
+				elapsed = new Date().getTime() - start.getTime();
+			}
 			synchronized(this) {
 				timeCompleted = new Date();
 			}
@@ -156,6 +159,15 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		}
 		
 		return response;
+	}
+	
+	private long getElapsedTimeFromContext(HttpContext context) {
+		final Date start = (Date) context.getAttribute(RequestTimingHttpExecutor.REQUEST_TIME);
+		final Date end = (Date) context.getAttribute(RequestTimingHttpExecutor.RESPONSE_TIME);
+		if(start == null || end == null) {
+			return -1;
+		}
+		return end.getTime() - start.getTime();
 	}
 	
 	private HttpEntity processEntity(HttpResponse response, HttpEntity entity) throws IOException {

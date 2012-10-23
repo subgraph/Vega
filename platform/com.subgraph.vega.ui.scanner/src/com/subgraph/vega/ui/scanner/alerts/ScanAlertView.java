@@ -10,128 +10,102 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.scanner.alerts;
 
-import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.services.ISourceProviderService;
 
 import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
-import com.subgraph.vega.api.model.WorkspaceCloseEvent;
-import com.subgraph.vega.api.model.WorkspaceOpenEvent;
-import com.subgraph.vega.api.model.WorkspaceResetEvent;
-import com.subgraph.vega.api.model.alerts.IScanAlert;
-import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
-import com.subgraph.vega.api.model.alerts.ScanPauseStateChangedEvent;
-import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
+import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
-import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
-import com.subgraph.vega.ui.scanner.commands.PauseStateSourceProvider;
-import com.subgraph.vega.ui.scanner.commands.ScannerStateSourceProvider;
+import com.subgraph.vega.ui.util.images.ImageCache;
 
-public class ScanAlertView extends ViewPart implements IDoubleClickListener {
+public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEventHandler {
 	public final static String ID = "com.subgraph.vega.views.alert";
+	private final static String ALERT_VIEW_ICON = "icons/alert_view.png";
 	private final Logger logger = Logger.getLogger("scan-alert-view");
 	
-	private IEventHandler scanEventHandler;
-	private TreeViewer viewer;
-	private IWorkspace currentWorkspace;
-	private IScanInstance selectedScanInstance;
+	private final Timer blinkTimer = new Timer();
+	private final ImageCache imageCache = new ImageCache(Activator.PLUGIN_ID);
 	
+	
+	private IWorkspace currentWorkspace;
+	private ScopeTracker scopeTracker;
+	private IPartListener2 partListener;
+	private TreeViewer viewer;
+	private TimerTask blinkTask;
+	private boolean isViewVisible;
 	
 	@Override
 	public void createPartControl(Composite parent) {
-		scanEventHandler = createScanEventHandler();
 		viewer = new TreeViewer(parent);
 		final AlertTreeContentProvider contentProvider = new AlertTreeContentProvider();
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new AlertTreeLabelProvider(contentProvider));
 		viewer.addDoubleClickListener(this);
-		viewer.setSorter(new ViewerSorter() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				final int cat1 = category(e1);
-				final int cat2 = category(e2);
-				if(cat1 != cat2) {
-					return cat1 - cat2;
-				}
-
-				if((e1 instanceof AlertScanNode) && (e2 instanceof AlertScanNode)) {
-					return compareAlertNodes((AlertScanNode)e1, (AlertScanNode)e2);
-				} else if((e1 instanceof AlertSeverityNode) && (e2 instanceof AlertSeverityNode)) {
-					final AlertSeverityNode asn1 = (AlertSeverityNode) e1;
-					final AlertSeverityNode asn2 = (AlertSeverityNode) e2;
-					return asn2.getSeverityIndex() - asn1.getSeverityIndex();
-					
-				} else {
-					return super.compare(viewer, e1, e2);
-				}
-			}
-			@Override
-			public int category(Object element) {
-				if(element instanceof AlertScanNode) {
-					return (((AlertScanNode) element).getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) ? (0) : (1); 
-				}
-				return 0;
-			}
-			
-		});
+		viewer.setSorter(new ScanAlertSorter());
+				
 		getSite().setSelectionProvider(viewer);
-		viewer.addSelectionChangedListener(createSelectionChangedListener());
+		viewer.addSelectionChangedListener(new SelectionTracker(getSite().getPage()));
 		
 		final IModel model = Activator.getDefault().getModel();
 		if(model == null) {
 			logger.warning("Failed to obtain reference to model");
 			return;
 		}
-		currentWorkspace = model.addWorkspaceListener(new IEventHandler() {
-			@Override
-			public void handleEvent(IEvent event) {
-				if(event instanceof WorkspaceOpenEvent)
-					handleWorkspaceOpen((WorkspaceOpenEvent) event);
-				else if(event instanceof WorkspaceCloseEvent)
-					handleWorkspaceClose((WorkspaceCloseEvent) event);
-				else if(event instanceof WorkspaceResetEvent)
-					handleWorkspaceReset((WorkspaceResetEvent) event);
-			}
-		});
-		
-		if(currentWorkspace != null) {
-			viewer.setInput(currentWorkspace);
-			selectFirstScan();
-		}
+		scopeTracker = new ScopeTracker(viewer);
+		WorkspaceTracker.create(model, this, scopeTracker);
+		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveTracker(getSite().getPage(), viewer));
+		partListener = createPartListener();
+		getSite().getPage().addPartListener(partListener);
 	}
-
-	private IEventHandler createScanEventHandler() {
-		return new IEventHandler() {
+	
+		private IPartListener2 createPartListener() {
+		return new IPartListener2() {
 			@Override
-			public void handleEvent(IEvent event) {
-				if(event instanceof ScanPauseStateChangedEvent) {
-					updateSourceProviders(selectedScanInstance);
-				} else if(event instanceof ScanStatusChangeEvent) {
-					updateSourceProviders(selectedScanInstance);
+			public void partVisible(IWorkbenchPartReference partRef) {
+				if(ID.equals(partRef.getId())) {
+					isViewVisible = true;
+					stopNotifier();
 				}
 			}
-			
+			@Override
+			public void partHidden(IWorkbenchPartReference partRef) {
+				if(ID.equals(partRef.getId())) {
+					isViewVisible = false;
+				}
+			}
+
+			@Override public void partOpened(IWorkbenchPartReference partRef) {}
+			@Override public void partInputChanged(IWorkbenchPartReference partRef) {}
+			@Override public void partDeactivated(IWorkbenchPartReference partRef) {}
+			@Override public void partClosed(IWorkbenchPartReference partRef) {}
+			@Override public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+			@Override public void partActivated(IWorkbenchPartReference partRef) {}
 		};
+	}
+	@Override
+	public void dispose() {
+		getSite().getPage().removePartListener(partListener);
+		imageCache.dispose();
+		super.dispose();
 	}
 
 	public void expandAll() {
@@ -145,19 +119,6 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 			viewer.collapseAll();
 		}
 	}
-
-	private int compareAlertNodes(AlertScanNode n1, AlertScanNode n2) {
-		if((n1.getScanInstance() == null) || (n2.getScanInstance() == null)) {
-			return (int) (n1.getScanId() - n2.getScanId());
-		} else {
-			final Date d1 = n1.getScanInstance().getStartTime();
-			final Date d2 = n2.getScanInstance().getStartTime();
-			if(d1 == null || d2 == null) {
-				return 0;
-			}
-			return (d1.getTime() < d2.getTime()) ? (1) : (-1);
-		}
-	}
 	
 	private void selectFirstScan() {
 		if(viewer.getTree().getItemCount() > 0) {
@@ -166,77 +127,60 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		} 
 	}
 
-	private void handleWorkspaceOpen(WorkspaceOpenEvent event) {
-		viewer.setInput(event.getWorkspace());
-		selectFirstScan();
+	public void workspaceChanged(IWorkspace workspace) {
+		if(currentWorkspace != null) {
+			currentWorkspace.getScanAlertRepository().getProxyScanInstance().removeScanEventListener(this);
+		}
+		currentWorkspace = workspace;
+		viewer.setInput(workspace);
+		if(workspace != null) {
+			selectFirstScan();
+			workspace.getScanAlertRepository().getProxyScanInstance().addScanEventListenerAndPopulate(this);
+		}	
 	}
 	
-	private void handleWorkspaceClose(WorkspaceCloseEvent event) {
-		viewer.setInput(null);
-	}
-	
-	private void handleWorkspaceReset(WorkspaceResetEvent event) {
-		viewer.setInput(null);
-		viewer.setInput(event.getWorkspace());
-		selectFirstScan();
+	public void startNotifier() {
+		if(blinkTask == null) {
+			blinkTask = createBlinkTask();
+			blinkTimer.scheduleAtFixedRate(blinkTask, 0, 500);
+		}
 	}
 
-	private ISelectionChangedListener createSelectionChangedListener() {
-		return new ISelectionChangedListener() {
+	public void stopNotifier() {
+		if(blinkTask != null) {
+			blinkTask.cancel();
+			blinkTask = null;
+		}
+	}
+	
+	private TimerTask createBlinkTask() {
+		return new TimerTask() {
+			private boolean state;
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				handleSelection((IStructuredSelection) viewer.getSelection());
+			public void run() {
+				state = !state;
+				if(state) {
+					setLabelImage(imageCache.getDisabled(ALERT_VIEW_ICON));
+				} else {
+					setLabelImage(imageCache.get(ALERT_VIEW_ICON));
+				}
 			}
 		};
 	}
 	
-	private void handleSelection(IStructuredSelection selection) {
-		final Object item = selection.getFirstElement();
-		if(item instanceof IAlertTreeNode) {
-			setSelectedScanInstance( ((IAlertTreeNode) item).getScanInstance() );
-		} else if(item instanceof IScanAlert) {
-			setSelectedScanInstance( ((IScanAlert)item).getScanInstance() );
-		} else {
-			setSelectedScanInstance(null);
-		}
-	}
-	
-	private void setSelectedScanInstance(IScanInstance scanInstance) {
-		if(selectedScanInstance != null) {
-			selectedScanInstance.removeScanEventListener(scanEventHandler);
-		} 
-		selectedScanInstance = scanInstance;
-		if(selectedScanInstance != null) {
-			selectedScanInstance.addScanEventListenerAndPopulate(scanEventHandler);
-		} 
-		updateSourceProviders(scanInstance);
-	}
-
-	private void updateSourceProviders(IScanInstance scanInstance) {
-		final ISourceProviderService sps = (ISourceProviderService) PlatformUI.getWorkbench().getService(ISourceProviderService.class);
-		updatePauseStateSourceProvider((PauseStateSourceProvider) sps.getSourceProvider(PauseStateSourceProvider.PAUSE_STATE), scanInstance);
-		updateScannerStateSourceProvider((ScannerStateSourceProvider) sps.getSourceProvider(ScannerStateSourceProvider.SCAN_SELECTION_STATE), scanInstance);
-	}
-	
-	private void updatePauseStateSourceProvider(PauseStateSourceProvider provider, IScanInstance scanInstance) {
-		if(provider != null) {
-			provider.setSelectedScan(scanInstance);
-		}
-	}
-	
-	private void updateScannerStateSourceProvider(ScannerStateSourceProvider provider, IScanInstance scanInstance) {
-		if(provider != null) {
-			if(scanInstance != null) {
-				provider.setScanSelectionIsActive(scanInstance.isActive());
-			} else {
-				provider.setScanSelectionIsActive(false);
+	private void setLabelImage(final Image image) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				setTitleImage(image);
 			}
-		}
+		});
 	}
 	
 	@Override
 	public void setFocus() {
 		viewer.getTree().setFocus();
+		stopNotifier();
 	}
 
 	@Override
@@ -258,4 +202,22 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener {
 		}
 		return null;
 	}
+	
+	public void setTitleImage(Image image) {
+		super.setTitleImage(image);
+	}
+	
+	public void setFilterByScope(boolean enabled) {
+		scopeTracker.setFilterByScopeEnabled(enabled);
+	}
+
+	@Override
+	public void handleEvent(IEvent event) {
+		if(event instanceof NewScanAlertEvent) {
+			if(!isViewVisible) {
+				startNotifier();
+			}
+		}
+	}
+	
 }

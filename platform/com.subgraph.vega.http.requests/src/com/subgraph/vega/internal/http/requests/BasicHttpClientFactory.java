@@ -19,6 +19,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HttpRequestExecutor;
 
 import com.subgraph.vega.internal.http.requests.connection.BasicThreadSafeClientConnectionManager;
 
@@ -27,7 +28,12 @@ public class BasicHttpClientFactory extends AbstractHttpClientFactory {
 	static HttpClient createHttpClient() {
 		final HttpParams params = createHttpParams();
 		final ClientConnectionManager ccm = createConnectionManager(params);
-		final DefaultHttpClient client = new DefaultHttpClient(ccm, params);
+		final DefaultHttpClient client = new DefaultHttpClient(ccm, params) {
+			@Override
+			protected HttpRequestExecutor createRequestExecutor() {
+				return new RequestTimingHttpExecutor();
+			}
+		};
 		
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		client.clearRequestInterceptors();

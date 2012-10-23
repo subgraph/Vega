@@ -388,5 +388,18 @@
             name="Proxy">
       </perspective>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.subgraph.vega.perspectives.proxy">
+         <view
+               id="com.subgraph.vega.views.scaninfo"
+               minimized="false"
+               relationship="stack"
+               relative="com.subgraph.vega.views.intercept"
+               visible="false">
+         </view>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>
