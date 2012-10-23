@@ -19,8 +19,12 @@ import com.subgraph.vega.ui.http.request.view.HttpRequestView;
 import com.subgraph.vega.ui.http.statusview.StatusView;
 
 public class ProxyPerspectiveFactory implements IPerspectiveFactory {
+	public final static String ID = "com.subgraph.vega.perspectives.proxy";
+	
 	private final static String PROXY_FOLDER = "proxy";
 	private final static String WEBSITE_VIEW = "com.subgraph.vega.views.website";
+	private final static String ALERT_VIEW = "com.subgraph.vega.views.alert";
+
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
@@ -33,6 +37,9 @@ public class ProxyPerspectiveFactory implements IPerspectiveFactory {
 		layout.getViewLayout(StatusView.ID).setCloseable(false);
 		layout.addView(WEBSITE_VIEW, IPageLayout.LEFT, 0.25f, PROXY_FOLDER);
 		layout.getViewLayout(WEBSITE_VIEW).setCloseable(false);
+		
+		layout.addFastView(ALERT_VIEW, 0.25f);
+		layout.getViewLayout(ALERT_VIEW).setCloseable(false);
 
 		layout.setEditorAreaVisible(false);
 	}
