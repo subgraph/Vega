@@ -52,6 +52,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 	private TreeViewer viewer;
 	private TimerTask blinkTask;
 	private boolean isViewVisible;
+	private boolean ignoreEvents;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -135,7 +136,9 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 		viewer.setInput(workspace);
 		if(workspace != null) {
 			selectFirstScan();
+			ignoreEvents = true;
 			workspace.getScanAlertRepository().getProxyScanInstance().addScanEventListenerAndPopulate(this);
+			ignoreEvents = false;
 		}	
 	}
 	
@@ -149,6 +152,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 	public void stopNotifier() {
 		if(blinkTask != null) {
 			blinkTask.cancel();
+			setLabelImage(imageCache.get(ALERT_VIEW_ICON));
 			blinkTask = null;
 		}
 	}
@@ -214,7 +218,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 	@Override
 	public void handleEvent(IEvent event) {
 		if(event instanceof NewScanAlertEvent) {
-			if(!isViewVisible) {
+			if(!isViewVisible && !ignoreEvents) {
 				startNotifier();
 			}
 		}
