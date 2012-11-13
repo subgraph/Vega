@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner;
 
+import org.apache.http.client.CookieStore;
+
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.events.IEvent;
@@ -69,8 +71,8 @@ public class Scanner implements IScanner {
 	}
 	
 	@Override
-	public IProxyScan createProxyScan(IWorkspace workspace) {
-		return new ProxyScan(workspace, this);
+	public IProxyScan createProxyScan(IWorkspace workspace, CookieStore cookieStore) {
+		return new ProxyScan(workspace, cookieStore, this);
 	}
 
 	@Override

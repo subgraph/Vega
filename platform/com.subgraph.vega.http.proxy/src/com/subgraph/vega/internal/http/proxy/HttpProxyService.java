@@ -20,7 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCookieStore;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerFactory;
@@ -56,6 +58,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private IContentAnalyzerFactory contentAnalyzerFactory;
 	private IScannerModuleRegistry moduleRepository;
 	private IScanner scanner;
+	private CookieStore cookieStore;
 	private IPathFinder pathFinder;
 	private IContentAnalyzer contentAnalyzer;
 	private List<IResponseProcessingModule> responseProcessingModules;
@@ -82,7 +85,8 @@ public class HttpProxyService implements IHttpProxyService {
 
 	public void activate() {
 		interceptor = new HttpInterceptor(model);
-		proxyScanner = new ProxyScanner(scanner, model);
+		cookieStore = new BasicCookieStore();
+		proxyScanner = new ProxyScanner(scanner, cookieStore, model);
 
 		try {
 			sslContextRepository = SSLContextRepository.createInstance(pathFinder.getVegaDirectory());
@@ -208,6 +212,7 @@ public class HttpProxyService implements IHttpProxyService {
 	private void startListener(IHttpProxyListenerConfig config) {
 		IRequestOriginProxy requestOrigin = currentWorkspace.getRequestLog().getRequestOriginProxy(config.getInetAddress(), config.getPort());
 		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineConfig, requestOrigin);
+		requestEngine.setCookieStore(cookieStore);
 		HttpProxyListener listener = new HttpProxyListener(config, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		listener.registerEventHandler(listenerEventHandler);
 		listenerMap.put(config.toString(), listener);

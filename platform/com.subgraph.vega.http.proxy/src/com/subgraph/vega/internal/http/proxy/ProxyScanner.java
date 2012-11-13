@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 
@@ -22,14 +23,16 @@ public class ProxyScanner {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
 	
 	private final IScanner scanner;
+	private final CookieStore cookieStore;
 	private final ProxyScannerScopeTracker scopeTracker;
 	
 	
 	private IProxyScan proxyScan;
 	private boolean isEnabled = false;
 	
-	ProxyScanner(IScanner scanner, IModel model) {
+	ProxyScanner(IScanner scanner, CookieStore cookieStore, IModel model) {
 		this.scanner = scanner;
+		this.cookieStore = cookieStore;
 		this.scopeTracker = new ProxyScannerScopeTracker(model, this);
 	}
 	
@@ -57,7 +60,7 @@ public class ProxyScanner {
 		if(proxyScan != null) {
 			proxyScan.stop();
 		}
-		proxyScan = scanner.createProxyScan(newWorkspace);
+		proxyScan = scanner.createProxyScan(newWorkspace, cookieStore);
 	}
 	
 	

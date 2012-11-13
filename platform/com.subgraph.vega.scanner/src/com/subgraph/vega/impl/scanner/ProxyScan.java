@@ -32,6 +32,7 @@ import com.subgraph.vega.impl.scanner.urls.UriParser;
 public class ProxyScan implements IProxyScan {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final IWorkspace workspace;
+	private final CookieStore cookieStore;
 	private final Scanner scanner;
 	private final IScanInstance scanInstance;
 	private final IScannerConfig config;
@@ -39,8 +40,9 @@ public class ProxyScan implements IProxyScan {
 	private UriParser uriParser;
 	private boolean isStarted = false;
 	
-	ProxyScan(IWorkspace workspace, Scanner scanner) {
+	ProxyScan(IWorkspace workspace, CookieStore cookieStore, Scanner scanner) {
 		this.workspace = workspace;
+		this.cookieStore = cookieStore;
 		this.scanner = scanner;
 		this.scanInstance = workspace.getScanAlertRepository().getScanInstanceByScanId(IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID);
 		this.config = new ScannerConfig();
@@ -117,7 +119,6 @@ public class ProxyScan implements IProxyScan {
 		final IHttpRequestEngineFactory factory = scanner.getHttpRequestEngineFactory();
 		final IHttpRequestEngineConfig requestEngineConfig = factory.createConfig();
 		if (config.getCookieList() != null && !config.getCookieList().isEmpty()) {
-			final CookieStore cookieStore = requestEngineConfig.getCookieStore();
 			for (Cookie c: config.getCookieList()) {
 				cookieStore.addCookie(c);
 			}
@@ -134,6 +135,7 @@ public class ProxyScan implements IProxyScan {
 		HttpProtocolParams.setUserAgent(client.getParams(), config.getUserAgent());
 		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
 		final IHttpRequestEngine requestEngine = factory.createRequestEngine(client, requestEngineConfig, requestOrigin);
+		requestEngine.setCookieStore(cookieStore);
 		// REVISIT: consider moving authentication method to request engine config
 		IIdentity identity = config.getScanIdentity();
 		if (identity != null && identity.getAuthMethod() != null) {
