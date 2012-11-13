@@ -15,9 +15,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.SyncBasicHttpContext;
@@ -58,7 +59,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.htmlParser = htmlParser;
 		rateLimit = new RateLimiter(config.getRequestsPerMinute());
 		httpContext = new SyncBasicHttpContext(null);
-		httpContext.setAttribute(ClientContext.COOKIE_STORE, config.getCookieStore());
+
 		requestModifierList = new ArrayList<IHttpRequestModifier>();
 		requestEventManager = new EventListenerManager();
 		requestInProgressList = new ArrayList<HttpRequestTask>();
@@ -82,6 +83,23 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	@Override
 	public HttpContext getHttpContext() {
 		return httpContext;
+	}
+
+	@Override
+	public CookieStore getCookieStore() {
+		return getClientDowncast().getCookieStore();
+	}
+
+	@Override
+	public void setCookieStore(CookieStore cookieStore) {
+		getClientDowncast().setCookieStore(cookieStore);
+	}
+
+	private AbstractHttpClient getClientDowncast() {
+		if(client instanceof AbstractHttpClient) {
+			return (AbstractHttpClient)client;
+		}
+		throw new IllegalArgumentException("HttpClient instance is not expected type");
 	}
 
 	@Override
