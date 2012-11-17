@@ -212,12 +212,7 @@ public class Scan implements IScan {
 	private IHttpRequestEngine createRequestEngine(IScannerConfig config) {
 		final IHttpRequestEngineFactory requestEngineFactory = scanner.getHttpRequestEngineFactory();
 		final IHttpRequestEngineConfig requestEngineConfig = requestEngineFactory.createConfig();
-		if (config.getCookieList() != null && !config.getCookieList().isEmpty()) {
-			CookieStore cookieStore = requestEngineConfig.getCookieStore();
-			for (Cookie c: config.getCookieList()) {
-				cookieStore.addCookie(c);
-			}
-		}		
+
 		if (config.getMaxRequestsPerSecond() > 0) {
 			requestEngineConfig.setRequestsPerMinute(config.getMaxRequestsPerSecond() * 60);
 		}
@@ -234,6 +229,14 @@ public class Scan implements IScan {
 		if (identity != null && identity.getAuthMethod() != null) {
 			identity.getAuthMethod().setAuth(requestEngine);
 		}
+		
+		if (config.getCookieList() != null && !config.getCookieList().isEmpty()) {
+			CookieStore cookieStore = requestEngine.getCookieStore();
+			for (Cookie c: config.getCookieList()) {
+				cookieStore.addCookie(c);
+			}
+		}		
+
 		return requestEngine;
 	}
 

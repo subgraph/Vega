@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
@@ -44,6 +45,20 @@ public interface IHttpRequestEngine {
 	 * @return Parent HttpContext.
 	 */
 	HttpContext getHttpContext();
+	
+	/**
+	 * Get the cookie store from the HttpClient instance used by this request engine
+	 * 
+	 * @return CookieStore instance from HttpClient.
+	 */
+	CookieStore getCookieStore();
+	
+	/**
+	 * Replace the cookie store for the HttpClient instance used by this request engine.
+	 * 
+	 * @param cookieStore The new CookieStore to use.
+	 */
+	void setCookieStore(CookieStore cookieStore);
 	
 	/**
 	 * Register a request modifier.

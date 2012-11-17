@@ -10,10 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.api.scanner;
 
+import org.apache.http.client.CookieStore;
+
 import com.subgraph.vega.api.model.IWorkspace;
 
 public interface IScanner {
 	IScan createScan();
-	IProxyScan createProxyScan(IWorkspace workspace);
+	IProxyScan createProxyScan(IWorkspace workspace, CookieStore cookieStore);
 	void runDomTests();
 }

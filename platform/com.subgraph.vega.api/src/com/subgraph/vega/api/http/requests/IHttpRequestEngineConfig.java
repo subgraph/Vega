@@ -12,8 +12,6 @@ package com.subgraph.vega.api.http.requests;
 
 import java.util.List;
 
-import org.apache.http.client.CookieStore;
-
 public interface IHttpRequestEngineConfig {
 	final static int DEFAULT_MAX_CONNECTIONS = 10;
 	final static int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 2;
@@ -33,5 +31,4 @@ public interface IHttpRequestEngineConfig {
 	int getMaxConnectionsPerRoute();
 	void setMaximumResponseKilobytes(int kb);
 	int getMaximumResponseKilobytes();
-	CookieStore getCookieStore();
 }
