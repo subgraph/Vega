@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.http.requests;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -39,6 +40,8 @@ public class BasicHttpClientFactory extends AbstractHttpClientFactory {
 		client.clearRequestInterceptors();
 		client.clearResponseInterceptors();
 		client.addRequestInterceptor(new RequestCopyHeadersInterceptor());
+		client.addRequestInterceptor(new RequestExtractCookiesInterceptor());
+		client.addResponseInterceptor(new ResponseProcessCookies());
 		return client;
 	}
 
