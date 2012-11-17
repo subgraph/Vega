@@ -80,6 +80,13 @@ public class ModuleContextJS {
 		return Context.getCurrentContext().newObject(scope, "Response", args);
 	}
 	
+	public Scriptable getOrigResponse() {
+		final IHttpResponse r =  context.getPathState().getResponse();
+	    Object responseOb = Context.javaToJS(r, scope);
+		Object[] args = { responseOb };
+		return Context.getCurrentContext().newObject(scope, "Response", args);		
+	}
+	
 	/* Added below method because of bug #547 */
 
 	public String getSavedResponseBody(int index) {
@@ -140,7 +147,7 @@ public class ModuleContextJS {
 			String value, boolean append, int flag) {
 		context.submitAlteredRequest(wrap(callback), value, append, flag);
 	}
-
+	
 	public void submitAlteredParameterNameRequest(
 			Function callback, String name, int flag) {
 		context.submitAlteredParameterNameRequest(wrap(callback), name, flag);
