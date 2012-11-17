@@ -402,12 +402,18 @@ public class PathState implements IPathState {
 	public String createXssTag(int xssId) {
 		return pathStateManager.createXssTag(xssId);
 	}
-
 	@Override
 	public String createXssTag(String prefix, int xssId) {
 		return pathStateManager.createXssTag(prefix, xssId);
 	}
-
+	@Override
+	public String createXssPattern(int xssId) {
+		return pathStateManager.createXssPattern(xssId);
+	}
+	@Override
+	public String createXssPattern(String prefix, int xssId) {
+		return pathStateManager.createXssPattern(prefix, xssId);
+	}
 	@Override
 	public void registerXssRequest(HttpUriRequest request, int xssId) {
 		pathStateManager.registerXssRequest(request, xssId);

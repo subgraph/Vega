@@ -75,5 +75,7 @@ public interface IPathState {
 	boolean isIPSDetected();
 	void setIPSDetected();
 	long getScanId();
+	String createXssPattern(String prefix, int xssId);
+	String createXssPattern(int xssId);
 
 }

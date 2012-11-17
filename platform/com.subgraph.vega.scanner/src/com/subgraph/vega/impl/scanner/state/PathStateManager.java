@@ -176,6 +176,10 @@ public class PathStateManager {
 	public String createXssTag(int xssId) {
 		return createXssTag("", xssId);
 	}
+	
+	public String createXssPattern(int xssId) {
+		return createXssPattern("", xssId);
+	}
 
 	public int allocateXssId() {
 		synchronized(xssRequests) {
@@ -189,11 +193,23 @@ public class PathStateManager {
 			return formatXssTag(prefix, xssId, scanInstance.getScanId());
 		}
 	}
+	
+	public String createXssPattern(String prefix, int xssId) {
+		if(scanInstance.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID) {
+			return formatXssPattern(prefix, xssId, 0);
+		} else {
+			return formatXssPattern(prefix, xssId, scanInstance.getScanId());
+		}		
+	}
 
 	private String formatXssTag(String prefix, int xssId, long scanId) {
 		return String.format("%s-->\">'>'\"<vvv%06dv%06d>", prefix, xssId, scanId);
 	}
 
+	private String formatXssPattern(String prefix, int xssId, long scanId) {
+		return String.format("%svvv%06dv%06d", prefix, xssId, scanId);
+	}
+	
 	public void registerXssRequest(HttpUriRequest request, int xssId) {
 		synchronized(xssRequests) {
 			xssRequests.put(xssId, request);
