@@ -70,6 +70,7 @@ public class HtmlUrlExtractor {
 		final ArrayList<URI> uris = new ArrayList<URI>();
 		for(Element e: document.select(query)) {
 			String link = e.attr(attribute);
+			link = link.replace("\\", "%5C");
 			URI uri = createURI(link);
 			if(uri != null)
 				uris.add(uri);
