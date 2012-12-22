@@ -35,7 +35,6 @@ public class PageVariabilityCheck extends CrawlerModule {
 		}
 	}
 
-
 	@Override
 	public void runModule(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
 		final IPathState ps = ctx.getPathState();
@@ -46,14 +45,11 @@ public class PageVariabilityCheck extends CrawlerModule {
 			testResponse(request, response, ctx);
 
 		ctx.incrementResponseCount();
+		
 		if(!ctx.allResponsesReceived())
 			return;
 
-		if(ps.getResponseVaries())
-			return;
-
 		injectionChecks.launchInjectionModules(ps);
-
 	}
 
 	private void testResponse(HttpUriRequest request, IHttpResponse response, IInjectionModuleContext ctx) {
