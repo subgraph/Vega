@@ -26,6 +26,8 @@ public class ModuleValidator {
 	private boolean isValidated;
 	private boolean isDisabled;
 	private boolean isDefaultDisabled;
+	private boolean isTimeSensitive;
+	private boolean isDifferential;
 	
 	public ModuleValidator(Scriptable moduleScope) {
 		this.moduleScope = moduleScope;
@@ -52,6 +54,8 @@ public class ModuleValidator {
 		runFunction = getEntryFunction();
 		isDisabled = getFlagFromModuleObject(moduleObject, "disabled");
 		isDefaultDisabled = getFlagFromModuleObject(moduleObject, "defaultDisabled");
+		isTimeSensitive = getFlagFromModuleObject(moduleObject, "timeSensitive");
+		isDifferential = getFlagFromModuleObject(moduleObject, "differential");
 		isValidated = true;
 	}
 	
@@ -79,7 +83,21 @@ public class ModuleValidator {
 
 		return !isDefaultDisabled;
 	}
-	
+
+	public boolean isTimeSensitive() {
+		if(!isValidated) { 
+			throw new IllegalStateException("Cannot get time sensitive flag because module is not validated");
+		}
+		return isTimeSensitive;
+	}
+
+	public boolean isDifferential() {
+		if(!isValidated) {
+			throw new IllegalStateException("Cannot get differential flag because module is not validated");
+		}
+		return isDifferential;
+	}
+
 	public ModuleScriptType getType() {
 		if(!isValidated)
 			throw new IllegalStateException("Cannot get type because module is not validated");

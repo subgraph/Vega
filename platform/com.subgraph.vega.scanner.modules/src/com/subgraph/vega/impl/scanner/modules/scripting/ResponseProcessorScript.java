@@ -112,4 +112,14 @@ public class ResponseProcessorScript implements IResponseProcessingModule, IEnab
 	public boolean isEnabled() {
 		return isEnabled;
 	}
+
+	@Override
+	public boolean isDifferential() {
+		return false;
+	}
+
+	@Override
+	public boolean isTimeSensitive() {
+		return false;
+	}
 }
