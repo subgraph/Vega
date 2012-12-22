@@ -1,6 +1,7 @@
 var module = {
   name: "Blind SQL Injection Arithmetic Evaluation Differential Checks",
-  category: "Injection Modules"
+  category: "Injection Modules",
+  differential: true
 };
 
 function initialize(ctx) {

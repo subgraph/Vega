@@ -1,6 +1,7 @@
 var module = {
   name: "Format String Injection Checks",
-  category: "Injection Modules"
+  category: "Injection Modules",
+  differential: true
 };
 
 function initialize(ctx) {

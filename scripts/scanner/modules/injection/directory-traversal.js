@@ -1,6 +1,7 @@
 var module = {
   name: "Directory Listing and Traversal Checks",
-  category: "Injection Modules"
+  category: "Injection Modules",
+  differential: true
 };
 
 
