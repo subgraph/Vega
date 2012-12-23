@@ -1,9 +1,9 @@
--classpath libs/httpclient-4.1.1.jar
--output org.apache.http.client_4.1.1.vega.jar
+-classpath libs/httpclient-4.2.2.jar
+-output org.apache.http.client_4.2.2.vega.jar
 Export-Package: *
 Bundle-Name: org.apache.http.client
 Bundle-SymbolicName: org.apache.http.client
-Bundle-Version: 4.1.1
+Bundle-Version: 4.2.2
 Import-Package: *;resolution:=optional
 
 

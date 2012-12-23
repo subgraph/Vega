@@ -4,8 +4,6 @@
     <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="../lib/biz.aQute.bnd.jar" />
     <bnd files="org.apache.http.core.bnd" output="output" />
     <bnd files="org.apache.http.core.source.bnd" output="output" />
-    <bnd files="org.apache.http.core.nio.bnd" output="output" />
-    <bnd files="org.apache.http.core.nio.source.bnd" output="output" />
     <bnd files="org.apache.http.client.bnd" output="output" />
     <bnd files="org.apache.http.client.source.bnd" output="output" />
   </target>
