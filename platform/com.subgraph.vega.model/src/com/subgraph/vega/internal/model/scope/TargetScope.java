@@ -20,9 +20,9 @@ import com.subgraph.vega.api.util.UriTools;
 public class TargetScope implements ITargetScope, Activatable {
 
 	private final long id;
-	private final Set<URI> scopeURIs;
+	private final Set<String> scopeURIs;
 	private final Set<String> exclusionPatterns;
-	private final Set<URI> exclusionURIs;
+	private final Set<String> exclusionURIs;
 	private final boolean isDefault;
 	private String name;
 	private boolean isActiveScope;
@@ -37,9 +37,9 @@ public class TargetScope implements ITargetScope, Activatable {
 		this.id = id;
 		this.name = "";
 		this.isDefault = isDefault;
-		this.scopeURIs = new ActivatableHashSet<URI>();
+		this.scopeURIs = new ActivatableHashSet<String>();
 		this.exclusionPatterns = new ActivatableHashSet<String>();
-		this.exclusionURIs = new ActivatableHashSet<URI>();
+		this.exclusionURIs = new ActivatableHashSet<String>();
 		this.scopeChangedListeners = scopeChangeListeners;
 	}
 	
@@ -75,7 +75,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		activate(ActivationPurpose.READ);
 		checkReadOnly();
 		synchronized (scopeURIs) {
-			scopeURIs.add(uri);	
+			scopeURIs.add(uri.toString());	
 		}
 		activate(ActivationPurpose.WRITE);
 		notifyIfActiveScope();
@@ -96,10 +96,10 @@ public class TargetScope implements ITargetScope, Activatable {
 	}
 	
 	private void removeContainedURIs(URI base) {
-		final List<URI> current = new ArrayList<URI>(scopeURIs);
-		for(URI u: current) {
-			if(UriTools.doesBaseUriContain(base, u)) {
-				scopeURIs.remove(u);
+		final List<String> current = new ArrayList<String>(scopeURIs);
+		for(String uriStr: current) {
+			if(UriTools.doesBaseUriContain(base, URI.create(uriStr))) {
+				scopeURIs.remove(uriStr);
 			}
 		}
 	}
@@ -107,8 +107,12 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public synchronized Collection<URI> getScopeURIs() {
 		activate(ActivationPurpose.READ);
+		final List<URI> ret = new ArrayList<URI>();
 		synchronized (scopeURIs) {
-			return Collections.unmodifiableList(new ArrayList<URI>(scopeURIs));
+			for(String uriStr: scopeURIs) {
+				ret.add(URI.create(uriStr));
+			}
+			return Collections.unmodifiableCollection(ret);
 		}
 	}
 
@@ -129,7 +133,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		activate(ActivationPurpose.READ);
 		checkReadOnly();
 		synchronized (exclusionURIs) {
-			exclusionURIs.add(uri);
+			exclusionURIs.add(uri.toString());
 		}
 		activate(ActivationPurpose.WRITE);
 		notifyIfActiveScope();
@@ -169,8 +173,12 @@ public class TargetScope implements ITargetScope, Activatable {
 	@Override
 	public Collection<URI> getExclusionURIs() {
 		activate(ActivationPurpose.READ);
+		final List<URI> ret = new ArrayList<URI>();
 		synchronized (exclusionURIs) {
-			return Collections.unmodifiableCollection(new ArrayList<URI>(exclusionURIs));
+			for(String uriStr: exclusionURIs) {
+				ret.add(URI.create(uriStr));
+			}
+			return Collections.unmodifiableCollection(ret);
 		}
 	}
 
@@ -184,8 +192,8 @@ public class TargetScope implements ITargetScope, Activatable {
 		}
 		
 		synchronized (exclusionURIs) {
-			for(URI u: exclusionURIs) {
-				if(UriTools.doesBaseUriContain(u, uri)) {
+			for(String uriStr: exclusionURIs) {
+				if(UriTools.doesBaseUriContain(URI.create(uriStr), uri)) {
 					return true;
 				}
 			}
@@ -197,8 +205,8 @@ public class TargetScope implements ITargetScope, Activatable {
 	public boolean isInsideScope(URI uri) {
 		activate(ActivationPurpose.READ);
 		synchronized (scopeURIs) {
-			for(URI u: scopeURIs) {
-				if(UriTools.doesBaseUriContain(u, uri)) {
+			for(String uriStr: scopeURIs) {
+				if(UriTools.doesBaseUriContain(URI.create(uriStr), uri)) {
 					return true;
 				}
 			}
