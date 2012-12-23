@@ -25,6 +25,8 @@ public class ScriptedModule {
 	private Function runFunction;
 	private boolean isDisabledInScript;
 	private boolean isDefaultEnabled;
+	private boolean isTimeSensitive;
+	private boolean isDifferential;
 
 	public ScriptedModule(ScriptFile scriptFile, String category, ModuleValidator validator) {
 		this.scriptFile = scriptFile;
@@ -45,7 +47,10 @@ public class ScriptedModule {
 		runFunction = validator.getRunFunction();
 		isDisabledInScript = validator.isDisabled();
 		isDefaultEnabled = validator.isDefaultEnabled();
+		isTimeSensitive = validator.isTimeSensitive();
+		isDifferential = validator.isDifferential();
 	}
+
 	public Scriptable createInstanceScope(Context cx) {
 		Scriptable scope = cx.newObject(scriptFile.getCompiledScript());
 		scope.setPrototype(scriptFile.getCompiledScript());
@@ -73,6 +78,14 @@ public class ScriptedModule {
 		return moduleName;
 	}
 	
+	public boolean isDifferential() {
+		return isDifferential;
+	}
+
+	public boolean isTimeSensitive() {
+		return isTimeSensitive;
+	}
+
 	public ModuleScriptType getModuleType() {
 		return moduleType;
 	}

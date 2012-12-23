@@ -12,20 +12,17 @@ package com.subgraph.vega.internal.model.alerts;
 
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
-import com.db4o.query.Predicate;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.events.EventListenerManager;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
-import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.model.alerts.ScanExceptionEvent;
 import com.subgraph.vega.api.model.alerts.ScanPauseStateChangedEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
@@ -33,20 +30,21 @@ import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.internal.model.ModelProperties;
 
 public class ScanInstance implements IScanInstance, Activatable {
-	private final static Logger logger = Logger.getLogger("alerts");
 	private final long scanId;
 	private final ModelProperties properties;
-	private transient IScan scan;
-	private Date startTime;
-	private Date stopTime;
-	private int scanStatus;	
-	private transient Object alertLock;
+
+	private volatile Date startTime;
+	private volatile Date stopTime;
+	private volatile int scanStatus;
+	
+	private transient volatile IScan scan;
+	private transient volatile int activeScanCompletedCount;
+	private transient volatile int activeScanTotalCount;
+	private transient volatile boolean isPaused;
+	
+	private transient ScanInstanceAlerts alerts;
 	private transient EventListenerManager eventManager;
-	private transient ObjectContainer database;
-	private transient ScanAlertFactory alertFactory;
-	private transient int activeScanCompletedCount;
-	private transient int activeScanTotalCount;
-	private transient boolean isPaused;
+
 	private transient Activator activator;
 
 	public ScanInstance(long scanId) {
@@ -55,16 +53,9 @@ public class ScanInstance implements IScanInstance, Activatable {
 		this.properties = new ModelProperties();
 	}
 
-	public synchronized void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
-		this.alertLock = new Object();
-		this.database = database;
-		this.alertFactory = alertFactory;
+	public void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
 		this.eventManager = new EventListenerManager();
-	}
-
-	@Override
-	public Object getAlertLock() {
-		return alertLock;
+		this.alerts = new ScanInstanceAlerts(database, this, eventManager, alertFactory);
 	}
 
 	@Override
@@ -74,12 +65,12 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public synchronized IScan getScan() {
+	public IScan getScan() {
 		return scan;
 	}
 
 	@Override
-	public synchronized Date getStartTime() {
+	public Date getStartTime() {
 		activate(ActivationPurpose.READ);
 		return startTime;
 	}
@@ -103,19 +94,13 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
 		activate(ActivationPurpose.READ);
-		return alertFactory.createAlert(key, type, this, requestId);
+		return alerts.createAlert(type, key, requestId);
 	}
 
 	@Override
 	public void addAlert(IScanAlert alert) {
-		synchronized(alertLock) {
-			activate(ActivationPurpose.READ);
-			if(rejectDuplicateAlert(alert)) {
-				return;
-			}
-			database.store(alert);
-			eventManager.fireEvent(new NewScanAlertEvent(alert));
-		}
+		activate(ActivationPurpose.READ);
+		alerts.addAlert(alert);
 	}
 
 	@Override
@@ -125,57 +110,20 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public IScanAlert getAlertByKey(String key) {
-		if(key == null) {
-			return null;
-		}
-		
-		final List<ScanAlert> results = getAlertListForKey(key);
-		if(results.size() == 0) {
-			return null;
-		}			
-		if(results.size() > 1) {
-			logger.warning("Multiple alert model entries for key: "+ key);
-		}
-		return results.get(0);
-	}
-
-	private List<ScanAlert> getAlertListForKey(final String key) {
 		activate(ActivationPurpose.READ);
-		synchronized(alertLock) {
-			return database.query(new Predicate<ScanAlert>() {
-				private static final long serialVersionUID = 1L;
-				@Override
-				public boolean match(ScanAlert alert) {
-					return key.equals(alert.getKey()) && alert.getScanId() == scanId;
-				}			
-			});
-		}
+		return alerts.getAlertByKey(key); 
 	}
 
 	@Override
 	public List<IScanAlert> getAllAlerts() {
 		activate(ActivationPurpose.READ);
-		synchronized (alertLock) {
-			return database.query(new Predicate<IScanAlert>() {
-				private static final long serialVersionUID = 1L;
-				@Override
-				public boolean match(IScanAlert alert) {
-					return alert.getScanId() == scanId;
-				}			
-			});
-		}
+		return alerts.getAllAlerts();
 	}
-
 
 	@Override
 	public void addScanEventListenerAndPopulate(IEventHandler listener) {
-		synchronized(alertLock) {
-			for(IScanAlert alert: getAllAlerts()) {
-				listener.handleEvent(new NewScanAlertEvent(alert));
-			}
-			listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
-			eventManager.addListener(listener);
-		}
+		alerts.addScanEventListenerAndPopulate(listener);
+		listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 	}
 
 	@Override
@@ -184,7 +132,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public synchronized int getScanStatus() {
+	public int getScanStatus() {
 		activate(ActivationPurpose.READ);
 		return scanStatus;
 	}
@@ -202,46 +150,42 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
-	public synchronized int getScanCompletedCount() {
+	public int getScanCompletedCount() {
 		return activeScanCompletedCount;
 	}
 
 	@Override
-	public synchronized int getScanTotalCount() {
+	public int getScanTotalCount() {
 		return activeScanTotalCount;
 	}
 
 	@Override
-	public synchronized void setScan(IScan scan) {
+	public void setScan(IScan scan) {
 		this.scan = scan;
 	}
 
 	@Override
-	public synchronized void updateScanProgress(int completedCount, int totalCount) {
+	public void updateScanProgress(int completedCount, int totalCount) {
 		activeScanCompletedCount = completedCount;
 		activeScanTotalCount = totalCount;
-		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, completedCount, totalCount));
 	}
 
 	@Override
 	public synchronized void updateScanStatus(int status) {
 		activate(ActivationPurpose.READ);
-		if (status == SCAN_PROBING || status == SCAN_STARTING) {
-			if (startTime == null) {
-				startTime = new Date();
-			}
-		} else if (status == SCAN_COMPLETED || status == SCAN_CANCELLED) {
-			if (stopTime == null) {
-				stopTime = new Date();
-			}
+		if ((status == SCAN_PROBING || status == SCAN_STARTING) && (startTime == null)) {
+			startTime = new Date();
+		} else if ( (status == SCAN_COMPLETED || status == SCAN_CANCELLED)  && (stopTime == null) ){
+			stopTime = new Date();
 		}
 		this.scanStatus = status;
-		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, status, activeScanCompletedCount, activeScanTotalCount));
 		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override
-	public synchronized void notifyScanException(HttpUriRequest request, Throwable exception) {
+	public void notifyScanException(HttpUriRequest request, Throwable exception) {
 		eventManager.fireEvent(new ScanExceptionEvent(request, exception));
 	}
 
@@ -298,37 +242,6 @@ public class ScanInstance implements IScanInstance, Activatable {
 		return properties.propertyKeys();
 	}
 
-	private boolean rejectDuplicateAlert(IScanAlert alert) {
-		if(alert.getResource() == null) {
-			return false;
-		}
-		
-		for(ScanAlert sa: getAlertListForResource(alert.getResource())) {
-			if(sa.equals(alert)) {
-				return true;
-			}
-		}
-		
-		if(alert.getKey() == null) {
-			return false;
-		} else {
-			return hasAlertKey(alert.getKey());
-		}
-	}
-
-	private List<ScanAlert> getAlertListForResource(final String resource) {
-		activate(ActivationPurpose.READ);
-		synchronized(alertLock) {
-			return database.query(new Predicate<ScanAlert>() {
-				private static final long serialVersionUID = 1L;
-				@Override
-				public boolean match(ScanAlert alert) {
-					return resource.equals(alert.getResource()) && alert.getScanId() == scanId;
-				}
-			});
-		}
-	}
-
 	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if(activator != null) {
@@ -348,5 +261,4 @@ public class ScanInstance implements IScanInstance, Activatable {
 		
 		this.activator = activator;			
 	}
-
 }

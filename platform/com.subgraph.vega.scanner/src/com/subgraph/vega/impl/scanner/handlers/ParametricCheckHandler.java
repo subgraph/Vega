@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.handlers;
 
+import java.util.Random;
+
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
@@ -19,7 +21,7 @@ import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 
 public class ParametricCheckHandler extends CrawlerModule {
-	private final static String BOGUS_PARAM = "asdf1234";
+	private final static Random random = new Random();
 	private final ICrawlerResponseProcessor ognlHandler = new OgnlHandler();
 	private final InjectionChecks injectionChecks = new InjectionChecks();
 
@@ -33,10 +35,16 @@ public class ParametricCheckHandler extends CrawlerModule {
 			return;
 		}
 
+		final String param = generateBogusParameter();
 		for(int i = 0; i < 5; i++) {
-			ctx.submitAlteredRequest(this, BOGUS_PARAM, i);
+			ctx.submitAlteredRequest(this, param, i);
 		}
 
+	}
+	
+	private String generateBogusParameter() {
+		final int unique = random.nextInt(9000) + 1000;
+		return "asdf" + unique;
 	}
 
 	@Override

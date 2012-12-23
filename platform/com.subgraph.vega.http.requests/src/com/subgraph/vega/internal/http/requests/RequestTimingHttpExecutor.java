@@ -24,9 +24,8 @@ public class RequestTimingHttpExecutor extends HttpRequestExecutor {
 			final HttpRequest request,
 			final HttpClientConnection conn,
 			final HttpContext context) throws IOException, HttpException {
-		
-		
-		       if (request == null) {
+
+		if (request == null) {
             throw new IllegalArgumentException("HTTP request may not be null");
         }
         if (conn == null) {

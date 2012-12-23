@@ -235,14 +235,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpclient"
+         id="org.apache.http.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpcore"
+         id="org.apache.http.client"
          download-size="0"
          install-size="0"
          version="0.0.0"

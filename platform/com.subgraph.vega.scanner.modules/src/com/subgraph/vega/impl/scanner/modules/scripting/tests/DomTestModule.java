@@ -96,4 +96,14 @@ public class DomTestModule extends AbstractScriptModule {
 			sw.write(buffer, 0, n);
 		}
 	}
+
+	@Override
+	public boolean isDifferential() {
+		return false;
+	}
+
+	@Override
+	public boolean isTimeSensitive() {
+		return false;
+	}
 }

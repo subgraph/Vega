@@ -1,6 +1,7 @@
 var module = {
   name: "XML Injection checks",
-  category: "Injection Modules"
+  category: "Injection Modules",
+  differential: true
 };
 
 function initialize(ctx) {

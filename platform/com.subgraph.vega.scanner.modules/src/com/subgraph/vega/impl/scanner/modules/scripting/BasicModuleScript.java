@@ -91,4 +91,12 @@ public class BasicModuleScript implements IBasicModuleScript, IEnableableModule 
 	public ScriptedModuleRunningTime getRunningTimeProfile() {
 		return runningTime;
 	}
+	@Override
+	public boolean isDifferential() {
+		return module.isDifferential();
+	}
+	@Override
+	public boolean isTimeSensitive() {
+		return module.isTimeSensitive();
+	}
 }

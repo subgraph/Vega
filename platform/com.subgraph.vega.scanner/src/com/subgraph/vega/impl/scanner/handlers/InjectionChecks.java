@@ -26,10 +26,13 @@ public class InjectionChecks {
 
 	public void initialize(IPathState ps) {
 		ps.unlockChildren();
-		if(ps.getPath().getPathType() == PathType.PATH_DIRECTORY)
+		if(ps.getPath().getPathType() == PathType.PATH_DIRECTORY) {
 			putChecks.initialize(ps);
-		else
+		} if(ps.isParametric()) {
+			launchInjectionModules(ps);
+		} else {
 			runPageVariabilityCheck(ps);
+		}
 	}
 
 	public void runPageVariabilityCheck(IPathState ps) {
@@ -42,7 +45,7 @@ public class InjectionChecks {
 
 	public void launchInjectionModules(IPathState ps) {
 		for(IBasicModuleScript m: ps.getInjectionModules()) {
-			if(m.isEnabled()) {
+			if(m.isEnabled() && !(ps.getResponseVaries() && m.isDifferential())) {
 				m.runScript(ps);
 			}
 		}

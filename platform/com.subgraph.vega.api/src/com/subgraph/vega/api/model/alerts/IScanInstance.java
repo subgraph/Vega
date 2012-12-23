@@ -38,8 +38,6 @@ public interface IScanInstance extends IModelProperties {
 	long getScanId();
 	IScan getScan();
 	
-	Object getAlertLock();
-	
 	/**
 	 * Get the scan start time. Returns null until state is SCAN_PROBING or greater.
 	 * @return Scan start time, or null.

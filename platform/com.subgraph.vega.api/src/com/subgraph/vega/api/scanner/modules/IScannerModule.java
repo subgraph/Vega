@@ -14,5 +14,7 @@ public interface IScannerModule {
 	String getModuleName();
 	String getModuleCategoryName();
 	boolean isEnabled();
+	boolean isDifferential();
+	boolean isTimeSensitive();
 	IScannerModuleRunningTime getRunningTimeProfile();
 }
