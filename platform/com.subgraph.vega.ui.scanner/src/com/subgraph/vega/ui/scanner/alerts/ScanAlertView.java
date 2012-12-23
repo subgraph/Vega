@@ -31,6 +31,7 @@ import com.subgraph.vega.api.events.IEvent;
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.scanner.IScan;
@@ -197,16 +198,30 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 	}
 
 	public IScan getSelection() {
-		final IAlertTreeNode node = (IAlertTreeNode)((IStructuredSelection) viewer.getSelection()).getFirstElement();
-		if (node != null) {
-			final IScanInstance scanInstance = node.getScanInstance();
-			if (scanInstance != null) {
-				return scanInstance.getScan();
-			}
+		final IScanInstance scanInstance = getScanInstanceForSelection((IStructuredSelection) viewer.getSelection());
+		if(scanInstance == null) {
+			return null;
+		} else {
+			return scanInstance.getScan();
 		}
-		return null;
 	}
-	
+
+	private IScanInstance getScanInstanceForSelection(IStructuredSelection selection) {
+		if(selection == null || selection.isEmpty()) {
+			return null;
+		}
+		
+		final Object element = selection.getFirstElement();
+		
+		if(element instanceof IScanAlert) {
+			return ((IScanAlert)element).getScanInstance();
+		} else if(element instanceof IAlertTreeNode) {
+			return ((IAlertTreeNode)element).getScanInstance();
+		} else {
+			return null;
+		}
+	}
+
 	public void setTitleImage(Image image) {
 		super.setTitleImage(image);
 	}
