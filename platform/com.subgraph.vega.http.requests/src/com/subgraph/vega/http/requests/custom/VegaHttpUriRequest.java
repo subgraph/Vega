@@ -61,6 +61,10 @@ public class VegaHttpUriRequest extends HttpRequestBase implements IEncodableHtt
 		return targetHost;
 	}
 
+	public String getScheme() {
+		return targetHost.getSchemeName();
+	}
+
 	@Override
 	public RequestLine getRequestLine() {
 		if(encodedRequestLine != null) {

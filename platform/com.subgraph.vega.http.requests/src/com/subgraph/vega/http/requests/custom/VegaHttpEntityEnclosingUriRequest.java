@@ -69,6 +69,10 @@ public class VegaHttpEntityEnclosingUriRequest extends HttpEntityEnclosingReques
 		return targetHost;
 	}
 	
+	public String getScheme() {
+		return targetHost.getSchemeName();
+	}
+
 	@Override
 	public String getMethod() {
 		return requestLine.getMethod();
