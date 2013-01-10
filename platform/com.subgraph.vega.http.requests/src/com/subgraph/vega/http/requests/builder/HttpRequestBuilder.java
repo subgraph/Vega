@@ -69,24 +69,7 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	@Override
 	public synchronized void setFromRequestLine(RequestLine requestLine) throws URISyntaxException {
 		method = requestLine.getMethod();
-
-		final URI requestUri = new URI(requestLine.getUri());
-		scheme = requestUri.getScheme();
-		if (scheme == null) {
-			scheme = "http";
-		}
-
-		host = requestUri.getHost();
-		hostPort = requestUri.getPort();
-		if (hostPort == -1) {
-			if (scheme.equals("https")) {
-				hostPort = 443;
-			} else {
-				hostPort = 80;
-			}
-		}
-
-		setPathFromUri(requestUri);
+		path = requestLine.getUri();
 		setProtocolVersion(requestLine.getProtocolVersion());
 	}
 
