@@ -20,6 +20,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -56,6 +57,9 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 	@Override
 	public synchronized void setFromRequest(HttpRequest request) throws URISyntaxException {
 		setParams(request.getParams().copy());
+		if(request instanceof HttpUriRequest) {
+			setSchemeAndHostFromUri(((HttpUriRequest) request).getURI());
+		}
 		setFromRequestLine(request.getRequestLine());
 		setHeaders(request.getAllHeaders());
 
@@ -75,18 +79,25 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized void setFromUri(URI uri) {
-		if (uri.getScheme() != null) {
-			scheme = uri.getScheme();
-			if (uri.getHost() != null) {
-				host = uri.getHost();
-				hostPort = uri.getPort();
-				if (hostPort == -1) {
+		setSchemeAndHostFromUri(uri);
+		setPathFromUri(uri);
+	}
+
+	private void setSchemeAndHostFromUri(URI uri) {
+		final HttpHost httpHost = URIUtils.extractHost(uri);
+		if(httpHost == null) {
+			return;
+		}
+		if(httpHost.getSchemeName() != null) {
+			scheme = httpHost.getSchemeName();
+			if(httpHost.getHostName() != null) {
+				host = httpHost.getHostName();
+				hostPort = httpHost.getPort();
+				if(hostPort == -1) {
 					hostPort = getSchemeDefaultPort(scheme);
 				}
 			}
 		}
-
-		setPathFromUri(uri);
 	}
 
 	private void setPathFromUri(URI uri) {
