@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.jsoup.nodes.Attribute;
 import org.jsoup.select.Elements;
+import org.jsoup.nodes.FormElement;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -149,7 +151,20 @@ public class ElementImpl extends NodeImpl implements Element {
 			elements.add(this);
 			return new NodeListImpl(elements);
 		}
-		
+
+		// Special case #2 - to handle jsoup.org.FormElement, which has saved nested elements 
+		// see:             	return new NodeListImpl(elements);
+
+		if(getTagName().equals("FORM") && "*".equals(name)) {
+            ArrayList<org.jsoup.nodes.Element>fe = new ArrayList<org.jsoup.nodes.Element>();
+            fe = ((FormElement) this.jsoupElement).getElements();
+            for (org.jsoup.nodes.Element f : fe)
+            {
+            	elements.add(HTMLElementImpl.create(f, getOwnerDocument()));
+            }
+        	return new NodeListImpl(elements);
+
+		}
 		for(org.jsoup.nodes.Element e: jsoupElementsForTag(name)) {
 			if(e != jsoupElement)
 				elements.add(HTMLElementImpl.create(e, getOwnerDocument()));

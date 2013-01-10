@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.html2.HTMLCollection;
 import org.w3c.dom.html2.HTMLFormElement;
@@ -21,8 +23,9 @@ import org.w3c.dom.html2.HTMLFormElement;
 public class HTMLFormElementImpl extends HTMLElementImpl implements HTMLFormElement {
 
 	private HTMLCollection formElements;
-	
+
 	HTMLFormElementImpl(Element jsoupElement, Document ownerDocument) {
+		
 		super(jsoupElement, ownerDocument);
 	}
 
@@ -33,9 +36,13 @@ public class HTMLFormElementImpl extends HTMLElementImpl implements HTMLFormElem
 		
 		final List<HTMLElementImpl> elementList = new ArrayList<HTMLElementImpl>();
 		
-		for(Element e: jsoupElement.select("input, button, textarea, select")) {
+		ArrayList<Element>fe = new ArrayList<Element>();
+		fe = ((FormElement) jsoupElement).getElements();
+		
+		for(Element e: fe) {
 			addFormElementsToList(e, elementList);
 		}
+		
 		formElements = new HTMLCollectionImpl(elementList);
 		return formElements;		
 	}

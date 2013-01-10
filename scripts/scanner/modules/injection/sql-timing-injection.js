@@ -13,8 +13,8 @@ function initialize(ctx) {
 	  
 	// MySQL 
 	  
-    ctx.submitAlteredRequest(process, "1 AND SLEEP(5) -- ", true, 0);
-    ctx.submitAlteredRequest(process, "1 OR (SELECT SLEEP(5)) -- ", true, 1);
+    ctx.submitAlteredRequest(process, "1 AND SLEEP(5) -- ", false, 0);
+    ctx.submitAlteredRequest(process, "1 OR (SELECT SLEEP(5)) -- ", false, 1);
     ctx.submitAlteredRequest(process, "\" AND SLEEP(5) -- ", true, 2);
     ctx.submitAlteredRequest(process, "' AND SLEEP(5) -- ", true, 3);
     ctx.submitAlteredRequest(process, "\" OR (SELECT SLEEP(5)) -- ", true, 4);
@@ -25,7 +25,7 @@ function initialize(ctx) {
     ctx.submitAlteredRequest(process, " UNION SELECT SLEEP(5) -- ", true, 9);
     ctx.submitAlteredRequest(process, "' UNION SELECT SLEEP(5) -- ", true, 10);
     ctx.submitAlteredRequest(process, "\" UNION SELECT SLEEP(5) -- ", true, 11);
-    
+    ctx.submitAlteredRequest(process, "(1 AND (SELECT SLEEP(5)))", false, 12);
   }  
 
 }

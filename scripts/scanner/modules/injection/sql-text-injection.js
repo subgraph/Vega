@@ -28,7 +28,9 @@ function initialize(ctx) {
     ctx.submitAlteredRequest(process, "''", true, 13);
     
     ctx.submitAlteredRequest(process, "vega32432", true, 14);   
-    
+    ctx.submitAlteredRequest(process, "' UNION SELECT 8, table_name, 'vega' FROM information_schema.tables WHERE table_name like'%", true, 15);
+    ctx.submitAlteredRequest(process, "\" UNION SELECT 8, table_name, 'vega' FROM information_schema.tables WHERE table_name like'%", true, 16);
+
   }
   
 
@@ -49,16 +51,11 @@ function process(req, res, ctx) {
   
   var n = ctx.incrementResponseCount();
   
-  if (n < 15) return;
+  if (n < 17) return;
   
   var ps = ctx.getPathState();
   var fp = ps.getPathFingerprint();
   
-  if (!ctx.isFingerprintMatch(5,8)){
-	  ctx.debug("HIT:");
-	  ctx.debug(ctx.getSavedRequest(5).requestLine.uri)
-  }
-
   if (!ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(1, 2)) {
 	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
 	  var uripart = uri.replace(/\?.*/, "");
@@ -99,4 +96,27 @@ function process(req, res, ctx) {
     ctx.responseChecks(13);
   }  
 
+  if (ctx.isFingerprintMatch(fp, 14) && !ctx.isFingerprintMatch(14, 15)) {
+	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
+	  var uripart = uri.replace(/\?.*/, "");
+	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(15), ctx.getSavedResponse(15), {
+      output: ctx.getSavedResponse(1).bodyAsString,
+      key: "vinfo-sql-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: "Blind Text Injection Differential"
+    });
+    ctx.responseChecks(15);
+  }  
+  
+  if (ctx.isFingerprintMatch(fp, 14) && !ctx.isFingerprintMatch(14, 16)) {
+	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
+	  var uripart = uri.replace(/\?.*/, "");
+	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(16), ctx.getSavedResponse(16), {
+      output: ctx.getSavedResponse(1).bodyAsString,
+      key: "vinfo-sql-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: "Blind Text Injection Differential"
+    });
+    ctx.responseChecks(16);
+  }  
 }

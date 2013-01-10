@@ -11,3 +11,4 @@ Import-Package: org.jsoup,
  org.jsoup.nodes,
  org.jsoup.select
 Service-Component: OSGI-INF/html-parser.xml
+Require-Bundle: org.jsoup;bundle-version="0.0.0"

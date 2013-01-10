@@ -26,9 +26,9 @@ function run(request, response, ctx) {
     ctx.addRegexCaseInsensitiveHighlight("type=file");
 
     (found > 1) ? match = "instances" : match = "instance";
-    ctx.alert("vautocomplete", request, response, {
-      "resource": request.requestLine.uri,
-      key: "vautocomplete:" + sub
+    ctx.alert("vfileupload", request, response, {
+              "resource": request.requestLine.uri,
+              "key": "vfileupload" + sub
     });
 
   }
