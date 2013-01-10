@@ -7,14 +7,25 @@ How to build OSGi compatible HttpComponents bundles for Vega.
     httpcomponents-client-4.2.2-src.tar.gz
     httpcomponents-core-4.2.3-src.tar.gz
 
-2) Unpack both archives and build them with the command 'mvn package'
+2) Unpack both archives.
 
-3) Build artifacts can be found in
+3) Patch httpclient file: 
+
+     httpclient/src/main/java/org/apache/http/impl/client/DefaultRequestDirector
+
+   Change method wrapRequest() from private to protected:
+
+     DefaultRequestDirector#wrapRequest(HttpRequest request)
+
+
+4) Build both packages with the command 'mvn package'
+
+5) Build artifacts can be found in
 
    httpcomponents-client-4.2.2/httpclient/target
    httpcomponents-core-4.2.3/httpcore/target
 
-4) Copy the following 4 jar files into the lib/ directory:
+6) Copy the following 4 jar files into the lib/ directory:
 
   From httpcomponents-client-4.2.2/httpclient/target
 
@@ -26,18 +37,18 @@ How to build OSGi compatible HttpComponents bundles for Vega.
     httpcore-4.2.3-sources.jar
     httpcore-4.2.3.jar
 
-5) Run 'ant', generated jars appear in output/ directory
+7) Run 'ant', generated jars appear in output/ directory
 
     org.apache.http.client_4.2.2.vega.jar
     org.apache.http.core_4.2.3.vega.jar 
     org.apache.http.client.source_4.2.2.vega.jar
     org.apache.http.core.source_4.2.3.vega.jar
 
-6) Move all of these to
+8) Move all of these to
 
   Vega/platform/com.subgraph.vega.application/extra-bundles
 
   Delete the bundles which are begin upgraded 
 
 
-7) possibly change feature.xml, reset target platform, etc...
+9) possibly change feature.xml, reset target platform, etc...
