@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.model.web;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 
 import com.db4o.ObjectContainer;
@@ -96,5 +97,11 @@ public class WebResponse extends WebEntity implements IWebResponse {
 	@Override
 	public void accept(IWebModelVisitor visitor) {
 		visitor.visit(this);
+	}
+
+
+	@Override
+	public HttpHost getHttpHost() {
+		return parentPath.getHttpHost();
 	}
 }

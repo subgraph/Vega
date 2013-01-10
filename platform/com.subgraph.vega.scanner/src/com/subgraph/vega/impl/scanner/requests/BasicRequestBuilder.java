@@ -14,12 +14,13 @@ package com.subgraph.vega.impl.scanner.requests;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebPath;
 
 public class BasicRequestBuilder extends AbstractRequestBuilder {
 
-	public BasicRequestBuilder(IWebPath path) {
-		super(path);
+	public BasicRequestBuilder(IHttpRequestEngine requestEngine, IWebPath path) {
+		super(requestEngine, path);
 	}
 
 	@Override
@@ -30,7 +31,7 @@ public class BasicRequestBuilder extends AbstractRequestBuilder {
 	@Override
 	public HttpUriRequest createAlteredRequest(String value, boolean append) {
 		final String path = createPathWithSuffix(getBasePath(), value);
-		return createRequestFromPath(path);
+		return createRequestForPath(path);
 	}
 
 	private String createPathWithSuffix(String oldPath, String suffix) {

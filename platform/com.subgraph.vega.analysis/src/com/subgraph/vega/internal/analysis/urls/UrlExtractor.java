@@ -10,15 +10,15 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.analysis.urls;
 
-import java.net.URI;
 import java.util.List;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class UrlExtractor {
 	private final HtmlUrlExtractor htmlExtractor = new HtmlUrlExtractor();
 
-	public List<URI> findUrls(IHttpResponse response) {
+	public List<VegaURI> findUrls(IHttpResponse response) {
 		return htmlExtractor.findHtmlUrls(response);
 	}
 }

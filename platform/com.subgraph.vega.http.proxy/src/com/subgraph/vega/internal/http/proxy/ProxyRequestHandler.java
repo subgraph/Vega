@@ -19,11 +19,13 @@ import java.util.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HTTP;
@@ -35,8 +37,8 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
-import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpEntityEnclosingUriRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 
 public class ProxyRequestHandler implements HttpRequestHandler {
 
@@ -141,10 +143,11 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 
 	private HttpUriRequest copyToUriRequest(HttpRequest request) throws ProtocolException {
 		URI uri;
+		final String hostStr = removePath(request.getRequestLine().getUri());
 		try {
-			uri = new URI(request.getRequestLine().getUri());
+			uri = new URI(hostStr);
 		} catch (URISyntaxException e) {
-    		throw new ProtocolException("Invalid URI: " + request.getRequestLine().getUri(), e);
+    		throw new ProtocolException("Invalid URI: " + hostStr, e);
 		}
 		// ensuring we have scheme and host also prevents the proxy from connecting back to itself
 		if (uri.getScheme() == null) {
@@ -154,17 +157,52 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			throw new ProtocolException("No host in proxy request URI");
 		}
 		
-		final HttpUriRequest uriRequest;
-		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingMutableRequest tmp = new HttpEntityEnclosingMutableRequest(request.getRequestLine().getMethod(), uri);
-			tmp.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
-			uriRequest = tmp;
-		} else {
-			uriRequest = new HttpMutableRequest(request.getRequestLine().getMethod(), uri);
-		}
+		final HttpHost host = URIUtils.extractHost(uri);
+		final HttpUriRequest uriRequest = createRequestCopy(host, request);
 		uriRequest.setParams(request.getParams());
 		uriRequest.setHeaders(request.getAllHeaders());
 		return uriRequest;
+	}
+	
+	private String removeSchemeAndHost(String line) {
+		final int idx = findPathStart(line);
+		if(idx == -1) {
+			return "";
+		} else {
+			return line.substring(idx);
+		}
+	}
+	
+	private String removePath(String line) {
+		final int idx = findPathStart(line);
+		if(idx == -1) {
+			return line;
+		} else {
+			return line.substring(0, idx);
+		}
+	}
+	
+	
+	private int findPathStart(String line) {
+		int idx = line.indexOf("://");
+		if(idx == -1 || ((idx + 3) >= line.length())) {
+			return 0;
+		} else {
+			idx += 3;
+		}
+		while(line.charAt(idx) == '/') idx++;
+		return line.indexOf('/', idx);
+	}
+
+	private HttpUriRequest createRequestCopy(HttpHost host, HttpRequest request) {
+		final String method = request.getRequestLine().getMethod();
+		final String uriLine = removeSchemeAndHost(request.getRequestLine().getUri());
+		if(request instanceof HttpEntityEnclosingRequest) {
+			final VegaHttpEntityEnclosingUriRequest r = new VegaHttpEntityEnclosingUriRequest(host, method, uriLine);
+			r.setEntity(copyEntity(((HttpEntityEnclosingRequest) request).getEntity()));
+			return r;
+		}
+		return new VegaHttpUriRequest(host, method, uriLine);
 	}
 	
 	private HttpResponse copyResponse(HttpResponse originalResponse) {

@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -78,4 +79,5 @@ public interface IPathState {
 	String createXssPattern(String prefix, int xssId);
 	String createXssPattern(int xssId);
 
+	IHttpRequestEngine getRequestEngine();
 }

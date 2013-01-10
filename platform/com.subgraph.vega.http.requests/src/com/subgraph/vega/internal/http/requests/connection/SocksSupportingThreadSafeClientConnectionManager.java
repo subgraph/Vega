@@ -10,18 +10,20 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.http.requests.connection;
 
-import org.apache.http.impl.conn.DefaultClientConnection;
-import org.apache.http.impl.io.HttpRequestWriter;
-import org.apache.http.io.HttpMessageWriter;
-import org.apache.http.io.SessionOutputBuffer;
-import org.apache.http.params.HttpParams;
+import org.apache.http.conn.ClientConnectionOperator;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
+public class SocksSupportingThreadSafeClientConnectionManager extends
+		ThreadSafeClientConnManager {
 
-public class UnencodingClientConnection extends DefaultClientConnection {
-	@Override
-	 protected HttpMessageWriter createRequestWriter(
-	            final SessionOutputBuffer buffer,
-	            final HttpParams params) {
-	        return new HttpRequestWriter(buffer, new UnencodingLineFormatter(), params);
-	    }
+	public SocksSupportingThreadSafeClientConnectionManager(SchemeRegistry sr) {
+		super(sr);
+	}
+	
+	@Override 
+	protected ClientConnectionOperator createConnectionOperator(final SchemeRegistry sr) { 
+		return new SocksModeClientConnectionOperator(sr);
+	}
+
 }

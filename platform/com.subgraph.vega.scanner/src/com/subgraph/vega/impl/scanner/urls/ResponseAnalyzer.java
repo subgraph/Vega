@@ -27,6 +27,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.util.UriTools;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.forms.FormProcessor;
 
 public class ResponseAnalyzer {
@@ -58,7 +59,7 @@ public class ResponseAnalyzer {
 		if(isProxyScan) {
 			return;
 		}
-		for(URI u: result.getDiscoveredURIs()) {
+		for(VegaURI u: result.getDiscoveredURIs()) {
 			if(uriFilter.filter(u))
 				uriParser.processUri(u);
 		}

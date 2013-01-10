@@ -25,11 +25,10 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
 import com.subgraph.vega.api.http.requests.IHttpHeaderBuilder;
-import com.subgraph.vega.api.http.requests.IHttpMutableRequest;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.http.requests.custom.HttpEntityEnclosingMutableRequest;
-import com.subgraph.vega.http.requests.custom.HttpMutableRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpEntityEnclosingUriRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 
 public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpRequestBuilder {
 	private String scheme = "http";
@@ -257,32 +256,8 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 	@Override
 	public synchronized HttpUriRequest buildRequest(boolean setHeadersEntity) throws URISyntaxException {
-		if (host == null || host.length() == 0) {
-			throw new IllegalArgumentException("Invalid host");
-		}
-
-		final StringBuilder buf = new StringBuilder();
-		buf.append(scheme);
-		buf.append("://");
-		buf.append(host);
-		if (isSchemeDefaultPort(scheme, hostPort) == false) {
-			buf.append(":");
-			buf.append(Integer.toString(hostPort));
-		}
-		if (path != null) {
-			buf.append(path);
-		}
-		final URI requestUri = new URI(buf.toString());		
-		IHttpMutableRequest request;
-		HttpEntity entity = getEntity();		
-		if (entity != null) {
-			HttpEntityEnclosingMutableRequest entityRequest = new HttpEntityEnclosingMutableRequest(method, requestUri);
-			entityRequest.setEntity(entity);
-			request = entityRequest;
-		} else {
-			request = new HttpMutableRequest(method, requestUri);
-		}
-
+		final HttpUriRequest request = createRequest( buildHost() );
+		
 		HttpParams params = getParams();
 		if (params == null) {
 			params = new BasicHttpParams();
@@ -303,7 +278,31 @@ public class HttpRequestBuilder extends HttpMessageBuilder implements IHttpReque
 
 		return request;
 	}
-
-
 	
+	private HttpHost buildHost() {
+		if (host == null || host.length() == 0) {
+			throw new IllegalArgumentException("Invalid host");
+		}
+		if(isSchemeDefaultPort(scheme, hostPort)) {
+			return new HttpHost(host, -1, scheme);
+		} else {
+			return new HttpHost(host, hostPort, scheme);
+		}
+	}
+
+	private HttpUriRequest createRequest(HttpHost host) {
+		final String requestPath = (path == null) ? "" : path;
+		final HttpEntity entity = getEntity();
+		if(entity != null) {
+			return createEntityEnclosingRequest(host, requestPath, entity);
+		} else {
+			return new VegaHttpUriRequest(host, method, requestPath);
+		}
+	}
+	
+	private HttpUriRequest createEntityEnclosingRequest(HttpHost host, String requestPath, HttpEntity entity) {
+		final VegaHttpEntityEnclosingUriRequest request = new VegaHttpEntityEnclosingUriRequest(host, method, requestPath);
+		request.setEntity(entity);
+		return request;
+	}
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebPath;
 
 public abstract class AbstractParameterRequestBuilder extends AbstractRequestBuilder {
@@ -23,8 +24,8 @@ public abstract class AbstractParameterRequestBuilder extends AbstractRequestBui
 	protected final List<NameValuePair> parameters;
 	protected final int parameterFuzzIndex;
 	
-	protected AbstractParameterRequestBuilder(IWebPath path, List<NameValuePair> parameters, int index) {
-		super(path);
+	protected AbstractParameterRequestBuilder(IHttpRequestEngine requestEngine, IWebPath path, List<NameValuePair> parameters, int index) {
+		super(requestEngine, path);
 		if(parameters == null || index < 0 || index >= parameters.size())
 			throw new IllegalArgumentException();
 		

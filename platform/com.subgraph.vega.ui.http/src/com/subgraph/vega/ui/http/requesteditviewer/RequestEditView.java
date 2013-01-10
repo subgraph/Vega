@@ -12,7 +12,6 @@ package com.subgraph.vega.ui.http.requesteditviewer;
 
 import java.net.URISyntaxException;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -69,8 +68,7 @@ public class RequestEditView extends ViewPart {
 		}
 		IRequestOrigin requestOrigin = workspace.getRequestLog().getRequestOriginRequestEditor();
 		IHttpRequestEngineFactory requestEngineFactory = Activator.getDefault().getHttpRequestEngineFactoryService();
-		final HttpClient httpClient = requestEngineFactory.createBasicClient();
-		requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineFactory.createConfig(), requestOrigin);
+		requestEngine = requestEngineFactory.createRequestEngine(IHttpRequestEngine.EngineConfigType.CONFIG_PROXY, requestEngineFactory.createConfig(), requestOrigin);
 		requestBuilder = requestEngineFactory.createRequestBuilder();
 	}
 	

@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.api.http.requests;
 
+import org.apache.http.HttpHost;
+import org.apache.http.RequestLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -20,6 +22,7 @@ import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public interface IHttpRequestEngine {
+	enum EngineConfigType { CONFIG_SCANNER, CONFIG_PROXY };
 	/**
 	 * Get the configuration for this request engine.
 	 * 
@@ -115,5 +118,10 @@ public interface IHttpRequestEngine {
 	 * @param context Macro context.
 	 * @return Macro executor.
 	 */
-	IHttpMacroExecutor createMacroExecutor(IHttpMacro macro, IHttpMacroContext context);	
+	IHttpMacroExecutor createMacroExecutor(IHttpMacro macro, IHttpMacroContext context);
+	
+	HttpUriRequest createGetRequest(HttpHost target, String uri);
+	HttpUriRequest createPostRequest(HttpHost target, String uri);
+	HttpUriRequest createRawRequest(HttpHost target, RequestLine requestLine);
+	HttpUriRequest createRawEntityEnclosingRequest(HttpHost target, RequestLine requestLine);
 }

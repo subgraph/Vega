@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.forms;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,23 +19,24 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.subgraph.vega.api.scanner.IFormCredential;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class FormProcessingState {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final static FormHints formHints = new FormHints();
 
 	private final List<IFormCredential> credentials;
-	private final URI baseURI;
+	private final VegaURI baseURI;
 	private final String action;
 	private final String method;
 
 	private final List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 
-	private URI cachedTargetURI;
+	private VegaURI cachedTargetURI;
 	private boolean passwordFlag;
 	private boolean fileFieldFlag;
 
-	FormProcessingState(URI baseURI, String action, String method, List<IFormCredential> credentials) {
+	FormProcessingState(VegaURI baseURI, String action, String method, List<IFormCredential> credentials) {
 		this.baseURI = baseURI;
 		this.action = action;
 		this.method = method;
@@ -51,7 +51,7 @@ public class FormProcessingState {
 		return (method != null && method.toLowerCase().equals("post"));
 	}
 
-	URI getTargetURI() {
+	VegaURI getTargetURI() {
 		synchronized(this) {
 			if(cachedTargetURI == null)
 				cachedTargetURI = createTargetURI();
@@ -59,14 +59,14 @@ public class FormProcessingState {
 		}
 	}
 
-	private URI createTargetURI() {
+	private VegaURI createTargetURI() {
 		if(baseURI == null)
 			return null;
 		if(action == null)
 			return baseURI;
 		try {
-			final URI target = baseURI.resolve(action);
-			final String scheme = target.getScheme();
+			final VegaURI target = baseURI.resolve(action);
+			final String scheme = target.getTargetHost().getSchemeName();
 			if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
 				return target;
 			else

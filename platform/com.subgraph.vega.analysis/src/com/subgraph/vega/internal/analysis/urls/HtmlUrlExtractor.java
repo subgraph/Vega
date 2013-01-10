@@ -22,16 +22,19 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.client.utils.URIUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class HtmlUrlExtractor {
 	
-	List<URI> findHtmlUrls(IHttpResponse response) {
+	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
 		
 		if(htmlParseResult != null) {
@@ -41,14 +44,14 @@ public class HtmlUrlExtractor {
 		}
 	}
 	
-	List<URI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
+	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
 		return extractUrlsFromDocument(document);
 	}
 	
-	private List<URI> extractUrlsFromDocument(Document document) {
-		final ArrayList<URI> uris = new ArrayList<URI>();
+	private List<VegaURI> extractUrlsFromDocument(Document document) {
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "[src]", "abs:src"));
 		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
@@ -66,18 +69,25 @@ public class HtmlUrlExtractor {
 			w.write(buffer, 0, n);
 		}
 	}
-	private List<URI> extractURIs(Document document, String query, String attribute) {
-		final ArrayList<URI> uris = new ArrayList<URI>();
+	private List<VegaURI> extractURIs(Document document, String query, String attribute) {
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		for(Element e: document.select(query)) {
 			String link = e.attr(attribute);
 			link = link.replace("\\", "%5C");
 			URI uri = createURI(link);
-			if(uri != null)
-				uris.add(uri);
+			if(uri != null && hasValidHttpScheme(uri)) {
+				final HttpHost targetHost = URIUtils.extractHost(uri);
+				final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+				uris.add(vegaURI);
+			}
 		}
 		return uris;
 	}
 	
+	private boolean hasValidHttpScheme(URI uri) {
+		final String scheme = uri.getScheme();
+		return (scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
+	}
 	private URI createURI(String link) {
 		try {
 			if(link.isEmpty())

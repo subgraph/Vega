@@ -45,27 +45,13 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 	}
 
 	@Override
-	public HttpClient createBasicClient() {
-		HttpClient client = BasicHttpClientFactory.createHttpClient(); 
-		if (proxy != null) {
+	public IHttpRequestEngine createRequestEngine(IHttpRequestEngine.EngineConfigType type, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin) {
+		final HttpClient client = BasicHttpClientFactory.createHttpClient(type);
+		if(proxy != null) {
 			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		}
-		return client;
-	}
-	
-	@Override
-	public HttpClient createUnencodingClient() {
-		HttpClient client = UnencodedHttpClientFactory.createHttpClient();
-		if (proxy != null) {
-			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-		}
-		return client;
-	}
-
-	@Override
-	public IHttpRequestEngine createRequestEngine(HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin) {
 		configureClient(client, config);
-		return new HttpRequestEngine(executor, client, config, requestOrigin, htmlParser);
+		return new HttpRequestEngine(type, executor, client, config, requestOrigin, htmlParser);
 	}
 	
 	@Override

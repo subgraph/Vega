@@ -1,13 +1,11 @@
 package com.subgraph.vega.impl.scanner;
 
-import java.net.URI;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.params.HttpProtocolParams;
 
@@ -21,11 +19,11 @@ import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
-import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
-import com.subgraph.vega.api.util.UriTools;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
@@ -52,23 +50,29 @@ public class ProxyScan implements IProxyScan {
 	}
 
 	@Override
-	public void scanGetTarget(URI target, List<NameValuePair> parameters) {
+	public void scanGetTarget(VegaURI target, List<NameValuePair> parameters) {
 		if(!isStarted) {
 			start();
 		}
-		final URI uri = UriTools.stripQueryFromUri(target);
-		final IPathState ps = uriParser.processUri(uri);
+		final IPathState ps = uriParser.processUri(stripQuery(target));
 		ps.maybeAddParameters(parameters);
 	}
 
 	@Override
-	public void scanPostTarget(URI target, List<NameValuePair> parameters) {
+	public void scanPostTarget(VegaURI target, List<NameValuePair> parameters) {
 		if(!isStarted) {
 			start();
 		}
-		final URI uri = UriTools.stripQueryFromUri(target);
-		final IPathState ps = uriParser.processUri(uri);
+		final IPathState ps = uriParser.processUri(stripQuery(target));
 		ps.maybeAddPostParameters(parameters);
+	}
+	
+	private VegaURI stripQuery(VegaURI uri) {
+		if(uri.getQuery() != null) {
+			return new VegaURI(uri.getTargetHost(), uri.getPath(), null);
+		} else {
+			return uri;
+		}
 	}
 		
 	@Override
@@ -131,10 +135,9 @@ public class ProxyScan implements IProxyScan {
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
 		
-		final HttpClient client = factory.createUnencodingClient();
-		HttpProtocolParams.setUserAgent(client.getParams(), config.getUserAgent());
 		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
-		final IHttpRequestEngine requestEngine = factory.createRequestEngine(client, requestEngineConfig, requestOrigin);
+		final IHttpRequestEngine requestEngine = factory.createRequestEngine(IHttpRequestEngine.EngineConfigType.CONFIG_SCANNER, requestEngineConfig, requestOrigin);
+		HttpProtocolParams.setUserAgent(requestEngine.getHttpClient().getParams(), config.getUserAgent());
 		requestEngine.setCookieStore(cookieStore);
 		// REVISIT: consider moving authentication method to request engine config
 		IIdentity identity = config.getScanIdentity();

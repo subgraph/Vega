@@ -10,12 +10,10 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.handlers;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IHttpResponse.ResponseStatus;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
@@ -50,15 +48,10 @@ public class DirIPSCheck extends CrawlerModule {
 	}
 
 	private HttpUriRequest createRequest(IPathState ps, String query) {
-		final URI baseUri = ps.getPath().getUri();
-		try {
-			final URI newUri = new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath(), query, null);
-			return new HttpGet(newUri);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+		final IHttpRequestEngine requestEngine = ps.getRequestEngine();
+		final HttpHost host = ps.getPath().getHttpHost();
+		final String requestLine = ps.getPath().getFullPath() + "?" + query;
+		return requestEngine.createGetRequest(host, requestLine);
 	}
 
 	@Override

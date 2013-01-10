@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.analysis;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,6 +25,7 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.web.IWebModel;
 import com.subgraph.vega.api.model.web.IWebPath;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.internal.analysis.urls.UrlExtractor;
 
 public class ContentAnalyzer implements IContentAnalyzer {
@@ -78,7 +78,8 @@ public class ContentAnalyzer implements IContentAnalyzer {
 			workspace.getRequestLog().addRequestResponse(response);
 		}
 
-		IWebPath path = workspace.getWebModel().getWebPathByUri(response.getRequestUri());
+		final VegaURI uri = VegaURI.fromHostAndRequest(response.getHost(), response.getOriginalRequest());
+		final IWebPath path = workspace.getWebModel().getWebPathByUri(uri);
 		path.setVisited(true);
 		
 		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
@@ -97,13 +98,19 @@ public class ContentAnalyzer implements IContentAnalyzer {
 	
 	private void runExtractUrls(ContentAnalyzerResult result, IHttpResponse response, IWebModel webModel) {
 		if(response.isMostlyAscii()) {
-			for(URI u : urlExtractor.findUrls(response)) {
-				if(addLinksToModel && (u.getScheme().equalsIgnoreCase("http") || u.getScheme().equalsIgnoreCase("https")))
+			for(VegaURI u : urlExtractor.findUrls(response)) {
+				if(addLinksToModel && (schemeEquals(u, "http") || schemeEquals(u, "https")))
 					webModel.getWebPathByUri(u);
 				result.addUri(u);
 			}
 		}
 	}
+	
+	private boolean schemeEquals(VegaURI uri, String scheme) {
+		final String s = uri.getTargetHost().getSchemeName();
+		return s.equalsIgnoreCase(scheme);
+	}
+	
 	private void runResponseProcessingModules(HttpRequest request, IHttpResponse response, MimeType declaredMime, MimeType sniffedMime, IWorkspace workspace) {
 		if(responseProcessingModules == null || !response.isMostlyAscii()) {
 			return;

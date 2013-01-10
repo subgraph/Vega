@@ -21,6 +21,7 @@ import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.analysis.MimeType;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -36,7 +37,8 @@ import com.subgraph.vega.impl.scanner.requests.PostParameterRequestBuilder;
 public class PathState implements IPathState {
 
 	public static PathState createBasicPathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path) {
-		final IRequestBuilder rb = new BasicRequestBuilder(path);
+		final IHttpRequestEngine requestEngine = stateManager.getCrawler().getRequestEngine();
+		final IRequestBuilder rb = new BasicRequestBuilder(requestEngine, path);
 		final PathState st = new PathState(fetchProcessor, stateManager, parentState, path, rb);
 		if(parentState != null)
 			parentState.addChildState(st, true);
@@ -50,7 +52,8 @@ public class PathState implements IPathState {
 	public static PathState createParameterPathState(ICrawlerResponseProcessor fetchProcessor, PathState parentState, List<NameValuePair> parameters, int fuzzIndex) {
 		if(parentState == null)
 			throw new IllegalArgumentException("Parent of parameter path cannot be null");
-		final IRequestBuilder rb = new GetParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
+		final IHttpRequestEngine requestEngine = parentState.getPathStateManager().getCrawler().getRequestEngine();
+		final IRequestBuilder rb = new GetParameterRequestBuilder(requestEngine, parentState.getPath(), parameters, fuzzIndex);
 		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
 		parentState.addChildState(st, false);
 		return st;
@@ -59,7 +62,8 @@ public class PathState implements IPathState {
 	public static PathState createPostParameterPathState(ICrawlerResponseProcessor fetchProcessor, PathState parentState, List<NameValuePair> parameters, int fuzzIndex) {
 		if(parentState == null)
 			throw new IllegalArgumentException("Parent of parameter path cannot be null");
-		final IRequestBuilder rb = new PostParameterRequestBuilder(parentState.getPath(), parameters, fuzzIndex);
+		final IHttpRequestEngine requestEngine = parentState.getPathStateManager().getCrawler().getRequestEngine();
+		final IRequestBuilder rb = new PostParameterRequestBuilder(requestEngine, parentState.getPath(), parameters, fuzzIndex);
 		final PathState st = new PathState(fetchProcessor, parentState.getPathStateManager(), parentState, parentState.getPath(), rb);
 		parentState.addChildState(st, false);
 		return st;
@@ -539,5 +543,10 @@ public class PathState implements IPathState {
 	@Override
 	public List<IBasicModuleScript> getInjectionModules() {
 		return pathStateManager.getInjectionModules();
+	}
+
+	@Override
+	public IHttpRequestEngine getRequestEngine() {
+		return pathStateManager.getCrawler().getRequestEngine();
 	}
 }

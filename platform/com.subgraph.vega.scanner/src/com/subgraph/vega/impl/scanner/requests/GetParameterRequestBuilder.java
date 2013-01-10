@@ -15,13 +15,14 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebPath;
 
 public class GetParameterRequestBuilder extends AbstractParameterRequestBuilder {
 
 	
-	public GetParameterRequestBuilder(IWebPath path, List<NameValuePair> parameters, int index) {
-		super(path, parameters, index);
+	public GetParameterRequestBuilder(IHttpRequestEngine requestEngine, IWebPath path, List<NameValuePair> parameters, int index) {
+		super(requestEngine, path, parameters, index);
 	}
 
 	@Override

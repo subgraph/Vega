@@ -15,7 +15,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
@@ -31,6 +33,7 @@ import com.subgraph.vega.api.model.identity.IIdentity;
 import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRunningTime;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
@@ -146,9 +149,10 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 							return false;
 						}
 						else {
-							URI newu = response.getRequestUri().resolve(locationHeader.getValue());
-							if (uriFilter.filter(newu)) {	
-								uriParser.processUri(newu);
+							final VegaURI base = VegaURI.fromHostAndRequest(response.getHost(), response.getOriginalRequest());
+							final VegaURI uri = base.resolve(locationHeader.getValue());
+							if (uriFilter.filter(uri)) {	
+								uriParser.processUri(uri);
 							}
 						}
 							
@@ -166,7 +170,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		currentCrawler.registerProgressTracker(this);
 		
 		for(URI u: scanTargetScope.getScopeURIs()) {
-			uriParser.processUri(u);
+			uriParser.processUri(toVegaURI(u));
 		}
 		currentCrawler.start();
 		try {
@@ -177,6 +181,11 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		}
 		currentCrawler = null;
 		logger.info("Crawler finished");
+	}
+
+	private VegaURI toVegaURI(URI u) {
+		final HttpHost targetHost = URIUtils.extractHost(u);
+		return new VegaURI(targetHost, u.getPath(), u.getQuery());
 	}
 
 	void pauseScan() {

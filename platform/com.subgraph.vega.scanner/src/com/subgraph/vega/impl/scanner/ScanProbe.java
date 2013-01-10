@@ -11,11 +11,12 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.io.IOException;
-
-import java.util.logging.Logger;
 import java.net.URI;
+import java.util.logging.Logger;
+
 import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -28,7 +29,7 @@ public class ScanProbe {
 	private final static int MAX_REDIRECT_COUNT = 5;
 	private final URI targetURI;
 	private final IHttpRequestEngine requestEngine;
-	private volatile HttpGet currentRequest;
+	private volatile HttpUriRequest currentRequest;
 	
 	ScanProbe(URI targetURI, IHttpRequestEngine requestEngine) {
 		this.targetURI = targetURI;
@@ -36,7 +37,7 @@ public class ScanProbe {
 	}
 	
 	IScanProbeResult runProbe() {
-		currentRequest = new HttpGet(targetURI);
+		currentRequest = requestEngine.createGetRequest(URIUtils.extractHost(targetURI), getPathAndQuery(targetURI));
 		try {
 			IHttpResponse response = requestEngine.sendRequest(currentRequest).get();
 			return processFirstProbeResponse(targetURI, response);
@@ -44,7 +45,13 @@ public class ScanProbe {
 			return ScanProbeResult.createConnectFailedResult(e.getMessage());
 		}
 	}
-		
+	private String getPathAndQuery(URI uri) {
+		if(uri.getQuery() != null) {
+			return uri.getPath() + '?' + uri.getQuery();
+		} else {
+			return uri.getPath();
+		}
+	}
 	private IScanProbeResult processFirstProbeResponse(URI targetURI, IHttpResponse response) {
 		if(isResponseRedirect(response)) {
 			return processRedirect(targetURI, response);
@@ -69,7 +76,7 @@ public class ScanProbe {
 			}
 
 			try {
-				currentRequest = new HttpGet(location);
+				currentRequest = requestEngine.createGetRequest(URIUtils.extractHost(location), getPathAndQuery(location));
 				response = requestEngine.sendRequest(currentRequest).get();
 				try {
 					EntityUtils.consume(response.getRawResponse().getEntity());
@@ -105,21 +112,11 @@ public class ScanProbe {
 			return null;
 		}
 		return response.getRequestUri().resolve(locationHeader.getValue());
-		/*
-		
-		final String location = locationHeader.getValue();
-		try {
-			return new URI(location);
-		} catch (URISyntaxException e) {
-			logger.log(Level.WARNING,"URI Syntax Exception on: "+locationHeader);
-			return null;
-		}
-		*/
 	}
 	    
 		
 	void abort() {
-		final HttpGet get = currentRequest;
+		final HttpUriRequest get = currentRequest;
 		if(get != null) {
 			get.abort();
 		}

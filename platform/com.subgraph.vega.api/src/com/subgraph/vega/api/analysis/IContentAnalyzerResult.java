@@ -10,11 +10,12 @@
  ******************************************************************************/
 package com.subgraph.vega.api.analysis;
 
-import java.net.URI;
 import java.util.List;
 
+import com.subgraph.vega.api.util.VegaURI;
+
 public interface IContentAnalyzerResult {
-	List<URI> getDiscoveredURIs();
+	List<VegaURI> getDiscoveredURIs();
 	MimeType getDeclaredMimeType();
 	MimeType getSniffedMimeType();
 }

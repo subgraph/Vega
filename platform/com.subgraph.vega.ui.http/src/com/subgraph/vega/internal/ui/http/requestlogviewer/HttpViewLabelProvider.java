@@ -54,16 +54,7 @@ public class HttpViewLabelProvider extends LabelProvider implements ITableLabelP
 		case 2:
 			return record.getRequest().getRequestLine().getMethod();
 		case 3:
-			URI uri;
-			try {
-				uri = new URI(record.getRequest().getRequestLine().getUri());
-			} catch (URISyntaxException e) {
-				return null;
-			}
-			if(uri.getRawQuery() != null)
-				return uri.getRawPath() + "?" + uri.getRawQuery();
-			else
-				return uri.getRawPath();
+			return record.getRequest().getRequestLine().getUri();
 		case 4:
 			return Integer.valueOf(record.getResponse().getStatusLine().getStatusCode()).toString();
 		case 5:

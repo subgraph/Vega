@@ -237,9 +237,11 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		}
 		sb.append(" while retrieving URI ");
 		sb.append(request.getURI().toString());
-		sb.append(" [");
-		sb.append(ex.getMessage());
-		sb.append("]");
+		if(ex.getMessage() != null) {
+			sb.append(" [");
+			sb.append(ex.getMessage());
+			sb.append("]");
+		}
 		return new RequestEngineException(sb.toString(), ex);
 	}
 
