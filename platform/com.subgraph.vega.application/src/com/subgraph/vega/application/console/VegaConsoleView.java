@@ -147,7 +147,9 @@ public class VegaConsoleView extends ConsoleView implements IEventHandler {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				setTitleImage(image);
+				if(image != null && !image.isDisposed()) {
+					setTitleImage(image);
+				}
 			}
 		});
 	}
