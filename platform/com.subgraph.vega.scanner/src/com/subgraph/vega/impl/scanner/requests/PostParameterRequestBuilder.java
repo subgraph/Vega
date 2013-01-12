@@ -11,21 +11,21 @@
 package com.subgraph.vega.impl.scanner.requests;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebPath;
 
 public class PostParameterRequestBuilder extends AbstractParameterRequestBuilder {
 
-	public PostParameterRequestBuilder(IWebPath path, List<NameValuePair> parameters, int index) {
-		super(path, parameters, index);
+	public PostParameterRequestBuilder(IHttpRequestEngine requestEngine, IWebPath path, List<NameValuePair> parameters, int index) {
+		super(requestEngine, path, parameters, index);
 	}
 
 	@Override
@@ -34,9 +34,8 @@ public class PostParameterRequestBuilder extends AbstractParameterRequestBuilder
 	}
 
 	private HttpUriRequest createPostRequest(List<NameValuePair> parameters) {
-		final URI u = createUri(getBasePath());
-		final HttpPost req = new HttpPost(u);
-		req.setEntity(createParameterEntity(parameters));
+		final HttpUriRequest req =  requestEngine.createPostRequest(webPath.getHttpHost(), getBasePath());
+		((HttpEntityEnclosingRequest)req).setEntity(createParameterEntity(parameters));
 		return req;
 	}
 

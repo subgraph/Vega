@@ -10,50 +10,57 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.http.requests;
 
-import org.apache.http.HttpVersion;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HttpRequestExecutor;
 
-import com.subgraph.vega.internal.http.requests.connection.BasicThreadSafeClientConnectionManager;
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+import com.subgraph.vega.internal.http.requests.client.VegaHttpClient;
+import com.subgraph.vega.internal.http.requests.config.IHttpClientConfigurer;
+import com.subgraph.vega.internal.http.requests.config.RequestEngineConfig;
+import com.subgraph.vega.internal.http.requests.connection.SocksSupportingThreadSafeClientConnectionManager;
 
-public class BasicHttpClientFactory extends AbstractHttpClientFactory {
+public class BasicHttpClientFactory {
 
-	static HttpClient createHttpClient() {
-		final HttpParams params = createHttpParams();
+	static HttpClient createHttpClient(IHttpRequestEngine.EngineConfigType type) {
+		final IHttpClientConfigurer configurer = RequestEngineConfig.getHttpClientConfigurer(type);
+		final HttpParams params = configurer.createHttpParams();
 		final ClientConnectionManager ccm = createConnectionManager(params);
-		final DefaultHttpClient client = new DefaultHttpClient(ccm, params) {
-			@Override
-			protected HttpRequestExecutor createRequestExecutor() {
-				return new RequestTimingHttpExecutor();
-			}
-		};
-		
-		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		client.clearRequestInterceptors();
-		client.clearResponseInterceptors();
-		client.addRequestInterceptor(new RequestCopyHeadersInterceptor());
-		client.addRequestInterceptor(new RequestExtractCookiesInterceptor());
-		client.addResponseInterceptor(new ResponseProcessCookies());
+		final DefaultHttpClient client = new VegaHttpClient(ccm, params);
+		configurer.configureHttpClient(client);
 		return client;
 	}
 
+	
 	private static ClientConnectionManager createConnectionManager(HttpParams params) {
 		final SchemeRegistry sr = createSchemeRegistry();
-		return new BasicThreadSafeClientConnectionManager(sr);
+		return new SocksSupportingThreadSafeClientConnectionManager(sr);
 	}
-
-	private static HttpParams createHttpParams() {
-		final HttpParams params = new BasicHttpParams();
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		return params;
+	
+	private static SchemeRegistry createSchemeRegistry() {
+		final SchemeRegistry sr = new SchemeRegistry();
+		sr.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		try {
+			SSLSocketFactory ssf = new SSLSocketFactory(new TrustStrategy() {
+				@Override
+				public boolean isTrusted(X509Certificate[] chain, String authType)
+						throws CertificateException {
+					return true;
+				}
+			}, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			sr.register(new Scheme("https", 443, ssf));
+		} catch (Exception e) {
+			throw new RuntimeException("Unexpected exception creating SSLSocketFactory", e);
+		}
+		return sr;
 	}
-
 }

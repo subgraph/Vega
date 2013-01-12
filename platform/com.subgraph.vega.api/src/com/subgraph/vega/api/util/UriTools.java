@@ -3,6 +3,8 @@ package com.subgraph.vega.api.util;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.http.HttpHost;
+
 public class UriTools {
 	private final static String[] schemePrefixes = new String[] {"http://", "https://"};
 	
@@ -58,5 +60,29 @@ public class UriTools {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+	
+	public static URI createUriFromTargetAndLine(HttpHost target, String line) {
+		try {
+			return new URI(target.getSchemeName().toLowerCase(), null, target.getHostName(), target.getPort(), extractPath(line), extractQuery(line), null);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Failed to parse URI fields", e);
+		}
+	}
+	
+	private static String extractQuery(String line) {
+		final int idx = line.indexOf('?');
+		if(idx == -1) {
+			return null;
+		}
+		return line.substring(idx + 1);
+	}
+	
+	private static String extractPath(String line) {
+		final int idx = line.indexOf('?');
+		if(idx == -1) {
+			return line;
+		}
+		return line.substring(0, idx);
 	}
 }

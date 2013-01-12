@@ -15,8 +15,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.apache.http.HttpHost;
+import org.apache.http.RequestLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
@@ -37,9 +41,15 @@ import com.subgraph.vega.api.http.requests.RequestTaskStartEvent;
 import com.subgraph.vega.api.http.requests.RequestTaskStopEvent;
 import com.subgraph.vega.api.model.macros.IHttpMacro;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
+import com.subgraph.vega.http.requests.custom.IEncodableHttpRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpEntityEnclosingUriRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
+import com.subgraph.vega.internal.http.requests.config.IRequestEncodingStrategy;
+import com.subgraph.vega.internal.http.requests.config.RequestEngineConfig;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
+	private final IRequestEncodingStrategy encodingStrategy;
 	private final ExecutorService executor;
 	private final HttpClient client;
 	private final IHttpRequestEngineConfig config;
@@ -51,7 +61,8 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final EventListenerManager requestEventManager;
 	private final List<HttpRequestTask> requestInProgressList;
 	
-	HttpRequestEngine(ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
+	HttpRequestEngine(EngineConfigType type, ExecutorService executor, HttpClient client, IHttpRequestEngineConfig config, IRequestOrigin requestOrigin, IHTMLParser htmlParser) {
+		this.encodingStrategy = RequestEngineConfig.getRequestEncodingStrategy(type);
 		this.executor = executor;
 		this.client = client;
 		this.config = config;
@@ -126,6 +137,9 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	
 	@Override
 	public IHttpRequestTask sendRequest(HttpUriRequest request, HttpContext context) {
+		if(request instanceof IEncodableHttpRequest) {
+			((IEncodableHttpRequest) request).encodeWith(encodingStrategy);
+		}
 		for (IHttpRequestModifier modifier: requestModifierList) {
 			modifier.process(request, context);
 		}
@@ -163,5 +177,26 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 			requestEventManager.fireEvent(new RequestTaskStopEvent(requestTask));
 		}
 	}
-	
+
+	@Override
+	public HttpUriRequest createGetRequest(HttpHost target, String uri) {
+		return new VegaHttpUriRequest(target, HttpGet.METHOD_NAME, uri);
+	}
+
+	@Override
+	public HttpUriRequest createPostRequest(HttpHost target, String uri) {
+		return new VegaHttpEntityEnclosingUriRequest(target, HttpPost.METHOD_NAME, uri);
+	}
+
+	@Override
+	public HttpUriRequest createRawRequest(HttpHost target,
+			RequestLine requestLine) {
+		return new VegaHttpUriRequest(target, requestLine);
+	}
+
+	@Override
+	public HttpUriRequest createRawEntityEnclosingRequest(HttpHost target,
+			RequestLine requestLine) {
+		return new VegaHttpEntityEnclosingUriRequest(target, requestLine);
+	}
 }

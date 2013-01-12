@@ -10,10 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.handlers;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -32,7 +28,7 @@ public class DirParentCheck extends CrawlerModule {
 		}
 		
 		final IInjectionModuleContext ctx = ps.createModuleContext();
-		final HttpUriRequest req = createRequest(ps.getPath());
+		final HttpUriRequest req = createRequest(ps);
 		ctx.submitRequest(req, this, 0);
 	}
 	
@@ -41,19 +37,12 @@ public class DirParentCheck extends CrawlerModule {
 		return(parentPath != null && parentPath.getParentPath() != null);
 	}
 	
-	private HttpUriRequest createRequest(IWebPath path) {
+	private HttpUriRequest createRequest(IPathState ps) {
+		final IWebPath path = ps.getPath();
 		final IWebPath parent = path.getParentPath();
 		String basePath = parent.getParentPath().getFullPath();
 		String newPath = basePath + "foo/" + path.getPathComponent();
-		final URI originalUri = path.getUri();
-		try {
-			final URI newUri =  new URI(originalUri.getScheme(), originalUri.getAuthority(), newPath, null, null);
-			return new HttpGet(newUri);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+		return ps.getRequestEngine().createGetRequest(path.getHttpHost(), newPath);
 	}
 
 	@Override

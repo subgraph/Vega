@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.params.HttpProtocolParams;
 
@@ -219,11 +218,10 @@ public class Scan implements IScan {
 		requestEngineConfig.setMaxConnections(config.getMaxConnections());
 		requestEngineConfig.setMaxConnectionsPerRoute(config.getMaxConnections());
 		requestEngineConfig.setMaximumResponseKilobytes(config.getMaxResponseKilobytes());
-		final HttpClient client = requestEngineFactory.createUnencodingClient();
-		HttpProtocolParams.setUserAgent(client.getParams(), config.getUserAgent());
 		
 		final IRequestOriginScanner requestOrigin = workspace.getRequestLog().getRequestOriginScanner(scanInstance);
-		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineConfig, requestOrigin);
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(IHttpRequestEngine.EngineConfigType.CONFIG_SCANNER, requestEngineConfig, requestOrigin);
+		HttpProtocolParams.setUserAgent(requestEngine.getHttpClient().getParams(), config.getUserAgent());
 		// REVISIT: consider moving authentication method to request engine config
 		IIdentity identity = config.getScanIdentity();
 		if (identity != null && identity.getAuthMethod() != null) {

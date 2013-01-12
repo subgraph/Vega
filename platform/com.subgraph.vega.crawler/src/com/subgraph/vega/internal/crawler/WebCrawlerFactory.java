@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.crawler;
 
-import org.apache.http.client.HttpClient;
-
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.crawler.IWebCrawlerFactory;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -26,8 +24,7 @@ public class WebCrawlerFactory implements IWebCrawlerFactory {
 	
 	@Override
 	public IWebCrawler create(IRequestOrigin requestOrigin) {
-		final HttpClient client = requestEngineFactory.createBasicClient();
-		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(client, requestEngineFactory.createConfig(), requestOrigin);
+		final IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(IHttpRequestEngine.EngineConfigType.CONFIG_SCANNER, requestEngineFactory.createConfig(), requestOrigin);
 		return create(requestEngine);
 	}
 

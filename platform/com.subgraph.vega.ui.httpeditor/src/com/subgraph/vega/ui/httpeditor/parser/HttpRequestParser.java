@@ -11,7 +11,6 @@
 package com.subgraph.vega.ui.httpeditor.parser;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.ParseException;
@@ -110,7 +109,7 @@ public class HttpRequestParser extends ParserBase {
 		}
 
 		builder.setMethod(method);
-		builder.setFromUri(new URI(uri));
+		builder.setPath(uri);
 		builder.setProtocolVersion(version);
 		
 		return 0;

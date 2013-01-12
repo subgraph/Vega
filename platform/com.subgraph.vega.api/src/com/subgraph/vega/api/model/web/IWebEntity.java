@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.web;
 
+import org.apache.http.HttpHost;
+
 import com.subgraph.vega.api.model.IModelProperties;
 
 public interface IWebEntity extends IModelProperties, IWebModelVisitable {
@@ -18,4 +20,5 @@ public interface IWebEntity extends IModelProperties, IWebModelVisitable {
 	boolean isScanned();
 	void setScanned();
 	IWebEntity getParent();
+	HttpHost getHttpHost();
 }

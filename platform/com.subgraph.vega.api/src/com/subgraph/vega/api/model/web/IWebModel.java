@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.web;
 
-import java.net.URI;
 import java.util.Collection;
 
 import org.apache.http.HttpHost;
@@ -18,6 +17,7 @@ import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.web.forms.IWebForm;
+import com.subgraph.vega.api.util.VegaURI;
 
 public interface IWebModel extends IWebModelVisitable {
 	void addChangeListenerAndPopulate(IEventHandler listener);
@@ -25,9 +25,9 @@ public interface IWebModel extends IWebModelVisitable {
 	Collection<IWebHost> getAllWebHosts();
 	IWebHost getWebHostByHttpHost(HttpHost host);
 	IWebHost createWebHostFromHttpHost(HttpHost host);
-	IWebPath getWebPathByUri(URI uri);
+	IWebPath getWebPathByUri(VegaURI uri);
 	
-	IWebPath addGetTarget(URI uri);
+	IWebPath addGetTarget(VegaURI uri);
 
 	Collection<IWebHost> getUnscannedHosts();
 	Collection<IWebPath> getUnscannedPaths();

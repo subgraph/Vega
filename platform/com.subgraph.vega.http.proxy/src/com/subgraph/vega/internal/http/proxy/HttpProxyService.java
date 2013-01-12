@@ -21,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCookieStore;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
@@ -70,7 +69,6 @@ public class HttpProxyService implements IHttpProxyService {
 	private ProxyScanner proxyScanner;
 	private HttpInterceptor interceptor;
 	private SSLContextRepository sslContextRepository;
-	private HttpClient httpClient;
 	
 	public HttpProxyService() {
 		eventHandlers = new ArrayList<IHttpProxyServiceEventHandler>();
@@ -94,7 +92,6 @@ public class HttpProxyService implements IHttpProxyService {
 			sslContextRepository = null;
 			logger.warning("Failed to initialize SSL support in proxy.  SSL interception will be disabled. ("+ e.getMessage() + ")");
 		}
-		httpClient = requestEngineFactory.createBasicClient();
 	}
 
 	@Override
@@ -211,7 +208,7 @@ public class HttpProxyService implements IHttpProxyService {
 
 	private void startListener(IHttpProxyListenerConfig config) {
 		IRequestOriginProxy requestOrigin = currentWorkspace.getRequestLog().getRequestOriginProxy(config.getInetAddress(), config.getPort());
-		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(httpClient, requestEngineConfig, requestOrigin);
+		IHttpRequestEngine requestEngine = requestEngineFactory.createRequestEngine(IHttpRequestEngine.EngineConfigType.CONFIG_PROXY, requestEngineConfig, requestOrigin);
 		requestEngine.setCookieStore(cookieStore);
 		HttpProxyListener listener = new HttpProxyListener(config, transactionManipulator, interceptor, requestEngine, sslContextRepository);
 		listener.registerEventHandler(listenerEventHandler);

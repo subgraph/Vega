@@ -10,9 +10,9 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.urls;
 
-import java.net.URI;
 import java.util.List;
 
+import org.apache.http.Consts;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -29,6 +29,7 @@ import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.handlers.DirectoryProcessor;
 import com.subgraph.vega.impl.scanner.handlers.FileProcessor;
 import com.subgraph.vega.impl.scanner.handlers.UnknownProcessor;
@@ -50,9 +51,8 @@ public class UriParser {
 		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isProxyScan), scanInstance, isProxyScan);
 	}
 
-	public IPathState processUri(URI uri) {
-		final HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
-		final IWebHost webHost = getWebHost(host);
+	public IPathState processUri(VegaURI uri) {
+		final IWebHost webHost = getWebHost(uri.getTargetHost());
 		final IWebPath rootPath = webHost.getRootPath();
 		IWebPath path = rootPath;
 		final boolean hasTrailingSlash = uri.getPath().endsWith("/");
@@ -73,7 +73,7 @@ public class UriParser {
 		if(path == rootPath && uri.getQuery() != null) {
 			final PathState ps = pathStateManager.getStateForPath(rootPath);
 			synchronized (pathStateManager) {
-				ps.maybeAddParameters(URLEncodedUtils.parse(uri, "UTF-8"));
+				ps.maybeAddParameters(URLEncodedUtils.parse(uri.getQuery(), Consts.UTF_8));
 			}
 		}
 		return pathStateManager.getStateForPath(path);
@@ -100,7 +100,7 @@ public class UriParser {
 		}
 	}
 
-	private void processPath(IWebPath webPath, URI uri, boolean isLast, boolean hasTrailingSlash) {
+	private void processPath(IWebPath webPath, VegaURI uri, boolean isLast, boolean hasTrailingSlash) {
 		if(!isLast || (isLast && hasTrailingSlash)) {
 			processDirectory(webPath, uri);
 		} else if(uri.getQuery() != null) {
@@ -111,13 +111,13 @@ public class UriParser {
 		}
 	}
 
-	private void processDirectory(IWebPath webPath, URI uri) {
+	private void processDirectory(IWebPath webPath, VegaURI uri) {
 		synchronized(pathStateManager) {
 			if(!pathStateManager.hasSeenPath(webPath)) {
 				webPath.setPathType(PathType.PATH_DIRECTORY);
 				final PathState ps = pathStateManager.createStateForPath(webPath, directoryProcessor);
 				if(uri.getQuery() != null) {
-					ps.maybeAddParameters(URLEncodedUtils.parse(uri, "UTF-8"));
+					ps.maybeAddParameters(URLEncodedUtils.parse(uri.getQuery(), Consts.UTF_8));
 				}
 				return;
 			}
@@ -129,9 +129,9 @@ public class UriParser {
 	}
 
 
-	private void processPathWithQuery(IWebPath path, URI uri) {
+	private void processPathWithQuery(IWebPath path, VegaURI uri) {
 		path.setPathType(PathType.PATH_FILE);
-		List<NameValuePair> plist = URLEncodedUtils.parse(uri, "UTF-8");
+		List<NameValuePair> plist = URLEncodedUtils.parse(uri.getQuery(), Consts.UTF_8);
 		synchronized(pathStateManager) {
 			final PathState ps = getPathStateForFile(path);
 			if(ps != null) {

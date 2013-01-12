@@ -8,9 +8,11 @@ import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import com.subgraph.vega.api.model.IModel;
@@ -18,6 +20,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScanner;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class ProxyScanner {
 	private final Logger logger = Logger.getLogger(HttpProxyService.class.getName());
@@ -72,10 +75,10 @@ public class ProxyScanner {
 		}
 		final URI target = request.getURI();
 		if(isTargetInScope(target)) {
-			proxyScan.scanGetTarget(target, params);
+			proxyScan.scanGetTarget(requestToURI(request), params);
 		}
 	}
-	
+
 	private void handleProxyScanPostRequest(HttpUriRequest request) {
 		if(!(request instanceof HttpEntityEnclosingRequest)) {
 			return;
@@ -93,8 +96,14 @@ public class ProxyScanner {
 		}
 		final URI target = request.getURI();
 		if(isTargetInScope(target)) {
-			proxyScan.scanPostTarget(target, params);
+			proxyScan.scanPostTarget(requestToURI(request), params);
 		}
+	}
+
+	private VegaURI requestToURI(HttpUriRequest request) {
+		final URI u = request.getURI();
+		final HttpHost targetHost = URIUtils.extractHost(u);
+		return new VegaURI(targetHost, u.getPath(), u.getQuery());
 	}
 
 	private boolean isTargetInScope(URI target) {

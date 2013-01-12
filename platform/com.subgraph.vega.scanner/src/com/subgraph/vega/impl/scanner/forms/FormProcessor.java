@@ -10,7 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.forms;
 
+import java.net.URI;
+
+import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -22,6 +26,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
@@ -54,7 +59,10 @@ public class FormProcessor {
 	}
 
 	private void processFormElement(IInjectionModuleContext ctx, HttpUriRequest request, Element form) {
-		final FormProcessingState fps = new FormProcessingState(request.getURI(), form.getAttribute("action"), form.getAttribute("method"), config.getFormCredentials());
+		final URI reqURI = request.getURI();
+		final HttpHost targetHost = URIUtils.extractHost(reqURI);
+		final VegaURI baseURI = new VegaURI(targetHost, reqURI.getPath(), reqURI.getQuery());
+		final FormProcessingState fps = new FormProcessingState(baseURI, form.getAttribute("action"), form.getAttribute("method"), config.getFormCredentials());
 		if(!fps.isValid())
 			return;
 

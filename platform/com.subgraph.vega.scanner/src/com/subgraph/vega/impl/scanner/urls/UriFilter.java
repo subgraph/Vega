@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.urls;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,10 +17,11 @@ import java.util.regex.Pattern;
 
 import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class UriFilter {
 	private final IScannerConfig scannerConfig;
-	private final Set<URI> visitedURIs = new HashSet<URI>();
+	private final Set<VegaURI> visitedURIs = new HashSet<VegaURI>();
 	private final ArrayList<Pattern> exclusionList = new ArrayList<Pattern>();
 
 	public UriFilter(IScannerConfig scannerConfig) {
@@ -34,7 +34,7 @@ public class UriFilter {
 		}
 	}
 
-	public boolean isExcluded(final URI uri) {
+	public boolean isExcluded(final VegaURI uri) {
 		for (Pattern p: exclusionList) {
 			if (p.matcher(uri.toString()).find() == true) {
 				return true;
@@ -43,12 +43,12 @@ public class UriFilter {
 		return false;
 	}
 	
-	public boolean isAllowed(URI uri) {
+	public boolean isAllowed(VegaURI uri) {
 		final ITargetScope scanTargetScope = scannerConfig.getScanTargetScope();
-		return scanTargetScope.filter(uri) && !isExcluded(uri);
+		return scanTargetScope.filter(uri.toURI()) && !isExcluded(uri);
 	}
 
-	public synchronized boolean filter(URI uri) {
+	public synchronized boolean filter(VegaURI uri) {
 		if(visitedURIs.contains(uri) || !isAllowed(uri))
 			return false;
 		visitedURIs.add(uri);

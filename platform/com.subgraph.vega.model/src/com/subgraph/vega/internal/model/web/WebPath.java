@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -329,5 +330,10 @@ public class WebPath extends WebEntity implements IWebPath {
 		for(IWebResponse r: getPostResponses()) {
 			r.accept(visitor);
 		}
+	}
+
+	@Override
+	public HttpHost getHttpHost() {
+		return mountPoint.getWebHost().getHttpHost();
 	}
 }

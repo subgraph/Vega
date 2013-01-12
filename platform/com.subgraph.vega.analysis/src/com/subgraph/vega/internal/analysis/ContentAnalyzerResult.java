@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.analysis;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,14 +17,15 @@ import java.util.Set;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.analysis.MimeType;
+import com.subgraph.vega.api.util.VegaURI;
 
 public class ContentAnalyzerResult implements IContentAnalyzerResult {
-	private final Set<URI> uniqueUris = new HashSet<URI>();
+	private final Set<VegaURI> uniqueUris = new HashSet<VegaURI>();
 	
 	private MimeType declaredType = MimeType.MIME_NONE;
 	private MimeType sniffedType = MimeType.MIME_NONE;
 	
-	void addUri(URI uri) {
+	void addUri(VegaURI uri) {
 		uniqueUris.add(uri);
 	}
 
@@ -38,8 +38,8 @@ public class ContentAnalyzerResult implements IContentAnalyzerResult {
 	}
 	
 	@Override
-	public List<URI> getDiscoveredURIs() {
-		return new ArrayList<URI>(uniqueUris);
+	public List<VegaURI> getDiscoveredURIs() {
+		return new ArrayList<VegaURI>(uniqueUris);
 	}
 
 	@Override

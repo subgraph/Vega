@@ -12,7 +12,10 @@ package com.subgraph.vega.api.crawler;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
+
 public interface IWebCrawler {
+	IHttpRequestEngine getRequestEngine();
 	void submitTask(HttpUriRequest request, ICrawlerResponseProcessor callback, Object argument);
 	void submitTask(HttpUriRequest request, ICrawlerResponseProcessor callback);
 	void setStopOnEmptyQueue(boolean value);

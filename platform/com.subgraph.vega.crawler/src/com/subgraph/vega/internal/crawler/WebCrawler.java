@@ -58,6 +58,11 @@ public class WebCrawler implements IWebCrawler {
 	}
 	
 	@Override
+	public IHttpRequestEngine getRequestEngine() {
+		return requestEngine;
+	}
+
+	@Override
 	public synchronized void start() {
 		if(crawlerRunning)
 			throw new IllegalStateException("Cannot call start() on running crawler instance");
