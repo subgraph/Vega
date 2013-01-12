@@ -96,7 +96,7 @@ function process(req, res, ctx) {
     ctx.responseChecks(13);
   }  
 
-  if (ctx.isFingerprintMatch(fp, 14) && !ctx.isFingerprintMatch(14, 15)) {
+  if (ctx.isFingerprintMatch(14, fp) && !ctx.isFingerprintMatch(14, 15)) {
 	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
 	  var uripart = uri.replace(/\?.*/, "");
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(15), ctx.getSavedResponse(15), {
@@ -108,7 +108,7 @@ function process(req, res, ctx) {
     ctx.responseChecks(15);
   }  
   
-  if (ctx.isFingerprintMatch(fp, 14) && !ctx.isFingerprintMatch(14, 16)) {
+  if (ctx.isFingerprintMatch(14, fp) && !ctx.isFingerprintMatch(14, 16)) {
 	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
 	  var uripart = uri.replace(/\?.*/, "");
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(16), ctx.getSavedResponse(16), {
