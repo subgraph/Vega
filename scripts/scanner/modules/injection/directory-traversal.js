@@ -1,4 +1,4 @@
-var module = {
+var module = {	
   name: "Directory Listing and Traversal Checks",
   category: "Injection Modules",
   differential: true
@@ -39,15 +39,19 @@ function createInjectables(ctx) {
   ret.push("../../../../../../../../../../../../etc/passwd");
   ret.push("file:/../../../../../../../../../../../../etc/passwd");
   
-  // WINDOWS
-  
- // ret.push("\..\..\..\")
   // JAVA
   
   ret.push("WEB-INF/web.xml");
   ret.push("/WEB-INF/web.xml");
   ret.push("../../WEB-INF/web.xml");
   ret.push("/../../WEB-INF/web.xml");
+
+  // WINDOWS
+  
+  ret.push("\..\..\..\..\..\..\..\..\..\..\..\boot.ini");
+  ret.push("..\..\..\..\..\..\..\..\..\..\..\..\..\boot.ini");
+  ret.push("C:\boot.ini");
+  ret.push("file:/../../../../../../../../../../../boot.ini");
   
   return ret;
 }
@@ -70,7 +74,7 @@ function handler(req, res, ctx) {
 	  if (ctx.incrementResponseCount() < 4) return;
   }
   else {
-	  if (ctx.incrementResponseCount() < 20) return;
+	  if (ctx.incrementResponseCount() < 24) return;
   }
   
 
@@ -83,6 +87,7 @@ function handler(req, res, ctx) {
       publishAlert(ctx, "Unique response for \\.\\", 2, ctx.getSavedRequest(2), ctx.getSavedResponse(2));
       ctx.responseChecks(2);
     }
+    return;
   }
   else {
     if (!ctx.isFingerprintMatch(0, 1)) {
@@ -110,10 +115,12 @@ function handler(req, res, ctx) {
     
     var pwre = /root:.:0:0/;
     var i;
+    var res = null;
+     
     for (i=11; i<=15; i++) {
-    	res = pwre.test(ctx.getSavedResponse(i).bodyAsString);
+    	res = pwre.exec(ctx.getSavedResponse(i).bodyAsString);
     	if (res) {
-    		publishAlert(ctx, "", i);
+    		publishAlert(ctx, res[0], i);
     	}
     }
 
@@ -122,11 +129,16 @@ function handler(req, res, ctx) {
     var content = "<web-app";
     for (i = 16; i<= 19; i++) {
     	if (ctx.getSavedResponse(i).bodyAsString.indexOf(content) >= 0) {
-    		publishAlert(ctx, "", i);
+    		publishAlert(ctx, content, i);
     	}
     }
     
-    
+    content = "[boot loader]";
+    for (i = 20; i <= 23; i++) {
+    	if (ctx.getSavedResponse(i).bodyAsString.indexOf(content) >= 0) {
+    		publishAlert(ctx, content, i);
+    	}
+    }
 }
 
   
