@@ -115,12 +115,18 @@ public class ResponseAnalyzer {
 						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
 
 					if(v.startsWith("http://vega.invalid/") || v.startsWith("//vega.invalid/")) {
-						if(match(tag, "script", "link"))
+						if(match(tag, "script", "link")) {
+							ctx.addStringHighlight(((Attr)item).getValue());
 							alert(ctx, "vinfo-xss-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
-						else if(match(tag, "a"))
+						}
+						else if(match(tag, "a")) {
+							ctx.addStringHighlight(((Attr)item).getValue());
 							alert(ctx, "vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
-						else
+						}	
+						else {
+							ctx.addStringHighlight(((Attr)item).getValue());
 							alert(ctx, "vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res);
+						}
 					}
 
 				}
@@ -150,15 +156,18 @@ public class ResponseAnalyzer {
 
 	private void possibleXssAlert(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res, String text, int offset, String type, String message) {
 		final int[] xids = extractXssTag(text, offset);
+		final String xidstring = extractXssString(text, offset);
 		if(xids == null)
+			return;
+		if(xidstring == null)
 			return;
 		final HttpUriRequest xssReq = ctx.getPathState().getXssRequest(xids[0], xids[1]);
 		if(xssReq != null) {
-			ctx.addStringHighlight(text);
+			ctx.addStringHighlight(xidstring);
 			alert(ctx, type, message, xssReq, res);
 		}	
 		else {
-			ctx.addStringHighlight(text);
+			ctx.addStringHighlight(xidstring);
 			alert(ctx, "vinfo-xss-stored", message + " (from previous scan)", req, res);
 		}
 	}
@@ -173,6 +182,16 @@ public class ResponseAnalyzer {
 	}
 
 
+	private String extractXssString(String text, int offset) {
+		//    3     9
+		// vvv000000v000000
+		if(text.length() < (offset + 16))
+			return null;
+		if(text.charAt(offset + 9) != 'v')
+			return null;
+		return text.substring(offset, offset + 16);
+	}
+	
 	private int[] extractXssTag(String text, int offset) {
 		//    3     9
 		// vvv000000v000000
