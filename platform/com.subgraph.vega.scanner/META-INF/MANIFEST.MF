@@ -31,7 +31,7 @@ Import-Package: com.google.common.base;version="1.6.0",
  org.apache.http.params;version="4.1.0",
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.1.0",
- org.jsoup.nodes;version="1.7.2.SNAPSHOT",
+ org.jsoup.nodes,
  org.w3c.dom.html2
 Service-Component: OSGI-INF/scanner-factory.xml
 Require-Bundle: org.apache.http.client;bundle-version="4.2.2"
