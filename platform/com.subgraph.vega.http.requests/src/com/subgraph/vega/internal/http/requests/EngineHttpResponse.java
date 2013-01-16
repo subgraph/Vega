@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -32,6 +33,8 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.tags.ITag;
+import com.subgraph.vega.http.requests.custom.VegaHttpEntityEnclosingUriRequest;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 
 public class EngineHttpResponse implements IHttpResponse {
 	private final Logger logger = Logger.getLogger("request-engine");
@@ -55,11 +58,19 @@ public class EngineHttpResponse implements IHttpResponse {
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, IRequestOrigin requestOrigin, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
-		this.originalRequest = originalRequest;
+		this.originalRequest = cloneOriginalRequest(host, originalRequest);
 		this.requestOrigin = requestOrigin;
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
 		this.htmlParser = htmlParser;
+	}
+
+	private static HttpRequest cloneOriginalRequest(HttpHost host, HttpRequest request) {
+		if(request instanceof HttpEntityEnclosingRequest) {
+			return VegaHttpEntityEnclosingUriRequest.createFrom(host, (HttpEntityEnclosingRequest) request);
+		} else {
+			return VegaHttpUriRequest.createFrom(host, request);
+		}
 	}
 
 	@Override
