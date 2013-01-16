@@ -3,6 +3,7 @@ package com.subgraph.vega.http.requests.custom;
 import java.net.URI;
 
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpVersion;
 import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -13,12 +14,17 @@ import com.subgraph.vega.api.util.UriTools;
 import com.subgraph.vega.internal.http.requests.config.IRequestEncodingStrategy;
 
 public class VegaHttpUriRequest extends HttpRequestBase implements IEncodableHttpRequest {
+	
+	public static VegaHttpUriRequest createFrom(HttpHost host, HttpRequest request) {
+		final VegaHttpUriRequest newRequest = new VegaHttpUriRequest(host, request.getRequestLine());
+		newRequest.setHeaders(request.getAllHeaders());
+		return newRequest;
+	}
 
 	private final HttpHost targetHost;
 	private final RequestLine requestLine;
 	private RequestLine encodedRequestLine;
 
-	
 	public VegaHttpUriRequest(String methodName, URI uri) {
 		this(URIUtils.extractHost(uri), methodName, uriToRequestUri(uri));
 	}

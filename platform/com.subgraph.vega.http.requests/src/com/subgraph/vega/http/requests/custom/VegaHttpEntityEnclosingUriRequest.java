@@ -2,6 +2,7 @@ package com.subgraph.vega.http.requests.custom;
 
 import java.net.URI;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpVersion;
 import org.apache.http.RequestLine;
@@ -13,7 +14,14 @@ import com.subgraph.vega.api.util.UriTools;
 import com.subgraph.vega.internal.http.requests.config.IRequestEncodingStrategy;
 
 public class VegaHttpEntityEnclosingUriRequest extends HttpEntityEnclosingRequestBase implements IEncodableHttpRequest {
-	
+
+	public static VegaHttpEntityEnclosingUriRequest createFrom(HttpHost host, HttpEntityEnclosingRequest request) {
+		final VegaHttpEntityEnclosingUriRequest newRequest = new VegaHttpEntityEnclosingUriRequest(host, request.getRequestLine());
+		newRequest.setEntity(request.getEntity());
+		newRequest.setHeaders(request.getAllHeaders());
+		return newRequest;
+	}
+
 	private final HttpHost targetHost;
 	private final RequestLine requestLine;
 	private RequestLine encodedRequestLine;
