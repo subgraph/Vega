@@ -196,4 +196,16 @@ public class WebsiteView extends ViewPart implements IDoubleClickListener {
 			viewer.setExpandedState(element, !viewer.getExpandedState(element));
 		}
 	}
+	
+	public void collapseAll() {
+		if(viewer != null) {
+			viewer.collapseAll();
+		}
+	}
+
+	public void expandAll() {
+		if(viewer != null) {
+			viewer.expandAll();
+		}
+	}
 }

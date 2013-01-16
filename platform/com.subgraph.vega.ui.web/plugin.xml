@@ -25,6 +25,14 @@
             id="com.subgraph.vega.ui.command.filterByScope"
             name="Filter By Scope">
       </command>
+      <command
+            id="com.subgraph.vega.ui.web.expandAll"
+            name="Expand All Web Tree">
+      </command>
+      <command
+            id="com.subgraph.vega.ui.web.collapseAll"
+            name="Collapse All Web Tree">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -53,6 +61,18 @@
                icon="icons/scope.png"
                label="Filter By Scope"
                style="toggle">
+         </command>
+         <command
+               commandId="com.subgraph.vega.ui.web.expandAll"
+               icon="icons/expandall.png"
+               label="Expand All"
+               style="push">
+         </command>
+         <command
+               commandId="com.subgraph.vega.ui.web.collapseAll"
+               icon="icons/collapseall.png"
+               label="Collapse All"
+               style="push">
          </command>
       </menuContribution>
    </extension>
@@ -94,6 +114,14 @@
       <handler
             class="com.subgraph.vega.ui.web.commands.FilterByScopeHandler"
             commandId="com.subgraph.vega.ui.command.filterByScope">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.web.commands.ExpandAllHandler"
+            commandId="com.subgraph.vega.ui.web.expandAll">
+      </handler>
+      <handler
+            class="com.subgraph.vega.ui.web.commands.CollapseAllHandler"
+            commandId="com.subgraph.vega.ui.web.collapseAll">
       </handler>
    </extension>
 
