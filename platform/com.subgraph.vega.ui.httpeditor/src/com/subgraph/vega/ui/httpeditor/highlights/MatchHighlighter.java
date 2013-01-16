@@ -131,37 +131,7 @@ public class MatchHighlighter implements ITextInputListener {
 	}
 	
 	private void revealDocumentRegion(IRegion r) {
-		final int startLine = getStartLineForMatch(r);
-		final int endLine = getEndLineForMatch(r);
-		if(!isLineVisible(startLine) || !isLineVisible(endLine)) {
-			viewer.setTopIndex(startLine);
-		}
-	}
-	
-	private boolean isLineVisible(int line) {
-		return viewer.getTopIndex() <= line && viewer.getBottomIndex() >= line;
-	}
-
-	private int getEndLineForMatch(IRegion r) {
-		return getLineForOffset(r.getOffset() + r.getLength() - 1);
-	}
-
-	private int getLineForOffset(int offset) {
-		try {
-			final IDocument document = viewer.getDocument();
-			if(document != null) {
-				final int documentLine = document.getLineOfOffset(offset);
-				return viewer.modelLine2WidgetLine(documentLine);
-			} else {
-				return 0;
-			}
-		} catch (BadLocationException e) {
-			throw new RuntimeException("Bad location calculating line of highlight");
-		}
-	}
-
-	private int getStartLineForMatch(IRegion r) {
-		return getLineForOffset(r.getOffset());
+		viewer.revealRange(r.getOffset(), r.getLength());
 	}
 
 	private void configureViewer(SourceViewer viewer, Color highlightColor, String annotationType) {
