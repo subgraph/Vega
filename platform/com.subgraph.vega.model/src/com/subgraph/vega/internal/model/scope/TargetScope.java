@@ -86,7 +86,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		activate(ActivationPurpose.READ);
 		checkReadOnly();
 		synchronized (scopeURIs) {
-			scopeURIs.remove(uri);
+			scopeURIs.remove(uri.toString());
 			if(removeContained) {
 				removeContainedURIs(uri);
 			}
@@ -156,7 +156,7 @@ public class TargetScope implements ITargetScope, Activatable {
 		activate(ActivationPurpose.READ);
 		checkReadOnly();
 		synchronized (exclusionURIs) {
-			exclusionURIs.remove(uri);
+			exclusionURIs.remove(uri.toString());
 		}
 		activate(ActivationPurpose.WRITE);
 		notifyIfActiveScope();
