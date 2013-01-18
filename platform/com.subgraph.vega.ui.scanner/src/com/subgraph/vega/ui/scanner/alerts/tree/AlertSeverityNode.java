@@ -53,6 +53,8 @@ public class AlertSeverityNode extends AbstractAlertTreeNode {
 			return "Low";
 		case INFO:
 			return "Info";
+		case UNKNOWN:
+			return "Unknown";
 		}
 		return "";
 	}
@@ -68,6 +70,8 @@ public class AlertSeverityNode extends AbstractAlertTreeNode {
 			return ALERT_LOW;
 		case INFO:
 			return ALERT_INFO;
+		case UNKNOWN:
+			return null;
 		}
 		return null;
 	}
