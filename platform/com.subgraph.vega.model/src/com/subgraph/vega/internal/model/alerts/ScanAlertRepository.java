@@ -30,6 +30,8 @@ import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanInstanceEvent;
+import com.subgraph.vega.api.model.alerts.RemoveScanAlertsEvent;
+import com.subgraph.vega.api.model.alerts.RemoveScanInstanceEvent;
 import com.subgraph.vega.api.xml.IXmlRepository;
 
 public class ScanAlertRepository implements IScanAlertRepository {
@@ -51,7 +53,7 @@ public class ScanAlertRepository implements IScanAlertRepository {
 				final Object ob = args.object();
 				if(ob instanceof ScanInstance) {
 					final ScanInstance scan = (ScanInstance) ob;
-					scan.setTransientState(database, alertFactory);
+					scan.setTransientState(database, ScanAlertRepository.this, alertFactory);
 					final int status = scan.getScanStatus();
 					if(status != IScanInstance.SCAN_CONFIG && status != IScanInstance.SCAN_COMPLETED && status != IScanInstance.SCAN_CANCELLED) {
 						scan.updateScanStatus(IScanInstance.SCAN_CANCELLED);
@@ -63,6 +65,10 @@ public class ScanAlertRepository implements IScanAlertRepository {
 		activeScanInstanceList = new ArrayList<IScanInstance>();
 	}
 
+	void fireRemoveEventsEvent(IScanInstance instance, Collection<IScanAlert> removedAlerts) {
+		scanInstanceEventManager.fireEvent(new RemoveScanAlertsEvent(instance, removedAlerts));
+	}
+	
 	@Override
 	public List<IScanInstance> addActiveScanInstanceListener(IEventHandler listener) {
 		scanInstanceEventManager.addListener(listener);
@@ -107,7 +113,7 @@ public class ScanAlertRepository implements IScanAlertRepository {
 
 	private IScanInstance createScanInstanceForScanId(long scanId) {
 		final ScanInstance scan = new ScanInstance(scanId);
-		scan.setTransientState(database, alertFactory);
+		scan.setTransientState(database, this, alertFactory);
 		database.store(scan);
 		return scan;
 	}
@@ -162,5 +168,21 @@ public class ScanAlertRepository implements IScanAlertRepository {
 				return (alert.getRequestId() == requestId);
 			}
 		});
+	}
+
+	@Override
+	public synchronized void removeScanInstance(IScanInstance scanInstance) {
+		if(scanInstance.getScanId() == PROXY_ALERT_ORIGIN_SCAN_ID) {
+			throw new IllegalArgumentException("Cannot remove scan instance for proxy alerts");
+		}
+		if(scanInstance.isActive()) {
+			throw new IllegalArgumentException("Cannot remove active scan instance");
+		}
+		scanInstanceEventManager.fireEvent(new RemoveScanInstanceEvent(scanInstance));
+		if(activeScanInstanceList.contains(scanInstance)) {
+			activeScanInstanceList.remove(scanInstance);
+		}
+		scanInstance.deleteScanInstance();
+		database.delete(scanInstance);
 	}
 }

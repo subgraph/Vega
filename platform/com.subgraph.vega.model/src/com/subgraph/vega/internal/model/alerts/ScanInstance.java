@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.model.alerts;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +44,8 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private transient volatile int activeScanTotalCount;
 	private transient volatile boolean isPaused;
 	
-	private transient ScanInstanceAlerts alerts;
+	private transient ScanAlertRepository repository;
+	private transient ScanInstanceAlerts scanAlerts;
 	private transient EventListenerManager eventManager;
 
 	private transient Activator activator;
@@ -53,9 +56,10 @@ public class ScanInstance implements IScanInstance, Activatable {
 		this.properties = new ModelProperties();
 	}
 
-	public void setTransientState(ObjectContainer database, ScanAlertFactory alertFactory) {
+	public void setTransientState(ObjectContainer database, ScanAlertRepository repository, ScanAlertFactory alertFactory) {
 		this.eventManager = new EventListenerManager();
-		this.alerts = new ScanInstanceAlerts(database, this, eventManager, alertFactory);
+		this.repository = repository;
+		this.scanAlerts = new ScanInstanceAlerts(database, this, eventManager, alertFactory);
 	}
 
 	@Override
@@ -94,13 +98,25 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public IScanAlert createAlert(String type, String key, long requestId) {
 		activate(ActivationPurpose.READ);
-		return alerts.createAlert(type, key, requestId);
+		return scanAlerts.createAlert(type, key, requestId);
 	}
 
 	@Override
 	public void addAlert(IScanAlert alert) {
 		activate(ActivationPurpose.READ);
-		alerts.addAlert(alert);
+		scanAlerts.addAlert(alert);
+	}
+
+	@Override
+	public void removeAlert(IScanAlert alert) {
+		removeAlerts(Arrays.asList(alert));
+	}
+
+	@Override
+	public void removeAlerts(Collection<IScanAlert> alerts) {
+		activate(ActivationPurpose.READ);
+		scanAlerts.removeAlerts(alerts);
+		repository.fireRemoveEventsEvent(this, alerts);
 	}
 
 	@Override
@@ -111,18 +127,18 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public IScanAlert getAlertByKey(String key) {
 		activate(ActivationPurpose.READ);
-		return alerts.getAlertByKey(key); 
+		return scanAlerts.getAlertByKey(key); 
 	}
 
 	@Override
 	public List<IScanAlert> getAllAlerts() {
 		activate(ActivationPurpose.READ);
-		return alerts.getAllAlerts();
+		return scanAlerts.getAllAlerts();
 	}
 
 	@Override
 	public void addScanEventListenerAndPopulate(IEventHandler listener) {
-		alerts.addScanEventListenerAndPopulate(listener);
+		scanAlerts.addScanEventListenerAndPopulate(listener);
 		listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 	}
 
@@ -198,6 +214,12 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override 
 	public boolean isScanPaused() {
 		return isPaused;
+	}
+
+	@Override
+	public void deleteScanInstance() {
+		eventManager.clearListeners();
+		scanAlerts.removeAllAlerts();
 	}
 
 	@Override

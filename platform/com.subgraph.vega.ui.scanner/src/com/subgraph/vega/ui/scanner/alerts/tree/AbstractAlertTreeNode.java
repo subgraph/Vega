@@ -10,7 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.scanner.alerts.tree;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.subgraph.vega.api.model.alerts.IScanAlert;
@@ -18,10 +22,10 @@ import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 abstract class AbstractAlertTreeNode implements IAlertTreeNode {
-	protected final IAlertTreeNode parentNode;
+	protected final AbstractAlertTreeNode parentNode;
 	protected final Map<String, IAlertTreeNode> nodeMap = new HashMap<String, IAlertTreeNode>();
 
-	protected AbstractAlertTreeNode(IAlertTreeNode parentNode) {
+	protected AbstractAlertTreeNode(AbstractAlertTreeNode parentNode) {
 		this.parentNode = parentNode;
 	}
 
@@ -31,6 +35,36 @@ abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 		if(node != null) {
 			node.addAlert(alert);
 		}
+	}
+	
+	@Override
+	public void removeAlert(IScanAlert alert) {
+		final String key = createKeyForAlert(alert);
+		for(IAlertTreeNode node: getChildren()) {
+			if(node.getKey().equals(key)) {
+				node.removeAlert(alert);
+			}
+			if(node.getAlertCount() == 0) {
+				removeNode(key);
+			}
+		}
+	}
+
+	@Override
+	public void remove() {
+		for(IAlertTreeNode node: getChildren()) {
+			node.remove();
+		}
+		parentNode.removeNode(getKey());
+	}
+	
+	@Override
+	public Collection<IScanAlert> getAlerts() {
+		final List<IScanAlert> alerts = new ArrayList<IScanAlert>();
+		for(IAlertTreeNode node: getChildren()) {
+			alerts.addAll(node.getAlerts());
+		}
+		return Collections.unmodifiableList(alerts);
 	}
 
 	@Override
@@ -53,6 +87,10 @@ abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 		return nodeMap.values().toArray(new IAlertTreeNode[0]);
 	}
 
+	public synchronized void removeNode(String key) {
+		nodeMap.remove(key);
+	}
+
 	@Override
 	public String getImage() {
 		return null;
@@ -65,6 +103,7 @@ abstract class AbstractAlertTreeNode implements IAlertTreeNode {
 		}
 		return null;
 	}
+
 
 	protected synchronized IAlertTreeNode getNodeForAlert(IScanAlert alert) {
 		final String key = createKeyForAlert(alert);

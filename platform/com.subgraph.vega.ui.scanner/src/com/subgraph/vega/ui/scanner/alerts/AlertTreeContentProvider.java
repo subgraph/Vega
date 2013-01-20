@@ -30,6 +30,8 @@ import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.api.model.alerts.RemoveScanAlertsEvent;
+import com.subgraph.vega.api.model.alerts.RemoveScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
@@ -94,6 +96,7 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 					for(IScanAlert alert: scan.getAllAlerts()) {
 						tree.addAlert(alert);
 					}
+					
 				}
 			}
 			for (IScanInstance scanInstance: workspace.getScanAlertRepository().addActiveScanInstanceListener(this)) {
@@ -136,9 +139,22 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 		return false;
 	}
 
+	public void removeAlert(IScanAlert alert) {
+		if(tree != null) {
+			tree.removeAlert(alert);
+			refreshViewer();
+		}
+	}
 	private void handleNewScanAlert(NewScanAlertEvent event) {
 		if(tree != null) {
 			tree.addAlert(event.getAlert());
+			refreshViewer();
+		}
+	}
+	
+	private void handleRemoveScanAlerts(RemoveScanAlertsEvent event) {
+		if(tree != null) {
+			tree.removeAlerts(event.getRemovedEvents());
 			refreshViewer();
 		}
 	}
@@ -155,6 +171,34 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 				});
 			}
 		}
+	}
+	
+	private void handleRemoveScanInstance(RemoveScanInstanceEvent event) {
+		if(tree != null && !event.getScanInstance().isActive()) {
+			tree.removeScan(event.getScanInstance());
+			refreshViewer();
+			final AlertScanNode scanNode = chooseScanNode();
+			if(scanNode != null) {
+				viewer.setSelection(new StructuredSelection(scanNode));
+			}
+		}
+	}
+	
+	private AlertScanNode chooseScanNode() {
+		if(tree == null) {
+			return null;
+		}
+		List<AlertScanNode> scanNodes = tree.getScanNodes();
+		if(scanNodes.size() == 0) {
+			return null;
+		}
+		
+		for(AlertScanNode node: scanNodes) {
+			if(node.getScanInstance().isActive()) {
+				return node;
+			}
+		}
+		return scanNodes.get(0);
 	}
 	
 	private void addActiveScan(IScanInstance scan) {
@@ -211,8 +255,12 @@ public class AlertTreeContentProvider implements ITreeContentProvider, IEventHan
 	public void handleEvent(IEvent event) {
 		if(event instanceof NewScanAlertEvent) {
 			handleNewScanAlert((NewScanAlertEvent) event);
+		} else if(event instanceof RemoveScanAlertsEvent) {
+			handleRemoveScanAlerts((RemoveScanAlertsEvent) event);
 		} else if(event instanceof ActiveScanInstanceEvent) {
 			handleActiveScanInstance((ActiveScanInstanceEvent) event);
+		} else if(event instanceof RemoveScanInstanceEvent) { 
+			handleRemoveScanInstance((RemoveScanInstanceEvent) event);
 		} else if(event instanceof ScanStatusChangeEvent) {
 			handleScanStatusChange((ScanStatusChangeEvent) event);
 		}

@@ -28,6 +28,10 @@ public class EventListenerManager {
 		}
 	}
 
+	public synchronized void clearListeners() {
+		handlers.clear();
+	}
+
 	public void fireEvent(final IEvent event) {
 		IEventHandler[] handlersCopy;
 

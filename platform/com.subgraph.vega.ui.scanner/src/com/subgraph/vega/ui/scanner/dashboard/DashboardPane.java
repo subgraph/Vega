@@ -112,6 +112,20 @@ public class DashboardPane extends Composite implements IEventHandler {
 		disableRenderTaskStart = false;
 	}
 	
+	public IScanInstance getScanInstance() {
+		return scanInstance;
+	}
+
+	public void reset() {
+		alertPane.reset();
+		if(scanInstance == null) {
+			return;
+		}
+		for(IScanAlert alert: scanInstance.getAllAlerts()) {
+			alertPane.addAlert(alert);
+		}
+	}
+
 	private void setProgressPaneVisible(final boolean flag) {
 		if(isProgressPaneVisible == flag) {
 			return;

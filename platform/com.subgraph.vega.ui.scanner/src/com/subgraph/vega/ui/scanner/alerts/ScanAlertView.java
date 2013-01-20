@@ -10,10 +10,15 @@
  ******************************************************************************/
 package com.subgraph.vega.ui.scanner.alerts;
 
+import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,6 +27,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -32,10 +38,15 @@ import com.subgraph.vega.api.events.IEventHandler;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
+import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.scanner.IScan;
 import com.subgraph.vega.ui.scanner.Activator;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertHostNode;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
+import com.subgraph.vega.ui.scanner.alerts.tree.AlertTitleNode;
 import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEventHandler {
@@ -66,6 +77,7 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 				
 		getSite().setSelectionProvider(viewer);
 		viewer.addSelectionChangedListener(new SelectionTracker(getSite().getPage()));
+		createContextMenu(viewer);
 		
 		final IModel model = Activator.getDefault().getModel();
 		if(model == null) {
@@ -239,4 +251,91 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 		}
 	}
 	
+	private void createContextMenu(TreeViewer viewer) {
+		final MenuManager menuManager = new MenuManager();
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				fillContextMenu(manager);
+			}
+		});
+		final Menu menu = menuManager.createContextMenu(viewer.getControl());
+		viewer.getControl().setMenu(menu);
+	}
+	
+	private void fillContextMenu(IMenuManager manager) {
+		final IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+		if(selection == null) {
+			return;
+		}
+		final Object ob = selection.getFirstElement();
+		if(ob instanceof IScanAlert) {
+			createContextMenuForScanAlert(manager, (IScanAlert) ob);
+		} else if (ob instanceof AlertScanNode) {
+			createContextMenuForScanNode(manager, (AlertScanNode) ob);
+		} else if (ob instanceof IAlertTreeNode) {
+			createContextMenuForAlertTreeNode(manager, (IAlertTreeNode) ob);
+		}
+	}
+	
+	private void createContextMenuForScanAlert(IMenuManager manager, final IScanAlert alert) {
+		final Action action = new Action() {
+			@Override
+			public void run() {
+				alert.getScanInstance().removeAlert(alert);
+			}
+		};
+		action.setText("Remove alert");
+		manager.add(action);
+		
+	}
+	
+	private void createContextMenuForScanNode(IMenuManager manager, final AlertScanNode node) {
+		if(node.getScanId() == IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID || node.getScanInstance().isActive()) {
+			return;
+		}
+
+		final Action action = new Action() {
+			@Override
+			public void run() {
+				currentWorkspace.getScanAlertRepository().removeScanInstance(node.getScanInstance());
+			}
+		};
+		action.setText("Remove Scan");
+		manager.add(action);
+	}
+	
+	private void createContextMenuForAlertTreeNode(IMenuManager manager, final IAlertTreeNode node) {
+		final Collection<IScanAlert> alerts = node.getAlerts();
+		final Action action = new Action() {
+			@Override 
+			public void run() {
+				node.getScanInstance().removeAlerts(alerts);
+			}
+		};
+		action.setText(getAlertTreeNodeString(node) + getAlertCountString(alerts.size()));
+		manager.add(action);
+		
+	}
+
+	private String getAlertCountString(int n) {
+		if(n == 1) {
+			return "1 alert";
+		} else {
+			return Integer.toString(n) + " alerts";
+		}
+	}
+	
+	private String getAlertTreeNodeString(IAlertTreeNode node) {
+		if(node instanceof AlertTitleNode) {
+			return "Remove ";
+		} else if (node instanceof AlertSeverityNode) {
+			return "Remove severity node with ";
+		} else if (node instanceof AlertHostNode) {
+			return "Remove host node with ";
+		} else {
+			return "Remove ";
+		}
+	}
 }

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.api.model.alerts;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,8 @@ public interface IScanInstance extends IModelProperties {
 	IScanAlert createAlert(String type, String key);
 	IScanAlert createAlert(String type, String key, long requestId);
 	void addAlert(IScanAlert alert);
+	void removeAlert(IScanAlert alert);
+	void removeAlerts(Collection<IScanAlert> alerts);
 	boolean hasAlertKey(String key);
 	IScanAlert getAlertByKey(String key);
 	List<IScanAlert> getAllAlerts();
@@ -64,4 +67,6 @@ public interface IScanInstance extends IModelProperties {
 	
 	void addScanEventListenerAndPopulate(IEventHandler listener);
 	void removeScanEventListener(IEventHandler listener);
+	
+	void deleteScanInstance();
 }

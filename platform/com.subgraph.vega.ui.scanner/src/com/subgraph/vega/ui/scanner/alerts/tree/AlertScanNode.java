@@ -18,7 +18,6 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.ui.scanner.alerts.IAlertTreeNode;
 
 public class AlertScanNode extends AbstractAlertTreeNode {
 	private final static String SCAN_IMAGE = "icons/scanner.png";
@@ -29,7 +28,7 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 	private final long scanId;
 	private IScanInstance scanInstance;
 	
-	AlertScanNode(IAlertTreeNode parentNode, long scanId, IWorkspace workspace) {
+	AlertScanNode(AbstractAlertTreeNode parentNode, long scanId, IWorkspace workspace) {
 		super(parentNode);
 		this.workspace = workspace;
 		this.scanId = scanId;
@@ -115,5 +114,9 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 
 	public long getScanId() {
 		return scanId;
+	}
+	
+	public String getKey() {
+		return Long.toString(scanId);
 	}
 }

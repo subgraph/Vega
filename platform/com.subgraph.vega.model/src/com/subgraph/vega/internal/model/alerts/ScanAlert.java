@@ -191,6 +191,57 @@ public class ScanAlert implements IScanAlert, Activatable {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ScanAlert other = (ScanAlert) obj;
+		if (key == null) {
+			if (other.key != null)
+				return false;
+		} else if (!key.equals(other.key))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (requestId != other.requestId)
+			return false;
+		if (scanInstance == null) {
+			if (other.scanInstance != null)
+				return false;
+		} else if (!scanInstance.equals(other.scanInstance))
+			return false;
+		if (severity != other.severity)
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (int) (requestId ^ (requestId >>> 32));
+		result = prime * result
+				+ ((scanInstance == null) ? 0 : scanInstance.hashCode());
+		result = prime * result
+				+ ((severity == null) ? 0 : severity.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		return result;
+	}
+
+	@Override
 	public void activate(ActivationPurpose activationPurpose) {
 		if(activator != null) {
 			activator.activate(activationPurpose);

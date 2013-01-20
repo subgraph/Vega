@@ -37,6 +37,8 @@ import com.subgraph.vega.api.model.WorkspaceResetEvent;
 import com.subgraph.vega.api.model.alerts.ActiveScanInstanceEvent;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
+import com.subgraph.vega.api.model.alerts.RemoveScanAlertsEvent;
+import com.subgraph.vega.api.model.alerts.RemoveScanInstanceEvent;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.ScanAlertView;
@@ -53,6 +55,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 	public static String ID = "com.subgraph.vega.views.scaninfo";
 	
 	private Browser browser;
+	private IScanAlert currentBrowserAlert;
 	private DashboardPane dashboard;
 	private Composite contentPanel;
 	private final AlertRenderer renderer;
@@ -136,8 +139,10 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 
 	private void displayAlert(IScanAlert alert) {
 		String html = renderer.render(alert);
-		if(html != null && !browser.isDisposed())
+		if(html != null && !browser.isDisposed()) {
 			browser.setText(html, true);
+			currentBrowserAlert = alert;
+		}
 		stackLayout.topControl = browser;
 		contentPanel.layout();
 	}
@@ -158,6 +163,7 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 		}
 	}
 	public void showDashboard() {
+		currentBrowserAlert = null;
 		stackLayout.topControl = dashboard;
 		if(!contentPanel.isDisposed()) {
 			contentPanel.layout();
@@ -185,6 +191,11 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 			handleWorkspaceResetEvent((WorkspaceResetEvent) event);
 		} else if(event instanceof ActiveScanInstanceEvent) {
 			handleActiveScanInstance((ActiveScanInstanceEvent) event);
+		} else if(event instanceof RemoveScanAlertsEvent) {
+			handleRemoveScanAlertsEvent((RemoveScanAlertsEvent) event);
+		} else if(event instanceof RemoveScanInstanceEvent) {
+			handleRemoveScanInstanceEvent((RemoveScanInstanceEvent) event);
+			
 		}
 	}
 	
@@ -204,6 +215,26 @@ public class ScanInfoView extends ViewPart implements IEventHandler {
 	
 	private void handleActiveScanInstance(ActiveScanInstanceEvent event) {
 		setActiveScanInstance(event.getScanInstance());
+	}
+	
+	private void handleRemoveScanAlertsEvent(RemoveScanAlertsEvent event) {
+		if(currentBrowserAlert != null) {
+			for(IScanAlert alert: event.getRemovedEvents()) {
+				if(alert == currentBrowserAlert) {
+					resetState();
+				}
+			}
+		}
+		dashboard.reset();
+	}
+	
+	private void handleRemoveScanInstanceEvent(RemoveScanInstanceEvent event) {
+		if(currentBrowserAlert != null && currentBrowserAlert.getScanId() == event.getScanInstance().getScanId()) {
+			resetState();
+		}
+		if(stackLayout.topControl == dashboard && dashboard.getScanInstance() == event.getScanInstance()) {
+			resetState();
+		}
 	}
 
 	private void setCurrentWorkspace(IWorkspace workspace) {

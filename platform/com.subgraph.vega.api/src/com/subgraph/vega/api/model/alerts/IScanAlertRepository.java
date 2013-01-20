@@ -24,6 +24,7 @@ public interface IScanAlertRepository {
 	List<IScanInstance> getAllActiveScanInstances();
 	List<IScanInstance> getAllScanInstances();
 	IScanInstance createNewScanInstance();
+	void removeScanInstance(IScanInstance scanInstance);
 	IScanInstance getScanInstanceByScanId(long scanId);
 	IScanInstance getProxyScanInstance();
 	Collection<IScanAlert> getAlertsByRequestId(long requestId);

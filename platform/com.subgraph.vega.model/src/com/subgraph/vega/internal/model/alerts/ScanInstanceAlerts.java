@@ -1,5 +1,7 @@
 package com.subgraph.vega.internal.model.alerts;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -40,7 +42,16 @@ public class ScanInstanceAlerts {
 		}
 		eventManager.fireEvent(new NewScanAlertEvent(alert));
 	}
-
+	
+	
+	public void removeAlerts(Collection<IScanAlert> alerts) {
+		synchronized(this) {
+			for(IScanAlert alert: alerts) {
+				database.delete(alert);
+			}
+		}
+	}
+	
 	private boolean rejectDuplicateAlert(IScanAlert alert) {
 		if(alert.getResource() == null) {
 			return false;
@@ -110,6 +121,10 @@ public class ScanInstanceAlerts {
 		});
 	}
 
+	public void removeAllAlerts() {
+		final List<IScanAlert> all = new ArrayList<IScanAlert>(getAllAlerts());
+		removeAlerts(all);
+	}
 
 	public void addScanEventListenerAndPopulate(IEventHandler listener) {
 		List<IScanAlert> allAlerts = null;
