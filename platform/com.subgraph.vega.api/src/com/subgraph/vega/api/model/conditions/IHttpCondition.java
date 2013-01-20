@@ -28,4 +28,12 @@ public interface IHttpCondition {
 	boolean matches(HttpRequest request, HttpResponse response);
 	boolean isEnabled();
 	void setEnabled(boolean state);
+	boolean isInternal();
+	/**
+	 * Returns true if the sufficient flag has been set.  A sufficient condition will cause a {@link IHttpConditionSet#matchesAll(IRequestLogRecord)}
+	 * to return true if at least one sufficient condition matches the query.
+	 * @return
+	 */
+	boolean isSufficient();
+	void setSufficient(boolean value);
 }

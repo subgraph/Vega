@@ -14,6 +14,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
@@ -82,7 +83,7 @@ public class ConditionResponseLength extends AbstractCondition {
 	}
 
 	@Override
-	public void filterRequestLogQuery(Query query) {
-		constrainQuery(query.descend("responseLength"));		
+	public Constraint filterRequestLogQuery(Query query) {
+		return constrainQuery(query.descend("responseLength"));		
 	}
 }

@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.model.conditions.match;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.db4o.query.Constraint;
 import com.db4o.query.Evaluation;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionStringMatchAction;
@@ -66,11 +67,12 @@ public abstract class RegexMatchAction implements IHttpConditionStringMatchActio
 	}
 
 	@Override
-	public void constrainQuery(Query query) {
+	public Constraint constrainQuery(Query query) {
 		final Pattern p = getRegexPattern();
-		if(p == null)
-			return;
-		query.constrain(getRegexConstraint(p));
+		if(p == null) {
+			return null;
+		}
+		return query.constrain(getRegexConstraint(p));
 	}
 	
 	protected abstract Evaluation createQueryEvaluation(Pattern pattern);

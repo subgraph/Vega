@@ -11,6 +11,7 @@
 package com.subgraph.vega.internal.model.conditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.db4o.ObjectContainer;
@@ -113,6 +114,21 @@ public class HttpConditionManager implements IHttpConditionManager {
 
 	@Override
 	public List<IHttpConditionType> getConditionTypes() {
-		return new ArrayList<IHttpConditionType>(conditionTypes);
+		return getConditionTypes(false);
+	}
+	
+	@Override
+	public List<IHttpConditionType> getConditionTypes(boolean includeInternal) {
+		if(includeInternal) {
+			return Collections.unmodifiableList(new ArrayList<IHttpConditionType>(conditionTypes));
+		}
+		final List<IHttpConditionType> result = new ArrayList<IHttpConditionType>();
+		for(IHttpConditionType type: conditionTypes) {
+			if(!type.isInternal()) {
+				result.add(type);
+			}
+		}
+		return Collections.unmodifiableList(result);
+		
 	}
 }

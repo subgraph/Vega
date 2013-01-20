@@ -21,6 +21,7 @@ import com.db4o.ObjectContainer;
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableArrayList;
+import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 import com.db4o.ta.Activatable;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
@@ -34,6 +35,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	private final List<IHttpCondition> conditionList = new ActivatableArrayList<IHttpCondition>();
 	private boolean matchOnEmptySet;
 	private transient HttpConditionManager conditionManager;
+	private transient List<IHttpCondition> temporaryConditions;
 	
 	HttpConditionSet(String name, HttpConditionManager conditionManager) {
 		this(name, conditionManager, null);
@@ -42,9 +44,14 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	HttpConditionSet(String name, HttpConditionManager conditionManager, IHttpConditionSet copyMe) {
 		this.name = name;
 		this.conditionManager = conditionManager;
+		this.temporaryConditions = new ArrayList<IHttpCondition>();
 		if(copyMe != null) {
-			for(IHttpCondition c: copyMe.getAllConditions()) 
+			for(IHttpCondition c: copyMe.getAllConditions(true)) { 
 				conditionList.add(c.createCopy());
+			}
+			for(IHttpCondition c: copyMe.getAllTemporaryConditions(true)) {
+				temporaryConditions.add(c.createCopy());
+			}
 		}
 	}
 
@@ -158,8 +165,54 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	@Override
 	public List<IHttpCondition> getAllConditions() {
+		return getAllConditions(false);
+	}
+	
+	@Override
+	public List<IHttpCondition> getAllConditions(boolean includeInternal) {
 		activate(ActivationPurpose.READ);
-		return new ArrayList<IHttpCondition>(conditionList);
+		if(!includeInternal) {
+			return Collections.unmodifiableList(new ArrayList<IHttpCondition>(conditionList));
+		}
+		final List<IHttpCondition> result = new ArrayList<IHttpCondition>();
+		for(IHttpCondition condition: conditionList) {
+			if(!condition.isInternal()) {
+				result.add(condition);
+			}
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	@Override
+	public void appendTemporaryCondition(IHttpCondition condition) {
+		temporaryConditions.add(condition);
+		conditionManager.notifyConditionSetChanged(this);
+	}
+
+	@Override
+	public void removeTemporaryCondition(IHttpCondition condition) {
+		temporaryConditions.remove(condition);
+		conditionManager.notifyConditionSetChanged(this);
+	}
+
+	@Override
+	public void clearTemporaryCondition(IHttpCondition condition) {
+		temporaryConditions.clear();
+		conditionManager.notifyConditionSetChanged(this);
+	}
+
+	@Override
+	public List<IHttpCondition> getAllTemporaryConditions(boolean includeInternal) {
+		if(!includeInternal) {
+			return Collections.unmodifiableList(new ArrayList<IHttpCondition>(temporaryConditions));
+		}
+		final List<IHttpCondition> result = new ArrayList<IHttpCondition>();
+		for(IHttpCondition condition: temporaryConditions) {
+			if(!condition.isInternal()) {
+				result.add(condition);
+			}
+		}
+		return Collections.unmodifiableList(result);
 	}
 
 	@Override
@@ -169,6 +222,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	void setConditionManager(HttpConditionManager conditionManager) {
 		this.conditionManager = conditionManager;
+		this.temporaryConditions = new ArrayList<IHttpCondition>();
 	}
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
@@ -178,11 +232,38 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		}
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
-
+		
+		Constraint orChain = null;
+		Constraint andChain = null;
+		
+		List<IHttpCondition> allConditions = new ArrayList<IHttpCondition>();
+		allConditions.addAll(temporaryConditions);
+		allConditions.addAll(conditionList);
+		
 		for(IHttpCondition c: conditionList) {
-			((AbstractCondition) c).filterRequestLogQuery(query);
+			Constraint result = ((AbstractCondition)c).filterRequestLogQuery(query);
+			if(c.isSufficient()) {
+				orChain = processConstraintChain(result, orChain, false);
+			} else {
+				andChain = processConstraintChain(result, andChain, true);
+			}
+		}
+		if(orChain != null && andChain != null) {
+			orChain.or(andChain);
 		}
 		return query.execute();
+	}
+
+	private Constraint processConstraintChain(Constraint newConstraint, Constraint chain, boolean useAnd) {
+		if(newConstraint == null) {
+			return chain;
+		} else if(chain == null) {
+			return newConstraint;
+		} else if(useAnd) {
+			return chain.and(newConstraint);
+		} else {
+			return chain.or(newConstraint);
+		}
 	}
 
 	private boolean hasRecords(ObjectContainer db) {

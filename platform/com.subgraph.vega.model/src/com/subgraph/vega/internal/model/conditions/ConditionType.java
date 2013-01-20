@@ -19,16 +19,27 @@ import com.subgraph.vega.internal.model.conditions.match.IMatchActionSet;
 public abstract class ConditionType implements IHttpConditionType {
 
 	private final String name;
+	private final boolean isInternal;
 	private final IMatchActionSet matchActionSet;
 	
 	ConditionType(String name, IMatchActionSet matchActionSet) {
+		this(name, matchActionSet, false);
+	}
+
+	ConditionType(String name, IMatchActionSet matchActionSet, boolean isInternal) {
 		this.name = name;
+		this.isInternal = isInternal;
 		this.matchActionSet = matchActionSet;
 	}
 	
 	@Override
 	public String getName() {
 		return name;
+	}
+	
+	@Override
+	public boolean isInternal() {
+		return isInternal;
 	}
 	
 	public List<IHttpConditionMatchAction> getMatchActions() {

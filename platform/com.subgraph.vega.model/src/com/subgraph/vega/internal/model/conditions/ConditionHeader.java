@@ -16,6 +16,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.db4o.activation.ActivationPurpose;
+import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 import com.subgraph.vega.api.model.conditions.IHttpCondition;
 import com.subgraph.vega.api.model.conditions.IHttpConditionType;
@@ -114,11 +115,11 @@ public class ConditionHeader extends AbstractCondition {
 	}
 
 	@Override
-	public void filterRequestLogQuery(Query query) {
+	public Constraint filterRequestLogQuery(Query query) {
 		activate(ActivationPurpose.READ);
 		if(matchRequestHeader) 
-			constrainQuery(query.descend("requestHeaders"));
+			return constrainQuery(query.descend("requestHeaders"));
 		else
-			constrainQuery(query.descend("responseHeaders"));		
+			return constrainQuery(query.descend("responseHeaders"));		
 	}
 }

@@ -23,10 +23,20 @@ public interface IHttpConditionSet {
 	boolean matchesAll(HttpRequest request, HttpResponse response);
 	boolean matchesAny(IRequestLogRecord record);
 	boolean matchesAny(HttpRequest request, HttpResponse response);
+	/**
+	 * Add a temporary condition to this set.  Temporary conditions are not persisted in the database.
+	 * @param condition The temporary condition to add.
+	 */
+	void appendTemporaryCondition(IHttpCondition condition);
+	void removeTemporaryCondition(IHttpCondition condition);
+	void clearTemporaryCondition(IHttpCondition condition);
+	List<IHttpCondition> getAllTemporaryConditions(boolean includeInternal);
+	
 	void appendCondition(IHttpCondition condition);
 	void removeCondition(IHttpCondition condition);
 	void clearConditions();
 	List<IHttpCondition> getAllConditions();
+	List<IHttpCondition> getAllConditions(boolean includeInternal);
 	IHttpConditionManager getConditionManager();
 	void setMatchOnEmptySet(boolean flag);
 }

@@ -16,6 +16,7 @@ import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 
 public interface IHttpConditionType {
 	String getName();
+	boolean isInternal();
 	IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction);
 	List<IHttpConditionMatchAction> getMatchActions();
 }
