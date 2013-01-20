@@ -24,6 +24,10 @@ public class StringMatchActionSet implements IMatchActionSet {
 		actions.add(new DoesNotContainAction());
 		actions.add(new MatchesRegexAction());
 		actions.add(new DoesNotMatchRegexAction());
+		actions.add(new StartsWithAction());
+		actions.add(new DoesNotStartWithAction());
+		actions.add(new EndsWithAction());
+		actions.add(new DoesNotEndWithAction());
 		return actions;
 	}
 }
