@@ -19,6 +19,7 @@ import com.subgraph.vega.api.model.conditions.match.IHttpConditionIntegerMatchAc
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionRangeMatchAction;
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionStringMatchAction;
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.internal.model.conditions.match.IHttpConditionMatchActionEx;
 
 public abstract class AbstractCondition implements IHttpCondition, Activatable {
@@ -44,6 +45,11 @@ public abstract class AbstractCondition implements IHttpCondition, Activatable {
 			this.matchAction = (IHttpConditionMatchActionEx) matchAction;
 			activate(ActivationPurpose.WRITE);
 		}
+	}
+	
+	@Override
+	public boolean matches(IRequestLogRecord record) {
+		return matches(record.getRequest(), record.getResponse());
 	}
 
 	@Override

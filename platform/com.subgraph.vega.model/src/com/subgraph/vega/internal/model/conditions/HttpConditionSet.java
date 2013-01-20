@@ -55,15 +55,41 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	@Override
+	public boolean matchesAll(IRequestLogRecord record) {
+		activate(ActivationPurpose.READ);
+		return matchesAllConditions(record);
+	}
+
+	@Override
 	public boolean matchesAll(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		return matchesAllConditions(request, response);
 	}
 
 	@Override
+	public boolean matchesAny(IRequestLogRecord record) {
+		activate(ActivationPurpose.READ);
+		return matchesAnyCondition(record);
+	}
+
+	@Override
 	public boolean matchesAny(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		return matchesAnyCondition(request, response);
+	}
+	
+	private boolean matchesAllConditions(IRequestLogRecord record) {
+		synchronized(conditionList) {
+			if(conditionList.size() == 0) {
+				return matchOnEmptySet;
+			}
+			for(IHttpCondition c: conditionList) {
+				if(c.isEnabled() && !c.matches(record)) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 	
 	private boolean matchesAllConditions(HttpRequest request, HttpResponse response) {
@@ -80,6 +106,20 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		}
 	}
 	
+	private boolean matchesAnyCondition(IRequestLogRecord record) {
+		synchronized (conditionList) {
+			if(conditionList.size() == 0) {
+				return matchOnEmptySet;
+			}
+			for(IHttpCondition c: conditionList) {
+				if(c.isEnabled() && c.matches(record)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean matchesAnyCondition(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
 		synchronized(conditionList) {

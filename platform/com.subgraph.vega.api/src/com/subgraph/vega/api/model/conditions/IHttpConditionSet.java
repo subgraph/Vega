@@ -15,9 +15,13 @@ import java.util.List;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.subgraph.vega.api.model.requests.IRequestLogRecord;
+
 public interface IHttpConditionSet {
 	String getName();
+	boolean matchesAll(IRequestLogRecord record);
 	boolean matchesAll(HttpRequest request, HttpResponse response);
+	boolean matchesAny(IRequestLogRecord record);
 	boolean matchesAny(HttpRequest request, HttpResponse response);
 	void appendCondition(IHttpCondition condition);
 	void removeCondition(IHttpCondition condition);
