@@ -63,6 +63,9 @@ public abstract class RegexMatchAction implements IHttpConditionStringMatchActio
 
 	protected boolean matchesRegex(String value) {
 		final Pattern regex = getRegexPattern();
+		if(regex == null || value == null) {
+			return false;
+		}
 		return regex.matcher(value).find();
 	}
 

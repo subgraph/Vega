@@ -38,6 +38,9 @@ public abstract class StringMatchAction implements IHttpConditionMatchActionEx, 
 	}
 
 	protected boolean matchesContains(String value) {
+		if(value == null) {
+			return false;
+		}
 		return value.contains(stringValue);
 	}
 	
