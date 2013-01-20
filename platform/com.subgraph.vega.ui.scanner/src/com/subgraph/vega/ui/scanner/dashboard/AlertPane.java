@@ -84,6 +84,8 @@ public class AlertPane extends Composite {
 			return ALERT_LOW;
 		case INFO:
 			return ALERT_INFO;
+		case UNKNOWN:
+			return null;
 		}
 		return null;
 	}
@@ -98,6 +100,8 @@ public class AlertPane extends Composite {
 			return "Low";
 		case INFO:
 			return "Info";
+		case UNKNOWN:
+			return "Unknown";
 		}
 		return null;
 	}
