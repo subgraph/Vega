@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.ui.http.requestlogviewer;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 
