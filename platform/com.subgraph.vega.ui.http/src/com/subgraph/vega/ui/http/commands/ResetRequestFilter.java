@@ -46,6 +46,7 @@ public class ResetRequestFilter extends AbstractHandler implements IHandler {
 				final IHttpConditionManager conditionManager = workspace.getHttpConditionMananger();
 				final IHttpConditionSet filterSet = conditionManager.getConditionSet(conditionSetId);
 				filterSet.clearConditions();
+				filterSet.clearTemporaryConditions();
 				conditionManager.saveConditionSet(conditionSetId, filterSet);
 			}
 		} else {
