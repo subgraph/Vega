@@ -196,7 +196,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	@Override
-	public void clearTemporaryCondition(IHttpCondition condition) {
+	public void clearTemporaryConditions() {
 		temporaryConditions.clear();
 		conditionManager.notifyConditionSetChanged(this);
 	}
@@ -240,7 +240,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		allConditions.addAll(temporaryConditions);
 		allConditions.addAll(conditionList);
 		
-		for(IHttpCondition c: conditionList) {
+		for(IHttpCondition c: allConditions) {
 			Constraint result = ((AbstractCondition)c).filterRequestLogQuery(query);
 			if(c.isSufficient()) {
 				orChain = processConstraintChain(result, orChain, false);
