@@ -14,8 +14,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.part.ViewPart;
 
+import com.subgraph.vega.api.model.IModel;
+import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.requestlogviewer.RequestLogViewer;
 import com.subgraph.vega.ui.http.requestlogviewer.RequestResponseViewer;
 
@@ -45,6 +49,11 @@ public class HttpRequestView extends ViewPart {
 
 		form.setWeights(new int[] {40, 60});
 		parent.pack();
+		
+		final ISelectionService ss = getSite().getWorkbenchWindow().getSelectionService();
+		final IModel model = Activator.getDefault().getModel();
+		final ISelectionListener listener = new WebEntitySelectionListener(model, getViewSite().getSecondaryId());
+		ss.addSelectionListener(listener);
 	}
 
 	public void focusOnRecord(long requestId) {
@@ -55,5 +64,4 @@ public class HttpRequestView extends ViewPart {
 	public void setFocus() {
 		requestLogViewer.setFocus();
 	}
-
 }
