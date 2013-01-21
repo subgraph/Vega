@@ -15,7 +15,7 @@ public class ConditionRequestId extends AbstractCondition {
 
 	private transient static IHttpConditionType conditionType;
 	
-	private static IHttpConditionType getConditionType() {
+	static IHttpConditionType getConditionType() {
 		synchronized (ConditionRequestId.class) {
 			if(conditionType == null) {
 				conditionType = createType();

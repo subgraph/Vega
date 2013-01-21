@@ -59,6 +59,7 @@ public class HttpConditionManager implements IHttpConditionManager {
 		types.add(ConditionHeader.getResponseConditionType());
 		types.add(ConditionResponseLength.getConditionType());
 		types.add(ConditionResponseStatusCode.getConditionType());
+		types.add(ConditionRequestId.getConditionType());
 		return types;
 	}
 	
