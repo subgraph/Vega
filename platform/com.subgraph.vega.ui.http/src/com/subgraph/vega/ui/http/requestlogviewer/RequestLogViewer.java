@@ -49,6 +49,11 @@ import org.eclipse.ui.PlatformUI;
 
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.model.IWorkspace;
+import com.subgraph.vega.api.model.conditions.IHttpCondition;
+import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
+import com.subgraph.vega.api.model.conditions.IHttpConditionType;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionIntegerMatchAction;
+import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewContentProviderLazy;
@@ -68,6 +73,7 @@ public class RequestLogViewer extends Composite {
 	private Menu tableMenu;
 	private RequestResponseViewer requestResponseViewer;
 	private TaggablePopupDialog taggablePopupDialog;
+	private HttpViewContentProviderLazy contentProvider;
 
 	/**
 	 * @param parent
@@ -109,6 +115,8 @@ public class RequestLogViewer extends Composite {
 			return;
 		}
 		
+		addRequestIdConditionRule(requestId);
+		
 		final IRequestLog requestLog = workspace.getRequestLog();
 		final IRequestLogRecord record = requestLog.lookupRecord(requestId);
 		if(record == null) {
@@ -120,7 +128,30 @@ public class RequestLogViewer extends Composite {
 			requestResponseViewer.setDisplayResponse();
 		}
 	}
+	
+	
+	private IHttpCondition requestIdCondition;
+	
+	private void addRequestIdConditionRule(long requestId) {
+		if(contentProvider == null || contentProvider.getConditionSet() == null) {
+			return;
+		}
+		final IHttpConditionSet conditionSet = contentProvider.getConditionSet();
+		final IHttpConditionType type = conditionSet.getConditionManager().getConditionTypeByName("request id");
+		final IHttpConditionMatchAction matchAction = type.getMatchActionByName("equals");
 
+		((IHttpConditionIntegerMatchAction) matchAction).setInteger((int) requestId);
+		
+		if(requestIdCondition != null) {
+			conditionSet.removeTemporaryCondition(requestIdCondition);
+		}
+		requestIdCondition = type.createConditionInstance(matchAction);
+		requestIdCondition.setSufficient(true);
+		conditionSet.appendTemporaryCondition(requestIdCondition);
+	}
+
+	
+	
 	private Composite createTable(GridData gd) {
 		final Composite rootControl = new Composite(this, SWT.NONE);
 		final TableColumnLayout tcl = new TableColumnLayout();
@@ -128,7 +159,8 @@ public class RequestLogViewer extends Composite {
 
 		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
-		tableViewer.setContentProvider(new HttpViewContentProviderLazy(instanceId));
+		contentProvider = new HttpViewContentProviderLazy(instanceId);
+		tableViewer.setContentProvider(contentProvider);
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());
 		final Table table = tableViewer.getTable();

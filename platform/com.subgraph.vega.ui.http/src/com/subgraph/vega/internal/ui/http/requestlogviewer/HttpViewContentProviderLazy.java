@@ -67,6 +67,10 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		conditionSetListener = createConditionSetListener();
 	}
 
+	public IHttpConditionSet getConditionSet() {
+		return filterCondition;
+	}
+	
 	@Override
 	public void dispose() {
 		cleanupListeners();
