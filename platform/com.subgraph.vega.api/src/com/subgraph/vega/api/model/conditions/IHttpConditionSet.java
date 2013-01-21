@@ -29,7 +29,7 @@ public interface IHttpConditionSet {
 	 */
 	void appendTemporaryCondition(IHttpCondition condition);
 	void removeTemporaryCondition(IHttpCondition condition);
-	void clearTemporaryCondition(IHttpCondition condition);
+	void clearTemporaryConditions();
 	List<IHttpCondition> getAllTemporaryConditions(boolean includeInternal);
 	
 	void appendCondition(IHttpCondition condition);
