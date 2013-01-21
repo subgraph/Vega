@@ -251,6 +251,14 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		if(orChain != null && andChain != null) {
 			orChain.or(andChain);
 		}
+	
+		// If there are only 'sufficient' conditions, then don't filter at all
+		if(andChain == null) {
+			final Query q = db.query();
+			q.constrain(IRequestLogRecord.class);
+			return q.execute();
+		}
+	
 		return query.execute();
 	}
 
