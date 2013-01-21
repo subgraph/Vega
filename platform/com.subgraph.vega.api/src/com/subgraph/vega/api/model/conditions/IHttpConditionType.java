@@ -19,4 +19,6 @@ public interface IHttpConditionType {
 	boolean isInternal();
 	IHttpCondition createConditionInstance(IHttpConditionMatchAction matchAction);
 	List<IHttpConditionMatchAction> getMatchActions();
+	IHttpConditionMatchAction getMatchActionByName(String name);
+
 }

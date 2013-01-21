@@ -42,10 +42,21 @@ public abstract class ConditionType implements IHttpConditionType {
 		return isInternal;
 	}
 	
+	@Override
 	public List<IHttpConditionMatchAction> getMatchActions() {
 		return matchActionSet.createMatchActions();
 	}
-	
+
+	@Override
+	public IHttpConditionMatchAction getMatchActionByName(String name) {
+		for(IHttpConditionMatchAction action: getMatchActions()) {
+			if(action.getLabel().equals(name)) {
+				return action;
+			}
+		}
+		return null;
+	}
+
 	public boolean equals(Object other) {
 		if(this == other)
 			return true;

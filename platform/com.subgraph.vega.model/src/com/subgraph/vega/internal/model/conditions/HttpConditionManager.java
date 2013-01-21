@@ -131,4 +131,14 @@ public class HttpConditionManager implements IHttpConditionManager {
 		return Collections.unmodifiableList(result);
 		
 	}
+
+	@Override
+	public IHttpConditionType getConditionTypeByName(String name) {
+		for(IHttpConditionType type: getConditionTypes(true)) {
+			if(type.getName().equals(name)) {
+				return type;
+			}
+		}
+		return null;	
+	}
 }

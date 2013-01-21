@@ -21,4 +21,5 @@ public interface IHttpConditionManager {
 	void saveConditionSet(String name, IHttpConditionSet conditionSet);
 	List<IHttpConditionType> getConditionTypes();
 	List<IHttpConditionType> getConditionTypes(boolean includeInternal);
+	IHttpConditionType getConditionTypeByName(String name);
 }
