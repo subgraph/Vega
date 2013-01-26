@@ -75,7 +75,6 @@ function run(request, response, ctx) {
       }
     }
     if(httponly!=1){
-      java.lang.System.out.println("http-only");
       ctx.alert("vinfo-cookie-httponly", request, response, {
         output: cookies[i].getValue(),
         key: "vinfo-cookie-httponly:" + cookies[i].getValue(),
