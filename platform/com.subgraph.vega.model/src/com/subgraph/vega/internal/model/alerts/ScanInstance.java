@@ -42,6 +42,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	private transient volatile IScan scan;
 	private transient volatile int activeScanCompletedCount;
 	private transient volatile int activeScanTotalCount;
+	private transient volatile String currentPath;
 	private transient volatile boolean isPaused;
 	
 	private transient ScanAlertRepository repository;
@@ -139,7 +140,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	@Override
 	public void addScanEventListenerAndPopulate(IEventHandler listener) {
 		scanAlerts.addScanEventListenerAndPopulate(listener);
-		listener.handleEvent(new ScanStatusChangeEvent(this, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+		listener.handleEvent(new ScanStatusChangeEvent(this, currentPath, scanStatus, activeScanCompletedCount, activeScanTotalCount));
 	}
 
 	@Override
@@ -166,6 +167,11 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
+	public String getScanCurrentPath() {
+		return currentPath;
+	}
+
+	@Override
 	public int getScanCompletedCount() {
 		return activeScanCompletedCount;
 	}
@@ -181,10 +187,20 @@ public class ScanInstance implements IScanInstance, Activatable {
 	}
 
 	@Override
+	public void updateScanProgress(String currentPath, int completedCount, int totalCount) {
+		if(currentPath != null) {
+			this.currentPath = currentPath;
+		}
+		activeScanCompletedCount = completedCount;
+		activeScanTotalCount = totalCount;
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, this.currentPath, scanStatus, activeScanCompletedCount, activeScanTotalCount));
+	}
+
+	@Override
 	public void updateScanProgress(int completedCount, int totalCount) {
 		activeScanCompletedCount = completedCount;
 		activeScanTotalCount = totalCount;
-		eventManager.fireEvent(new ScanStatusChangeEvent(this, scanStatus, completedCount, totalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, currentPath, scanStatus, completedCount, totalCount));
 	}
 
 	@Override
@@ -196,7 +212,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 			stopTime = new Date();
 		}
 		this.scanStatus = status;
-		eventManager.fireEvent(new ScanStatusChangeEvent(this, status, activeScanCompletedCount, activeScanTotalCount));
+		eventManager.fireEvent(new ScanStatusChangeEvent(this, currentPath, status, activeScanCompletedCount, activeScanTotalCount));
 		activate(ActivationPurpose.WRITE);
 	}
 

@@ -46,6 +46,12 @@ public class ResponseModuleContext implements IModuleContext {
 	}
 
 	@Override
+	public void reportRequestException(HttpUriRequest request, Throwable ex) {
+		logger.warning("Exception processing request "+ request +" : "+ ex.getMessage());
+		scanInstance.notifyScanException(request, ex);
+	}
+
+	@Override
 	public void error(HttpUriRequest request, IHttpResponse response,
 			String message) {
 		final long requestId = workspace.getRequestLog().addRequestResponse(response);

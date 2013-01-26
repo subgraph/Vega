@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.state;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,11 @@ public class PathStateManager {
 	private final Map<Integer, HttpUriRequest> xssRequests = new HashMap<Integer, HttpUriRequest>();
 
 	private final IScanInstance scanInstance;
+
+	private Object progressLock = new Object();
+	private volatile int totalPathCount;
+	private volatile int completedPathCount;
+
 
 	public PathStateManager(IScannerConfig config, List<IBasicModuleScript> injectionModules, IWorkspace workspace, IWebCrawler crawler, ResponseAnalyzer responseAnalyzer, IScanInstance scanInstance, boolean isProxyScan) {
 		this.config = config;
@@ -254,6 +260,11 @@ public class PathStateManager {
 		if(config.getDisplayDebugOutput())
 			logger.info(message);
 	}
+	
+	public void reportRequestException(HttpUriRequest request, Throwable ex) {
+		logger.warning("Exception processing request: "+ request +" : "+ ex.getMessage());
+		scanInstance.notifyScanException(request, ex);
+	}
 
 	public List<String> getFileExtensionList() {
 		return wordlists.getFileExtensions();
@@ -273,5 +284,31 @@ public class PathStateManager {
 	
 	public int getMaxParameterCount() {
 		return config.getMaxParameterCount();
+	}
+	
+	void notifyPathNodeStart(PathState ps) {
+		final String path = pathNodeToPathString(ps);
+		debug("Starting path "+ path);
+		synchronized(progressLock) {
+			if(totalPathCount == 0) {
+				scanInstance.updateScanProgress(path, 0, 1);
+			}
+			totalPathCount += 1;
+		}
+		scanInstance.updateScanProgress(completedPathCount, totalPathCount);
+	}
+	
+	void notifyPathNodeFinish(PathState ps) {
+		final String path = pathNodeToPathString(ps);
+		debug("Finished path "+ path);
+		synchronized (progressLock) {
+			completedPathCount += 1;
+		}
+		scanInstance.updateScanProgress(path, completedPathCount, totalPathCount);
+	}
+	
+	private String pathNodeToPathString(PathState ps) {
+		final URI uri = ps.getPath().getUri();
+		return uri.toString();
 	}
 }

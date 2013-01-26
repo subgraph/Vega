@@ -28,5 +28,10 @@ public abstract class CrawlerModule implements ICrawlerResponseProcessor {
 			throw new IllegalArgumentException("Crawler callback argument is not IModuleContext as expected: "+ argument);
 		runModule(request, response, (IInjectionModuleContext) argument);
 	}
-
+	
+	@Override
+	public void processException(HttpUriRequest request, Throwable ex, Object argument) {
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
+		ctx.reportRequestException(request, ex);
+	}
 }

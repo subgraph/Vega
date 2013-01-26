@@ -33,7 +33,7 @@ public class ModuleContext implements IInjectionModuleContext {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final PathStateManager scanState;
 	private final IRequestBuilder requestBuilder;
-	private final IPathState pathState;
+	private final PathState pathState;
 	private final int currentIndex;
 	private final ModuleContextState contextState;
 	private final List<String> stringHighlights;
@@ -41,7 +41,7 @@ public class ModuleContext implements IInjectionModuleContext {
 	private final List<String> caseInsensitiveRegexHighlights;
 
 
-	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState, int index) {
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, PathState pathState, int index) {
 		this.scanState = scanState;
 		this.requestBuilder = requestBuilder;
 		this.pathState = pathState;
@@ -53,7 +53,7 @@ public class ModuleContext implements IInjectionModuleContext {
 
 	}
 
-	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, IPathState pathState) {
+	ModuleContext(PathStateManager scanState, IRequestBuilder requestBuilder, PathState pathState) {
 		this(scanState, requestBuilder, pathState, -1);
 	}
 
@@ -147,14 +147,15 @@ public class ModuleContext implements IInjectionModuleContext {
 	public void submitRequest(HttpUriRequest request,
 			ICrawlerResponseProcessor callback, int index) {
 		contextState.incrementSentRequestCount();
+		pathState.incrementOutstandingRequests();
 		scanState.getCrawler().submitTask(request, getWrappedCallback(callback), new ModuleContext(this, index));
 	}
 	
 	private ICrawlerResponseProcessor getWrappedCallback(ICrawlerResponseProcessor callback) {
 		if(scanState.requestLoggingEnabled())
-			return CrawlerCallbackWrapper.createLogging(scanState.getRequestLog(), callback);
+			return CrawlerCallbackWrapper.createLogging(pathState, scanState.getRequestLog(), callback);
 		else
-			return CrawlerCallbackWrapper.create(callback);
+			return CrawlerCallbackWrapper.create(pathState, callback);
 	}
 	
 	@Override
@@ -222,6 +223,12 @@ public class ModuleContext implements IInjectionModuleContext {
 	@Override
 	public boolean hasModuleFailed() {
 		return contextState.hasModuleFailed();
+	}
+
+	@Override
+	public void reportRequestException(HttpUriRequest request, Throwable ex) {
+		pathState.decrementOutstandingRequests();
+		scanState.reportRequestException(request, ex);
 	}
 
 	@Override

@@ -18,19 +18,21 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 
 public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
-	static ICrawlerResponseProcessor createLogging(IRequestLog requestLog, ICrawlerResponseProcessor callback) {
-		return new CrawlerCallbackWrapper(requestLog, callback);
+	static ICrawlerResponseProcessor createLogging(PathState pathState, IRequestLog requestLog, ICrawlerResponseProcessor callback) {
+		return new CrawlerCallbackWrapper(pathState, requestLog, callback);
 	}
 	
-	static ICrawlerResponseProcessor create(ICrawlerResponseProcessor callback) {
-		return new CrawlerCallbackWrapper(null, callback);
+	static ICrawlerResponseProcessor create(PathState pathState, ICrawlerResponseProcessor callback) {
+		return new CrawlerCallbackWrapper(pathState, null, callback);
 	}
 	
+	private final PathState pathState;
 	private final boolean logRequest;
 	private final IRequestLog requestLog;
 	private final ICrawlerResponseProcessor wrappedCallback;
 	
-	private CrawlerCallbackWrapper(IRequestLog requestLog, ICrawlerResponseProcessor callback) {
+	private CrawlerCallbackWrapper(PathState pathState, IRequestLog requestLog, ICrawlerResponseProcessor callback) {
+		this.pathState = pathState;
 		this.logRequest = (requestLog != null);
 		this.requestLog = requestLog;
 		this.wrappedCallback = callback;
@@ -39,6 +41,8 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 
 	@Override
 	public void processResponse(IWebCrawler crawler, HttpUriRequest request, IHttpResponse response, Object argument) {
+		pathState.decrementOutstandingRequests();
+		
 		if(!response.lockResponseEntity()) {
 			return;
 		}
@@ -46,5 +50,11 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 		if(logRequest) {
 			requestLog.addRequestResponse(response);
 		}
+	}
+
+	@Override
+	public void processException(HttpUriRequest request, Throwable ex, Object argument) {
+		pathState.decrementOutstandingRequests();
+		pathState.getPathStateManager().reportRequestException(request, ex);
 	}
 }

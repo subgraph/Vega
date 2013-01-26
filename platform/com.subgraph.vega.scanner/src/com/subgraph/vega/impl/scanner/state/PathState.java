@@ -13,6 +13,7 @@ package com.subgraph.vega.impl.scanner.state;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -96,7 +97,10 @@ public class PathState implements IPathState {
 	private final Object childCountLock = new Object();
 	private int descendantCount = 0;
 	private int childCount = 0;
-
+	
+	private AtomicInteger outstandingRequests = new AtomicInteger();
+	private volatile boolean finishOnNoRequests;
+	
 	private PathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path, IRequestBuilder requestBuilder) {
 		this.initialFetchProcessor = fetchProcessor;
 		this.pathStateManager = stateManager;
@@ -174,6 +178,7 @@ public class PathState implements IPathState {
 	public void setDone() {
 		isDone = true;
 		response = null;
+		pathStateManager.notifyPathNodeFinish(this);
 	}
 
 	public void requeueInitialFetch() {
@@ -198,6 +203,7 @@ public class PathState implements IPathState {
 		} else {
 			submitRequest(req, initialFetchProcessor, ctx);
 		}
+		pathStateManager.notifyPathNodeStart(this);
 	}
 
 	@Override
@@ -237,14 +243,15 @@ public class PathState implements IPathState {
 	}
 
 	public void submitRequest(HttpUriRequest request, ICrawlerResponseProcessor callback, IInjectionModuleContext ctx) {
+		incrementOutstandingRequests();
 		pathStateManager.getCrawler().submitTask(request, getWrappedCallback(callback), ctx);
 	}
 
 	private ICrawlerResponseProcessor getWrappedCallback(ICrawlerResponseProcessor callback) {
 		if(pathStateManager.requestLoggingEnabled())
-			return CrawlerCallbackWrapper.createLogging(pathStateManager.getRequestLog(), callback);
+			return CrawlerCallbackWrapper.createLogging(this, pathStateManager.getRequestLog(), callback);
 		else
-			return CrawlerCallbackWrapper.create(callback);
+			return CrawlerCallbackWrapper.create(this, callback);
 	}
 
 	@Override
@@ -548,5 +555,25 @@ public class PathState implements IPathState {
 	@Override
 	public IHttpRequestEngine getRequestEngine() {
 		return pathStateManager.getCrawler().getRequestEngine();
+	}
+	
+	
+	void incrementOutstandingRequests() {
+		outstandingRequests.incrementAndGet();
+	}
+	
+	public void decrementOutstandingRequests() {
+		if(outstandingRequests.decrementAndGet() <= 0) {
+			if(finishOnNoRequests) {
+				setDone();
+			}
+		}
+	}
+	
+	public void setFinishOnNoRequests() {
+		finishOnNoRequests = true;
+		if(outstandingRequests.get() == 0) {
+			setDone();
+		}
 	}
 }

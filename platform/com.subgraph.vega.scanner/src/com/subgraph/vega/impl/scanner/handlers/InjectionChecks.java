@@ -13,6 +13,7 @@ package com.subgraph.vega.impl.scanner.handlers;
 import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.impl.scanner.state.PathState;
 
 public class InjectionChecks {
 
@@ -49,5 +50,6 @@ public class InjectionChecks {
 				m.runScript(ps);
 			}
 		}
+		((PathState)ps).setFinishOnNoRequests();
 	}
 }

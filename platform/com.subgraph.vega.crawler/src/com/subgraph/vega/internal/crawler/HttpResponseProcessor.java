@@ -101,12 +101,17 @@ public class HttpResponseProcessor implements Runnable {
 
 			synchronized(counter) {
 				counter.addCompletedTask();
-				crawler.updateProgress();
-			}
-			if(task.causedException()) {
-				crawler.notifyException(req, task.getException());
 			}
 
+			if(task.getResponse() == null) {
+				if(task.causedException()) {
+					task.getResponseProcessor().processException(task.getRequest(), task.getException(), task.getArgument());
+				} else {
+					final Throwable ex = new IllegalStateException("Completed queue task has no response and no exception");
+					task.getResponseProcessor().processException(task.getRequest(), ex, task.getArgument());
+				}
+			}
+	
 			if(outstandingTasks.decrementAndGet() <= 0) {
 				if(stopOnEmptyQueue) {
 					crawlerRequestQueue.add(CrawlerTask.createExitTask());

@@ -55,7 +55,7 @@ public class CrawlerProgressPane extends Composite {
 		final Label label = new Label(parent, SWT.CENTER);
 		label.setFont(JFaceResources.getBannerFont());
 		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.widthHint = 300;
+		gd.widthHint = 400;
 		gd.verticalIndent = 20;
 		label.setLayoutData(gd);
 		return label;
@@ -66,7 +66,7 @@ public class CrawlerProgressPane extends Composite {
 		progress.setMinimum(0);
 		progress.setMaximum(100);
 		final GridData gd = new GridData(SWT.FILL, SWT.BOTTOM, true, true);
-		gd.widthHint = 300;
+		gd.widthHint = 400;
 		progress.setLayoutData(gd);
 		return progress;
 	}

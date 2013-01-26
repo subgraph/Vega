@@ -16,12 +16,10 @@ import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIUtils;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
-import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
@@ -37,7 +35,7 @@ import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
 
-public class ScannerTask implements Runnable, ICrawlerProgressTracker {
+public class ScannerTask implements Runnable {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final Scan scan;
 	private final IScanInstance scanInstance;
@@ -167,8 +165,7 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 	
 	private void runCrawlerPhase() {
 		logger.info("Starting crawling phase");
-		currentCrawler.registerProgressTracker(this);
-		
+				
 		for(URI u: scanTargetScope.getScopeURIs()) {
 			uriParser.processUri(toVegaURI(u));
 		}
@@ -211,15 +208,5 @@ public class ScannerTask implements Runnable, ICrawlerProgressTracker {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public void progressUpdate(int completed, int total) {
-		scanInstance.updateScanProgress(completed, total);
-	}
-
-	@Override
-	public void exceptionThrown(HttpUriRequest request, Throwable exception) {
-		scanInstance.notifyScanException(request, exception);
 	}
 }

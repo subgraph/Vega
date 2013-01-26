@@ -16,4 +16,5 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 
 public interface ICrawlerResponseProcessor {
 	void processResponse(IWebCrawler crawler, HttpUriRequest request, IHttpResponse response, Object argument);
+	void processException(HttpUriRequest request, Throwable ex, Object argument);
 }

@@ -58,6 +58,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 	private int lastStatus;
 	private int lastCompletedCount;
 	private int lastTotalCount;
+	private String lastCurrentPath;
 	
 	private boolean isProxyInstance;
 	
@@ -103,7 +104,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 			lastStatus = 0;
 			lastCompletedCount = 0;
 			lastTotalCount = 0;
-			maybeUpdateCrawler(scanInstance.getScanStatus(), scanInstance.getScanCompletedCount(), scanInstance.getScanTotalCount());
+			maybeUpdateCrawler(scanInstance.getScanStatus(), scanInstance.getScanCurrentPath(), scanInstance.getScanCompletedCount(), scanInstance.getScanTotalCount());
 			maybeUpdateStatus(scanInstance.getScanStatus());
 		}
 		final boolean progressPaneVisible = (!isProxyInstance && (scanInstance != null && scanInstance.getScanStatus() == IScanInstance.SCAN_AUDITING));
@@ -247,7 +248,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 		addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
-		addIndented(sb, 20, "<control width='400' height='80' href='crawler'/>");
+		addIndented(sb, 20, "<control width='500' height='100' href='crawler'/>");
 	}
 	
 	private void renderAlertSummary(StringBuilder sb) {
@@ -255,7 +256,7 @@ public class DashboardPane extends Composite implements IEventHandler {
 		final String title = isProxyInstance ? "Proxy Alert Summary" : "Scan Alert Summary";
 		addIndented(sb, 10, "<span font='header'>" + title +"</span>");
 		addVSpaces(sb, 2);
-		addIndented(sb, 20, "<control width='400' href='alerts'/>");
+		addIndented(sb, 20, "<control width='500' href='alerts'/>");
 		addVSpaces(sb, 2);
 	}
 	
@@ -286,15 +287,16 @@ public class DashboardPane extends Composite implements IEventHandler {
 	}
 	
 	private void handleScannerStatusChanged(ScanStatusChangeEvent event) {
-		maybeUpdateCrawler(event.getStatus(), event.getCompletedCount(), event.getTotalCount());
+		maybeUpdateCrawler(event.getStatus(), event.getCurrentPath(), event.getCompletedCount(), event.getTotalCount());
 		maybeUpdateStatus(event.getStatus());
 	}
 	
-	private void maybeUpdateCrawler(int status, int completed, int total) {
-		if(completed != lastCompletedCount || total != lastTotalCount || status != lastStatus) {
+	private void maybeUpdateCrawler(int status, String currentPath, int completed, int total) {
+		if(currentPath != lastCurrentPath || completed != lastCompletedCount || total != lastTotalCount || status != lastStatus) {
+			lastCurrentPath = currentPath;
 			lastCompletedCount = completed;
 			lastTotalCount = total;
-			crawlerPane.updateCrawlerProgress(status, total, completed);
+			crawlerPane.updateCrawlerProgress(status, currentPath, total, completed);
 			crawlerRenderNeeded = true;
 		}
 	}

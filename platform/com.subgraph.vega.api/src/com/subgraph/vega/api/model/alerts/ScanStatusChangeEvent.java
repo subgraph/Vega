@@ -14,17 +14,23 @@ import com.subgraph.vega.api.events.IEvent;
 
 public class ScanStatusChangeEvent implements IEvent {
 	private final IScanInstance scanInstance;
+	private final String currentPath;
 	private final int scanStatus;
 	private final int scanCompletedCount;
 	private final int scanTotalCount;
 
-	public ScanStatusChangeEvent(IScanInstance scanInstance, int status, int completed, int total) {
-		this.scanInstance = scanInstance; 
+	public ScanStatusChangeEvent(IScanInstance scanInstance, String currentPath, int status, int completed, int total) {
+		this.scanInstance = scanInstance;
+		this.currentPath = currentPath;
 		this.scanStatus = status;
 		this.scanCompletedCount = completed;
 		this.scanTotalCount = total;
 	}
 	
+	public String getCurrentPath() {
+		return currentPath;
+	}
+
 	public IScanInstance getScanInstance() {
 		return scanInstance;
 	}

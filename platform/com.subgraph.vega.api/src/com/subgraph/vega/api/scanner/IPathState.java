@@ -80,4 +80,6 @@ public interface IPathState {
 	String createXssPattern(int xssId);
 
 	IHttpRequestEngine getRequestEngine();
+	
+	void decrementOutstandingRequests();
 }

@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
-import com.subgraph.vega.api.crawler.ICrawlerProgressTracker;
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
@@ -33,7 +32,6 @@ public class WebCrawler implements IWebCrawler {
 	private final BlockingQueue<CrawlerTask> responseQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final List<RequestConsumer> requestConsumers;
 	private final List<HttpResponseProcessor> responseProcessors;
-	private final List<ICrawlerProgressTracker> eventHandlers;
 	private final int requestThreadCount;
 	private final int responseThreadCount;
 	private final CrawlerPauseLock pauseLock;
@@ -53,7 +51,6 @@ public class WebCrawler implements IWebCrawler {
 		this.executor = Executors.newFixedThreadPool(requestThreadCount + responseThreadCount);
 		this.requestConsumers = new ArrayList<RequestConsumer>(requestThreadCount);
 		this.responseProcessors = new ArrayList<HttpResponseProcessor>(responseThreadCount);
-		this.eventHandlers = new ArrayList<ICrawlerProgressTracker>();
 		this.pauseLock = new CrawlerPauseLock();
 	}
 	
@@ -68,8 +65,6 @@ public class WebCrawler implements IWebCrawler {
 			throw new IllegalStateException("Cannot call start() on running crawler instance");
 	
 		latch = new CountDownLatch(requestThreadCount + responseThreadCount);
-		
-		updateProgress();
 		
 		for(int i = 0; i < responseThreadCount; i++) {
 			HttpResponseProcessor responseProcessor = new HttpResponseProcessor(this, requestQueue, responseQueue, latch, counter, outstandingTasks, stopOnEmptyQueue, pauseLock);
@@ -144,25 +139,5 @@ public class WebCrawler implements IWebCrawler {
 	@Override
 	public void setStopOnEmptyQueue(boolean value) {
 		stopOnEmptyQueue = value;
-	}
-
-	@Override
-	public void registerProgressTracker(ICrawlerProgressTracker progress) {
-		synchronized(counter) {
-			eventHandlers.add(progress);
-		}		
-	}
-	
-	void updateProgress() {
-		synchronized(counter) {
-			for(ICrawlerProgressTracker pt: eventHandlers) 
-				pt.progressUpdate(counter.getCompletedTasks(), counter.getTotalTasks());
-		}
-	}
-	
-	void notifyException(HttpUriRequest request, Throwable exception) {
-		for(ICrawlerProgressTracker pt: eventHandlers) {
-			pt.exceptionThrown(request, exception);
-		}
 	}
 }

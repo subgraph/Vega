@@ -61,4 +61,10 @@ public class CrawlerCallbackWrapper implements ICrawlerResponseProcessor {
 		Object[] args = { responseOb };
 		return cx.newObject(scope, "Response", args);
 	}
+
+	@Override
+	public void processException(HttpUriRequest request, Throwable ex, Object argument) {
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
+		ctx.reportRequestException(request, ex);
+	}
 }

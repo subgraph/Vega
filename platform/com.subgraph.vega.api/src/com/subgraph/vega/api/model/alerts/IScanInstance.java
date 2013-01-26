@@ -58,7 +58,9 @@ public interface IScanInstance extends IModelProperties {
 	boolean isComplete();
 	int getScanCompletedCount();
 	int getScanTotalCount();
+	String getScanCurrentPath();
 	void setScan(IScan scan);
+	void updateScanProgress(String currentPath, int completedCount, int totalCount);
 	void updateScanProgress(int completedCount, int totalCount);
 	void updateScanStatus(int status);
 	void notifyScanException(HttpUriRequest request, Throwable exception);

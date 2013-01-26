@@ -17,6 +17,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IModelProperties;
 
 public interface IModuleContext extends IModelProperties {
+	void reportRequestException(HttpUriRequest request, Throwable ex);
 	void error(HttpUriRequest request, IHttpResponse response, String message);
 	void debug(String msg);
 	void addStringHighlight(String str);

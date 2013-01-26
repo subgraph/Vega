@@ -44,4 +44,9 @@ public class OgnlHandler implements ICrawlerResponseProcessor {
 		}
 	}
 
+	@Override
+	public void processException(HttpUriRequest request, Throwable ex, Object argument) {
+		final IInjectionModuleContext ctx = (IInjectionModuleContext) argument;
+		ctx.reportRequestException(request, ex);
+	}
 }

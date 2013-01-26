@@ -19,7 +19,6 @@ public interface IWebCrawler {
 	void submitTask(HttpUriRequest request, ICrawlerResponseProcessor callback, Object argument);
 	void submitTask(HttpUriRequest request, ICrawlerResponseProcessor callback);
 	void setStopOnEmptyQueue(boolean value);
-	void registerProgressTracker(ICrawlerProgressTracker progress);
 	void start();
 	void pause();
 	void unpause();
