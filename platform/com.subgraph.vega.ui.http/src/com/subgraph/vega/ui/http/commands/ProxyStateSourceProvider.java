@@ -17,14 +17,10 @@ import org.eclipse.ui.AbstractSourceProvider;
 import org.eclipse.ui.ISources;
 
 public class ProxyStateSourceProvider extends AbstractSourceProvider {
-	final static String PROXY_STATE = "vega.proxyState";
-	final static String PASSTHROUGH_STATE = "vega.passthroughState";
-	final static String PROXYSCAN_STATE = "vega.proxyScanState";
+	public final static String PROXY_STATE = "vega.proxyState";
 	final static String PROXY_ENABLED = "enabled";
 	final static String PROXY_DISABLED = "disabled";
 	private boolean isRunning = false;
-	private boolean isPassthrough = false;
-	private boolean isProxyScan = false;
 	
 	@Override
 	public void dispose() {		
@@ -34,57 +30,25 @@ public class ProxyStateSourceProvider extends AbstractSourceProvider {
 	public Map<?, ?> getCurrentState() {
 		Map<String, String> stateMap = new HashMap<String, String>(3);
 		stateMap.put(PROXY_STATE, getCurrentProxyState());
-		stateMap.put(PASSTHROUGH_STATE, getCurrentPassthroughState());
-		stateMap.put(PROXYSCAN_STATE, getCurrentProxyScanState());
 		return stateMap;
 	}
 
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[] { PROXY_STATE, PASSTHROUGH_STATE, PROXYSCAN_STATE };
+		return new String[] { PROXY_STATE };
 	}
 
-	void setProxyRunning(boolean enabled) {
+	public void setProxyRunning(boolean enabled) {
 		if (isRunning!= enabled) {
 			isRunning = enabled;
 			fireSourceChanged(ISources.WORKBENCH, PROXY_STATE, getCurrentProxyState());
 		}
 	}
 	
-	void setProxyPassthrough(boolean enabled) {
-		if (isPassthrough != enabled) {
-			isPassthrough = enabled;
-			fireSourceChanged(ISources.WORKBENCH, PASSTHROUGH_STATE, getCurrentPassthroughState());
-		}
-	}
-	
-	void setProxyScan(boolean enabled) {
-		if(isProxyScan != enabled) {
-			isProxyScan = enabled;
-			fireSourceChanged(ISources.WORKBENCH, PROXYSCAN_STATE, getCurrentProxyScanState());
-		}
-	}
-
 	private String getCurrentProxyState() {
 		if (isRunning) {
 			return PROXY_ENABLED;
 		} else { 
-			return PROXY_DISABLED;
-		}
-	}
-
-	private String getCurrentPassthroughState() {
-		if (isPassthrough) {
-			return PROXY_ENABLED;
-		} else {
-			return PROXY_DISABLED;
-		}
-	}
-	
-	private String getCurrentProxyScanState() {
-		if(isProxyScan) {
-			return PROXY_ENABLED;
-		} else {
 			return PROXY_DISABLED;
 		}
 	}
