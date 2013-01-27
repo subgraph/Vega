@@ -157,6 +157,10 @@
             categoryId="com.subgraph.vega.commands.proxyCategory"
             id="com.subgraph.vega.commands.proxyPassthrough"
             name="Toggle HTTP proxy passthrough">
+         <state
+               class="com.subgraph.vega.ui.http.commands.ToggleState"
+               id="org.eclipse.ui.commands.toggleState">
+         </state>
       </command>
       <category
             description="Commands for controlling the request editor"
@@ -207,6 +211,10 @@
             categoryId="com.subgraph.vega.commands.proxyCategory"
             id="com.subgraph.vega.commands.proxyScan"
             name="Start Proxy Scan">
+         <state
+               class="com.subgraph.vega.ui.http.commands.ToggleState"
+               id="org.eclipse.ui.commands.toggleState">
+         </state>
       </command>
    </extension>
    <extension

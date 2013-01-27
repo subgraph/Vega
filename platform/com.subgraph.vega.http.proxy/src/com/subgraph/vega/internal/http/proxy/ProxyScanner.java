@@ -63,6 +63,7 @@ public class ProxyScanner {
 		if(proxyScan != null) {
 			proxyScan.stop();
 		}
+		isEnabled = false;
 		proxyScan = scanner.createProxyScan(newWorkspace, cookieStore);
 	}
 	
