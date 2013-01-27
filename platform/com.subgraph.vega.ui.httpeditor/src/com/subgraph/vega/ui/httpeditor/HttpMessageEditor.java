@@ -23,6 +23,7 @@ import org.apache.http.entity.StringEntity;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.TextViewerUndoManager;
@@ -160,6 +161,7 @@ public class HttpMessageEditor extends Composite {
 		highlightBar.clearHighlights();
 		viewer.unconfigure();
 		viewer.configure(new Configuration(colors));
+		viewer.setDocument(new Document());
 	}
 	
 	public String getContent() {

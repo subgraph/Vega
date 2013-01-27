@@ -87,7 +87,6 @@ public class RequestResponseViewer extends Composite {
 		fd.top = new FormAttachment(0);
 		toolbarComposite.setLayoutData(fd);
 		setTabbedMode();
-		
 		workspaceListener = new IEventHandler() {
 			@Override
 			public void handleEvent(IEvent event) {
@@ -391,6 +390,7 @@ public class RequestResponseViewer extends Composite {
 	}
 
 	private void clearViewers() {
+		currentRecord = null;
 		requestViewer.clearContent();
 		responseViewer.clearContent();
 	}
