@@ -235,7 +235,9 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 	}
 
 	public void setTitleImage(Image image) {
-		super.setTitleImage(image);
+		if(image != null && !image.isDisposed()) {
+			super.setTitleImage(image);
+		}
 	}
 	
 	public void setFilterByScope(boolean enabled) {
