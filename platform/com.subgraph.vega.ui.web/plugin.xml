@@ -14,10 +14,6 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="com.subgraph.vega.ui.command.scanFrom"
-            name="Scan From">
-      </command>
-      <command
             id="com.subgraph.vega.ui.command.hideUnvisited"
             name="Hide Unvisited Sites">
       </command>
@@ -36,16 +32,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:com.subgraph.vega.views.website">
-         <command
-               commandId="com.subgraph.vega.ui.command.scanFrom"
-               icon="icons/start_crawling2.png"
-               label="Scan from selected path"
-               style="push">
-         </command>
-      </menuContribution>
       <menuContribution
             allPopups="false"
             locationURI="toolbar:com.subgraph.vega.views.website">
@@ -90,23 +76,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
-      <handler
-            class="com.subgraph.vega.ui.web.commands.ScanFromHandler"
-            commandId="com.subgraph.vega.ui.command.scanFrom">
-         <activeWhen>
-            <reference
-                  definitionId="oneElementSelected">
-            </reference>
-         </activeWhen>
-         <enabledWhen>
-            <with
-                  variable="vega.scannerState">
-               <equals
-                     value="idle">
-               </equals>
-            </with>
-         </enabledWhen>
-      </handler>
       <handler
             class="com.subgraph.vega.ui.web.commands.HideUnvisitedHandler"
             commandId="com.subgraph.vega.ui.command.hideUnvisited">
