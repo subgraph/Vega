@@ -26,9 +26,10 @@ import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 
 public class WebCrawler implements IWebCrawler {
+	private final static int MAX_QUEUED_REQUESTS = 50000;
 	private final IHttpRequestEngine requestEngine;
 	private final Executor executor;
-	private final BlockingQueue<CrawlerTask> requestQueue = new LinkedBlockingQueue<CrawlerTask>();
+	private final BlockingQueue<CrawlerTask> requestQueue = new LinkedBlockingQueue<CrawlerTask>(MAX_QUEUED_REQUESTS);
 	private final BlockingQueue<CrawlerTask> responseQueue = new LinkedBlockingQueue<CrawlerTask>();
 	private final List<RequestConsumer> requestConsumers;
 	private final List<HttpResponseProcessor> responseProcessors;
@@ -132,7 +133,11 @@ public class WebCrawler implements IWebCrawler {
 		outstandingTasks.incrementAndGet();
 		synchronized(counter) {
 			counter.addNewTask();
-			requestQueue.add(task);
+			try {
+				requestQueue.put(task);
+			} catch (InterruptedException e) {
+				throw new RuntimeException("Interruped submission of request task");
+			}
 		}
 	}
 	
