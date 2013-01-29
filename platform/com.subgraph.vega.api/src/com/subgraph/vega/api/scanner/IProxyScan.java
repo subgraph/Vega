@@ -7,6 +7,11 @@ import org.apache.http.NameValuePair;
 import com.subgraph.vega.api.util.VegaURI;
 
 public interface IProxyScan {
+	/**
+	 * Get the configuration for this scan.
+	 * @return Scan configuration.
+	 */
+	IScannerConfig getConfig();
 	void scanGetTarget(VegaURI target, List<NameValuePair> parameters);
 	void scanPostTarget(VegaURI target, List<NameValuePair> parameters);
 	void stop();

@@ -50,6 +50,11 @@ public class ProxyScan implements IProxyScan {
 	}
 
 	@Override
+	public IScannerConfig getConfig() {
+		return config;
+	}
+
+	@Override
 	public void scanGetTarget(VegaURI target, List<NameValuePair> parameters) {
 		if(!isStarted) {
 			start();
