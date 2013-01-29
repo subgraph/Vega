@@ -110,7 +110,6 @@ function createReq9(ctx,ps) {
 function createReq10(ctx,ps) {
 	var xid = ps.allocateXssId();
 	var tag = ps.createXssPattern("\" onMouseOver=", xid);
-	ctx.debug(tag);
 	var req = ps.createAlteredRequest(tag, false);
 	ps.registerXssRequest(req, xid);
 	return req;
