@@ -16,12 +16,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.RequestLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -56,6 +58,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	private final IRequestOrigin requestOrigin;
 	private final IHTMLParser htmlParser;
 	private final RateLimiter rateLimit;
+	private final CookieMatcher cookieMatcher;
 	private final HttpContext httpContext;
 	private final List<IHttpRequestModifier> requestModifierList;
 	private final EventListenerManager requestEventManager;
@@ -69,6 +72,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.requestOrigin = requestOrigin;
 		this.htmlParser = htmlParser;
 		rateLimit = new RateLimiter(config.getRequestsPerMinute());
+		cookieMatcher = new CookieMatcher(getClientDowncast());
 		httpContext = new SyncBasicHttpContext(null);
 
 		requestModifierList = new ArrayList<IHttpRequestModifier>();
@@ -198,5 +202,11 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 	public HttpUriRequest createRawEntityEnclosingRequest(HttpHost target,
 			RequestLine requestLine) {
 		return new VegaHttpEntityEnclosingUriRequest(target, requestLine);
+	}
+
+	@Override
+	public List<Cookie> getCookiesForRequest(HttpHost targetHost,
+			HttpRequest request) {
+		return cookieMatcher.getCookiesForRequest(targetHost, request);
 	}
 }
