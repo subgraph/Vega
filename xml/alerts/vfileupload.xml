@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Form File Upload Detected</title>
+	
+	<class>Environment</class>
+
+	<severity>Info</severity>
+
+	<impact>A form allowing file upload was detected by Vega.</impact>
+	<impact>Vulnerabilities are commonly found in file upload functions.</impact>
+
+	<remediation>
+	This alert is purely informational, there is no vulnerability that has been positively identified. It is recommended that the file upload function be examined and reviewed to ensure that it is implemented securely.
+	</remediation>
+
+
+	<discussion>
+	File uploads via FORM submissions are a common source of vulnerabilities. The most common attacks include uploading of script code (uploading a PHP file and then executing it remotely). Ensure that the location of the files uploaded is restricted, i.e., the uploaded file cannot be interpreted as server-side code. Care should also be taken to ensure that directory traversal vulnerabilities do not allow files to be uploaded in other areas.
+	</discussion>
+
+
+</alert>
+

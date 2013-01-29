@@ -48,9 +48,9 @@ function createInjectables(ctx) {
 
   // WINDOWS
   
-  ret.push("\..\..\..\..\..\..\..\..\..\..\..\boot.ini");
-  ret.push("..\..\..\..\..\..\..\..\..\..\..\..\..\boot.ini");
-  ret.push("C:\boot.ini");
+  ret.push("\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\boot.ini");
+  ret.push("..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\boot.ini");
+  ret.push("C:\\boot.ini");
   ret.push("file:/../../../../../../../../../../../boot.ini");
   
   return ret;

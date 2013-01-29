@@ -27,9 +27,10 @@ function initialize(ctx) {
     ctx.submitAlteredRequest(process, "\\'", true, 12);    
     ctx.submitAlteredRequest(process, "''", true, 13);
     
-    ctx.submitAlteredRequest(process, "vega32432", true, 14);   
+    ctx.submitAlteredRequest(process, "' UNION SELECT 8, table_name, 'vega' FROM information_schema.taables WHERE taable_name like'%", true, 14);   
     ctx.submitAlteredRequest(process, "' UNION SELECT 8, table_name, 'vega' FROM information_schema.tables WHERE table_name like'%", true, 15);
-    ctx.submitAlteredRequest(process, "\" UNION SELECT 8, table_name, 'vega' FROM information_schema.tables WHERE table_name like'%", true, 16);
+    ctx.submitAlteredRequest(process, "\" UNION SELECT 8, table_name, 'vega' FROM information_schema.taables WHERE taable_name like'%", true, 16);
+    ctx.submitAlteredRequest(process, "\" UNION SELECT 8, table_name, 'vega' FROM information_schema.tables WHERE table_name like'%", true, 17);
 
   }
   
@@ -51,7 +52,7 @@ function process(req, res, ctx) {
   
   var n = ctx.incrementResponseCount();
   
-  if (n < 17) return;
+  if (n < 18) return;
   
   var ps = ctx.getPathState();
   var fp = ps.getPathFingerprint();
@@ -108,7 +109,7 @@ function process(req, res, ctx) {
     ctx.responseChecks(15);
   }  
   
-  if (ctx.isFingerprintMatch(14, fp) && !ctx.isFingerprintMatch(14, 16)) {
+  if (ctx.isFingerprintMatch(16, fp) && !ctx.isFingerprintMatch(17, 16)) {
 	  var uri = String(ctx.getSavedRequest(1).requestLine.uri);
 	  var uripart = uri.replace(/\?.*/, "");
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(16), ctx.getSavedResponse(16), {

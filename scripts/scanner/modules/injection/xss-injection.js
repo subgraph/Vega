@@ -6,7 +6,6 @@ var module = {
 function initialize(ctx) {
   var ps = ctx.getPathState();
 
-
   ctx.submitRequest(createReq0(ctx, ps), process, 0);
   ctx.submitRequest(createReq1(ctx, ps), process, 1);
   ctx.submitRequest(createReq2(ctx, ps), process, 2);
@@ -23,7 +22,6 @@ function initialize(ctx) {
   ctx.submitRequest(createReq13(ctx, ps), process, 13);	
   ctx.submitRequest(createReq14(ctx, ps), process, 14);
   ctx.submitRequest(createReq14(ctx, ps), process, 15); 
-  fuzzCookies(ctx, ps);
 
 }
 
@@ -112,7 +110,6 @@ function createReq9(ctx,ps) {
 function createReq10(ctx,ps) {
 	var xid = ps.allocateXssId();
 	var tag = ps.createXssPattern("\" onMouseOver=", xid);
-	ctx.debug(tag);
 	var req = ps.createAlteredRequest(tag, false);
 	ps.registerXssRequest(req, xid);
 	return req;
@@ -160,35 +157,6 @@ function createReq15(ctx,ps) {
 	return req;
 }
 
-function fuzzCookies(ctx,ps) {
-	var headers = ctx.getOrigResponse().allHeaders;
-	var i = 0;
-
-  	for (i = 0; i < headers.length; i++) {
-		if (headers[i].name.toLowerCase() == "set-cookie") {
-			var xid = ps.allocateXssId();
- 			var tag = ps.createXssTag(xid);
-			var rawCookie = headers[i].value;
-			var cookies = new Array();
-			var nameValue = new Array();
-			var req = ps.createAlteredRequest(tag, false);
-			var x = 0;
-
-			cookies = rawCookie.split(";");
-			for (i = 0; i < cookies.length; i++) {
-				if (cookies[i].indexOf("=") >= 0) {
-					nameValue = cookies[i].split("=");
-					nameValue[1] += " " + tag;
-					cookie = nameValue[0] + "=" + nameValue[1];
-					req.addHeader("Cookie", cookie);
-					ctx.submitRequest(req, process);
-				}
-			}
-		}
-
-	}          
-}
-	
 function process(req, res, ctx) {
   ctx.contentChecks(req, res);
 }
