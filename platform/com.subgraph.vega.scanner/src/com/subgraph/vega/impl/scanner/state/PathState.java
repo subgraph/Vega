@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
 import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
@@ -447,15 +448,10 @@ public class PathState implements IPathState {
 			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
 				return;
 			} else if(pm.hasParameterList(parameters)) {
-				if(pathStateManager.isProxyScan()) {
-					for(PathState ps: pm.getStatesForParameterList(parameters)) {
-						ps.requeueInitialFetch();
-					}
-				}
-				return;
-			} else if(pathStateManager.hasExceededLimits(this)) {
-				return;
-			} else {
+				if(isRescanNeeded()) {
+					rescanGetParameters(parameters, pm);
+				} 
+			} else if(!pathStateManager.hasExceededLimits(this)) {
 				pm.addParameterList(parameters);
 			}
 		}
@@ -467,14 +463,57 @@ public class PathState implements IPathState {
 		synchronized(pm) {
 			if(parameters.size() > pathStateManager.getMaxParameterCount()) {
 				return;
-			}
-			if(!pm.hasPostParameterList(parameters)) {
+			} else if(!pm.hasPostParameterList(parameters)) {
 				pm.addPostParameterList(parameters);
-			} else if(pathStateManager.isProxyScan()) {
-				for(PathState ps: pm.getStatesForPostParameterList(parameters)) {
-					ps.requeueInitialFetch();
-				}
+			} else if(isRescanNeeded()) {
+				rescanPostParameters(parameters,  pm);
 			}
+		}
+	}
+	
+	private boolean isRescanNeeded() {
+		if(!pathStateManager.isProxyScan() || response == null) {
+			return false;
+		}
+		
+		final IHttpRequestEngine requestEngine = pathStateManager.getCrawler().getRequestEngine();
+		final List<Cookie> cookies = requestEngine.getCookiesForRequest(response.getHost(), response.getOriginalRequest());
+		return !sameCookies(cookies, response.getSentCookies());
+	}
+	
+	private boolean sameCookies(List<Cookie> a, List<Cookie> b) {
+		if(a.size() != b.size()) {
+			return false;
+		}
+		for(Cookie c: a) {
+			Cookie c2 = findFirstCookieByName(b, c.getName());
+			if(c2 == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private Cookie findFirstCookieByName(List<Cookie> cookieList, String name) {
+		for(Cookie c: cookieList) {
+			if(c.getName().equalsIgnoreCase(name)) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
+	private void rescanGetParameters(List<NameValuePair> parameters, PathStateParameterManager manager) {
+		rescanPathStates(manager.getStatesForParameterList(parameters));
+	}
+	
+	private void rescanPostParameters(List<NameValuePair> parameters, PathStateParameterManager manager) {
+		rescanPathStates(manager.getStatesForPostParameterList(parameters));
+	}
+	
+	private void rescanPathStates(List<PathState> states) {
+		for(PathState ps: states) {
+			ps.requeueInitialFetch();
 		}
 	}
 
