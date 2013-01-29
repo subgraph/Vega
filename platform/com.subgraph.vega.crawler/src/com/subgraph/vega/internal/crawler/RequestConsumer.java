@@ -96,7 +96,7 @@ public class RequestConsumer implements Runnable {
 			if(e.getMessage().contains("abort")) {
 				return false;
 			}
-			task.setException(e);
+			task.setException(e.getCause());
 			logger.log(Level.WARNING, e.getMessage());
 			return false;
 		} finally {
