@@ -24,6 +24,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.util.EntityUtils;
 
@@ -41,6 +42,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final URI requestUri;
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
+	private final List<Cookie> requestCookies;
 	private final IRequestOrigin requestOrigin;
 	private /*final*/ HttpResponse rawResponse;
 	private final long requestTime;
@@ -55,10 +57,11 @@ public class EngineHttpResponse implements IHttpResponse {
 	private boolean isMostlyAscii;
 	private long requestId = -1;
 
-	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, IRequestOrigin requestOrigin, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
+	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, List<Cookie> requestCookies, IRequestOrigin requestOrigin, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
 		this.originalRequest = cloneOriginalRequest(host, originalRequest);
+		this.requestCookies = requestCookies;
 		this.requestOrigin = requestOrigin;
 		this.rawResponse = rawResponse;
 		this.requestTime = requestTime;
@@ -76,6 +79,11 @@ public class EngineHttpResponse implements IHttpResponse {
 	@Override
 	public HttpRequest getOriginalRequest() {
 		return originalRequest;
+	}
+
+	@Override
+	public List<Cookie> getSentCookies() {
+		return requestCookies;
 	}
 
 	@Override

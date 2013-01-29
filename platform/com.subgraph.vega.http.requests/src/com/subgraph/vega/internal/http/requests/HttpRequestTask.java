@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -28,6 +29,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
@@ -145,10 +147,10 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		}
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 		final HttpRequest sentRequest = (HttpRequest) context.getAttribute(HttpRequestEngine.VEGA_SENT_REQUEST);
-		
+		final List<Cookie> requestCookies = requestEngine.getCookiesForRequest(host, sentRequest);
 		final IHttpResponse response = new EngineHttpResponse(
 				request.getURI(), host,  
-				(sentRequest == null) ? (request) : (sentRequest), requestOrigin,
+				(sentRequest == null) ? (request) : (sentRequest), requestCookies, requestOrigin,
 				httpResponse, 
 				elapsed, 
 				htmlParser
