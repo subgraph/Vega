@@ -12,10 +12,10 @@ package com.subgraph.vega.internal.http.requests.connection;
 
 import org.apache.http.conn.ClientConnectionOperator;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 
 public class SocksSupportingThreadSafeClientConnectionManager extends
-		ThreadSafeClientConnManager {
+		PoolingClientConnectionManager {
 
 	public SocksSupportingThreadSafeClientConnectionManager(SchemeRegistry sr) {
 		super(sr);

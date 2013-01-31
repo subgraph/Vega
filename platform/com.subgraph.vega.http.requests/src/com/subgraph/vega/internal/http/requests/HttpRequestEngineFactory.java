@@ -17,7 +17,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpRequestBuilder;
@@ -66,8 +66,8 @@ public class HttpRequestEngineFactory implements IHttpRequestEngineFactory {
 
 	private void configureClient(HttpClient client, IHttpRequestEngineConfig config) {
 		final ClientConnectionManager connectionManager = client.getConnectionManager();
-		if(connectionManager instanceof ThreadSafeClientConnManager) {
-			ThreadSafeClientConnManager ccm = (ThreadSafeClientConnManager) connectionManager;
+		if(connectionManager instanceof PoolingClientConnectionManager) {
+			PoolingClientConnectionManager ccm = (PoolingClientConnectionManager) connectionManager;
 			ccm.setMaxTotal(config.getMaxConnections());
 			ccm.setDefaultMaxPerRoute(config.getMaxConnectionsPerRoute());
 		}
