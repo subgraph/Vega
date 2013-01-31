@@ -17,7 +17,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngineFactory;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 
 public class WebCrawlerFactory implements IWebCrawlerFactory {
-	private final static int DEFAULT_RESPONSE_THREAD_COUNT = 10;
+	private final static int DEFAULT_RESPONSE_THREAD_COUNT = 20;
 	private final static int MIN_REQUEST_THREAD_COUNT = 5;
 	private final static int MAX_REQUEST_THREAD_COUNT = 100;
 	private IHttpRequestEngineFactory requestEngineFactory;

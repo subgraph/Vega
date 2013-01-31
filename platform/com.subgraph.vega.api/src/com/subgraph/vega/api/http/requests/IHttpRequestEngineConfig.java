@@ -13,8 +13,8 @@ package com.subgraph.vega.api.http.requests;
 import java.util.List;
 
 public interface IHttpRequestEngineConfig {
-	final static int DEFAULT_MAX_CONNECTIONS = 10;
-	final static int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 2;
+	final static int DEFAULT_MAX_CONNECTIONS = 25;
+	final static int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 25;
 	void setForceIdentityEncoding(boolean value);
 	void setDecompressGzipEncoding(boolean value);
 	void setUndoURLEncoding(boolean value);
