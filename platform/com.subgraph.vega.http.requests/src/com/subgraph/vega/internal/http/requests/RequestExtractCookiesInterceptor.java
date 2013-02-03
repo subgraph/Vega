@@ -1,6 +1,7 @@
 package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,9 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.ProtocolException;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.HttpRoutedConnection;
 import org.apache.http.cookie.Cookie;
@@ -21,19 +24,31 @@ import org.apache.http.cookie.CookieSpecRegistry;
 import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.cookie.SM;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
  
  public class RequestExtractCookiesInterceptor implements HttpRequestInterceptor {
  
+	 private final String defaultPolicy;
+	 
+	 public RequestExtractCookiesInterceptor(String defaultPolicy) {
+		 this.defaultPolicy = defaultPolicy;
+	 }
+	
+	 public RequestExtractCookiesInterceptor() {
+		 defaultPolicy = CookiePolicy.BROWSER_COMPATIBILITY;
+	 }
+	 
 	 @Override
 	 public void process(HttpRequest request, HttpContext context)
 			 throws HttpException, IOException {
  
-		 final CookieOrigin cookieOrigin = getCookieOrigin(request, context);
-		 if(cookieOrigin == null) {
+		 final CookieOrigin trueOrigin = getTrueOrigin(request, context);
+		 if(trueOrigin == null) {
 			 return;
 		 }
+		 final CookieOrigin cookieOrigin = toCookieOrigin(trueOrigin);
 		 
 		 final CookieStore cookieStore = (CookieStore) context.getAttribute(ClientContext.COOKIE_STORE);
 		 if(cookieStore == null) {
@@ -50,7 +65,7 @@ import org.apache.http.protocol.HttpContext;
 		 }
 		 
 		 context.setAttribute(ClientContext.COOKIE_SPEC, cookieSpec);
-		 context.setAttribute(ClientContext.COOKIE_ORIGIN, cookieOrigin);
+		 context.setAttribute(ClientContext.COOKIE_ORIGIN, trueOrigin);
 	 }
 	 
 	 private void addCookiesForHeader(Header header, CookieSpec spec, CookieOrigin origin, CookieStore store) throws MalformedCookieException {
@@ -79,11 +94,20 @@ import org.apache.http.protocol.HttpContext;
 		 if(registry == null) {
 			 return null;
 		 }
- 		 final String policy = HttpClientParams.getCookiePolicy(request.getParams());
+ 		 final String policy = getCookiePolicy(request.getParams());
  		 return registry.getCookieSpec(policy, request.getParams());
 	 }
 	 
-	 private CookieOrigin getCookieOrigin(HttpRequest request, HttpContext context) throws ProtocolException {
+	 private String getCookiePolicy(HttpParams params) {
+		 final String policy = (String) params.getParameter(ClientPNames.COOKIE_POLICY);
+		 if(policy == null) {
+			 return defaultPolicy;
+		 } else {
+			 return policy;
+		 }
+	 }
+ 
+	 private CookieOrigin getTrueOrigin(HttpRequest request, HttpContext context) throws ProtocolException {
 		 final HttpHost targetHost = (HttpHost) context.getAttribute(
 				 ExecutionContext.HTTP_TARGET_HOST);
 		 if(targetHost == null) {
@@ -98,8 +122,25 @@ import org.apache.http.protocol.HttpContext;
 		 return new CookieOrigin(
 				 targetHost.getHostName(),
 				 getPort(targetHost, conn),
-				 "/", // broaden path scope since original cookie path is unknown
+				 getPathForRequest(request),
+				 conn.isSecure());
+	 }
+
+	 private CookieOrigin toCookieOrigin(CookieOrigin trueOrigin) {
+		 return new CookieOrigin(
+				 trueOrigin.getHost(), 
+				 trueOrigin.getPort(), 
+				 "/", // broaden path scope since original cookie path is unknown 
 				 false);
+	 }
+
+	 private String getPathForRequest(HttpRequest request) {
+		if(request instanceof HttpUriRequest) {
+			final URI requestURI = ((HttpUriRequest) request).getURI();
+			return requestURI.getPath();
+		} else {
+			return request.getRequestLine().getUri();
+		}
 	 }
 
 	 private int getPort(HttpHost host, HttpRoutedConnection connection) {
