@@ -11,7 +11,12 @@
 package com.subgraph.vega.internal.http.requests;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +31,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
@@ -110,7 +118,7 @@ public class EngineHttpResponse implements IHttpResponse {
 			}
 
 			try {
-				cachedString = EntityUtils.toString(rawResponse.getEntity());
+				cachedString = toString(rawResponse.getEntity(), null);
 			} catch (ParseException e) {
 				logger.log(Level.WARNING, "Error parsing response headers: "+ e.getMessage(), e);
 				cachedString = "";
@@ -121,6 +129,65 @@ public class EngineHttpResponse implements IHttpResponse {
 			return cachedString;
 		}
 	}
+
+	 /**
+	 * [*] Copied from EntityUtils to make a small change
+	 * 
+     * Get the entity content as a String, using the provided default character set
+     * if none is found in the entity.
+     * If defaultCharset is null, the default "ISO-8859-1" is used.
+     *
+     * @param entity must not be null
+     * @param defaultCharset character set to be applied if none found in the entity
+     * @return the entity content as a String. May be null if
+     *   {@link HttpEntity#getContent()} is null.
+     * @throws ParseException if header elements cannot be parsed
+     * @throws IllegalArgumentException if entity is null or if content length > Integer.MAX_VALUE
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static String toString(
+            final HttpEntity entity, final Charset defaultCharset) throws IOException, ParseException {
+        if (entity == null) {
+            throw new IllegalArgumentException("HTTP entity may not be null");
+        }
+        InputStream instream = entity.getContent();
+        if (instream == null) {
+            return null;
+        }
+        try {
+            if (entity.getContentLength() > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("HTTP entity too large to be buffered in memory");
+            }
+            int i = (int)entity.getContentLength();
+            if (i < 0) {
+                i = 4096;
+            }
+            Charset charset = null;
+            try {
+                ContentType contentType = ContentType.getOrDefault(entity);
+                charset = contentType.getCharset();
+            } catch (UnsupportedCharsetException ex) {
+            	// In EntityUtils an exception is thrown here.
+            	charset = null;
+            }
+            if (charset == null) {
+                charset = defaultCharset;
+            }
+            if (charset == null) {
+                charset = HTTP.DEF_CONTENT_CHARSET;
+            }
+            Reader reader = new InputStreamReader(instream, charset);
+            CharArrayBuffer buffer = new CharArrayBuffer(i);
+            char[] tmp = new char[1024];
+            int l;
+            while((l = reader.read(tmp)) != -1) {
+                buffer.append(tmp, 0, l);
+            }
+            return buffer.toString();
+        } finally {
+            instream.close();
+        }
+    }
 
 	@Override
 	public IHTMLParseResult getParsedHTML() {
