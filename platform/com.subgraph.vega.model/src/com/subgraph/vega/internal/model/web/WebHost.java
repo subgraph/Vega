@@ -45,6 +45,9 @@ public class WebHost extends WebEntity implements IWebHost {
 	
 	private WebHost(EventListenerManager eventManager, ObjectContainer database, HttpHost host, WebMountPoint rootMountPoint) {
 		super(eventManager, database);
+		if(host.getHostName().isEmpty()) {
+			throw new IllegalArgumentException();
+		}
 		this.host = host;
 		this.mountPoint = rootMountPoint;
 		this.rootPath = rootMountPoint.getMountPath();
