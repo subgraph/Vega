@@ -3,6 +3,7 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -23,13 +24,39 @@ import org.apache.http.cookie.CookieSpec;
 import org.apache.http.cookie.CookieSpecRegistry;
 import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.cookie.SM;
+import org.apache.http.cookie.params.CookieSpecPNames;
+import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
  
  public class RequestExtractCookiesInterceptor implements HttpRequestInterceptor {
  
+
+	 /* Copied from BrowserCompatSpec */
+	 private static final List<String> DATE_PATTERNS = Arrays.asList(
+        DateUtils.PATTERN_RFC1123,
+        DateUtils.PATTERN_RFC1036,
+        DateUtils.PATTERN_ASCTIME,
+        "EEE, dd-MMM-yyyy HH:mm:ss z",
+        "EEE, dd-MMM-yyyy HH-mm-ss z",
+        "EEE, dd MMM yy HH:mm:ss z",
+        "EEE dd-MMM-yyyy HH:mm:ss z",
+        "EEE dd MMM yyyy HH:mm:ss z",
+        "EEE dd-MMM-yyyy HH-mm-ss z",
+        "EEE dd-MMM-yy HH:mm:ss z",
+        "EEE dd MMM yy HH:mm:ss z",
+        "EEE,dd-MMM-yy HH:mm:ss z",
+        "EEE,dd-MMM-yyyy HH:mm:ss z",
+        "EEE, dd-MM-yyyy HH:mm:ss z",
+        
+        // Added this pattern seen in the wild
+        "EEE, dd MMM yyyy HH:mm:ss"
+	 );
+
 	 private final String defaultPolicy;
 	 
 	 public RequestExtractCookiesInterceptor(String defaultPolicy) {
@@ -37,9 +64,9 @@ import org.apache.http.protocol.HttpContext;
 	 }
 	
 	 public RequestExtractCookiesInterceptor() {
-		 defaultPolicy = CookiePolicy.BROWSER_COMPATIBILITY;
+		 this(CookiePolicy.BROWSER_COMPATIBILITY);
 	 }
-	 
+
 	 @Override
 	 public void process(HttpRequest request, HttpContext context)
 			 throws HttpException, IOException {
@@ -94,9 +121,13 @@ import org.apache.http.protocol.HttpContext;
 		 if(registry == null) {
 			 return null;
 		 }
- 		 final String policy = getCookiePolicy(request.getParams());
- 		 return registry.getCookieSpec(policy, request.getParams());
+		 
+		 final HttpParams params = new DefaultedHttpParams(new BasicHttpParams(), request.getParams());
+		 params.setParameter(CookieSpecPNames.DATE_PATTERNS, DATE_PATTERNS);
+ 		 final String policy = getCookiePolicy(params);
+ 		 return registry.getCookieSpec(policy, params);
 	 }
+	 
 	 
 	 private String getCookiePolicy(HttpParams params) {
 		 final String policy = (String) params.getParameter(ClientPNames.COOKIE_POLICY);
