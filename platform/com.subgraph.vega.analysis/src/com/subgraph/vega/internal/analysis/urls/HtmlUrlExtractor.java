@@ -77,8 +77,10 @@ public class HtmlUrlExtractor {
 			URI uri = createURI(link);
 			if(uri != null && hasValidHttpScheme(uri)) {
 				final HttpHost targetHost = URIUtils.extractHost(uri);
-				final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
-				uris.add(vegaURI);
+				if(targetHost.getHostName() != null && !targetHost.getHostName().isEmpty()) {
+					final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+					uris.add(vegaURI);
+				}
 			}
 		}
 		return uris;
