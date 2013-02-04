@@ -25,6 +25,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DecompressingHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.SyncBasicHttpContext;
@@ -46,14 +47,17 @@ import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.http.requests.custom.IEncodableHttpRequest;
 import com.subgraph.vega.http.requests.custom.VegaHttpEntityEnclosingUriRequest;
 import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
+import com.subgraph.vega.internal.http.requests.client.VegaDecompressingHttpClient;
 import com.subgraph.vega.internal.http.requests.config.IRequestEncodingStrategy;
 import com.subgraph.vega.internal.http.requests.config.RequestEngineConfig;
 
 public class HttpRequestEngine implements IHttpRequestEngine {
 	public final static String VEGA_SENT_REQUEST = "vega.sent-request"; /** Key under which a copy of sent request with actual sent headers is stored in HttpContext */
+	private final static boolean isDecompressingClient = true;
 	private final IRequestEncodingStrategy encodingStrategy;
 	private final ExecutorService executor;
 	private final HttpClient client;
+	private final HttpClient decompressingClient;
 	private final IHttpRequestEngineConfig config;
 	private final IRequestOrigin requestOrigin;
 	private final IHTMLParser htmlParser;
@@ -68,6 +72,7 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		this.encodingStrategy = RequestEngineConfig.getRequestEncodingStrategy(type);
 		this.executor = executor;
 		this.client = client;
+		this.decompressingClient = new VegaDecompressingHttpClient(client);
 		this.config = config;
 		this.requestOrigin = requestOrigin;
 		this.htmlParser = htmlParser;
@@ -147,7 +152,17 @@ public class HttpRequestEngine implements IHttpRequestEngine {
 		for (IHttpRequestModifier modifier: requestModifierList) {
 			modifier.process(request, context);
 		}
-		HttpRequestTask requestTask = new HttpRequestTask(this, client, rateLimit, request, requestOrigin, context, config, htmlParser);
+		
+		HttpRequestTask requestTask = new HttpRequestTask(
+				this,
+				(isDecompressingClient) ? (decompressingClient) : (client),
+				rateLimit, 
+				request, 
+				requestOrigin, 
+				context, 
+				config, 
+				htmlParser);
+		
 		Future<IHttpResponse> future = executor.submit(requestTask);
 		requestTask.setFuture(future);
 		return requestTask;

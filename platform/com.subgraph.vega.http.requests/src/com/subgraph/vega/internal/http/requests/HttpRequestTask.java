@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.subgraph.vega.internal.http.requests;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -18,10 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -173,13 +171,16 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 	}
 	
 	private HttpEntity processEntity(HttpResponse response, HttpEntity entity) throws IOException {
-		if(entity == null)
+		if(entity == null) {
 			return null;
-
-		if(isGzipEncoded(entity) && config.getDecompressGzipEncoding())
-			return processGzipEncodedEntity(response, entity);
-
-		final InputStream input = entity.getContent();
+		}
+		InputStream input = null;
+		try {
+			input = entity.getContent();
+		} catch(EOFException ex) {
+			response.setHeader(HTTP.CONTENT_LEN, "0");
+			input = null;
+		}
 
 		if(input == null) {
 			return createEmptyEntity();
@@ -198,39 +199,11 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		return new ByteArrayEntity(new byte[0]);
 	}
 
-	private HttpEntity processGzipEncodedEntity(HttpResponse response, HttpEntity entity) throws IOException {
-		final InputStream input = entity.getContent();
-		if(input == null) {
-			response.setHeader(HTTP.CONTENT_LEN, "0");
-			return new ByteArrayEntity(new byte[0]);
-		}
-		final InputStream gzipInput = new GZIPInputStream(input);
-		response.removeHeaders(HTTP.CONTENT_ENCODING);
-		String contentType = (entity.getContentType() == null) ? (null) : (entity.getContentType().getValue());
-		RepeatableStreamingEntity newEntity = new RepeatableStreamingEntity(gzipInput, -1, true, entity.isChunked(), contentType, null);
-		response.setHeader(HTTP.CONTENT_LEN, Long.toString(newEntity.getContentLength()));
-		if(config.getMaximumResponseKilobytes() > 0) {
-			newEntity.setMaximumInputKilobytes(config.getMaximumResponseKilobytes());
-		}
-		return newEntity;
-	}
-
-	private boolean isGzipEncoded(HttpEntity entity) {
-		if(entity == null)
-			return false;
-		final Header ceh = entity.getContentEncoding();
-		if(ceh == null)
-			return false;
-		for(HeaderElement element : ceh.getElements()) {
-			if("gzip".equalsIgnoreCase(element.getName()))
-				return true;
-		}
-		return false;
-	}
-
 	private RequestEngineException translateException(HttpUriRequest request, Throwable ex) {
 		final StringBuilder sb = new StringBuilder();
-		if(ex instanceof IOException) {
+		if(ex instanceof EOFException) {
+			sb.append("Unexpected EOF received");
+		} else if(ex instanceof IOException) {
 			sb.append("Network problem");
 		} else if(ex instanceof HttpException) {
 			sb.append("Protocol problem");
