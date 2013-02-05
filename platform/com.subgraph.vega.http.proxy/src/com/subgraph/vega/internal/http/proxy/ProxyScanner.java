@@ -20,6 +20,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScanner;
+import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class ProxyScanner {
@@ -45,6 +46,13 @@ public class ProxyScanner {
 	
 	void setEnabled(boolean value) {
 		isEnabled = value;
+	}
+	
+	IScannerConfig getConfig() {
+		if(proxyScan == null) {
+			return null;
+		}
+		return proxyScan.getConfig();
 	}
 	
 	void processRequest(HttpUriRequest request) {

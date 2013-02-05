@@ -12,6 +12,7 @@ package com.subgraph.vega.api.http.proxy;
 
 import java.util.List;
 
+import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public interface IHttpProxyService {
@@ -27,6 +28,7 @@ public interface IHttpProxyService {
 	int getListenerConfigsCount();
 	void setPassthrough(boolean enabled);
 	void setProxyScanEnabled(boolean enabled);
+	IScannerConfig getProxyScanConfig();
 	void start();
 	void stop();
 	IHttpProxyTransactionManipulator getTransactionManipulator();
