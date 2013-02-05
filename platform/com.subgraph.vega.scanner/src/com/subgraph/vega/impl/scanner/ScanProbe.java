@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -39,7 +38,7 @@ public class ScanProbe {
 	IScanProbeResult runProbe() {
 		currentRequest = requestEngine.createGetRequest(URIUtils.extractHost(targetURI), getPathAndQuery(targetURI));
 		try {
-			IHttpResponse response = requestEngine.sendRequest(currentRequest).get();
+			IHttpResponse response = requestEngine.sendRequest(currentRequest).get(true);
 			return processFirstProbeResponse(targetURI, response);
 		} catch (RequestEngineException e) {
 			return ScanProbeResult.createConnectFailedResult(e.getMessage());
@@ -77,12 +76,8 @@ public class ScanProbe {
 
 			try {
 				currentRequest = requestEngine.createGetRequest(URIUtils.extractHost(location), getPathAndQuery(location));
-				response = requestEngine.sendRequest(currentRequest).get();
-				try {
-					EntityUtils.consume(response.getRawResponse().getEntity());
-				} catch (IOException e) {
-					// shouldn't matter
-				}
+				response = requestEngine.sendRequest(currentRequest).get(true);
+				EntityUtils.consumeQuietly(response.getRawResponse().getEntity());
 				if(!isResponseRedirect(response)) {
 					return ScanProbeResult.createRedirectResult(location);
 				}

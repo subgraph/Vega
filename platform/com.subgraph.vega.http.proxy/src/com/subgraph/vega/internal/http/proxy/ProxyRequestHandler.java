@@ -88,7 +88,7 @@ public class ProxyRequestHandler implements HttpRequestHandler {
 			transaction.signalForward();
 			IHttpResponse r = null;
 			try {
-				r = requestTask.get();
+				r = requestTask.get(false);
 			} finally {
 				transaction.setRequestTask(null);
 			}

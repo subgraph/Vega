@@ -86,9 +86,13 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 	}
 
 	@Override
-	public IHttpResponse get() throws RequestEngineException {
+	public IHttpResponse get(boolean readEntity) throws RequestEngineException {
 		try {
-			return future.get();
+			IHttpResponse response = future.get();
+			if(readEntity) {
+				response.lockResponseEntity();
+			}
+			return response;
 		} catch (InterruptedException e) {
 			logger.info("Request "+ request.getURI() +" was interrupted before completion");
 		} catch (ExecutionException e) {

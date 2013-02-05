@@ -134,7 +134,7 @@ public class ScannerTask implements Runnable {
 					int status;
 					
 					try {
-						response = executor.sendNextRequest().get();
+						response = executor.sendNextRequest().get(true);
 					} catch (Exception e) {
 						logger.log(Level.WARNING, e.getMessage());
 						return false;

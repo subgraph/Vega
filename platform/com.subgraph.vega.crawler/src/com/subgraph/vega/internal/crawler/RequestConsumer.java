@@ -85,7 +85,7 @@ public class RequestConsumer implements Runnable {
 	private boolean sendRequest(CrawlerTask task) {
 		try {
 			activeRequest = task.getRequest();
-			final IHttpResponse response = requestEngine.sendRequest(task.getRequest()).get();
+			final IHttpResponse response = requestEngine.sendRequest(task.getRequest()).get(true);
 			task.setResponse(response);
 			return response != null;
 		} catch (RequestEngineException e) {

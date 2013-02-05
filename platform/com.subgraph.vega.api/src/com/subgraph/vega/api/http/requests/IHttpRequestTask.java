@@ -41,7 +41,7 @@ public interface IHttpRequestTask {
 	 * @return Response.
 	 * @throws RequestEngineException 
 	 */
-	IHttpResponse get() throws RequestEngineException;
+	IHttpResponse get(boolean readEntity) throws RequestEngineException;
 
 	/**
 	 * Determine whether the request task has completed.
