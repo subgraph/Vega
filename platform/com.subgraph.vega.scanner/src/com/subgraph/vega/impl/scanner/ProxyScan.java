@@ -44,8 +44,6 @@ public class ProxyScan implements IProxyScan {
 		this.scanner = scanner;
 		this.scanInstance = workspace.getScanAlertRepository().getScanInstanceByScanId(IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID);
 		this.config = new ScannerConfig();
-		config.setDisplayDebugOutput(true);
-		config.setLogAllRequests(true);
 		logger.setLevel(Level.ALL);
 	}
 
