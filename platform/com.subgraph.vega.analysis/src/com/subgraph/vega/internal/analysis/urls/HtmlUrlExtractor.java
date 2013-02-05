@@ -77,7 +77,7 @@ public class HtmlUrlExtractor {
 			URI uri = createURI(link);
 			if(uri != null && hasValidHttpScheme(uri)) {
 				final HttpHost targetHost = URIUtils.extractHost(uri);
-				if(targetHost.getHostName() != null && !targetHost.getHostName().isEmpty()) {
+				if(validateHost(targetHost)) {
 					final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
 					uris.add(vegaURI);
 				}
@@ -86,6 +86,18 @@ public class HtmlUrlExtractor {
 		return uris;
 	}
 	
+	private boolean validateHost(HttpHost host) {
+		if(host.getHostName() == null || host.getHostName().isEmpty()) {
+			return false;
+		}
+		try {
+			new URI(host.getSchemeName(), null, host.getHostName(), host.getPort(), null, null, null);
+			return true;
+		} catch (URISyntaxException e) {
+			return false;
+		}
+	}
+
 	private boolean hasValidHttpScheme(URI uri) {
 		final String scheme = uri.getScheme();
 		return (scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
