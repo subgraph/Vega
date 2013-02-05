@@ -46,8 +46,9 @@ public class WebHost extends WebEntity implements IWebHost {
 	private WebHost(EventListenerManager eventManager, ObjectContainer database, HttpHost host, WebMountPoint rootMountPoint) {
 		super(eventManager, database);
 		if(host.getHostName().isEmpty()) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Hostname is empty");
 		}
+		hostToUri(host);
 		this.host = host;
 		this.mountPoint = rootMountPoint;
 		this.rootPath = rootMountPoint.getMountPath();
@@ -96,12 +97,16 @@ public class WebHost extends WebEntity implements IWebHost {
 		}
 	}
 	
-	private URI generateUri() {
+	private static URI hostToUri(HttpHost host) {
 		try {
 			return new URI(host.getSchemeName(), null, host.getHostName(), host.getPort(), null, null, null);
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Unable to convert host to URI"+ host);
+			throw new IllegalArgumentException("Unable to convert host to URI: "+ host);
 		}
+	}
+
+	private URI generateUri() {
+		return hostToUri(host);
 	}
 
 	@Override
