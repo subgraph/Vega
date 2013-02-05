@@ -10,13 +10,21 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.handlers;
 
+import java.net.URI;
+
+import org.apache.http.HttpHost;
+import org.apache.http.HttpVersion;
+import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.message.BasicRequestLine;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 
 public class PutChecks extends CrawlerModule {
 
@@ -29,8 +37,11 @@ public class PutChecks extends CrawlerModule {
 	@Override
 	public void initialize(IPathState ps) {
 		final IInjectionModuleContext ctx = ps.createModuleContext();
-		HttpUriRequest req = new HttpPut(ps.getPath().getUri().resolve("PUT-putfile"));
-		ctx.submitRequest(req, this);
+		URI u = ps.getPath().getUri().resolve("PUT-putfile");
+		HttpHost host = URIUtils.extractHost(u);
+		RequestLine line = new BasicRequestLine(HttpPut.METHOD_NAME, u.getPath(), HttpVersion.HTTP_1_1);
+		VegaHttpUriRequest r = new VegaHttpUriRequest(host, line);
+		ctx.submitRequest(r, this);
 	}
 
 	@Override
