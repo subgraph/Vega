@@ -13,6 +13,7 @@ package com.subgraph.vega.impl.scanner.requests;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicNameValuePair;
 
 import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.model.web.IWebPath;
@@ -50,7 +51,7 @@ public class BasicRequestBuilder extends AbstractRequestBuilder {
 
 	@Override
 	public NameValuePair getFuzzableParameter() {
-		throw new UnsupportedOperationException();
+		return new BasicNameValuePair("", "");
 	}
 
 	@Override
