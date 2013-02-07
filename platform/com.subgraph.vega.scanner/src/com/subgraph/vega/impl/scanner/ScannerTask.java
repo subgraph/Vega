@@ -41,7 +41,7 @@ public class ScannerTask implements Runnable {
 	private final IScanInstance scanInstance;
 	private IContentAnalyzer contentAnalyzer;
 	private final UriParser uriParser;
-	private UriFilter uriFilter;
+	private final UriFilter uriFilter;
 	private final ITargetScope scanTargetScope;
 	private volatile boolean stopRequested;
 	private IWebCrawler currentCrawler;
@@ -53,7 +53,8 @@ public class ScannerTask implements Runnable {
 		currentCrawler = scan.getScanner().getWebCrawlerFactory().create(scan.getRequestEngine());
 		contentAnalyzer = scan.getScanner().getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
 		contentAnalyzer.setResponseProcessingModules(scan.getResponseModules());
-		uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, new UriFilter(scan.getConfig()), contentAnalyzer, scanInstance, false);
+		uriFilter = new UriFilter(scan.getConfig());
+		uriParser = new UriParser(scan.getConfig(), scan.getBasicModules(), scan.getWorkspace(), currentCrawler, uriFilter, contentAnalyzer, scanInstance, false);
 		scanTargetScope = scan.getConfig().getScanTargetScope();
 
 		logger.setLevel(Level.ALL);
