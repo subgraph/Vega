@@ -22,5 +22,5 @@ public interface ITextEntityRenderer {
 	String getDefaultPartitionType();
 	void configurePresentationReconciler(PresentationReconciler reconciler, Colors colors);
 	String formatText(String input);
-	char getLineSplitChar();
+	String getLineSplitChars();
 }

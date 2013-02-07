@@ -39,6 +39,7 @@ import com.subgraph.vega.ui.httpeditor.js.JavascriptTextEntityRenderer;
 
 public class HttpMessageDocumentFactory {
 	private final static int MAX_LONG_LINE = 200;
+	private final static int ABSOLUTE_MAX_LONG_LINE = MAX_LONG_LINE + 20;
 
 	public final static String PARTITION_REQUEST_LINE = "http-request-line";
 	public final static String PARTITION_RESPONSE_LINE = "http-response-line";
@@ -105,10 +106,10 @@ public class HttpMessageDocumentFactory {
 			return "";
 		}
 		final String formattedText = renderer.formatText(messageEntity.getTextData());
-		return longLineFormatter(formattedText, renderer.getLineSplitChar());
+		return longLineFormatter(formattedText, renderer.getLineSplitChars());
 	}
 
-	private String longLineFormatter(String input, char splitAt) {
+	private String longLineFormatter(String input, String splitAt) {
 		final StringBuilder sb = new StringBuilder();
 		int count = 0;
 		char c;
@@ -116,10 +117,11 @@ public class HttpMessageDocumentFactory {
 			count += 1;
 			c = input.charAt(i);
 			sb.append(c);
-			if(count > MAX_LONG_LINE && c == splitAt) {
+			if(count > ABSOLUTE_MAX_LONG_LINE || 
+					(count > MAX_LONG_LINE && splitAt.indexOf(c) != -1)) {
 				sb.append("\n");
 				count = 0;
-			}
+			} 
 		}
 		return sb.toString();
 	}

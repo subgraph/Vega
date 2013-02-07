@@ -91,8 +91,8 @@ public class HtmlTextEntityRenderer implements ITextEntityRenderer {
 	}
 
 	@Override
-	public char getLineSplitChar() {
-		return '>';
+	public String getLineSplitChars() {
+		return ">,";
 	}
 
 	@Override
