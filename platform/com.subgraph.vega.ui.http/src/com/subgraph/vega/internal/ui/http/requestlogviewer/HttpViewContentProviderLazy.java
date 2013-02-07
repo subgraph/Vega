@@ -18,6 +18,7 @@ import java.util.TimerTask;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import com.subgraph.vega.api.events.IEvent;
@@ -46,6 +47,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	private final String conditionSetId;
 	private final IRequestLogUpdateListener callback;
 	private final IEventHandler conditionSetListener;
+	private final Color activeFilterColor;
 
 	private TimerTask updateTask;
 	private final Timer updateTimer = new Timer();
@@ -56,7 +58,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	/**
 	 * @param instanceId A unique ID to differentiate between condition filter sets.
 	 */
-	public HttpViewContentProviderLazy(String instanceId) {
+	public HttpViewContentProviderLazy(String instanceId, Color activeFilterColor) {
 		if (instanceId != null) {
 			conditionSetId = IHttpConditionManager.CONDITION_SET_FILTER + "." + instanceId;
 		} else {
@@ -65,6 +67,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 		workspaceListener = createWorkspaceListener();
 		callback = createUpdateListener();
 		conditionSetListener = createConditionSetListener();
+		this.activeFilterColor = activeFilterColor;
 	}
 
 	public IHttpConditionSet getConditionSet() {
@@ -74,6 +77,7 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	@Override
 	public void dispose() {
 		cleanupListeners();
+		activeFilterColor.dispose();
 	}
 
 	@Override
@@ -219,13 +223,25 @@ public class HttpViewContentProviderLazy implements ILazyContentProvider {
 	}
 
 	public void setConditionFilter(IHttpConditionSet conditionSet) {
-		if(conditionSet != null)
+		if(conditionSet != null) {
 			conditionSet.setMatchOnEmptySet(true);
+		}
+		highlightTableForConditionFilter(conditionSet);
 		final IRequestLog requestLog = currentWorkspace.getRequestLog();
 		filterCondition = conditionSet;
 		requestLog.removeUpdateListener(callback);
 		requestLog.addUpdateListener(callback, conditionSet);
+		
 		reloadRecords();
+		
+	}
+	
+	private void highlightTableForConditionFilter(IHttpConditionSet conditionSet) {
+		if(conditionSet != null && conditionSet.hasActiveConditions(false)) {
+			tableViewer.getTable().setBackground(activeFilterColor);
+		} else {
+			tableViewer.getTable().setBackground(null);
+		}
 	}
 	
 	private void resetTable() {

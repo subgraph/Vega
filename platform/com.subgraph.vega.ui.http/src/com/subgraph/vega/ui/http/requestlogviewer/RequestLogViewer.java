@@ -33,7 +33,9 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -66,6 +68,7 @@ import com.subgraph.vega.ui.util.dialogs.ErrorDialog;
 
 public class RequestLogViewer extends Composite {
 	public final static String POPUP_REQUESTS_TABLE = "com.subgraph.vega.ui.http.requestlogviewer.popup";
+	private static final RGB ACTIVE_FILTER_COLOR = new RGB(0xF0, 0xFF, 0xFF);
 	private static final int MAX_OPEN_EDITORS = 3; // Maximum number of editors to allow to open at once before prompting the user
 	private final String instanceId;
 	private final int heightInRows;
@@ -159,7 +162,8 @@ public class RequestLogViewer extends Composite {
 
 		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
-		contentProvider = new HttpViewContentProviderLazy(instanceId);
+		final Color activeFilterColor = new Color(tableViewer.getControl().getDisplay(), ACTIVE_FILTER_COLOR);
+		contentProvider = new HttpViewContentProviderLazy(instanceId, activeFilterColor);
 		tableViewer.setContentProvider(contentProvider);
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());

@@ -143,6 +143,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		
 	}
 	@Override
+	public boolean hasActiveConditions(boolean includeInternal) {
+		return !(getAllTemporaryConditions(includeInternal).isEmpty() && getAllConditions(includeInternal).isEmpty());
+	}
+
+	@Override
 	public void appendCondition(IHttpCondition condition) {
 		activate(ActivationPurpose.READ);
 		conditionList.add(condition);
