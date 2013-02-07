@@ -32,6 +32,7 @@ import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
+import com.subgraph.vega.api.model.alerts.ScanPauseStateChangedEvent;
 import com.subgraph.vega.api.model.alerts.ScanStatusChangeEvent;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.util.images.ImageCache;
@@ -245,7 +246,14 @@ public class DashboardPane extends Composite implements IEventHandler {
 			setProgressPaneVisible(true);
 		}
 
-		addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
+		if(scanInstance.isScanPaused()) {
+			crawlerPane.setScannerPaused(true);
+			addIndented(sb, 10, "<span font='header'>Scanner Progress (Scanner Paused)</span>");
+		} else {
+			crawlerPane.setScannerPaused(false);
+			addIndented(sb, 10, "<span font='header'>Scanner Progress</span>");
+		}
+	
 		addVSpaces(sb, 2);
 		crawlerPane.renderChanges();
 		addIndented(sb, 20, "<control width='500' height='100' href='crawler'/>");
@@ -353,6 +361,8 @@ public class DashboardPane extends Composite implements IEventHandler {
 			handleScannerStatusChanged((ScanStatusChangeEvent) event);
 		} else if (event instanceof NewScanAlertEvent) {
 			processAlert(((NewScanAlertEvent)event).getAlert());
+		} if(event instanceof ScanPauseStateChangedEvent) {
+			outputRenderNeeded = true;
 		}
 	}
 }

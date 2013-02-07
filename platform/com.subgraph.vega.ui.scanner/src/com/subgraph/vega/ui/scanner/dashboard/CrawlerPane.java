@@ -25,6 +25,7 @@ public class CrawlerPane extends Composite {
 	private final Label pathLabel;
 	private final Label crawlLabel;
 	private volatile boolean changed;
+	private boolean isScannerPaused;
 	private int scannerStatus;
 	private String scannerPath;
 	private int crawlerTotal;
@@ -54,6 +55,10 @@ public class CrawlerPane extends Composite {
 		gd.widthHint = 300;
 		crawlLabel.setLayoutData(gd);
 		crawlLabel.setBackground(parent.getBackground());
+	}
+
+	void setScannerPaused(boolean value) {
+		isScannerPaused = value;
 	}
 
 	void renderChanges() {
@@ -123,7 +128,11 @@ public class CrawlerPane extends Composite {
 		sb.append(" out of ");
 		sb.append(crawlerTotal);
 		sb.append(" scanned (");
-		sb.append(String.format("%.1f%%", crawlerPercent));
+		if(isScannerPaused) {
+			sb.append("Scanner Paused");
+		} else {
+			sb.append(String.format("%.1f%%", crawlerPercent));
+		}
 		sb.append(")");
 		crawlLabel.setText(sb.toString());
 	}

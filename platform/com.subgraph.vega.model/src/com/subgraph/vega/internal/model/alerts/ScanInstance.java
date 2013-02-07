@@ -208,9 +208,14 @@ public class ScanInstance implements IScanInstance, Activatable {
 		activate(ActivationPurpose.READ);
 		if ((status == SCAN_PROBING || status == SCAN_STARTING) && (startTime == null)) {
 			startTime = new Date();
-		} else if ( (status == SCAN_COMPLETED || status == SCAN_CANCELLED)  && (stopTime == null) ){
+		} else if ( (status == SCAN_COMPLETED || status == SCAN_CANCELLED)  && (stopTime == null) ) {
 			stopTime = new Date();
 		}
+	
+		if(status == SCAN_CANCELLED && isPaused) {
+			isPaused = false;
+		}
+	
 		this.scanStatus = status;
 		eventManager.fireEvent(new ScanStatusChangeEvent(this, currentPath, status, activeScanCompletedCount, activeScanTotalCount));
 		activate(ActivationPurpose.WRITE);

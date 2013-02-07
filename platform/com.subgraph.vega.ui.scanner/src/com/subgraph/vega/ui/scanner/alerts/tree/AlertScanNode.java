@@ -60,6 +60,11 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 			sb.append(dateFormat.format(scanInstance.getStartTime()));
 		}
 
+		if(scanInstance.isScanPaused()) {
+			sb.append(" [Scan Paused] ");
+			return sb.toString();
+		}
+
 		sb.append(" [");
 		switch(scanInstance.getScanStatus()) {
 		case IScanInstance.SCAN_PROBING:
