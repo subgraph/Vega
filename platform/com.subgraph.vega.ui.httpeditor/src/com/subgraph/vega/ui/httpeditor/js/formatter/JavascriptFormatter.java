@@ -113,6 +113,10 @@ public class JavascriptFormatter {
 			case TK_UNKNOWN:
 				handleUnknown(token.text);
 				break;
+			case TK_EOF:
+				break;
+			default:
+				break;
 			}
 			pushToken(token);
 			token = nextToken();
