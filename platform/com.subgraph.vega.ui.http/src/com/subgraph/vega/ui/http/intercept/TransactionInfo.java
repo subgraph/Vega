@@ -158,6 +158,10 @@ public class TransactionInfo {
 		case STATUS_PENDING:
 			responseStatusMessage = "Response pending";
 			break;
+		case STATUS_SENT:
+			break;
+		default:
+			break;
 		}
 	}
 
