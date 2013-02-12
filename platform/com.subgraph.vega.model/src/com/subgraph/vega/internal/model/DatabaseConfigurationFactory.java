@@ -13,6 +13,7 @@ package com.subgraph.vega.internal.model;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.config.QueryEvaluationMode;
 import com.db4o.diagnostic.DiagnosticToConsole;
 import com.db4o.reflect.jdk.JdkReflector;
 import com.db4o.ta.TransparentPersistenceSupport;
@@ -21,6 +22,7 @@ import com.subgraph.vega.internal.model.requests.RequestLogRecord;
 import com.subgraph.vega.internal.model.tags.Tag;
 
 public class DatabaseConfigurationFactory {
+	final private static boolean LAZY_EVALUATION = true;
 	final private static boolean DIAGNOSTICS_ENABLED = false;
 	final private static boolean DEBUG_OUTPUT_ENABLED = false;
 	final private static int DEBUG_OUTPUT_LEVEL = 4;
@@ -50,6 +52,9 @@ public class DatabaseConfigurationFactory {
 			configuration.common().messageLevel(DEBUG_OUTPUT_LEVEL);
 		}
 
+		if(LAZY_EVALUATION) {
+			configuration.common().queries().evaluationMode(QueryEvaluationMode.LAZY);
+		}
 		return configuration;
 
 	}
