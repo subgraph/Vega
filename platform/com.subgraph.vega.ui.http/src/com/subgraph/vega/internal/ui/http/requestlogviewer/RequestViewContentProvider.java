@@ -53,6 +53,10 @@ public class RequestViewContentProvider implements ILazyContentProvider, IReques
 	public void dispose() {
 		cleanupListeners();
 		activeFilterColor.dispose();
+		if(currentResult != null) {
+			currentResult.cancel();
+			currentResult = null;
+		}
 	}
 
 	@Override
