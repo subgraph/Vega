@@ -25,18 +25,20 @@ public interface IHttpConditionSet {
 	boolean matchesAny(HttpRequest request, HttpResponse response);
 	
 	boolean hasActiveConditions(boolean includeInternal);
+	
+	void notifyChanged();
 	/**
 	 * Add a temporary condition to this set.  Temporary conditions are not persisted in the database.
 	 * @param condition The temporary condition to add.
 	 */
-	void appendTemporaryCondition(IHttpCondition condition);
-	void removeTemporaryCondition(IHttpCondition condition);
-	void clearTemporaryConditions();
+	void appendTemporaryCondition(IHttpCondition condition, boolean notify);
+	void removeTemporaryCondition(IHttpCondition condition, boolean notify);
+	void clearTemporaryConditions(boolean notify);
 	List<IHttpCondition> getAllTemporaryConditions(boolean includeInternal);
 	
-	void appendCondition(IHttpCondition condition);
-	void removeCondition(IHttpCondition condition);
-	void clearConditions();
+	void appendCondition(IHttpCondition condition, boolean notify);
+	void removeCondition(IHttpCondition condition, boolean notify);
+	void clearConditions(boolean notify);
 	List<IHttpCondition> getAllConditions();
 	List<IHttpCondition> getAllConditions(boolean includeInternal);
 	IHttpConditionManager getConditionManager();

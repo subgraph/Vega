@@ -18,6 +18,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableArrayList;
@@ -34,8 +35,10 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	private final String name;
 	private final List<IHttpCondition> conditionList = new ActivatableArrayList<IHttpCondition>();
 	private boolean matchOnEmptySet;
+	private transient Object lock;
 	private transient HttpConditionManager conditionManager;
 	private transient List<IHttpCondition> temporaryConditions;
+	private transient List<IHttpCondition> allConditions;
 	
 	HttpConditionSet(String name, HttpConditionManager conditionManager) {
 		this(name, conditionManager, null);
@@ -45,6 +48,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		this.name = name;
 		this.conditionManager = conditionManager;
 		this.temporaryConditions = new ArrayList<IHttpCondition>();
+		this.lock = new Object();
 		if(copyMe != null) {
 			for(IHttpCondition c: copyMe.getAllConditions(true)) { 
 				conditionList.add(c.createCopy());
@@ -52,7 +56,23 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 			for(IHttpCondition c: copyMe.getAllTemporaryConditions(true)) {
 				temporaryConditions.add(c.createCopy());
 			}
+			this.allConditions = new ArrayList<IHttpCondition>();
+			updateAllConditions();
 		}
+	}
+
+	private void updateAllConditions() {
+		allConditions.clear();
+		allConditions.addAll(conditionList);
+		allConditions.addAll(temporaryConditions);
+	}
+	
+	private List<IHttpCondition> getAllConditionsList() {
+		if(allConditions == null) {
+			allConditions = new ArrayList<IHttpCondition>();
+			updateAllConditions();
+		}
+		return allConditions;
 	}
 
 	@Override
@@ -86,11 +106,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 	
 	private boolean matchesAllConditions(IRequestLogRecord record) {
-		synchronized(conditionList) {
-			if(conditionList.size() == 0) {
+		synchronized(lock) {
+			if(getAllConditionsList().size() == 0) {
 				return matchOnEmptySet;
 			}
-			for(IHttpCondition c: conditionList) {
+			for(IHttpCondition c: getAllConditionsList()) {
 				if(c.isEnabled() && !c.matches(record)) {
 					return false;
 				}
@@ -101,11 +121,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	
 	private boolean matchesAllConditions(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
-		synchronized(conditionList) {
-			if (conditionList.size() == 0) {
+		synchronized(lock) {
+			if (getAllConditionsList().size() == 0) {
 				return matchOnEmptySet;
 			}
-			for(IHttpCondition c: conditionList) {
+			for(IHttpCondition c: getAllConditionsList()) {
 				if(c.isEnabled() && !c.matches(request, response))
 					return false;
 			}
@@ -114,11 +134,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 	
 	private boolean matchesAnyCondition(IRequestLogRecord record) {
-		synchronized (conditionList) {
-			if(conditionList.size() == 0) {
+		synchronized (lock) {
+			if(getAllConditionsList().size() == 0) {
 				return matchOnEmptySet;
 			}
-			for(IHttpCondition c: conditionList) {
+			for(IHttpCondition c: getAllConditionsList()) {
 				if(c.isEnabled() && c.matches(record)) {
 					return true;
 				}
@@ -129,11 +149,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 
 	private boolean matchesAnyCondition(HttpRequest request, HttpResponse response) {
 		activate(ActivationPurpose.READ);
-		synchronized(conditionList) {
-			if (conditionList.size() == 0) {
+		synchronized(lock) {
+			if (getAllConditionsList().size() == 0) {
 				return matchOnEmptySet;
 			}
-			for(IHttpCondition c: conditionList) {
+			for(IHttpCondition c: getAllConditionsList()) {
 				if(c.isEnabled() && c.matches(request, response)) {
 					return true;
 				}
@@ -142,30 +162,45 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 		}
 		
 	}
+
+	@Override
+	public void notifyChanged() {
+		conditionManager.notifyConditionSetChanged(this);
+	}
+
 	@Override
 	public boolean hasActiveConditions(boolean includeInternal) {
 		return !(getAllTemporaryConditions(includeInternal).isEmpty() && getAllConditions(includeInternal).isEmpty());
 	}
 
 	@Override
-	public void appendCondition(IHttpCondition condition) {
+	public void appendCondition(IHttpCondition condition, boolean notify) {
 		activate(ActivationPurpose.READ);
 		conditionList.add(condition);
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
-	public void removeCondition(IHttpCondition condition) {
+	public void removeCondition(IHttpCondition condition, boolean notify) {
 		activate(ActivationPurpose.READ);
 		conditionList.remove(condition);
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
-	public void clearConditions() {
+	public void clearConditions(boolean notify) {
 		activate(ActivationPurpose.READ);
 		conditionList.clear();
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
@@ -189,21 +224,30 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	@Override
-	public void appendTemporaryCondition(IHttpCondition condition) {
+	public void appendTemporaryCondition(IHttpCondition condition, boolean notify) {
 		temporaryConditions.add(condition);
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
-	public void removeTemporaryCondition(IHttpCondition condition) {
+	public void removeTemporaryCondition(IHttpCondition condition, boolean notify) {
 		temporaryConditions.remove(condition);
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
-	public void clearTemporaryConditions() {
+	public void clearTemporaryConditions(boolean notify) {
 		temporaryConditions.clear();
-		conditionManager.notifyConditionSetChanged(this);
+		updateAllConditions();
+		if(notify) {
+			conditionManager.notifyConditionSetChanged(this);
+		}
 	}
 
 	@Override
@@ -228,24 +272,27 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	void setConditionManager(HttpConditionManager conditionManager) {
 		this.conditionManager = conditionManager;
 		this.temporaryConditions = new ArrayList<IHttpCondition>();
+		this.lock = new Object();
 	}
 	
 	public List<IRequestLogRecord> filterRequestLog(ObjectContainer db) {
 		activate(ActivationPurpose.READ);
 		if(!hasRecords(db)) {
 			return Collections.emptyList();
+		} else {
+			return executeFilterQuery(db);
 		}
+	}
+
+	public ObjectSet<IRequestLogRecord> executeFilterQuery(ObjectContainer db) {
+		activate(ActivationPurpose.READ);
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
 		
 		Constraint orChain = null;
 		Constraint andChain = null;
 		
-		List<IHttpCondition> allConditions = new ArrayList<IHttpCondition>();
-		allConditions.addAll(temporaryConditions);
-		allConditions.addAll(conditionList);
-		
-		for(IHttpCondition c: allConditions) {
+		for(IHttpCondition c: getAllConditionsList()) {
 			Constraint result = ((AbstractCondition)c).filterRequestLogQuery(query);
 			if(c.isSufficient()) {
 				orChain = processConstraintChain(result, orChain, false);
@@ -282,7 +329,7 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	private boolean hasRecords(ObjectContainer db) {
 		final Query query = db.query();
 		query.constrain(IRequestLogRecord.class);
-		return query.execute().size() > 0;
+		return query.execute().hasNext();
 	}
 
 	@Override
