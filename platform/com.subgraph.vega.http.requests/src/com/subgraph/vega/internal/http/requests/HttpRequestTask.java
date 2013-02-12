@@ -13,6 +13,8 @@ package com.subgraph.vega.internal.http.requests;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -20,6 +22,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -27,7 +31,13 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.ClientCookie;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.cookie.MalformedCookieException;
+import org.apache.http.cookie.SM;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
@@ -150,9 +160,12 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 		final HttpRequest sentRequest = (HttpRequest) context.getAttribute(HttpRequestEngine.VEGA_SENT_REQUEST);
 		final List<Cookie> requestCookies = requestEngine.getCookiesForRequest(host, sentRequest);
+		final List<ClientCookie> responseCookies = extractResponseCookies(httpResponse, context);
 		final IHttpResponse response = new EngineHttpResponse(
 				request.getURI(), host,  
-				(sentRequest == null) ? (request) : (sentRequest), requestCookies, requestOrigin,
+				(sentRequest == null) ? (request) : (sentRequest), 
+				requestCookies, responseCookies,
+				requestOrigin,
 				httpResponse, 
 				elapsed, 
 				htmlParser
@@ -165,6 +178,31 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		return response;
 	}
 	
+	private List<ClientCookie> extractResponseCookies(HttpResponse response, HttpContext context) {
+		final CookieSpec cookieSpec = (CookieSpec) context.getAttribute(ClientContext.COOKIE_SPEC);
+		final CookieOrigin cookieOrigin = (CookieOrigin) context.getAttribute(ClientContext.COOKIE_ORIGIN);
+		final HeaderIterator it = response.headerIterator(SM.SET_COOKIE);
+		if(cookieOrigin == null || cookieSpec == null || !it.hasNext()) {
+			return Collections.emptyList();
+		}
+		
+		final List<ClientCookie> result = new ArrayList<ClientCookie>();
+		while(it.hasNext()) {
+			final Header header = it.nextHeader();
+			try {
+				for(Cookie c: cookieSpec.parse(header, cookieOrigin)) {
+					if(c instanceof ClientCookie) {
+						result.add((ClientCookie) c);
+					}
+				}
+			} catch (MalformedCookieException e) {
+				logger.warning("Malformed Set-Cookie header received: "+ header.getValue());
+			}
+		}
+		return result;
+	}
+	
+
 	private long getElapsedTimeFromContext(HttpContext context) {
 		final Date start = (Date) context.getAttribute(RequestTimingHttpExecutor.REQUEST_TIME);
 		final Date end = (Date) context.getAttribute(RequestTimingHttpExecutor.RESPONSE_TIME);
