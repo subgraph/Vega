@@ -50,7 +50,7 @@ public class ConnectionTask implements Runnable {
 		} catch (ConnectionClosedException e) {
 			logger.info("Client closed connection to proxy");
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "IOException processing client request in proxy", e);
+			logger.log(Level.INFO, "IOException processing client request in proxy", e);
 		} catch (HttpException e) {
 			logger.log(Level.WARNING, "HTTP protocol error processing client request in proxy", e);
 		} catch (Exception e) {
