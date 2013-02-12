@@ -112,7 +112,7 @@ public class RequestEditView extends ViewPart {
 		messageDialog.open();
 	}
 	
-	private void displayExceptionError(Exception e) {
+	void displayExceptionError(Exception e) {
 		if (e.getMessage() != null) {
 			displayError(e.getMessage());
 		} else {
@@ -138,21 +138,32 @@ public class RequestEditView extends ViewPart {
 			return;
 		}
 
-		IHttpResponse response;
-		try {
-			response = requestEngine.sendRequest(uriRequest).get(true);
-			responseViewer.displayHttpResponse(response.getRawResponse());
-		} catch (Exception e) {
-			displayExceptionError(e);
-			return;
-		}
-		if(contentAnalyzer != null) {
+		final SendRequestTask sendTask = new SendRequestTask(uriRequest, this, requestEngine);
+		sendTask.start();
+	}
+	
+	void processResponse(IHttpResponse response) {
+		displayResponse(response);
+		if(contentAnalyzer != null && response != null) {
 			contentAnalyzer.processResponse(response);
 		}
-
-		if (requestBuilderPartCurr != null) {
-			requestBuilderPartCurr.refresh();
+	}
+	
+	private void displayResponse(final IHttpResponse response) {
+		if(parentComposite == null || parentComposite.isDisposed()) {
+			return;
 		}
+		parentComposite.getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if(response != null) {
+					responseViewer.displayHttpResponse(response.getRawResponse());
+				}
+				if(requestBuilderPartCurr != null) {
+					requestBuilderPartCurr.refresh();
+				}
+			}
+		});
 	}
 
 	private Composite createRequestEditor(Composite parent) {
