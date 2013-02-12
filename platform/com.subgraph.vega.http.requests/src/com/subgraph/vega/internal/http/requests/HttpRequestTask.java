@@ -48,6 +48,7 @@ import com.subgraph.vega.api.http.requests.IHttpRequestEngine;
 import com.subgraph.vega.api.http.requests.IHttpRequestEngineConfig;
 import com.subgraph.vega.api.http.requests.IHttpRequestTask;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IHttpResponseCookie;
 import com.subgraph.vega.api.http.requests.IHttpResponseProcessor;
 import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
@@ -160,7 +161,7 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 		final HttpRequest sentRequest = (HttpRequest) context.getAttribute(HttpRequestEngine.VEGA_SENT_REQUEST);
 		final List<Cookie> requestCookies = requestEngine.getCookiesForRequest(host, sentRequest);
-		final List<ClientCookie> responseCookies = extractResponseCookies(httpResponse, context);
+		final List<IHttpResponseCookie> responseCookies = extractResponseCookies(httpResponse, context);
 		final IHttpResponse response = new EngineHttpResponse(
 				request.getURI(), host,  
 				(sentRequest == null) ? (request) : (sentRequest), 
@@ -178,7 +179,7 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 		return response;
 	}
 	
-	private List<ClientCookie> extractResponseCookies(HttpResponse response, HttpContext context) {
+	private List<IHttpResponseCookie> extractResponseCookies(HttpResponse response, HttpContext context) {
 		final CookieSpec cookieSpec = (CookieSpec) context.getAttribute(ClientContext.COOKIE_SPEC);
 		final CookieOrigin cookieOrigin = (CookieOrigin) context.getAttribute(ClientContext.COOKIE_ORIGIN);
 		final HeaderIterator it = response.headerIterator(SM.SET_COOKIE);
@@ -186,13 +187,13 @@ class HttpRequestTask implements IHttpRequestTask, Callable<IHttpResponse> {
 			return Collections.emptyList();
 		}
 		
-		final List<ClientCookie> result = new ArrayList<ClientCookie>();
+		final List<IHttpResponseCookie> result = new ArrayList<IHttpResponseCookie>();
 		while(it.hasNext()) {
 			final Header header = it.nextHeader();
 			try {
 				for(Cookie c: cookieSpec.parse(header, cookieOrigin)) {
 					if(c instanceof ClientCookie) {
-						result.add((ClientCookie) c);
+						result.add(new HttpResponseCookie(header.getValue(), (ClientCookie) c));
 					}
 				}
 			} catch (MalformedCookieException e) {

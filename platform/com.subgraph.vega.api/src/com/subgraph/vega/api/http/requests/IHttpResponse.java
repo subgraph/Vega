@@ -16,7 +16,6 @@ import java.util.List;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.cookie.ClientCookie;
 import org.apache.http.cookie.Cookie;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
@@ -31,7 +30,7 @@ public interface IHttpResponse {
 	boolean isFetchFail();
 	HttpRequest getOriginalRequest();
 	List<Cookie> getSentCookies();
-	List<ClientCookie> getResponseCookies();
+	List<IHttpResponseCookie> getResponseCookies();
 	void setRawResponse(HttpResponse response); // temporary, probably. used in interceptor.
 	HttpResponse getRawResponse();
 	HttpHost getHost();

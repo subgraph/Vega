@@ -29,7 +29,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.cookie.ClientCookie;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
@@ -40,6 +39,7 @@ import org.apache.http.util.EntityUtils;
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.html.IHTMLParser;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IHttpResponseCookie;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.tags.ITag;
@@ -52,7 +52,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private final HttpHost host;
 	private final HttpRequest originalRequest;
 	private final List<Cookie> requestCookies;
-	private final List<ClientCookie> responseCookies;
+	private final List<IHttpResponseCookie> responseCookies;
 	private final IRequestOrigin requestOrigin;
 	private /*final*/ HttpResponse rawResponse;
 	private final long requestTime;
@@ -68,7 +68,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	private long requestId = -1;
 
 	EngineHttpResponse(URI uri, HttpHost host, HttpRequest originalRequest, 
-			List<Cookie> requestCookies, List<ClientCookie> responseCookies, 
+			List<Cookie> requestCookies, List<IHttpResponseCookie> responseCookies, 
 			IRequestOrigin requestOrigin, HttpResponse rawResponse, long requestTime, IHTMLParser htmlParser) {
 		this.requestUri = uri;
 		this.host = host;
@@ -100,7 +100,7 @@ public class EngineHttpResponse implements IHttpResponse {
 	}
 
 	@Override
-	public List<ClientCookie> getResponseCookies() {
+	public List<IHttpResponseCookie> getResponseCookies() {
 		return responseCookies;
 	}
 
