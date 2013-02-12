@@ -20,6 +20,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.db4o.events.Event4;
 import com.db4o.events.EventListener4;
 import com.db4o.events.EventRegistry;
@@ -31,6 +32,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
+import com.subgraph.vega.api.model.requests.IRequestLogNewRecordListener;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
@@ -43,6 +45,7 @@ public class RequestLog implements IRequestLog {
 	private final RequestLogId requestLogId;
 	private final HttpMessageCloner cloner;
 	private final List<RequestLogListener> listenerList = new ArrayList<RequestLogListener>();
+	private final List<RequestLogNewRecordListener> newRecordListeners = new ArrayList<RequestLogNewRecordListener>();
 	private final Object lock = new Object();
 
 	public RequestLog(final ObjectContainer database) {
@@ -88,6 +91,11 @@ public class RequestLog implements IRequestLog {
 	}
 
 	@Override
+	public long getNextRequestId() {
+		return requestLogId.getCurrentId();
+	}
+	
+	@Override
 	public long addRequestResponse(IHttpResponse response) {
 		if (response.getRequestId() != -1) {
 			return response.getRequestId();
@@ -108,6 +116,9 @@ public class RequestLog implements IRequestLog {
 	
 	private void filterNewRecord(IRequestLogRecord record) {
 		for(RequestLogListener listener: listenerList) {
+			listener.filterRecord(record);
+		}
+		for(RequestLogNewRecordListener listener: newRecordListeners) {
 			listener.filterRecord(record);
 		}
 	}
@@ -145,7 +156,7 @@ public class RequestLog implements IRequestLog {
 	private boolean hasRecords() {
 		final Query query = database.query();
 		query.constrain(IRequestLogRecord.class);
-		return query.execute().size() > 0;
+		return query.execute().hasNext();
 	}
 
 	public List<IRequestLogRecord> getRecordsByConditionSet(IHttpConditionSet conditionFilter) {
@@ -154,6 +165,36 @@ public class RequestLog implements IRequestLog {
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	@Override
+	public Iterator<IRequestLogRecord> getRecordIteratorByConditionSet(IHttpConditionSet conditionFilter) {
+		if(conditionFilter instanceof HttpConditionSet) {
+			final ObjectSet<IRequestLogRecord> result = ((HttpConditionSet)conditionFilter).executeFilterQuery(database);
+			return createIteratorForResult(result);
+		} else {
+			return Collections.emptyListIterator();
+		}
+	}
+
+	private Iterator<IRequestLogRecord> createIteratorForResult(final ObjectSet<IRequestLogRecord> result) {
+		return new Iterator<IRequestLogRecord>() {
+
+			@Override
+			public boolean hasNext() {
+				return result.hasNext();
+			}
+
+			@Override
+			public IRequestLogRecord next() {
+				return result.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	@Override
@@ -236,4 +277,29 @@ public class RequestLog implements IRequestLog {
 		}
 	}
 
+	@Override
+	public void addNewRecordListener(IRequestLogNewRecordListener callback) {
+		addNewRecordListener(callback, null);
+	}
+
+	@Override
+	public void addNewRecordListener(IRequestLogNewRecordListener callback,
+			IHttpConditionSet filterCondition) {
+		synchronized (lock) {
+			newRecordListeners.add(new RequestLogNewRecordListener(callback, filterCondition));
+		}
+	}
+
+	@Override
+	public void removeNewRecordListener(IRequestLogNewRecordListener callback) {
+		synchronized (lock) {
+			final Iterator<RequestLogNewRecordListener> it = newRecordListeners.iterator();
+			while(it.hasNext()) {
+				RequestLogNewRecordListener listener = it.next();
+				if(listener.getListener() == callback) {
+					it.remove();
+				}
+			}
+		}
+	}
 }

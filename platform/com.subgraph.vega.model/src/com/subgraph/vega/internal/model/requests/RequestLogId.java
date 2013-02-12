@@ -18,4 +18,8 @@ public class RequestLogId {
 		currentId++;
 		return ret;
 	}
+	
+	synchronized long getCurrentId() {
+		return currentId;
+	}
 }
