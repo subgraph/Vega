@@ -36,6 +36,8 @@ public class ProxyScan implements IProxyScan {
 	private final IScannerConfig config;
 	private  IWebCrawler crawler;
 	private UriParser uriParser;
+	
+	private Object startLock = new Object();
 	private boolean isStarted = false;
 	
 	ProxyScan(IWorkspace workspace, CookieStore cookieStore, Scanner scanner) {
@@ -54,8 +56,10 @@ public class ProxyScan implements IProxyScan {
 
 	@Override
 	public void scanGetTarget(VegaURI target, List<NameValuePair> parameters) {
-		if(!isStarted) {
-			start();
+		synchronized (startLock) {
+			if(!isStarted) {
+				start();
+			}
 		}
 		final IPathState ps = uriParser.processUri(stripQuery(target));
 		ps.maybeAddParameters(parameters);
@@ -63,8 +67,10 @@ public class ProxyScan implements IProxyScan {
 
 	@Override
 	public void scanPostTarget(VegaURI target, List<NameValuePair> parameters) {
-		if(!isStarted) {
-			start();
+		synchronized (startLock) {
+			if(!isStarted) {
+				start();
+			}
 		}
 		final IPathState ps = uriParser.processUri(stripQuery(target));
 		ps.maybeAddPostParameters(parameters);
@@ -80,19 +86,23 @@ public class ProxyScan implements IProxyScan {
 		
 	@Override
 	public void stop() {
-		if(!isStarted) {
-			return;
+		synchronized (startLock) {
+			
+			if(!isStarted) {
+				return;
+			}
+			try {
+				crawler.stop();
+			} catch (InterruptedException e) {
+				throw new RuntimeException("Attempt to stop proxy scan crawler was interrupted", e);
+			}
+			crawler = null;
+			uriParser = null;
+			isStarted = false;
 		}
-		try {
-			crawler.stop();
-		} catch (InterruptedException e) {
-			throw new RuntimeException("Attempt to stop proxy scan crawler was interrupted", e);
-		}
-		crawler = null;
-		uriParser = null;
-		isStarted = false;
 	}
 	
+	// Called holding startLock
 	private void start() {
 		if(isStarted) {
 			return;
