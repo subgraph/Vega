@@ -33,8 +33,4 @@ public interface IRequestLog {
 	void addNewRecordListener(IRequestLogNewRecordListener callback);
 	void addNewRecordListener(IRequestLogNewRecordListener callback, IHttpConditionSet filterCondition);
 	void removeNewRecordListener(IRequestLogNewRecordListener callback);
-	
-	void addUpdateListener(IRequestLogUpdateListener callback);
-	void addUpdateListener(IRequestLogUpdateListener callback, IHttpConditionSet filterCondition);
-	void removeUpdateListener(IRequestLogUpdateListener callback);
 }

@@ -76,7 +76,6 @@ public class RequestLogViewer extends Composite {
 	private Menu tableMenu;
 	private RequestResponseViewer requestResponseViewer;
 	private TaggablePopupDialog taggablePopupDialog;
-	//private HttpViewContentProviderLazy contentProvider;
 	private RequestViewContentProvider contentProvider;
 
 	/**
@@ -164,7 +163,6 @@ public class RequestLogViewer extends Composite {
 		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 		final Color activeFilterColor = new Color(tableViewer.getControl().getDisplay(), ACTIVE_FILTER_COLOR);
-		//contentProvider = new HttpViewContentProviderLazy(instanceId, activeFilterColor);
 		contentProvider = new RequestViewContentProvider(instanceId, activeFilterColor);
 		tableViewer.setContentProvider(contentProvider);
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());

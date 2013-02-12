@@ -34,7 +34,6 @@ import com.subgraph.vega.api.model.conditions.IHttpConditionSet;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogNewRecordListener;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.api.model.requests.IRequestLogUpdateListener;
 import com.subgraph.vega.api.model.requests.IRequestOrigin;
 import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.model.requests.IRequestOriginScanner;
@@ -44,7 +43,6 @@ public class RequestLog implements IRequestLog {
 	private final ObjectContainer database;
 	private final RequestLogId requestLogId;
 	private final HttpMessageCloner cloner;
-	private final List<RequestLogListener> listenerList = new ArrayList<RequestLogListener>();
 	private final List<RequestLogNewRecordListener> newRecordListeners = new ArrayList<RequestLogNewRecordListener>();
 	private final Object lock = new Object();
 
@@ -115,9 +113,6 @@ public class RequestLog implements IRequestLog {
 	}
 	
 	private void filterNewRecord(IRequestLogRecord record) {
-		for(RequestLogListener listener: listenerList) {
-			listener.filterRecord(record);
-		}
 		for(RequestLogNewRecordListener listener: newRecordListeners) {
 			listener.filterRecord(record);
 		}
@@ -248,32 +243,6 @@ public class RequestLog implements IRequestLog {
 			return requestOrigin;
 		} else {
 			return results.get(0);
-		}
-	}
-
-	@Override
-	public void addUpdateListener(IRequestLogUpdateListener callback) {
-		synchronized(lock) {
-			listenerList.add(new RequestLogListener(callback, null, getAllRecords().size()));
-		}
-	}
-
-	@Override
-	public void addUpdateListener(IRequestLogUpdateListener callback, IHttpConditionSet conditionFilter) {
-		synchronized(lock) {
-			listenerList.add(new RequestLogListener(callback, conditionFilter, getRecordsByConditionSet(conditionFilter).size()));
-		}
-	}
-
-	@Override
-	public void removeUpdateListener(IRequestLogUpdateListener callback) {
-		synchronized (lock) {
-			final Iterator<RequestLogListener> it = listenerList.iterator();
-			while(it.hasNext()) {
-				RequestLogListener listener = it.next();
-				if(listener.getListenerCallback() == callback)
-					it.remove();
-			}
 		}
 	}
 
