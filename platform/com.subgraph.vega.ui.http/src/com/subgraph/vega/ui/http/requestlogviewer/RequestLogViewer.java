@@ -58,8 +58,8 @@ import com.subgraph.vega.api.model.conditions.match.IHttpConditionIntegerMatchAc
 import com.subgraph.vega.api.model.conditions.match.IHttpConditionMatchAction;
 import com.subgraph.vega.api.model.requests.IRequestLog;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
-import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewContentProviderLazy;
 import com.subgraph.vega.internal.ui.http.requestlogviewer.HttpViewLabelProvider;
+import com.subgraph.vega.internal.ui.http.requestlogviewer.RequestViewContentProvider;
 import com.subgraph.vega.ui.http.Activator;
 import com.subgraph.vega.ui.http.requesteditviewer.RequestEditView;
 import com.subgraph.vega.ui.tags.taggableeditor.TaggableEditorDialog;
@@ -76,7 +76,8 @@ public class RequestLogViewer extends Composite {
 	private Menu tableMenu;
 	private RequestResponseViewer requestResponseViewer;
 	private TaggablePopupDialog taggablePopupDialog;
-	private HttpViewContentProviderLazy contentProvider;
+	//private HttpViewContentProviderLazy contentProvider;
+	private RequestViewContentProvider contentProvider;
 
 	/**
 	 * @param parent
@@ -146,11 +147,11 @@ public class RequestLogViewer extends Composite {
 		((IHttpConditionIntegerMatchAction) matchAction).setInteger((int) requestId);
 		
 		if(requestIdCondition != null) {
-			conditionSet.removeTemporaryCondition(requestIdCondition);
+			conditionSet.removeTemporaryCondition(requestIdCondition, false);
 		}
 		requestIdCondition = type.createConditionInstance(matchAction);
 		requestIdCondition.setSufficient(true);
-		conditionSet.appendTemporaryCondition(requestIdCondition);
+		conditionSet.appendTemporaryCondition(requestIdCondition, true);
 	}
 
 	
@@ -163,7 +164,8 @@ public class RequestLogViewer extends Composite {
 		tableViewer = new TableViewer(rootControl, SWT.MULTI| SWT.VIRTUAL | SWT.FULL_SELECTION);
 		createColumns(tableViewer, tcl);
 		final Color activeFilterColor = new Color(tableViewer.getControl().getDisplay(), ACTIVE_FILTER_COLOR);
-		contentProvider = new HttpViewContentProviderLazy(instanceId, activeFilterColor);
+		//contentProvider = new HttpViewContentProviderLazy(instanceId, activeFilterColor);
+		contentProvider = new RequestViewContentProvider(instanceId, activeFilterColor);
 		tableViewer.setContentProvider(contentProvider);
 		tableViewer.setLabelProvider(new HttpViewLabelProvider());
 		tableViewer.addSelectionChangedListener(createSelectionChangedListener());

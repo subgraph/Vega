@@ -314,7 +314,7 @@ public class ConfigureInterceptionContent implements IConfigDialogContent {
 				IStructuredSelection selection = (IStructuredSelection) tableViewerBreakpoints.getSelection();
 				for(Object ob: selection.toList()) {
 					if((ob instanceof IHttpCondition) && (conditionSet != null)) 
-						conditionSet.removeCondition((IHttpCondition) ob);			
+						conditionSet.removeCondition((IHttpCondition) ob, true);			
 				}
 				tableViewerBreakpoints.refresh(true);
 			}
@@ -351,7 +351,7 @@ public class ConfigureInterceptionContent implements IConfigDialogContent {
 				if(breakpoint == null)
 					return;
 				if(conditionSet != null)
-					conditionSet.appendCondition(breakpoint);
+					conditionSet.appendCondition(breakpoint, true);
 				conditionInput.reset();
 				tableViewerBreakpoints.refresh(true);
 			}

@@ -146,18 +146,20 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 				IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
 				for(Object element: selection.toList()) {
 					if(element instanceof IHttpCondition) {
-						conditionSet.removeCondition((IHttpCondition) element);
+						conditionSet.removeCondition((IHttpCondition) element, false);
 						conditionSetDirty = true;
 					} else if (element instanceof IHttpConditionType) {
 						IHttpConditionType type = (IHttpConditionType) element;
 						for(IHttpCondition c: conditionSet.getAllConditions()) {
 							if(c.getType() == type) {
-								conditionSet.removeCondition(c);
+								conditionSet.removeCondition(c, false);
 								conditionSetDirty = true;
 							}
 						}
 					}
-						
+					if(conditionSetDirty) {
+						conditionSet.notifyChanged();
+					}
 				}
 				treeViewer.refresh();
 			}
@@ -173,7 +175,7 @@ public class RequestFilterConfigContent implements IConfigDialogContent {
 		if (dialog.open() == ConditionCreateDialog.OK) {
 			final IHttpCondition condition = dialog.getNewCondition();
 			if(condition != null) {
-				conditionSet.appendCondition(condition);
+				conditionSet.appendCondition(condition, true);
 				conditionSetDirty = true;
 				treeViewer.refresh();
 				treeViewer.expandToLevel(condition, TreeViewer.ALL_LEVELS);

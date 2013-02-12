@@ -53,7 +53,7 @@ public class WebEntitySelectionListener implements ISelectionListener {
 		if(conditionSet == null) {
 			return;
 		}
-		conditionSet.clearTemporaryConditions();
+		conditionSet.clearTemporaryConditions(false);
 		
 		if(entity instanceof IWebHost) {
 			handleWebHostSelected(conditionSet, (IWebHost) entity);
@@ -62,6 +62,7 @@ public class WebEntitySelectionListener implements ISelectionListener {
 		} else if(entity instanceof IWebResponse) {
 			handleWebResponseSelected(conditionSet, (IWebResponse) entity);
 		}
+		conditionSet.notifyChanged();
 	}
 	
 	private void handleWebHostSelected(IHttpConditionSet conditionSet, IWebHost host) {
@@ -82,7 +83,7 @@ public class WebEntitySelectionListener implements ISelectionListener {
 		final IHttpConditionMatchAction matchAction = type.getMatchActionByName("contains");
 		matchAction.setArgumentFromString(hostname);
 		final IHttpCondition condition = type.createConditionInstance(matchAction);
-		conditionSet.appendTemporaryCondition(condition);
+		conditionSet.appendTemporaryCondition(condition, false);
 	}
 	
 	private void addPathCondition(IHttpConditionSet conditionSet, String path) {
@@ -90,7 +91,7 @@ public class WebEntitySelectionListener implements ISelectionListener {
 		final IHttpConditionMatchAction matchAction = type.getMatchActionByName("starts with");
 		matchAction.setArgumentFromString(path);
 		final IHttpCondition condition = type.createConditionInstance(matchAction);
-		conditionSet.appendTemporaryCondition(condition);
+		conditionSet.appendTemporaryCondition(condition, false);
 	}
 
 
