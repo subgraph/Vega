@@ -168,7 +168,8 @@ public class RequestLog implements IRequestLog {
 			final ObjectSet<IRequestLogRecord> result = ((HttpConditionSet)conditionFilter).executeFilterQuery(database);
 			return createIteratorForResult(result);
 		} else {
-			return Collections.emptyListIterator();
+			final List<IRequestLogRecord> emptyList = Collections.emptyList();
+			return emptyList.iterator();
 		}
 	}
 
