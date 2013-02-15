@@ -62,9 +62,11 @@ public class HttpConditionSet implements IHttpConditionSet, Activatable {
 	}
 
 	private void updateAllConditions() {
-		allConditions.clear();
-		allConditions.addAll(conditionList);
-		allConditions.addAll(temporaryConditions);
+		synchronized (lock) {
+			allConditions.clear();
+			allConditions.addAll(conditionList);
+			allConditions.addAll(temporaryConditions);
+		}
 	}
 	
 	private List<IHttpCondition> getAllConditionsList() {
