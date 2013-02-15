@@ -79,12 +79,12 @@ public class FormProcessor {
 		}
 		ctx.debug("Processed form: "+ fps);
 		submitNewForm(fps);
-
 	}
 
 	private void submitNewForm(FormProcessingState formData) {
-		if(!uriFilter.isAllowed(formData.getTargetURI()))
+		if(!uriFilter.isAllowed(formData.getTargetURI())) {
 			return;
+		}
 			
 		final IPathState ps = uriParser.processUri(formData.getTargetURI());
 		if(formData.isPostMethod())

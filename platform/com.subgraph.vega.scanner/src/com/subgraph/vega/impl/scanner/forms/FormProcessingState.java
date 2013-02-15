@@ -25,7 +25,7 @@ public class FormProcessingState {
 	private final static Logger logger = Logger.getLogger("scanner");
 	private final static FormHints formHints = new FormHints();
 
-	private final List<IFormCredential> credentials;
+	//private final List<IFormCredential> credentials;
 	private final VegaURI baseURI;
 	private final String action;
 	private final String method;
@@ -40,7 +40,7 @@ public class FormProcessingState {
 		this.baseURI = baseURI;
 		this.action = action;
 		this.method = method;
-		this.credentials = credentials;
+		//this.credentials = credentials;
 	}
 
 	boolean isValid() {
@@ -53,8 +53,9 @@ public class FormProcessingState {
 
 	VegaURI getTargetURI() {
 		synchronized(this) {
-			if(cachedTargetURI == null)
+			if(cachedTargetURI == null) {
 				cachedTargetURI = createTargetURI();
+			}
 			return cachedTargetURI;
 		}
 	}
@@ -62,8 +63,9 @@ public class FormProcessingState {
 	private VegaURI createTargetURI() {
 		if(baseURI == null)
 			return null;
-		if(action == null)
+		if(action == null || action.trim().equals("#")) {
 			return baseURI;
+		}
 		try {
 			final VegaURI target = baseURI.resolve(action);
 			final String scheme = target.getTargetHost().getSchemeName();
@@ -101,6 +103,7 @@ public class FormProcessingState {
 		return fileFieldFlag;
 	}
 
+	/*
 	private boolean isPossiblePasswordField(String name) {
 		final String n = name.toLowerCase();
 		return (n.contains("pass") || n.contains("pwd"));
@@ -110,6 +113,7 @@ public class FormProcessingState {
 		final String n = name.toLowerCase();
 		return (n.contains("name") || n.contains("user") || n.contains("log"));
 	}
+	*/
 	private String guessFormValue(String name) {
 		/*
 		if(config.getNtlmPassword() != null && isPossiblePasswordField(name))
