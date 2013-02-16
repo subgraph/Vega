@@ -69,8 +69,12 @@ public class WebPathTreeStrategy implements ITreeAdapter<IWebPath> {
 	public String getLabel(IWebPath item) {
 		if(item.getParentPath() == null)
 			return "/";
-		else
+		else if(getChildrenCount(item) == 0 && (item.getPathComponent().contains(".") || item.getMimeType() != null)) {
+			return item.getPathComponent();
+			
+		} else {
 			return prevLabel(item) + "/" + item.getPathComponent();
+		}
 	}
 	
 	private String prevLabel(IWebPath item) {

@@ -348,7 +348,14 @@ public class PathState implements IPathState {
 		final IContentAnalyzer contentAnalyzer = pathStateManager.getContentAnalyzer();
 		final IContentAnalyzerResult result = contentAnalyzer.processResponse(response, false, false);
 		final URI uri = createRequest().getURI();
-		path.addGetResponse(uri.getQuery(), contentAnalyzerResultToMimeString(result));
+		final String mimeType = contentAnalyzerResultToMimeString(result);
+		if(uri.getQuery() == null) {
+			if(path.getMimeType() == null && mimeType != null) {
+				path.setMimeType(mimeType);
+			}
+			return;
+		}
+		path.addGetResponse(uri.getQuery(), mimeType);
 	}
 
 	private String contentAnalyzerResultToMimeString(IContentAnalyzerResult result) {

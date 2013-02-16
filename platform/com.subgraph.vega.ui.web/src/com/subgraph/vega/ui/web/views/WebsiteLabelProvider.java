@@ -64,21 +64,26 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 	}
 	
 	public Image getImage(Object element) {
-		if(element instanceof IWebResponse) {
-			IWebResponse response = (IWebResponse) element;
-			if(response.getMimeType() != null)
-				return getMimeImage(response.getMimeType());
-			else
-				return null;
-		}
-		else if(element instanceof IWebHost) {
+		if(element instanceof IWebHost) {
 			IWebHost wh = (IWebHost) element;
 			if(wh.isVisited())
 				return imageCache.get(WEBSITE);
 			else
 				return imageCache.getDisabled(WEBSITE);
+		} else {
+			final String mimeType = getMimeTypeForElement(element);
+			return getMimeImage(mimeType);
 		}
-		return null;
+	}
+	
+	private String getMimeTypeForElement(Object element) {
+		if(element instanceof IWebResponse) {
+			return ((IWebResponse)element).getMimeType();
+		} else if(element instanceof IWebPath) {
+			return ((IWebPath) element).getMimeType();
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -123,14 +128,16 @@ public class WebsiteLabelProvider extends LabelProvider implements IColorProvide
 
 	private Image getMimeImage(String contentType) {
 		String path = getMimeImagePath(contentType);
-		if(path == null)
+		if(path == null) {
 			return null;
-		else
+		} else {
 			return imageCache.get(path);
+		}
 	}
 	
 	private String getMimeImagePath(String contentType) {
-		if(contentType.matches("text/html.*")) return HTML;
+		if(contentType == null) return null;
+		else if(contentType.matches("text/html.*")) return HTML;
 		else if(contentType.matches("text/(javascript|vbscript|tcl)|application/(x-)?(javascript|perl|tcl|c?sh)")) return SCRIPT;
 		else if(contentType.matches("((text|application)/xml|application/x-(xhtml|xml)).*")) return XML;
 		else if(contentType.matches("text/.*")) return TEXT;

@@ -29,6 +29,10 @@ public interface IWebPath extends IWebEntity {
 	
 	void setPathType(PathType type);
 	PathType getPathType();
+	
+	void setMimeType(String mimeType);
+	String getMimeType();
+	
 	boolean isGetTarget();
 	boolean isPostTarget();
 	

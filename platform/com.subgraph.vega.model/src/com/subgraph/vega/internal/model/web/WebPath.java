@@ -55,7 +55,8 @@ public class WebPath extends WebEntity implements IWebPath {
 	private final Map<List<NameValuePair>, IWebResponse> postResponses = new ActivatableHashMap<List<NameValuePair>, IWebResponse>();
 
 	private PathType pathType;
-
+	private String mimeType;
+	
 	private transient URI cachedUri;
 	private transient String cachedFullPath;
 
@@ -316,6 +317,19 @@ public class WebPath extends WebEntity implements IWebPath {
 	public PathType getPathType() {
 		activate(ActivationPurpose.READ);
 		return pathType;
+	}
+
+	@Override
+	public void setMimeType(String mimeType) {
+		activate(ActivationPurpose.READ);
+		this.mimeType = mimeType;
+		activate(ActivationPurpose.WRITE);
+	}
+	
+	@Override
+	public String getMimeType() {
+		activate(ActivationPurpose.READ);
+		return mimeType;
 	}
 
 	@Override

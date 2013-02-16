@@ -85,10 +85,25 @@ public class ContentAnalyzer implements IContentAnalyzer {
 		result.setDeclaredMimeType(mimeDetector.getDeclaredMimeType(response));
 		result.setSniffedMimeType(mimeDetector.getSniffedMimeType(response));
 		
+		final String mimeType = getBestMimeType(result);
+		if(mimeType != null && path.getMimeType() == null) {
+			path.setMimeType(mimeType);
+		}
+		
 		if(scrapePage)
 			runExtractUrls(result, response, workspace.getWebModel());
 		runResponseProcessingModules(response.getOriginalRequest(), response, result.getDeclaredMimeType(), result.getSniffedMimeType(), workspace);
 		return result;
+	}
+	
+	private String getBestMimeType(IContentAnalyzerResult result) {
+		if(result.getSniffedMimeType() != MimeType.MIME_NONE) {
+			return result.getSniffedMimeType().getCanonicalName();
+		} else if(result.getDeclaredMimeType() != MimeType.MIME_NONE) {
+			return result.getDeclaredMimeType().getCanonicalName();
+		} else {
+			return null;
+		}
 	}
 
 	@Override
