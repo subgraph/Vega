@@ -9,7 +9,6 @@ function run(request, response, ctx) {
   if (response.document) {
     var input = jQuery("input:file", response.document);
     input.each(function() {
-	ctx.debug("FOUND");
     	found++;
     });
   }
