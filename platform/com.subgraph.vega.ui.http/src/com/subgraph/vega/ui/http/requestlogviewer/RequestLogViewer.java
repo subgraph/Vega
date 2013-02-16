@@ -23,7 +23,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
@@ -125,13 +124,14 @@ public class RequestLogViewer extends Composite {
 		if(record == null) {
 			return;
 		}
-
-		tableViewer.setSelection(new StructuredSelection(record), true);
+		
+		final FocusOnRecordTask task = new FocusOnRecordTask(record, contentProvider, tableViewer);
+		new Thread(task).start();
+		
 		if (requestResponseViewer != null) {
 			requestResponseViewer.setDisplayResponse();
 		}
-	}
-	
+	}	
 	
 	private IHttpCondition requestIdCondition;
 	

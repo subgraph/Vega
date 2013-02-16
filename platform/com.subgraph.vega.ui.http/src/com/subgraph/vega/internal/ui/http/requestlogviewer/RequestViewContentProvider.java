@@ -204,4 +204,12 @@ public class RequestViewContentProvider implements ILazyContentProvider, IReques
 			currentResult.addNewRecord(event.getNewRecord());
 		}
 	}
+	
+	public int getRowForRecord(IRequestLogRecord record) {
+		if(currentResult != null) {
+			return currentResult.getRowForRecord(record);
+		} else {
+			return -1;
+		}
+	}
 }

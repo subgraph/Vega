@@ -121,6 +121,7 @@ public class FilterTask {
 			addedRecords.clear();
 			size = records.size();
 			isFinished = true;
+			lock.notifyAll();
 		}
 		applyRecordCountToViewer(size);
 	}
@@ -177,6 +178,19 @@ public class FilterTask {
 					applyRecordCountToViewer(lastSize);
 				}
 			}
+		}
+	}
+	
+	public int getRowForRecord(IRequestLogRecord record) {
+		synchronized (lock) {
+			while(!isFinished) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					return -1;
+				}
+			}
+			return records.indexOf(record);
 		}
 	}
 }
