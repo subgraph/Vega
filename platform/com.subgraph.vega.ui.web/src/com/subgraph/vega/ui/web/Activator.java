@@ -44,9 +44,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		modelTracker = new ServiceTracker(context, IModel.class.getName(), null);
+		modelTracker = new ServiceTracker<IModel,IModel>(context, IModel.class.getName(), null);
 		modelTracker.open();
-		crawlerTracker = new ServiceTracker(context, IWebCrawlerFactory.class.getName(), null);
+		crawlerTracker = new ServiceTracker<IWebCrawlerFactory, IWebCrawlerFactory>(context, IWebCrawlerFactory.class.getName(), null);
 		crawlerTracker.open();
 	}
 
