@@ -297,7 +297,7 @@ public class ResponseAnalyzer {
 	
 	public void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
 		final String key = createAlertKey(ctx, type, request);
-		String resource = request.getURI().toString();
+		String resource = request.getURI().getPath();
 		
 		int i = resource.indexOf('?');
 
