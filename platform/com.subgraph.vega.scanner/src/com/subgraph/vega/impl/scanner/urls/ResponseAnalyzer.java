@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.urls;
 
-import java.net.URI;
-
 import org.apache.http.client.methods.HttpUriRequest;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -36,6 +34,7 @@ public class ResponseAnalyzer {
 	private final UriParser uriParser;
 	private final UriFilter uriFilter;
 	private final FormProcessor formProcessor;
+	private final SQLErrorMessageDetector sqlDetector;
 	private final boolean isProxyScan;
 
 	public ResponseAnalyzer(IScannerConfig config, IContentAnalyzer contentAnalyzer, UriParser uriParser, UriFilter uriFilter, boolean isProxyScan) {
@@ -44,6 +43,7 @@ public class ResponseAnalyzer {
 		this.uriFilter = uriFilter;
 		this.isProxyScan = isProxyScan;
 		this.formProcessor = new FormProcessor(config, uriFilter, uriParser);
+		this.sqlDetector = new SQLErrorMessageDetector(this);
 	}
 
 	public IContentAnalyzer getContentAnalyzer() {
@@ -71,6 +71,7 @@ public class ResponseAnalyzer {
 		if(!filterInjectedPath(res.getRequestUri().getPath())) {
 			contentAnalyzer.processResponse(res, false, false);
 		}
+		sqlDetector.detectErrorMessages(ctx, req, res);
 	}
 
 	private void analyzeHtml(IInjectionModuleContext ctx, HttpUriRequest req, IHttpResponse res) {
@@ -294,7 +295,7 @@ public class ResponseAnalyzer {
 
 	}
 	
-	private void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
+	public void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
 		final String key = createAlertKey(ctx, type, request);
 		String resource = request.getURI().toString();
 		
