@@ -37,7 +37,6 @@ public class ScannerPerspectiveFactory implements IPerspectiveFactory {
 
 		final IFolderLayout mgmtFolder = layout.createFolder(MGMT_FOLDER, IPageLayout.BOTTOM, 0.75f, SCAN_INFO_FOLDER);
 		mgmtFolder.addView("com.subgraph.vega.views.identity.identities");
-		mgmtFolder.addView("com.subgraph.vega.views.macros.macros");
 		
 		layout.setEditorAreaVisible(false);
 	}
