@@ -12,7 +12,7 @@ function run(request, response, ctx) {
     form.children().each(function() {
       if ((this.getAttribute("type") != null) && (this.getAttribute("type") == "password")) {
         if ((this.getAttribute("autocomplete") == null) || (this.getAttribute("autocomplete").toLowerCase() != "off")) {
-          ctx.addStringHighlight("type=\"password\""); // FIXME: Unoptimal, Selecting the form as a string without cloning the whole DOM would be nice.
+          ctx.addRegexCaseInsensitiveHighlight("type=[\"']*password[\"']*");
           found++;
         }
       }
@@ -31,7 +31,7 @@ function run(request, response, ctx) {
 
     (found > 1) ? match = "instances" : match = "instance";
     ctx.alert("vautocomplete", request, response, {
-      "resource": request.requestLine.uri,
+      "resource": sub,
       key: "vautocomplete:" + sub
     });
 
