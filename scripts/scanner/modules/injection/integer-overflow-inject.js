@@ -1,7 +1,8 @@
 var module = {
   name: "Integer Overflow Injection Checks",
   category: "Injection Modules",
-  differential: true
+  differential: true,
+  defaultDisabled: true
 };
 
 function initialize(ctx) {

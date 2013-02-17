@@ -2,7 +2,7 @@ var module = {
   name: "Format String Injection Checks",
   category: "Injection Modules",
   differential: true,
-  disabled: true
+  defaultDisabled: true
 };
 
 function initialize(ctx) {
