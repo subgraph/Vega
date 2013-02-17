@@ -22,7 +22,7 @@ function run(request, response, ctx) {
       sub = sub.substring(0, index);
     }
 
-    ctx.addRegexCaseInsensitiveHighlight("type=file");
+    ctx.addRegexCaseInsensitiveHighlight("type=[\"']*file[\"']*");
 
     (found > 1) ? match = "instances" : match = "instance";
     ctx.alert("vfileupload", request, response, {
