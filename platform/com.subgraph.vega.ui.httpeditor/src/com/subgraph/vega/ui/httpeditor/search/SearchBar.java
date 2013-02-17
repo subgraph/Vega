@@ -161,7 +161,7 @@ public class SearchBar extends Composite implements ModifyListener, KeyListener,
 	}
 
 	private boolean isEventCtrlF(KeyEvent ev) {
-		return ((ev.stateMask & SWT.CONTROL) != 0) && ev.keyCode == KEY_F;
+		return ((ev.stateMask & SWT.MOD1) != 0) && ev.keyCode == KEY_F;
 	}
 	
 	private boolean isEventEscape(KeyEvent ev) {
