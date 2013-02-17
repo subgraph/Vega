@@ -219,6 +219,22 @@
       <handler
             class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             commandId="com.subgraph.vega.ui.scanner.startnewscan">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="vega.scanSelectionState">
+                  <equals
+                        value="idle">
+                  </equals>
+               </with>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="com.subgraph.vega.perspectives.scanner">
+                  </equals>
+               </with>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="com.subgraph.vega.ui.scanner.commands.ExpandAllAlerts"
