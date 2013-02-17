@@ -1,5 +1,5 @@
 var module = {
-  name: "Internal IP Addresses",
+  name: "Internal IP Addressess",
   type: "response-processor"
 };
 
@@ -20,16 +20,22 @@ function run(request, response, ctx) {
 
   while (r = regex.exec(body)) {
     if (validateAddress(r[0]) && result.indexOf(r[0]) == -1) {
-      ctx.addStringHighlight(r[0]);
-      result.push(r[0]);
+      var regex2 = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
+      if (regex2.exec(r[0])) {
+        ctx.addStringHighlight(r[0]);
+        result.push(r[0]);
+      }
     }
   }
 
   if (result.length) {
+    var url = String(request.requestLine.uri);
+    var uripart = url.replace(/\?.*/, "");
+
     ctx.alert("vinfo-1918", request, response, {
       output: result.join(" "),
-      resource: request.requestLine.uri,
-      key: "vinfo-1918" + request.requestLine.uri + result.join(" ")
+      resource: uripart,
+      key: "vinfo-1918" + uripart + result.join(" ")
     });
   }
 }

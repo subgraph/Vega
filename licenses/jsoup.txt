@@ -1,7 +1,6 @@
 ============================================================
 Notices for file(s):
-  /Vega/platform/com.subgraph.vega.application/extra-bundles/org.jsoup_1.3.3.vega.jar
-  /Vega/platform/com.subgraph.vega.application/extra-bundles/org.jsoup.source_1.3.3.vega.jar
+  /Vega/platform/com.subgraph.vega.application/extra-bundles/jsoup-1.7.2-SNAPSHOT.jar
 
 License text from http://jsoup.org/license
 ------------------------------------------------------------
