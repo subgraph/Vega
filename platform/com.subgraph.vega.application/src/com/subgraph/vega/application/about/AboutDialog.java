@@ -34,7 +34,7 @@ public class AboutDialog extends TitleAreaDialog {
 								"Version: " + IConstants.VERSION_STRING + "\n" +
 								"Build id: 0xC0FFEEEE\n" +
 								"\n" +
-								"(c) Copyright Subgraph Technologies, Inc. and others, 2011. All rights reserved.\n" +
+								"(c) Copyright Subgraph Technologies, Inc. and others, 2013. All rights reserved.\n" +
 								"http://www.subgraph.com\n" +
 								"http://vega.subgraph.com\n" +
 								"\n" +
@@ -49,13 +49,12 @@ public class AboutDialog extends TitleAreaDialog {
 								"\n" +
 								"The Vega scanner owes much to the innovative work implemented in Skipfish\nby Michal Zalewski. \n" +
 								"\n" +
-								"The Vega Beta team is:\n" +
+								"The Vega 1.0 team is:\n" +
 								"\n" +
 								"Bruce Leidl\n" +
-								"Cade Cairns\n" +
 								"David Mirza Ahmad\n" +
-								"Hugo Fortier\n" +
 								"Tina Salameh\n" +
+								"David McKinney" +
 								"\n" +
 								"Special thanks to Lars Vogel for his Eclipse RCP tutorials.\n";
 
