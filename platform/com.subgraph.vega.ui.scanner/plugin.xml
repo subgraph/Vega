@@ -338,6 +338,12 @@
             schemeId="vega.scheme"
             sequence="M1+N">
       </key>
+      <key
+            commandId="com.subgraph.vega.ui.scanner.editscope"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="vega.scheme"
+            sequence="M1+E">
+      </key>
    </extension>
 
 </plugin>
