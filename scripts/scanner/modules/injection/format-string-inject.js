@@ -1,7 +1,8 @@
 var module = {
   name: "Format String Injection Checks",
   category: "Injection Modules",
-  differential: true
+  differential: true,
+  disabled: true
 };
 
 function initialize(ctx) {
@@ -19,7 +20,7 @@ function process(req, res, ctx) {
   if (ctx.incrementResponseCount() < 2) return;
 
   if (!ctx.isFingerprintMatch(0, 1)) {
-    ctx.publishAlert("vinfo-format-string", "Response to %dn%dn%dn... different than to %nd%nd%nd...", ctx.getSavedRequest(1), ctx.getSavedResponse(1));
+    ctx.alert("vinfo-format-string", "Response to %dn%dn%dn... different than to %nd%nd%nd...", ctx.getSavedRequest(1), ctx.getSavedResponse(1));
     ctx.responseChecks(1);
   }
 }
