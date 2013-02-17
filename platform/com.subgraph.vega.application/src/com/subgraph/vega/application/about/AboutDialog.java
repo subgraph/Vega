@@ -56,6 +56,8 @@ public class AboutDialog extends TitleAreaDialog {
 								"Tina Salameh\n" +
 								"David McKinney" +
 								"\n" +
+								"Vega Beta contributors also included Hugo Fortier and Cade Cairns."+
+								"\n"+
 								"Special thanks to Lars Vogel for his Eclipse RCP tutorials.\n";
 
 	
