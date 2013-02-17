@@ -23,7 +23,6 @@ import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
 import com.subgraph.vega.ui.util.modules.ModuleRegistryCheckStateProvider;
 import com.subgraph.vega.ui.util.modules.ModuleRegistryContentProvider;
-import com.subgraph.vega.ui.util.modules.ModuleRegistryLabelProvider;
 
 public class ConfigureProxyModulesContent implements IConfigDialogContent {
 	private final List<IScannerModule> modules;
@@ -46,12 +45,16 @@ public class ConfigureProxyModulesContent implements IConfigDialogContent {
 		viewer = new CheckboxTreeViewer(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		final ModuleRegistryCheckStateProvider checkStateProvider = new ModuleRegistryCheckStateProvider(viewer);
 		viewer.setContentProvider(new ModuleRegistryContentProvider(checkStateProvider));
-		viewer.setLabelProvider(new ModuleRegistryLabelProvider());
+		viewer.setLabelProvider(new ConfigureProxyModulesLabelProvider());
 		viewer.setCheckStateProvider(checkStateProvider);
 		
 		viewer.setInput(modules.toArray(new IScannerModule[0]));
 
-		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		final GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 300;
+		gd.widthHint = 500;
+		viewer.getTree().setLayoutData(gd);
+		
 		viewer.addCheckStateListener(checkStateProvider);
 		composite.layout();
 		return composite;
