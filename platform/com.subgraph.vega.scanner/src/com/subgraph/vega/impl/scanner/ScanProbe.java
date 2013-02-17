@@ -11,7 +11,6 @@
 package com.subgraph.vega.impl.scanner;
 
 import java.net.URI;
-import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -24,7 +23,6 @@ import com.subgraph.vega.api.http.requests.RequestEngineException;
 import com.subgraph.vega.api.scanner.IScanProbeResult;
 
 public class ScanProbe {
-	private final Logger logger = Logger.getLogger("scanner");
 	private final static int MAX_REDIRECT_COUNT = 5;
 	private final URI targetURI;
 	private final IHttpRequestEngine requestEngine;

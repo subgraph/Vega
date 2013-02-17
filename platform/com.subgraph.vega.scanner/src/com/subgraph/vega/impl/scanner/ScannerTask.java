@@ -19,7 +19,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIUtils;
 
 import com.subgraph.vega.api.analysis.IContentAnalyzer;
-import com.subgraph.vega.api.analysis.IContentAnalyzerResult;
 import com.subgraph.vega.api.crawler.IWebCrawler;
 import com.subgraph.vega.api.http.requests.IHttpMacroContext;
 import com.subgraph.vega.api.http.requests.IHttpMacroExecutor;
@@ -131,7 +130,6 @@ public class ScannerTask implements Runnable {
 				IHttpMacroExecutor executor = scan.getRequestEngine().createMacroExecutor(authMethodMacro.getMacro(), context);
 				while (executor.hasNext()) {
 					IHttpResponse response;
-					IContentAnalyzerResult result;
 					int status;
 					
 					try {
@@ -140,7 +138,7 @@ public class ScannerTask implements Runnable {
 						logger.log(Level.WARNING, e.getMessage());
 						return false;
 					}		
-					result = contentAnalyzer.processResponse(response, true, false);
+					contentAnalyzer.processResponse(response, true, false);
 					status = response.getResponseCode();
 					if (status == 301 || status == 302 || status == 303 || status == 307) {
 						Header locationHeader = response.getRawResponse().getFirstHeader("Location");
