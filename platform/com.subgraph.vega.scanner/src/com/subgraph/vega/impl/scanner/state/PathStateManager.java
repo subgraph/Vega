@@ -37,7 +37,7 @@ import com.subgraph.vega.impl.scanner.urls.ResponseAnalyzer;
 public class PathStateManager {
 	private final Logger logger = Logger.getLogger("scanner");
 	private final IScannerConfig config;
-	private final List<IBasicModuleScript> injectionModules;
+	private List<IBasicModuleScript> injectionModules;
 	private final IWorkspace workspace;
 	private final IWebCrawler crawler;
 	private final ResponseAnalyzer responseAnalyzer;
@@ -65,6 +65,10 @@ public class PathStateManager {
 		this.responseAnalyzer = responseAnalyzer;
 		this.scanInstance = scanInstance;
 		this.isProxyScan = isProxyScan;
+	}
+
+	public void setInjectionModules(List<IBasicModuleScript> injectionModules) {
+		this.injectionModules = injectionModules;
 	}
 
 	public List<IBasicModuleScript> getInjectionModules() {

@@ -51,6 +51,10 @@ public class UriParser {
 		this.pathStateManager = new PathStateManager(config, injectionModules, workspace, crawler, new ResponseAnalyzer(config, contentAnalyzer, this, filter, isProxyScan), scanInstance, isProxyScan);
 	}
 
+	public void updateInjectionModules(List<IBasicModuleScript> injectionModules) {
+		pathStateManager.setInjectionModules(injectionModules);
+	}
+
 	public IPathState processUri(VegaURI uri) {
 		final IWebHost webHost = getWebHost(uri.getTargetHost());
 		final IWebPath rootPath = webHost.getRootPath();
