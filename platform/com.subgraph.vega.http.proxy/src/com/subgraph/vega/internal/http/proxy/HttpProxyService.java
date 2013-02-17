@@ -199,6 +199,8 @@ public class HttpProxyService implements IHttpProxyService {
 		contentAnalyzer.setDefaultAddToRequestLog(true);
 		contentAnalyzer.setAddLinksToModel(true);
 
+		proxyScanner.reloadModules();
+		
 		for (IHttpProxyListenerConfig config: listenerConfigMap.values()) {
 			startListener(config);
 		}

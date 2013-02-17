@@ -42,12 +42,18 @@ public class ProxyScanner {
 		this.scopeTracker = new ProxyScannerScopeTracker(model, this);
 	}
 	
+	void reloadModules() {
+		if(proxyScan != null) {
+			proxyScan.reloadModules();
+		}
+	}
+
 	boolean isEnabled() {
 		return isEnabled;
 	}
 	
 	void setEnabled(boolean value) {
-		proxyScan.reloadModules();
+		reloadModules();
 		isEnabled = value;
 	}
 	

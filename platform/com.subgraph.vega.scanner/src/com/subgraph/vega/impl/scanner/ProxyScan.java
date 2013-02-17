@@ -110,11 +110,11 @@ public class ProxyScan implements IProxyScan {
 		if(isStarted) {
 			return;
 		}
-		reloadModules();
 		crawler = createWebCrawler();
 		uriParser = createUriParser(crawler);
 		crawler.start();
 		isStarted = true;
+		reloadModules();
 	}
 	
 	private UriParser createUriParser(IWebCrawler crawler) {
@@ -176,6 +176,9 @@ public class ProxyScan implements IProxyScan {
 			basicModules = moduleRegistry.getBasicModules();
 		} else {
 			basicModules = moduleRegistry.updateBasicModules(basicModules);
+		}
+		if(uriParser != null) {
+			uriParser.updateInjectionModules(basicModules);
 		}
 	}
 }
