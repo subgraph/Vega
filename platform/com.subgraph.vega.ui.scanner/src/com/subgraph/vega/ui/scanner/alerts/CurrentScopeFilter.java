@@ -14,6 +14,7 @@ import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
 import com.subgraph.vega.api.model.requests.IRequestLogRecord;
 import com.subgraph.vega.api.model.scope.ITargetScope;
+import com.subgraph.vega.api.util.UriTools;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertHostNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
@@ -111,9 +112,10 @@ public class CurrentScopeFilter extends ViewerFilter {
 		if(host == null || request == null) {
 			return null;
 		}
+		final String uriLine = UriTools.removeUnicodeEscapes(request.getRequestLine().getUri());
 		try {
 			final URI hostUri = new URI(host.toURI());
-			final URI reqUri = new URI(request.getRequestLine().getUri());
+			final URI reqUri = new URI(uriLine);
 			return hostUri.resolve(reqUri);
 		} catch (URISyntaxException e) {
 			logger.log(Level.WARNING, "Failed to convert host and request to URI", e);

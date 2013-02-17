@@ -117,6 +117,9 @@ public class HttpMessageDocumentFactory {
 			count += 1;
 			c = input.charAt(i);
 			sb.append(c);
+			if(c == '\n') {
+				count = 0;
+			}
 			if(count > ABSOLUTE_MAX_LONG_LINE || 
 					(count > MAX_LONG_LINE && splitAt.indexOf(c) != -1)) {
 				sb.append("\n");

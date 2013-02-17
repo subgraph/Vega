@@ -85,4 +85,49 @@ public class UriTools {
 		}
 		return line.substring(0, idx);
 	}
+
+	
+	private static boolean isHex(char c) {
+		return "abcdefABCDEF0123456789".indexOf(c) != -1;
+	}
+	
+	
+	public static String removeUnicodeEscapes(String line) {
+		if(line.indexOf("%u") == -1) {
+			return line;
+		}
+		final StringBuilder sb = new StringBuilder();
+		int idx = 0;
+		while(idx < line.length()) {
+			if(isUnicodeEscape(line, idx)) {
+				splitUnicodeEscape(line, idx, sb);
+				idx += 6;
+			} else {
+				sb.append(line.charAt(idx));
+				idx += 1;
+			}
+		}
+		return sb.toString();
+	}
+	
+	private static boolean isUnicodeEscape(String line, int idx) {
+		if(idx > (line.length() - 6)) {
+			return false;
+		}
+		return line.charAt(idx) == '%' &&
+				line.charAt(idx + 1) == 'u' &&
+				isHex(line.charAt(idx + 2)) &&
+				isHex(line.charAt(idx + 3)) &&
+				isHex(line.charAt(idx + 4)) &&
+				isHex(line.charAt(idx + 5));
+	}
+	
+	private static void splitUnicodeEscape(String line, int idx, StringBuilder sb) {
+		sb.append('%');
+		sb.append(line.charAt(idx + 2));
+		sb.append(line.charAt(idx + 3));
+		sb.append('%');
+		sb.append(line.charAt(idx + 4));
+		sb.append(line.charAt(idx + 5));
+	}
 }
