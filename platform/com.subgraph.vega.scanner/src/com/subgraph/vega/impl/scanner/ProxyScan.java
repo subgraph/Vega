@@ -1,5 +1,6 @@
 package com.subgraph.vega.impl.scanner;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScannerConfig;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.api.util.VegaURI;
 import com.subgraph.vega.impl.scanner.urls.UriFilter;
 import com.subgraph.vega.impl.scanner.urls.UriParser;
@@ -37,6 +39,7 @@ public class ProxyScan implements IProxyScan {
 	private  IWebCrawler crawler;
 	private UriParser uriParser;
 	
+	private List<IBasicModuleScript> basicModules;
 	private Object startLock = new Object();
 	private boolean isStarted = false;
 	
@@ -46,6 +49,7 @@ public class ProxyScan implements IProxyScan {
 		this.scanner = scanner;
 		this.scanInstance = workspace.getScanAlertRepository().getScanInstanceByScanId(IScanAlertRepository.PROXY_ALERT_ORIGIN_SCAN_ID);
 		this.config = new ScannerConfig();
+		reloadModules();
 		logger.setLevel(Level.ALL);
 	}
 
@@ -87,7 +91,6 @@ public class ProxyScan implements IProxyScan {
 	@Override
 	public void stop() {
 		synchronized (startLock) {
-			
 			if(!isStarted) {
 				return;
 			}
@@ -107,6 +110,7 @@ public class ProxyScan implements IProxyScan {
 		if(isStarted) {
 			return;
 		}
+		reloadModules();
 		crawler = createWebCrawler();
 		uriParser = createUriParser(crawler);
 		crawler.start();
@@ -115,7 +119,6 @@ public class ProxyScan implements IProxyScan {
 	
 	private UriParser createUriParser(IWebCrawler crawler) {
 		final IContentAnalyzer contentAnalyzer = scanner.getContentAnalyzerFactory().createContentAnalyzer(scanInstance);
-		final List<IBasicModuleScript> basicModules = scanner.getScannerModuleRegistry().getBasicModules();
 		return new UriParser(config,
 				basicModules,
 				workspace,
@@ -159,5 +162,20 @@ public class ProxyScan implements IProxyScan {
 		}
 
 		return requestEngine;
+	}
+
+	@Override
+	public List<IBasicModuleScript> getInjectionModules() {
+		return Collections.unmodifiableList(basicModules);
+	}
+	
+	@Override
+	public void reloadModules() {
+		final IScannerModuleRegistry moduleRegistry = scanner.getScannerModuleRegistry();
+		if(basicModules == null) {
+			basicModules = moduleRegistry.getBasicModules();
+		} else {
+			basicModules = moduleRegistry.updateBasicModules(basicModules);
+		}
 	}
 }

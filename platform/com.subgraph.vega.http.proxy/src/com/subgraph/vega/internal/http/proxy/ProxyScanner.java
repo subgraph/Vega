@@ -2,6 +2,7 @@ package com.subgraph.vega.internal.http.proxy;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import com.subgraph.vega.api.model.scope.ITargetScope;
 import com.subgraph.vega.api.scanner.IProxyScan;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class ProxyScanner {
@@ -45,9 +47,17 @@ public class ProxyScanner {
 	}
 	
 	void setEnabled(boolean value) {
+		proxyScan.reloadModules();
 		isEnabled = value;
 	}
 	
+	List<IBasicModuleScript> getInjectionModules() {
+		if(proxyScan == null) {
+			return Collections.emptyList();
+		}
+		return proxyScan.getInjectionModules();
+	}
+
 	IScannerConfig getConfig() {
 		if(proxyScan == null) {
 			return null;

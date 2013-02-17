@@ -34,9 +34,9 @@ import org.eclipse.swt.widgets.Text;
 
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.ui.scanner.Activator;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryCheckStateProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryContentProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryLabelProvider;
 
 public class ScanConfigDialog extends Dialog {
 

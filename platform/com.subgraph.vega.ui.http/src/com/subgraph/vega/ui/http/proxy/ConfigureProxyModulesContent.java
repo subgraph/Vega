@@ -12,29 +12,25 @@ package com.subgraph.vega.ui.http.proxy;
 
 import java.util.List;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ICheckStateProvider;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.subgraph.vega.api.scanner.modules.IEnableableModule;
-import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.ui.util.dialogs.IConfigDialogContent;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryCheckStateProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryContentProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryLabelProvider;
 
-public class ConfigureProxyModulesContent implements IConfigDialogContent, ICheckStateListener, ICheckStateProvider {
-	private final List<IResponseProcessingModule> modules;
+public class ConfigureProxyModulesContent implements IConfigDialogContent {
+	private final List<IScannerModule> modules;
 	private Composite composite;
-	private CheckboxTableViewer viewer;
+	private CheckboxTreeViewer viewer;
 	
-	public ConfigureProxyModulesContent(List<IResponseProcessingModule> modules) {
+	public ConfigureProxyModulesContent(List<IScannerModule> modules) {
 		this.modules = modules;
 	}
 
@@ -47,33 +43,28 @@ public class ConfigureProxyModulesContent implements IConfigDialogContent, IChec
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		viewer = CheckboxTableViewer.newCheckList(composite, SWT.NONE);
-		viewer.setCheckStateProvider(this);
-		viewer.addCheckStateListener(this);
-		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				if(element instanceof IScannerModule) {
-					return ((IScannerModule) element).getModuleName();
-				} else {
-					return super.getText(element);
-				}
-			}
-		});
-		viewer.setInput(modules);
-		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer = new CheckboxTreeViewer(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		final ModuleRegistryCheckStateProvider checkStateProvider = new ModuleRegistryCheckStateProvider(viewer);
+		viewer.setContentProvider(new ModuleRegistryContentProvider(checkStateProvider));
+		viewer.setLabelProvider(new ModuleRegistryLabelProvider());
+		viewer.setCheckStateProvider(checkStateProvider);
+		
+		viewer.setInput(modules.toArray(new IScannerModule[0]));
+
+		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.addCheckStateListener(checkStateProvider);
 		composite.layout();
 		return composite;
 	}
 
 	@Override
 	public String getTitle() {
-		return "Configure Response Processing Modules for Proxy";
+		return "Configure enabled modules for proxy";
 	}
 
 	@Override
 	public String getMessage() {
-		return "Choose which response processing modules will be enabled to process responses received by the HTTP proxy";
+		return "Select which vulnerability modules to enable in the Proxy. Injection modules only run against in-scope targets when proxy scanning is enabled.";
 	}
 
 	@Override
@@ -89,25 +80,5 @@ public class ConfigureProxyModulesContent implements IConfigDialogContent, IChec
 	public void onOk() {		
 	}
 
-	@Override
-	public boolean isChecked(Object element) {
-		if(element instanceof IEnableableModule) {
-			IEnableableModule module = (IEnableableModule) element;
-			return module.isEnabled();
-		}
-		return false;
-	}
 
-	@Override
-	public boolean isGrayed(Object element) {
-		return false;
-	}
-
-	@Override
-	public void checkStateChanged(CheckStateChangedEvent event) {
-		if(event.getElement() instanceof IEnableableModule) {
-			IEnableableModule module = (IEnableableModule) event.getElement();
-			module.setEnabled(event.getChecked());
-		}
-	}
 }

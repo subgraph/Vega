@@ -13,6 +13,7 @@ package com.subgraph.vega.api.http.proxy;
 import java.util.List;
 
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 
 public interface IHttpProxyService {
@@ -34,4 +35,5 @@ public interface IHttpProxyService {
 	IHttpProxyTransactionManipulator getTransactionManipulator();
 	IHttpInterceptor getInterceptor();
 	List<IResponseProcessingModule> getResponseProcessingModules();
+	List<IBasicModuleScript> getProxyScanModules();
 }

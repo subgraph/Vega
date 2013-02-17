@@ -11,4 +11,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.subgraph.vega.ui.util.dialogs,
  com.subgraph.vega.ui.util.images,
+ com.subgraph.vega.ui.util.modules,
  com.subgraph.vega.ui.util.preferences
+Import-Package: com.subgraph.vega.api.scanner.modules

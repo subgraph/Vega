@@ -8,7 +8,7 @@
  * Contributors:
  *     Subgraph - initial API and implementation
  ******************************************************************************/
-package com.subgraph.vega.ui.scanner.modules;
+package com.subgraph.vega.ui.util.modules;
 
 import java.util.ArrayList;
 import java.util.HashMap;

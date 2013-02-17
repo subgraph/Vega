@@ -76,7 +76,6 @@ public class ScanProbeTask implements Runnable {
 				}
 			}
 			
-			// replaceScopeURI(scan.getConfig().getScanTargetScope(), uri, redirectURI);
 			scan.getConfig().getScanTargetScope().addScopeURI(redirectURI);
 			
 			return true;
@@ -87,11 +86,6 @@ public class ScanProbeTask implements Runnable {
 		return true;
 	}
 	
-	private void replaceScopeURI(ITargetScope scope, URI remove, URI add) {
-		scope.removeScopeURI(remove, false);
-		scope.addScopeURI(add);
-	}
-
 	private boolean isTrivialRedirect(URI original, URI redirect) {
 		final String originalStr = original.toString();
 		/* Do we ask the user or not? I will assume yes for now

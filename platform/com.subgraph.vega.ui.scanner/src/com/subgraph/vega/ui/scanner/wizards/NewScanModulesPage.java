@@ -11,9 +11,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryCheckStateProvider;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryContentProvider;
-import com.subgraph.vega.ui.scanner.modules.ModuleRegistryLabelProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryCheckStateProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryContentProvider;
+import com.subgraph.vega.ui.util.modules.ModuleRegistryLabelProvider;
 
 public class NewScanModulesPage extends WizardPage {
 
