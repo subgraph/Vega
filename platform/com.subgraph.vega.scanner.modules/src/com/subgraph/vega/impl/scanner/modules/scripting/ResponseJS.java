@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.subgraph.vega.impl.scanner.modules.scripting;
 
+import java.util.List;
+
 import org.apache.http.Header;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -18,6 +20,7 @@ import org.w3c.dom.html2.HTMLDocument;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
+import com.subgraph.vega.api.http.requests.IHttpResponseCookie;
 
 public class ResponseJS extends ScriptableObject {
 
@@ -77,12 +80,29 @@ public class ResponseJS extends ScriptableObject {
 		return headersToJS(response.getRawResponse().getAllHeaders());
 	}
 
+	public Object jsFunction_getCookies() {
+		return cookiesToJS(response.getResponseCookies());
+	}
+	public Object jsGet_cookies() {
+		return cookiesToJS(response.getResponseCookies());
+	}
+
 	private Object headersToJS(Header[] headers) {
 		final Scriptable scope = ScriptableObject.getTopLevelScope(this);
 		final Context cx = Context.getCurrentContext();
 		final Scriptable array = cx.newArray(scope, headers.length);
 		for(int i = 0; i < headers.length; i++) {
 			array.put(i, array, Context.javaToJS(headers[i], scope));
+		}
+		return array;
+	}
+	
+	private Object cookiesToJS(List<IHttpResponseCookie> cookies) {
+		final Scriptable scope = ScriptableObject.getTopLevelScope(this);
+		final Context cx = Context.getCurrentContext();
+		final Scriptable array = cx.newArray(scope, cookies.size());
+		for(int i = 0; i < cookies.size(); i++) {
+			array.put(i, array, Context.javaToJS(cookies.get(i), scope));
 		}
 		return array;
 	}

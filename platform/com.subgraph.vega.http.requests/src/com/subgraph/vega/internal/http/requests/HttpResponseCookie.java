@@ -89,4 +89,9 @@ public class HttpResponseCookie implements IHttpResponseCookie {
 	public String getHeader() {
 		return header;
 	}
+	
+	@Override
+	public String toString() {
+		return cookie.toString();
+	}
 }
