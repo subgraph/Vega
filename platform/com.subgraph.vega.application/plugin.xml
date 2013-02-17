@@ -178,6 +178,13 @@
           class="com.subgraph.vega.application.preferences.ProxyPreferenceInitializer">
     </initializer>
  </extension>
+ <extension
+       point="org.eclipse.ui.bindings">
+    <scheme
+          id="vega.scheme"
+          name="vega.scheme">
+    </scheme>
+ </extension>
 
 
 </plugin>
