@@ -21,7 +21,8 @@ function run(request, response, ctx) {
 
   if (found) {
     var match;
-    ctx.addStringHighlight(request.requestLine.uri);
+    ctx.addRegexCaseInsensitiveHighlight("type=[\"']*password[\"']*");
+
     var sub = request.requestLine.uri;
     var index = sub.indexOf('?');
 
