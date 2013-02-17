@@ -42,6 +42,7 @@ import com.subgraph.vega.api.model.requests.IRequestOriginProxy;
 import com.subgraph.vega.api.paths.IPathFinder;
 import com.subgraph.vega.api.scanner.IScanner;
 import com.subgraph.vega.api.scanner.IScannerConfig;
+import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
 import com.subgraph.vega.internal.http.proxy.ssl.ProxySSLInitializationException;
@@ -356,5 +357,10 @@ public class HttpProxyService implements IHttpProxyService {
 	@Override
 	public IScannerConfig getProxyScanConfig() {
 		return proxyScanner.getConfig();
+	}
+
+	@Override
+	public List<IBasicModuleScript> getProxyScanModules() {
+		return proxyScanner.getInjectionModules();
 	}
 }
