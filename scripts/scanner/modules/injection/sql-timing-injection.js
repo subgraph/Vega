@@ -1,6 +1,7 @@
 var module = {
   name: "Blind SQL Injection Timing Analysis Checks",
-  category: "Injection Modules"
+  category: "Injection Modules",
+  defaultDisabled: true
 };
 
 function initialize(ctx) {
@@ -13,25 +14,25 @@ function initialize(ctx) {
 	  
 	// MySQL 
 	  
-    ctx.submitAlteredRequest(process, "1 AND SLEEP(5) -- ", false, 0);
-    ctx.submitAlteredRequest(process, "1 OR (SELECT SLEEP(5)) -- ", false, 1);
-    ctx.submitAlteredRequest(process, "\" AND SLEEP(5) -- ", true, 2);
-    ctx.submitAlteredRequest(process, "' AND SLEEP(5) -- ", true, 3);
-    ctx.submitAlteredRequest(process, "\" OR (SELECT SLEEP(5)) -- ", true, 4);
-    ctx.submitAlteredRequest(process, "\' OR (SELECT SLEEP(5)) -- ", true, 5);
-    ctx.submitAlteredRequest(process, " OR EXISTS(SELECT SLEEP(5)) -- ", true, 6);
-    ctx.submitAlteredRequest(process, "' OR EXISTS(SELECT SLEEP(5)) -- ", true, 7);
-    ctx.submitAlteredRequest(process, "\" OR EXISTS(SELECT SLEEP(5)) -- ", true, 8);
-    ctx.submitAlteredRequest(process, " UNION SELECT SLEEP(5) -- ", true, 9);
-    ctx.submitAlteredRequest(process, "' UNION SELECT SLEEP(5) -- ", true, 10);
-    ctx.submitAlteredRequest(process, "\" UNION SELECT SLEEP(5) -- ", true, 11);
-    ctx.submitAlteredRequest(process, "(1 AND (SELECT SLEEP(5)))", false, 12);
+    ctx.submitAlteredRequest(process, "1 AND SLEEP(20) -- ", false, 0);
+    ctx.submitAlteredRequest(process, "1 OR (SELECT SLEEP(20)) -- ", false, 1);
+    ctx.submitAlteredRequest(process, "\" AND SLEEP(20) -- ", true, 2);
+    ctx.submitAlteredRequest(process, "' AND SLEEP(20) -- ", true, 3);
+    ctx.submitAlteredRequest(process, "\" OR (SELECT SLEEP(20)) -- ", true, 4);
+    ctx.submitAlteredRequest(process, "\' OR (SELECT SLEEP(20)) -- ", true, 5);
+    ctx.submitAlteredRequest(process, " OR EXISTS(SELECT SLEEP(20)) -- ", true, 6);
+    ctx.submitAlteredRequest(process, "' OR EXISTS(SELECT SLEEP(20)) -- ", true, 7);
+    ctx.submitAlteredRequest(process, "\" OR EXISTS(SELECT SLEEP(20)) -- ", true, 8);
+    ctx.submitAlteredRequest(process, " UNION SELECT SLEEP(20) -- ", true, 9);
+    ctx.submitAlteredRequest(process, "' UNION SELECT SLEEP(20) -- ", true, 10);
+    ctx.submitAlteredRequest(process, "\" UNION SELECT SLEEP(20) -- ", true, 11);
+    ctx.submitAlteredRequest(process, "(1 AND (SELECT SLEEP(20)))", false, 12);
   }  
 
 }
 
 function process(req, res, ctx) {
-	if (res.milliseconds > 5000) {
+	if (res.milliseconds > 20000) {
 		var ps = ctx.getPathState();
 		
 		ctx.debug("Request:"+req.requestLine.uri);
