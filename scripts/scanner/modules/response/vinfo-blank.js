@@ -10,6 +10,9 @@ function run(request, response, ctx) {
     var i = 0;
     var found = 0;
     var headers = response.allHeaders
+    var url = String(request.requestLine.uri);
+    var uripart = url.replace(/\?.*/, "");
+
 
     for (i = 0; i < headers.length; i++) {
       if (headers[i].name.toLowerCase() == "location") found = 1;
@@ -18,8 +21,8 @@ function run(request, response, ctx) {
       if ((response.code != 401) && (response.code != 304) && (response.code != 404) && (response.code != 204)) {
         ctx.addStringHighlight(request.requestLine.uri);
         ctx.alert("vinfo-blank", request, response, {
-          resource: request.requestLine.uri,
-          key: "vinfo-blank" + request.requestLine.uri
+          resource: uripart,
+          key: "vinfo-blank:" + uripart
         });
       }
     }
