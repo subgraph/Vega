@@ -37,38 +37,43 @@ function run(request, response, ctx) {
   // Parse cookies array and generate alerts
   for (var i = 0; i < cookies.length; i++) {
   
-  	HttpOnly = false;
-  	if (httpOnlyRegex.test(cookies[i].getHeader())) {
-  	  HttpOnly = true;
-  	}    
+    HttpOnly = false;
+    if (httpOnlyRegex.test(cookies[i].getHeader())) {
+      HttpOnly = true;
+    }    
+
+    var alerted = false;
+
     // vinfo-sessioncookie-secure and vinfo-cookie-secure alerts
-    if(!cookies[i].isSecure() && ssl) {
-      ctx.addStringHighlight(cookies[i].getHeader());
+
+    if(!cookies[i].isSecure()) {
+
       var s; // session identifier substring
       var alerted = false; // alerted
-      for (s in sessionSubStrings) {
-        if (cookies[i].raw.indexOf(sessionSubStrings[s]) >= 0) {
-          ctx.debug(sessionSubStrings[s] + " matched " + cookies[i].raw);
-          if (alerted) {
+      for (s = 0; s < sessionSubStrings.length; s++) {
+        var cookie = String(cookies[i].getHeader());
+        if (cookie.indexOf(sessionSubStrings[s]) >= 0) {
             ctx.addStringHighlight(cookies[i].getHeader());
             ctx.alert("vinfo-sessioncookie-secure", request, response, {
               output: cookies[i].getHeader(),
               key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
               resource: request.requestLine.uri
             }); 
-            alerted = true;
+	    alerted = true;
           }
         }   
       }
+ 
+      if (!cookies[i].isSecure() && ssl) {
 
-      if (!alerted) {
-        ctx.alert("vinfo-cookie-secure", request, response, {
-          output: cookies[i].getHeader(),
-          key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
-          resource: request.requestLine.uri
-        });
+        if (!alerted) {
+          ctx.alert("vinfo-cookie-secure", request, response, {
+            output: cookies[i].getHeader(),
+            key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
+            resource: request.requestLine.uri
+          });
+        }
       }
-    }
 
     // vinfo-cookie-httponly alert
     
