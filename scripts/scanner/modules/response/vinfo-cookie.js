@@ -1,85 +1,94 @@
 var module = {
   name : "Cookie Security Module",
-  type: "response-processor",
+  type: "response-processor"
 };
-
-
 
 function run(request, response, ctx) {
 
-  var sessionSubStrings = new Array("ASP.NET_SessionId",
-		  							"ASPSESSIONID",
-		  							"sessionid",
-		  							"_session",
-		  							"JSESSIONID",
-		  							"PHPSESSID",
-		  							"symfony",
-		  							"PD-H-SESSION-ID",
-		  							"PD-S-SESSION-ID",
-		  							"SITESERVER",
-		  							"cfid",
-		  							"cftoken",
-		  							"jsessionid",
-		  							"sessid",
-		  							"sid",
-		  							"viewstate",
-		  							"zenid");
+  var sessionSubStrings = ["ASP.NET_SessionId",
+    "ASPSESSIONID",
+    "sessionid",
+    "_session",
+    "JSESSIONID",
+    "PHPSESSID",
+    "symfony",
+    "PD-H-SESSION-ID",
+    "PD-S-SESSION-ID",
+    "SITESERVER",
+    "cfid",
+    "cftoken",
+    "jsessionid",
+    "sessid",
+    "sid",
+    "viewstate",
+    "zenid"];
   
-  var cookies = new Array();
-  cookies=response.getHeaders("Set-Cookie");
-  // FIXME: Test for SSL Missing!!!
-  // so assume it is ssl until we can fix this
-  var ssl=0;
-  if(response.host.schemeName=="https"){
-    ssl=1;
+  var uri = String(request.requestLine.uri);
+  var uripart = uri.replace(/\?.*/, "");
+  var ssl = false;
+  var cookies = [];
+  cookies = response.cookies;
+  var httpOnlyRegex = /;(\s)*HttpOnly;*/i;
+
+  if (response.host.schemeName === "https") {
+    ssl = true;
   }
-  for(var i=0; i<cookies.length; i++) {
-    var httponly=0;
-    var secure=0;
-    var params = new Array();
-    params = cookies[i].getValue().split(";");
-    for(var j=1; j<params.length; j++) {
-      if(params[j].toLowerCase()==" secure"){
-        secure=1;
-      }
-      if(params[j].toLowerCase()==" httponly"){
-        httponly=1;
-      }
-    }	
 
-    if(httponly!=1 || (secure!=1&&ssl==1)) { ctx.addStringHighlight(cookies[i].getValue()); }
-
-    if(secure !=1 && ssl == 1) {
+  // Parse cookies array and generate alerts
+  for (var i = 0; i < cookies.length; i++) {
+  
+  	HttpOnly = false;
+  	if (httpOnlyRegex.test(cookies[i].getHeader())) {
+  	  HttpOnly = true;
+  	}    
+    // vinfo-sessioncookie-secure and vinfo-cookie-secure alerts
+    if(!cookies[i].isSecure() && ssl) {
+      ctx.addStringHighlight(cookies[i].getHeader());
       var s; // session identifier substring
-      var a = 0; // alerted
+      var alerted = false; // alerted
       for (s in sessionSubStrings) {
-    	if (cookies[i].getValue().indexOf(sessionSubStrings[s]) >= 0) {
-    	  ctx.debug(sessionSubStrings[s] + " matched " + cookies[i].getValue());
-    	  if (a == 0) {
-      	    ctx.alert("vinfo-sessioncookie-secure", request, response, {
-    	              output: cookies[i].getValue(),
-    	              key: "vinfo-cookie-secure:" + cookies[i].getValue(),
-    	              resource: request.requestLine.uri
-    	            }); 
-    	    a = 1;
-    	    }
-    	  }
-    	}
-        if (a == 0) {
-        	
-    	  ctx.alert("vinfo-cookie-secure", request, response, {
-          output: cookies[i].getValue(),
-          key: "vinfo-cookie-secure:" + cookies[i].getValue(),
+        if (cookies[i].raw.indexOf(sessionSubStrings[s]) >= 0) {
+          ctx.debug(sessionSubStrings[s] + " matched " + cookies[i].raw);
+          if (alerted) {
+            ctx.addStringHighlight(cookies[i].getHeader());
+            ctx.alert("vinfo-sessioncookie-secure", request, response, {
+              output: cookies[i].getHeader(),
+              key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
+              resource: request.requestLine.uri
+            }); 
+            alerted = true;
+          }
+        }   
+      }
+
+      if (!alerted) {
+        ctx.alert("vinfo-cookie-secure", request, response, {
+          output: cookies[i].getHeader(),
+          key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
           resource: request.requestLine.uri
         });
       }
     }
-    if(httponly!=1){
+
+    // vinfo-cookie-httponly alert
+    
+    if(!HttpOnly) {
+      ctx.addStringHighlight(cookies[i].getHeader());
       ctx.alert("vinfo-cookie-httponly", request, response, {
-        output: cookies[i].getValue(),
-        key: "vinfo-cookie-httponly:" + cookies[i].getValue(),
+        output: cookies[i].getHeader(),
+        key: "vinfo-cookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
         resource: request.requestLine.uri
       });
     }
+
+	
+    // vinfo-securecookie-insecurechannel alert
+    if(cookies[i].isSecure() && !ssl) {
+      ctx.alert("vinfo-securecookie-insecurechannel", request, response, {
+        output: cookies[i].getHeader(),
+        key: "vinfo-securecookie-insecurechannel:" + uri.host + uripart + cookies[i].getHeader(),
+        resource: request.requestLine.uri
+      });        
+    }
   }
-}
+}  
