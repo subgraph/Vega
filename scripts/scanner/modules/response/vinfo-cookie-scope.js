@@ -31,7 +31,7 @@ function run(request, response, ctx) {
 			}
 		}
 		if (tooLiberal) {
-			ctx.addStringHighlight(String(cookies[i].getHeader()));
+			ctx.addRegexCaseInsensitiveHighlight("Domain=[\"']*"+String(cookies[i].domain)+"[\"']*");
 			ctx.alert("vinfo-cookie-scope", request, response, {
 				"output": cookies[i].getHeader(),
 				key: "vinfo-cookie-scope" +  uri.host + uripart + cookies[i].getHeader(),
