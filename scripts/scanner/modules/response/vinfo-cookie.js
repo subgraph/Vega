@@ -30,7 +30,7 @@ function run(request, response, ctx) {
   cookies = response.cookies;
   var httpOnlyRegex = /;(\s)*HttpOnly;*/i;
 
-  if (response.host.schemeName === "https") {
+  if (response.host.schemeName == "https") {
     ssl = true;
   }
 
@@ -83,7 +83,9 @@ function run(request, response, ctx) {
 
 	
     // vinfo-securecookie-insecurechannel alert
+
     if(cookies[i].isSecure() && !ssl) {
+      ctx.addStringHighlight(cookies[i].getHeader());
       ctx.alert("vinfo-securecookie-insecurechannel", request, response, {
         output: cookies[i].getHeader(),
         key: "vinfo-securecookie-insecurechannel:" + uri.host + uripart + cookies[i].getHeader(),
