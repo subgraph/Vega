@@ -219,6 +219,22 @@
       <handler
             class="com.subgraph.vega.ui.scanner.commands.StartNewScanHandler"
             commandId="com.subgraph.vega.ui.scanner.startnewscan">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="vega.scanSelectionState">
+                  <equals
+                        value="idle">
+                  </equals>
+               </with>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="com.subgraph.vega.perspectives.scanner">
+                  </equals>
+               </with>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="com.subgraph.vega.ui.scanner.commands.ExpandAllAlerts"
@@ -313,6 +329,21 @@
             id="com.subgraph.vega.preferences.scanoptions"
             name="Scanner">
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.subgraph.vega.ui.scanner.startnewscan"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="vega.scheme"
+            sequence="M1+N">
+      </key>
+      <key
+            commandId="com.subgraph.vega.ui.scanner.editscope"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="vega.scheme"
+            sequence="M1+E">
+      </key>
    </extension>
 
 </plugin>
