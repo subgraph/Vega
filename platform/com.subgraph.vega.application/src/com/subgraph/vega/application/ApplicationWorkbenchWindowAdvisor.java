@@ -10,9 +10,11 @@
  ******************************************************************************/
 package com.subgraph.vega.application;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -26,7 +28,10 @@ import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.eclipse.ui.internal.PerspectiveBarManager;
 import org.eclipse.ui.internal.WorkbenchWindow;
 
+import com.subgraph.vega.api.vuge.IConstants;
 import com.subgraph.vega.application.console.VegaConsoleView;
+import com.subgraph.vega.application.preferences.IPreferenceConstants;
+import com.subgraph.vega.application.update.UpdateCheckTask;
 
 @SuppressWarnings("restriction")
 public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
@@ -92,6 +97,8 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
     	forceActivate(activePage, VegaConsoleView.ID);
     	forceActivate(activePage, "com.subgraph.vega.views.alert");
+    	
+    	maybePerformUpdateCheck(window.getShell(), IConstants.BUILD_NUMBER);
     }
     
     private void forceActivate(IWorkbenchPage page, String viewID) {
@@ -101,4 +108,13 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     		viewReference.getView(true);
     	}
     }
+    
+    private void maybePerformUpdateCheck(Shell shell, int buildNumber) {
+		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
+		if(preferences.getBoolean(IPreferenceConstants.P_UPDATE_CHECK_ENABLED) && (buildNumber != 0)) {
+			final UpdateCheckTask task = new UpdateCheckTask(shell, buildNumber);
+			final Thread thread = new Thread(task);
+			thread.start();
+		}
+	}
 }

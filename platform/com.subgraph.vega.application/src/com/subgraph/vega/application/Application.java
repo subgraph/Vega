@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
@@ -31,12 +30,9 @@ import org.eclipse.ui.PlatformUI;
 import com.subgraph.vega.api.console.IConsole;
 import com.subgraph.vega.api.model.IModel;
 import com.subgraph.vega.api.paths.IPathFinder;
-import com.subgraph.vega.api.vuge.IConstants;
 import com.subgraph.vega.application.console.ConsoleHandler;
 import com.subgraph.vega.application.logging.LogFormatter;
 import com.subgraph.vega.application.logging.LogHandler;
-import com.subgraph.vega.application.preferences.IPreferenceConstants;
-import com.subgraph.vega.application.update.UpdateCheckTask;
 
 /**
  * This class controls all aspects of the application's execution
@@ -61,8 +57,6 @@ public class Application implements IApplication {
 		ConsoleHandler consoleHandler = new ConsoleHandler(display, Activator.getDefault().getConsole());
 		consoleHandler.activate();
 		
-		maybePerformUpdateCheck(display, IConstants.BUILD_NUMBER);
-		
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
 			if (returnCode == PlatformUI.RETURN_RESTART)
@@ -73,15 +67,6 @@ public class Application implements IApplication {
 			display.dispose();
 		}
 		
-	}
-
-	private void maybePerformUpdateCheck(Display display, int buildNumber) {
-		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
-		if(preferences.getBoolean(IPreferenceConstants.P_UPDATE_CHECK_ENABLED) && (buildNumber != 0)) {
-			final UpdateCheckTask task = new UpdateCheckTask(display, buildNumber);
-			final Thread thread = new Thread(task);
-			thread.start();
-		}
 	}
 
 	private boolean lockInstance() {
