@@ -171,11 +171,17 @@
           id="com.subgraph.vega.preferences.general"
           name="General">
     </page>
+    <page
+          category="com.subgraph.vega.preferences.general"
+          class="com.subgraph.vega.application.preferences.UpdatesPreferencePage"
+          id="com.subgraph.vega.preferences.update"
+          name="Updates">
+    </page>
  </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="com.subgraph.vega.application.preferences.ProxyPreferenceInitializer">
+          class="com.subgraph.vega.application.preferences.GeneralPreferenceInitializer">
     </initializer>
  </extension>
  <extension

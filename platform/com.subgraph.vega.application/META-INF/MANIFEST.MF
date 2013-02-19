@@ -19,6 +19,7 @@ Import-Package: com.subgraph.vega.api.console,
  com.subgraph.vega.ui.util.images,
  com.subgraph.vega.ui.util.preferences,
  org.apache.http;version="4.1.0",
+ org.apache.http.client.methods;version="4.2.2",
  org.eclipse.ui.console,
  org.eclipse.ui.internal.console
 Export-Package: com.subgraph.vega.ui.util

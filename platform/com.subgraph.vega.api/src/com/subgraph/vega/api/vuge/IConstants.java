@@ -24,5 +24,10 @@ public interface IConstants {
 	/**
 	 * Version string.
 	 */
-	static final String VERSION_STRING = "Beta 1";
+	static final String VERSION_STRING = "1.0";
+	
+	/**
+	 * Build number (injected by Ant/Hudson)
+	 */
+	static final int BUILD_NUMBER = 0x00000000;
 }

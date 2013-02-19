@@ -18,4 +18,6 @@ public interface IPreferenceConstants {
 	public static final String P_PROXY_ENABLED = "vega.preferences.proxyEnabled";
 	public static final String P_PROXY_ADDRESS = "vega.preferences.proxyAddress";
 	public static final String P_PROXY_PORT = "vega.preferences.proxyPort";
+	
+	public static final String P_UPDATE_CHECK_ENABLED = "vega.preferences.updateCheck";
 }

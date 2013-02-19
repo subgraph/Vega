@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <project name="vega.setup">
-  <target name="setup" depends="copy-files,set-build-id" />
+  <target name="setup" depends="copy-files,set-build-id,set-build-number" />
 
   <target name="set-build-id" if="build.id">
     <replace file="build/stage/plugins/com.subgraph.vega.application/src/com/subgraph/vega/application/about/AboutDialog.java" value="${build.id}" token="0xC0FFEEEE" />
   </target>
 
+  <target name="set-build-number" if="build.number">
+    <replace file="build/stage/plugins/com.subgraph.vega.api/src/com/subgraph/vega/api/vuge/IConstants.java" value="${build.number}" token="0x00000000" />
+  </target>
+  
   <target name="copy-files">
     <copy todir="build/stage/features" >
       <fileset dir="platform" >
