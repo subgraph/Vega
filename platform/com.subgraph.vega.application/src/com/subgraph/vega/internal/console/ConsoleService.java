@@ -28,6 +28,9 @@ public class ConsoleService implements IConsole {
 	
 	@Override
 	public synchronized void write(String output) {
+		if(output == null || output.isEmpty()) {
+			return;
+		}
 		if(!output.endsWith("\n"))
 			output = output + "\n";
 		if(displays.size() == 0) {
@@ -42,6 +45,9 @@ public class ConsoleService implements IConsole {
 
 	@Override
 	public synchronized void error(String output) {
+		if(output == null || output.isEmpty()) {
+			return;
+		}
 		if(!output.endsWith("\n"))
 			output = output + "\n";
 		if(displays.size() == 0) {
