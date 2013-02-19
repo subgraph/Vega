@@ -2,7 +2,6 @@ package com.subgraph.vega.internal.http.requests.config.proxy;
 
 import org.apache.http.HttpVersion;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -10,6 +9,7 @@ import org.apache.http.params.HttpProtocolParams;
 
 import com.subgraph.vega.internal.http.requests.RequestCopyHeadersInterceptor;
 import com.subgraph.vega.internal.http.requests.RequestExtractCookiesInterceptor;
+import com.subgraph.vega.internal.http.requests.VegaResponseProcessCookies;
 import com.subgraph.vega.internal.http.requests.config.IHttpClientConfigurer;
 
 
@@ -31,7 +31,7 @@ public class ProxyHttpClientConfigurer implements IHttpClientConfigurer {
 	
 	private void configureResponseInterceptors(DefaultHttpClient client) {
 		client.clearResponseInterceptors();
-		client.addResponseInterceptor(new ResponseProcessCookies());
+		client.addResponseInterceptor(new VegaResponseProcessCookies());
 	}
 
 	@Override
