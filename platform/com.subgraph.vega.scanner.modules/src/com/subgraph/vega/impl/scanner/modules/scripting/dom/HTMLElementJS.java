@@ -19,6 +19,8 @@ import org.w3c.dom.html2.HTMLLinkElement;
 import org.w3c.dom.html2.HTMLOptionElement;
 import org.w3c.dom.html2.HTMLSelectElement;
 
+import com.subgraph.vega.api.html.IInnerHtmlProvidingElement;
+
 public class HTMLElementJS extends ElementJS {
 
 	static HTMLElementJS domHTMLElementToJS(HTMLElement element, DocumentJS document) {
@@ -77,7 +79,11 @@ public class HTMLElementJS extends ElementJS {
 	}
 	
 	public String jsGet_innerHTML() {
-		return null;
+		if(htmlElement instanceof IInnerHtmlProvidingElement) {
+			return ((IInnerHtmlProvidingElement) htmlElement).getInnerHtml();
+		} else {
+			return "";
+		}
 	}
 	
 	public String jsGet_lang() {

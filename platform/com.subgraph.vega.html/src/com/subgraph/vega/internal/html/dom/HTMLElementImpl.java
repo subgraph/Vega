@@ -15,8 +15,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.html2.HTMLElement;
 import org.w3c.dom.html2.HTMLFormElement;
 
+import com.subgraph.vega.api.html.IInnerHtmlProvidingElement;
 
-public class HTMLElementImpl extends ElementImpl implements HTMLElement {
+
+public class HTMLElementImpl extends ElementImpl implements HTMLElement, IInnerHtmlProvidingElement {
 
 	static Element findEnclosingFormElement(Element insideElement) {
 		Element e = insideElement;
@@ -119,5 +121,10 @@ public class HTMLElementImpl extends ElementImpl implements HTMLElement {
 		} catch (NumberFormatException e) {
 			return 0;
 		}
+	}
+
+	@Override
+	public String getInnerHtml() {
+		return jsoupElement.html();
 	}
 }
