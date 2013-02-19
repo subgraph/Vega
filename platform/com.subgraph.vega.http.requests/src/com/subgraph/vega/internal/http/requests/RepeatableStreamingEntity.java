@@ -130,31 +130,31 @@ public class RepeatableStreamingEntity extends AbstractHttpEntity {
 
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int l;
-		if(length < 0) {
-			// consume until EOF
-			while((l = input.read(buffer)) != -1) {
-				try {
+		
+		try {
+			if(length < 0) {
+				// consume until EOF
+				while((l = input.read(buffer)) != -1) {
 					outstream.write(buffer, 0, l);
-				} catch(Exception e) {
-					e.printStackTrace();
+				}
+			} else {
+				// consume no more than length
+				long remaining = this.length;
+
+				while(remaining > 0) {
+					int sz = (remaining < BUFFER_SIZE) ? ((int) remaining) : (BUFFER_SIZE);
+					l = input.read(buffer, 0, sz);
+					if(l == -1)
+						break;
+					outstream.write(buffer, 0, l);
+					remaining -= l;
 				}
 			}
-		} else {
-			// consume no more than length
-			long remaining = this.length;
-
-			while(remaining > 0) {
-				int sz = (remaining < BUFFER_SIZE) ? ((int) remaining) : (BUFFER_SIZE);
-				l = input.read(buffer, 0, sz);
-				if(l == -1)
-					break;
-				outstream.write(buffer, 0, l);
-				remaining -= l;
+		} finally {
+			if(input != null) {
+				input.close();
+				input = null;
 			}
-		}
-		if(input != null) {
-			input.close();
-			input = null;
 		}
 	}
 
