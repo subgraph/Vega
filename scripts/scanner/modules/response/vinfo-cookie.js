@@ -75,17 +75,32 @@ function run(request, response, ctx) {
         }
       }
 
-    // vinfo-cookie-httponly alert
+    // vinfo-sessioncookie-httponly alert
     
     if(!HttpOnly) {
-      ctx.addStringHighlight(cookies[i].getHeader());
-      ctx.alert("vinfo-cookie-httponly", request, response, {
-        output: cookies[i].getHeader(),
-        key: "vinfo-cookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
-        resource: request.requestLine.uri
-      });
+      var s; // session identifier substring
+      var alerted = false; // alerted
+      for (s = 0; s < sessionSubStrings.length; s++) {
+        var cookie = String(cookies[i].getHeader());
+        if (cookie.indexOf(sessionSubStrings[s]) >= 0) {
+            ctx.addStringHighlight(cookies[i].getHeader());
+            ctx.alert("vinfo-sessioncookie-httponly", request, response, {
+              output: cookies[i].getHeader(),
+              key: "vinfo-sessioncookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
+              resource: request.requestLine.uri
+            });
+            alerted = true;
+          }
+        }
+      if (!alerted) {
+        ctx.addStringHighlight(cookies[i].getHeader());
+        ctx.alert("vinfo-cookie-httponly", request, response, {
+          output: cookies[i].getHeader(),
+          key: "vinfo-cookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
+          resource: request.requestLine.uri
+        });
+      }
     }
-
 	
     // vinfo-securecookie-insecurechannel alert
 

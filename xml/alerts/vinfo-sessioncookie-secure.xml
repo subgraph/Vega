@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Session Cookie SECURE FLAG not set </title>
+<title>Session Cookie Without Secure Flag </title>
 
 <class>Information</class>
 <severity>High</severity>
 <discussion>
-Vega has detected that requesting this cookie is created without the secure flag.
+Vega has detected that a known session cookie may have been set without the secure flag.
 </discussion>
+        <impact>Cookies can be exposed to network eavesdroppers.</impact>
+        <impact>Session cookies are authentication credentials; attackers who obtain them can get unauthorized access to affected web applications.</impact>
+
         <remediation>
           When creating the cookie in the code, set the secure flag to true.
         </remediation>
+
         <references>
+                <url address="https://www.owasp.org/index.php/SecureFlag">Secure Flag</url>
                 <url address="https://www.owasp.org/index.php/HttpOnly">HttpOnly OWASP Reference</url>
         </references>
+
 </alert>
 
 
