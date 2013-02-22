@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Internet Explorer Cross-site Scripting Filter Disabled </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has disabled the Internet Explorer cross-site scripting filter. The cross-site scripting filter is a security feature in Internet Explorer 8 and later that is intended to mitigate some categories cross-site scripting attacks. It is enabled by default in supported versions of Internet Explorer but servers may disable the filter via the "X-XSS-Protection" response header. Disabling the filter presents a risk to users of browsers that support this feature as the filter will no longer protect them from certain cross-site scripting vulnerabilities in the website that has disabled the filter.
+</discussion>
+        <remediation>
+          Do not disable the cross-site scripting filter. If possible, proactively enable the filter by setting the following response header:
+          "X-XSS-Protection: 1; mode=block"
+        </remediation>
+        <references>
+                <url address="http://blogs.msdn.com/b/ieinternals/archive/2011/01/31/controlling-the-internet-explorer-xss-filter-with-the-x-xss-protection-http-header.aspx">Controlling the XSS Filter</url>
+        </references>
+</alert>
