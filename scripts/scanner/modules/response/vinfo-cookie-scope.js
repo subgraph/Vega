@@ -31,11 +31,12 @@ function run(request, response, ctx) {
 			}
 		}
 		if (tooLiberal) {
+                        var uripart = uri.replace(/\?.*/, "");
 			ctx.addRegexCaseInsensitiveHighlight("Domain=[\"']*"+String(cookies[i].domain)+"[\"']*");
 			ctx.alert("vinfo-cookie-scope", request, response, {
 				"output": cookies[i].getHeader(),
-				key: "vinfo-cookie-scope" +  uri.host + uripart + cookies[i].getHeader(),
-				resource: request.requestLine.uri 
+				key: "vinfo-cookie-scope" +  uri.host + cookies[i].getName() + cookies[i].getDomain() + cookies[i].getPath(),
+				resource: uripart
 			});
 		}
 		
