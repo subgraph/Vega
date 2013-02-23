@@ -19,9 +19,9 @@ function run(request, response, ctx) {
 			if (hdr.name == "X-XSS-Protection" && hdr.value == "0") {
 				ctx.addStringHighlight(hdr);
 				ctx.alert("vinfo-xss-filter-disabled", request, response, {
-          output: hdr,
-					resource: request.requestLine.uri,
-          key: "vinfo-xss-filter-disabled" + uripart
+          				output: hdr,
+					resource: uripart,
+          				key: "vinfo-xss-filter-disabled" + uripart
         });
 			}
 			
@@ -29,7 +29,7 @@ function run(request, response, ctx) {
 				ctx.addStringHighlight(hdr);
 				ctx.alert("vinfo-insecure-cors-ac", request, response, {
 					output: hdr,
-					resource: request.requestLine.uri,
+					resource: uripart,
 					key: "vinfo-insecure-cors-ac" + uripart
 				});
 			}

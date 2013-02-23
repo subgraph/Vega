@@ -26,7 +26,7 @@ function run(request, response, ctx) {
 	if (alert) {
 		ctx.alert("vinfo-xframeoptions", request, response, {
       output: request.requestLine.uri,
-			resource: request.requestLine.uri,
+			resource: uripart,
       key: "vinfo-xframe-options" + uripart
 		});
 	}

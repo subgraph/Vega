@@ -20,10 +20,13 @@ function run(request, response, ctx) {
     }
   }
   if (res) {
+   var uri = String(request.requestLine.uri);
+   var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-metatags", request, response, {
       "output": output,
-      "resource": request.requestLine.uri,
-      key: "vinfo-metatags" + request.requestLine.uri + output
+      "resource": uripart,
+      key: "vinfo-metatags" + uripart + output
     });
   }
 }

@@ -33,9 +33,12 @@ function run(request, response, ctx) {
   }
 
   if (res) {
+     var uri = String(request.requestLine.uri);
+     var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-feeds", request, response, {
       "output": output,
-      "resource": request.requestLine.uri,
+      "resource": uripart,
       key: "vinfo-feeds" + output
     });
   }

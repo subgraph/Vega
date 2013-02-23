@@ -44,10 +44,13 @@ function run(request, response, ctx) {
   }
 
   if (output.length > 0) {
+    var uri = String(request.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-source", request, response, {
       "output": output,
-      "resource": request.requestLine.uri,
-      key: "vinfo-source" + request.requestLine.uri
+      "resource": uripart,
+      key: "vinfo-source:" + uripart
     });
   }
 }

@@ -4,12 +4,16 @@ var module = {
 };
 
 function run(request, response, ctx) {
+
   
   if (response.code == 401 && response.host.schemeName != "https") {
+      var uri = String(request.requestLine.uri);
+      var uripart = uri.replace(/\?.*/, "");
+
       ctx.alert("vhttpauth", request, response, {
       output: response.bodyAsString,
-      key: "vhttpauth:" + request.requestLine.uri,
-      resource: request.requestLine.uri
+      key: "vhttpauth:" + uripart,
+      resource: uripart
     });
 
   }

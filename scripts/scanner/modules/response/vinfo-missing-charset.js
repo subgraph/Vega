@@ -28,9 +28,9 @@ function run(request, response, ctx) {
 	}
 	if (alert) {
 		ctx.alert("vinfo-missing-charset", request, response, {
-      output: request.requestLine.uri,
-			resource: request.requestLine.uri,
-      key: "vinfo-missing-charset" + uripart
+      			output: request.requestLine.uri,
+			resource: uripart,
+      			key: "vinfo-missing-charset:" + uripart
 		});
 	}
 }

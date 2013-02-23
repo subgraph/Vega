@@ -9,10 +9,13 @@ function run(request, response, ctx) {
 
   res = regexp.test(response.bodyAsString);
   if (res) {
+   var uri = String(request.requestLine.uri);
+   var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vvcs-users", request, response, {
       "output": response.bodyAsString,
-      "resource": request.requestLine.uri,
-      key: "vvcs-users" + request.requestLine.uri
+      "resource": uripart,
+      key: "vvcs-users:" + uripart
     });
   }
 }

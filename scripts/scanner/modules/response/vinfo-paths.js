@@ -48,11 +48,15 @@ function run(request, response, ctx) {
 
 
   if (matches.length) {
+ 
+    var uri = String(request.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     var key = output.join(" ");
 
     ctx.alert("vinfo-paths", request, response, {
       "output": output.join(" "),
-      "resource": request.requestLine.uri,
+      "resource": uripart,
       key: "vinfo-paths" + key
     });
   }

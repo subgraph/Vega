@@ -29,10 +29,14 @@ function run(request, response, ctx) {
     }
   }
   if (cards.length) {
+	
+   var uri = String(request.requestLine.uri);
+   var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vpii-cc", request, response, {
       "output": cards.join("\n"),
-      "resource": request.requestLine.uri,
-      key: "vpii-cc" + request.requestLine.uri + cards.join("\n")
+      "resource": uripart,
+      key: "vpii-cc:" + uripart + cards.join("\n")
     });
   }
 }
