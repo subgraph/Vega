@@ -113,20 +113,20 @@ public class ResponseAnalyzer {
 					remoteScript = true;
 				if((v != null) && (match(n, "href", "src", "action", "codebase") || (match(n, "value") && !match(tag, "input")))) {
 					if(v.startsWith("vega://"))	
-						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res);
+						alert(ctx, "vinfo-url-inject", "URL injection into <"+ tag + "> tag", req, res, null);
 
 					if(v.startsWith("http://vega.invalid/") || v.startsWith("//vega.invalid/")) {
 						if(match(tag, "script", "link")) {
 							ctx.addStringHighlight(((Attr)item).getValue());
-							alert(ctx, "vinfo-xss-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res);
+							alert(ctx, "vinfo-xss-inject", "URL injection into actively fetched field in tag <"+ tag +"> (high risk)", req, res, null);
 						}
 						else if(match(tag, "a")) {
 							ctx.addStringHighlight(((Attr)item).getValue());
-							alert(ctx, "vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res);
+							alert(ctx, "vinfo-url-inject", "URL injection into anchor tag (low risk)", req, res, null);
 						}	
 						else {
 							ctx.addStringHighlight(((Attr)item).getValue());
-							alert(ctx, "vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res);
+							alert(ctx, "vinfo-url-inject", "URL injection into tag <"+ tag +">", req, res, null);
 						}
 					}
 
@@ -164,12 +164,41 @@ public class ResponseAnalyzer {
 			return;
 		final HttpUriRequest xssReq = ctx.getPathState().getXssRequest(xids[0], xids[1]);
 		if(xssReq != null) {
-			ctx.addStringHighlight(xidstring);
-			alert(ctx, type, message, xssReq, res);
+			if (text.length() > 20) 
+				ctx.addStringHighlight(text);
+			else
+				ctx.addStringHighlight(xidstring);
+			alert(ctx, type, message, xssReq, res, null);
 		}	
 		else {
-			ctx.addStringHighlight(xidstring);
-			alert(ctx, "vinfo-xss-stored", message + " (from previous scan)", req, res);
+
+			if (text.length() > 20) 
+				ctx.addStringHighlight(text);
+			else
+				ctx.addStringHighlight(xidstring);
+			
+			String path = req.getURI().getPath();
+			String storedXSSContext;
+						
+			if (offset == 0) {
+				int tagOffset = res.getBodyAsString().indexOf(text);
+				if ((tagOffset + 26) < res.getBodyAsString().length()) 
+					storedXSSContext = res.getBodyAsString().substring(tagOffset+16, tagOffset+26);
+				else
+					storedXSSContext = res.getBodyAsString().substring(tagOffset, res.getBodyAsString().length()-1);
+			} 
+			else if ((offset + 26) < text.length()) 
+				storedXSSContext = text.substring(offset +16, offset + 26);
+			else 
+				storedXSSContext = text.substring(offset+16, text.length()-1);
+			
+			int i = path.indexOf('?');
+
+			if (i != -1) {
+				path = path.substring(0, i);
+			}
+		
+			alert(ctx, "vinfo-xss-stored", message + " (from previous scan)", req, res, "vinfo-xss-stored:"+path+":"+storedXSSContext);
 		}
 	}
 
@@ -238,7 +267,7 @@ public class ResponseAnalyzer {
 				inQuote = true;
 				if(matchStartsWith(text, lastWordIdx, "innerHTML", "open", "url", "href", "write") &&
 						matchStartsWith(text, idx + 1, "//vega.invalid/", "http://vega.invalid", "vega:")) {
-					alert(ctx, "vinfo-url-inject", "Injected URL in JS/CSS code", req, res);
+					alert(ctx, "vinfo-url-inject", "Injected URL in JS/CSS code", req, res, null);
 				}
 			} else if (c == '\'' || c == '"') {
 				inQuote = false;
@@ -295,8 +324,11 @@ public class ResponseAnalyzer {
 
 	}
 	
-	public void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response) {
-		final String key = createAlertKey(ctx, type, request);
+	public void alert(IInjectionModuleContext ctx, String type, String message, HttpUriRequest request, IHttpResponse response, String key) {
+		
+		if (key == null) {
+			key = createAlertKey(ctx, type, request);
+		}
 		String resource = request.getURI().getPath();
 		
 		int i = resource.indexOf('?');
