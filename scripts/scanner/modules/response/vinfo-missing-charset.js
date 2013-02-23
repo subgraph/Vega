@@ -18,7 +18,7 @@ function run(request, response, ctx) {
 	if (response.hasHeader("Content-Type")) {
 		var hdr = response.getFirstHeader("Content-Type");
 		if (textSubtypeRegex.test(hdr.value)) {
-			if (response.bodyAsString.length !== 0) {
+			if (response.bodyAsString.length > 0) {
 				// Alert if charset not specified in header and body.
 				if (!charsetHeaderRegex.test(hdr.value) && !charsetBodyRegex.test(response.bodyAsString)) {
 					alert = true;

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>X-Frame-Options Header Not Set </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has not set the X-Frame-Options HTTP response header. This header allows the resource to specify its policy with regards to whether it may be included in frames in other domains as well as which domains are allowed. When the header has been set, this may help to mitigate clickjacking attacks against browsers that support this feature. If the header has not been set, the affected resource may be used in clickjacking attacks.
+</discussion>
+        <remediation>
+          Set the X-Frame-Options header to DENY, SAMEORIGIN, or ALLOW-FROM according to policy.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/Clickjacking">OWASP Clickjacking</url>
+                <url address="https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet">OWASP Clickjacking Defense Cheat Sheet</url>
+        </references>
+</alert>
