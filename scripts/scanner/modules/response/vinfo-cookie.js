@@ -56,8 +56,8 @@ function run(request, response, ctx) {
             ctx.addStringHighlight(cookies[i].getHeader());
             ctx.alert("vinfo-sessioncookie-secure", request, response, {
               output: cookies[i].getHeader(),
-              key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
-              resource: request.requestLine.uri
+              key: "vinfo-cookie-secure:" + uri.host + cookies[i].getName() + cookies[i].getPath(),
+              resource: uripart 
             }); 
 	    alerted = true;
           }
@@ -69,8 +69,8 @@ function run(request, response, ctx) {
         if (!alerted) {
           ctx.alert("vinfo-cookie-secure", request, response, {
             output: cookies[i].getHeader(),
-            key: "vinfo-cookie-secure:" + uri.host + uripart + cookies[i].getHeader(),
-            resource: request.requestLine.uri
+            key: "vinfo-cookie-secure:" + uri.host + cookies[i].getName() + cookies[i].getPath(),
+            resource: uripart
           });
         }
       }
@@ -86,8 +86,8 @@ function run(request, response, ctx) {
             ctx.addStringHighlight(cookies[i].getHeader());
             ctx.alert("vinfo-sessioncookie-httponly", request, response, {
               output: cookies[i].getHeader(),
-              key: "vinfo-sessioncookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
-              resource: request.requestLine.uri
+              key: "vinfo-sessioncookie-httponly:" + uri.host + cookies[i].getName() + cookies[i].getPath() + cookies[i].getDomain,
+              resource: uripart
             });
             alerted = true;
           }
@@ -96,8 +96,8 @@ function run(request, response, ctx) {
         ctx.addStringHighlight(cookies[i].getHeader());
         ctx.alert("vinfo-cookie-httponly", request, response, {
           output: cookies[i].getHeader(),
-          key: "vinfo-cookie-httponly:" + uri.host + uripart + cookies[i].getHeader(),
-          resource: request.requestLine.uri
+          key: "vinfo-cookie-httponly:" + uri.host + cookies[i].getName() + cookies[i].getPath(),
+          resource: uripart
         });
       }
     }
@@ -108,8 +108,8 @@ function run(request, response, ctx) {
       ctx.addStringHighlight(cookies[i].getHeader());
       ctx.alert("vinfo-securecookie-insecurechannel", request, response, {
         output: cookies[i].getHeader(),
-        key: "vinfo-securecookie-insecurechannel:" + uri.host + uripart + cookies[i].getHeader(),
-        resource: request.requestLine.uri
+        key: "vinfo-securecookie-insecurechannel:" + uri.host + cookies[i].getName() + cookies[i].getPath(),
+        resource: uripart
       });        
     }
   }
