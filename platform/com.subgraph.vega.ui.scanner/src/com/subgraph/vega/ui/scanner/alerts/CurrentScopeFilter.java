@@ -1,10 +1,5 @@
 package com.subgraph.vega.ui.scanner.alerts;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.eclipse.jface.viewers.Viewer;
@@ -21,7 +16,6 @@ import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertTitleNode;
 
 public class CurrentScopeFilter extends ViewerFilter {
-	private final Logger logger = Logger.getLogger("scan-alert-view");
 
 	private final IWorkspace workspace;
 	private final ITargetScope currentScope;
@@ -92,34 +86,30 @@ public class CurrentScopeFilter extends ViewerFilter {
 	}
 	
 	private boolean selectScanAlert(IScanAlert alert) {
-		if(alert == null) {
-			return false;
-		}
-		final URI uri = alertToURI(alert);
-		if(uri == null) {
-			return false;
-		}
-		return currentScope.filter(uri);
-	}
-	
-	private URI alertToURI(IScanAlert alert) {
-		final IRequestLogRecord record = workspace.getRequestLog().lookupRecord(alert.getRequestId());
+		final IRequestLogRecord record = alertToRecord(alert);
 		if(record == null) {
-			return null;
+			return false;
 		}
 		final HttpHost host = record.getHttpHost();
+		final String uriPath = recordToUriPath(record);
+		if(host == null || uriPath == null) {
+			return false;
+		}
+		return currentScope.filter(host, uriPath);
+	}
+
+	private IRequestLogRecord alertToRecord(IScanAlert alert) {
+		if(alert == null) {
+			return null;
+		}
+		return workspace.getRequestLog().lookupRecord(alert.getRequestId());
+	}
+
+	private String recordToUriPath(IRequestLogRecord record) {
 		final HttpRequest request = record.getRequest();
-		if(host == null || request == null) {
+		if(request == null) {
 			return null;
 		}
-		final String uriLine = UriTools.removeUnicodeEscapes(request.getRequestLine().getUri());
-		try {
-			final URI hostUri = new URI(host.toURI());
-			final URI reqUri = new URI(uriLine);
-			return hostUri.resolve(reqUri);
-		} catch (URISyntaxException e) {
-			logger.log(Level.WARNING, "Failed to convert host and request to URI", e);
-			return null;
-		}
+		return UriTools.removeUnicodeEscapes(request.getRequestLine().getUri());
 	}
 }
