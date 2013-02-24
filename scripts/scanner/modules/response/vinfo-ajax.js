@@ -19,14 +19,18 @@ function run(request, response, ctx) {
 
   }
   if (output) {
+
+    var uri = String(request.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     if (output.length > 200) {
       output = output.substr(0, 199) + "...";
     }
 
     ctx.alert("vinfo-ajax", request, response, {
       output: output,
-      resource: request.requestLine.uri,
-      key: "vinfo-ajax" + request.requestLine.uri
+      resource: uripart,
+      key: "vinfo-ajax:" + uripart
     });
   }
 

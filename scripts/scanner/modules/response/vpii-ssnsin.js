@@ -68,15 +68,18 @@ function run(request, response, ctx) {
   if (resultssn) {
     ctx.alert("vpii-ssnsin-ssn", request, response, {
       "output": outputssn.join("\n"),
-      "resource": request.requestLine.uri,
-      key: "vpii-ssnsin-ssn" + request.requestLine.uri,
+      "resource": uripart,
+      key: "vpii-ssnsin-ssn" + uripart,
     });
   }
   if (resultsin) {
+    var uri = String(request.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vpii-ssnsin-sin", request, response, {
       "output": outputsin.join("\n"),
-      "resource": request.requestLine.uri,
-      key: "vpii-ssnsin-sin" + request.requestLine.uri
+      "resource": uripart,
+      key: "vpii-ssnsin-sin" + uripart
     });
   }
 }

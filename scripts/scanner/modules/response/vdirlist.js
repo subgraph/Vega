@@ -21,7 +21,7 @@ function run(request, response, ctx) {
     ctx.alert("vdirlist", request, response, {
       output: response.bodyAsString,
       key: "vdirlist:" + uripart,
-      resource: request.requestLine.uri
+      resource: uripart
     });
   }
 }

@@ -301,9 +301,7 @@ public class ModuleContext implements IInjectionModuleContext {
 				}
 			}
 			
-			/*
-			alert.setProperty("methods", request.getMethod());
-			*/
+			alert.setProperty("methods", request.getRequestLine().getMethod());
 			
 			if(message != null)
 				alert.setStringProperty("message", message);

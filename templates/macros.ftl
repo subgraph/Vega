@@ -51,7 +51,7 @@
 	</#if>
 </#macro>
 
-<#macro infobox class resource param detectiontype severity severityCSS>
+<#macro infobox class resource param methods detectiontype severity severityCSS>
 <div class="section" id="infobox">
 	<h2>At a glance</h2>
 	<div class="content" id="sectioncontent">
@@ -74,6 +74,14 @@
                 </tr>
                 </#if>
 
+ 
+                 <#if defined(methods)>
+                <tr>
+                        <td><div class="tablefield">Method</div></td><td><a class="resourcelink" href="#">${methods}</a></td>
+                </tr>
+                </#if>
+
+
 		<#if defined(detectiontype)>
 		<tr>
 			<td><div class="tablefield">Detection Type</div></td><td><a class="resourcelink" href="#">${detectiontype}</a></td>
@@ -90,6 +98,22 @@
 </div>
 
 </#macro>
+
+<#macro outputsection text>
+  <#if defined(text)>
+        <div class="section" id="resourcecontentsection">
+          <h2>Resource Content</h2>
+                <div class="content" id="sectioncontent">
+                  <table>
+                        <tr>
+                          <td><span class="resourcecontent"><pre>${text}</pre></span></td>
+                        </tr>
+                  </table>
+                </div>
+        </div>
+  </#if>
+</#macro>
+
 
 <#macro impactsection impact>
   <#if defined(impact)>
@@ -116,53 +140,6 @@
     		  <li>${item}</li>
   			</#list>
 		  </ul>
-		</div>
-	</div>
-  </#if>
-</#macro>
-
-<#macro detailsection resource param methods attackstring>
-  <#if defined(resource) || defined(methods) || defined(param) || defined(attackstring)>
-	<div class="section" id="detailsection">
-	  <h2>Detailed Findings</h2>
-		<div class="content" id="sectioncontent">
-		  <table>
-			<#if defined(resource)>
-		  	  <tr>
-		  	    <td><div class="tablefield">Resource</div></td><td><a class="resourcelink" href="#">${resource}</a></td>
-		      </tr>
-  			</#if>
-  			<#if defined(methods)>
-			  <tr>
-	  			<td><div class="tablefield">Methods</div></td><td>${methods}</td>
-			  </tr>
-  			</#if>
-  			<#if defined(param)>
-  			  <tr>
-	  			<td><div class="tablefield">Parameter</div></td><td><span class="parameter">${param}</span></td>
-			  </tr>
-  			</#if>
-  			<#if defined(attackstring)>
-    		  <tr>
-	  			<td><div class="tablefield">Attack string</div></td><td><span class="attackstring">${attackstring}</span></td>
-    		  </tr>
-  			</#if>
-		  </table>
-		</div>
-	</div>
-  </#if>
-</#macro>
-
-<#macro outputsection text>
-  <#if defined(text)>
-	<div class="section" id="resourcecontentsection">
-	  <h2>Resource Content</h2>
-		<div class="content" id="sectioncontent">
-		  <table>
-			<tr>
-			  <td><span class="resourcecontent"><pre>${text}</pre></span></td>	
-			</tr>
-		  </table>
 		</div>
 	</div>
   </#if>

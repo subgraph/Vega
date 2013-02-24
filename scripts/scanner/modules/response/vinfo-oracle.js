@@ -37,11 +37,14 @@ function run(request, response, ctx) {
   // Sun-ONE-Web-Server/6.1
 
   if (response.bodyAsString.indexOf("<!-- Created by Oracle ") >= 0) {
+    var uri = String(request.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     ctx.addStringHighlight("<!-- Created by Oracle");
     ctx.alert("vinfo-oracle", request, response, {
       "output": "<!-- Created by Oracle..",
-      "resource": request.requestLine.uri,
-      key: "vinfo-oracle" + request.requestLine.uri
+      "resource": uripart,
+      key: "vinfo-oracle:" + uripart
     });
   }
 }

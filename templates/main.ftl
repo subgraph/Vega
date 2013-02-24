@@ -14,6 +14,7 @@
   doc.alert.class ! "No class set." 
   vars.resource ! ""
   vars.param ! ""
+  vars.methods ! "" 
   vars.detectiontype ! ""
   vars.severity ! ""
   vars.severityCSS ! ""
@@ -28,6 +29,10 @@
   </div>
 </#if>
 
+<@outputsection
+  vars.output ! ""
+/>
+
 <@discussion
   doc.alert.discussion
 />
@@ -38,17 +43,6 @@
 
 <@remediationsection
   doc.alert.remediation
-/>
-
-<@detailsection
-  vars.resource ! ""
-  vars.param ! ""
-  vars.methods ! ""
-  vars.attackstring ! ""
-/>
-
-<@outputsection
-  vars.output ! ""
 />
 
 <#if doc.alert.external?size != 0>
