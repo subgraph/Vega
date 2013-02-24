@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpHost;
+import org.apache.http.client.utils.URIUtils;
+
 import com.db4o.activation.ActivationPurpose;
 import com.db4o.activation.Activator;
 import com.db4o.collections.ActivatableHashSet;
@@ -184,6 +187,7 @@ public class TargetScope implements ITargetScope, Activatable {
 
 	@Override
 	public boolean isExcluded(URI uri) {
+		activate(ActivationPurpose.READ);
 		final String uriString = uri.toString();
 		for(Pattern p: getCompiledPatterns()) {
 			if(p.matcher(uriString).find()) {
@@ -194,6 +198,25 @@ public class TargetScope implements ITargetScope, Activatable {
 		synchronized (exclusionURIs) {
 			for(String uriStr: exclusionURIs) {
 				if(UriTools.doesBaseUriContain(URI.create(uriStr), uri)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean isExcluded(HttpHost host, String uriPath) {
+		activate(ActivationPurpose.READ);
+		final String uriString = host.toString() + uriPath;
+		for(Pattern p: getCompiledPatterns()) {
+			if(p.matcher(uriString).find()) {
+				return true;
+			}
+		}
+		synchronized (exclusionURIs) {
+			for(String uriStr: exclusionURIs) {
+				if(matchesBase(URI.create(uriStr), host, uriPath)) {
 					return true;
 				}
 			}
@@ -214,9 +237,76 @@ public class TargetScope implements ITargetScope, Activatable {
 		return false;
 	}
 
+	@Override 
+	public boolean isInsideScope(HttpHost host, String uriPath) {
+		activate(ActivationPurpose.READ);
+		synchronized (scopeURIs) {
+			for(String uriStr: scopeURIs) {
+				if(matchesBase(URI.create(uriStr), host, uriPath)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean matchesBase(URI baseURI, HttpHost host, String uriPath) {
+		final HttpHost baseHost = URIUtils.extractHost(baseURI);
+		final String basePath = getPathPart(baseURI);
+		if(!hostsMatch(baseHost, host)) {
+			return false;
+		}
+		return uriPath.startsWith(basePath);
+	}
+
+	
+	private boolean hostsMatch(HttpHost h1, HttpHost h2) {
+		return stringsMatch(h1.getHostName(), h2.getHostName()) && 
+				stringsMatch(h1.getSchemeName(), h2.getSchemeName()) &&
+				portsMatch(h1.getSchemeName(), h1.getPort(), h2.getPort());
+	}
+
+	private boolean stringsMatch(String s1, String s2) {
+		if(s1 == null && s2 != null) {
+			return false;
+		}
+		return s1.equalsIgnoreCase(s2);
+	}
+	
+	private boolean portsMatch(String scheme, int p1, int p2) {
+		if(p1 == p2) {
+			return true;
+		} else if(
+				"http".equalsIgnoreCase(scheme) && (
+						((p1 == -1) && (p2 == 80)) ||
+						((p1 == 80) && (p2 == -1)))) {
+			return true;
+		} else if(
+				"https".equalsIgnoreCase(scheme) && (
+						((p1 == -1) && (p2 == 443)) ||
+						((p1 == 443) && (p2 == -1)))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private String getPathPart(URI uri) {
+		if(uri.getQuery() == null) {
+			return uri.getPath();
+		} else {
+			return uri.getPath() + '?' + uri.getQuery();
+		}
+	}
+
 	@Override
 	public boolean filter(URI uri) {
 		return isInsideScope(uri) && !isExcluded(uri);
+	}
+	
+	@Override
+	public boolean filter(HttpHost host, String uri) {
+		return isInsideScope(host, uri) && !isExcluded(host, uri);
 	}
 
 	@Override

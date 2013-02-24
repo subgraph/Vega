@@ -3,6 +3,8 @@ package com.subgraph.vega.api.model.scope;
 import java.net.URI;
 import java.util.Collection;
 
+import org.apache.http.HttpHost;
+
 public interface ITargetScope {
 	
 	long getScopeId();
@@ -114,11 +116,30 @@ public interface ITargetScope {
 	boolean isExcluded(URI uri);
 	
 	/**
+	 * Returns true if the given host and uriPath pair matches
+	 * the exclusion filter.
+	 * 
+	 * @param host The host to test.
+	 * @param uriPath The uriPath to test.
+	 * @return true if the host and uriPath pair matches the exclusion filter.
+	 */
+	boolean isExcluded(HttpHost host, String uriPath);
+
+	/**
 	 * Returns true if the given URI matches the scope filter.
 	 * @param uri The uri to test
 	 * @return true if the uri matches the scope filter.
 	 */
 	boolean isInsideScope(URI uri);
+	
+	/**
+	 * Returns true if the given host and uriPath pair matches the 
+	 * scope filter.
+	 * @param host The host to test.
+	 * @param uriPath The uri path to test.
+	 * @return true if the host and uriPath pair matches the scope filter.
+	 */
+	boolean isInsideScope(HttpHost host, String uriPath);
 	
 	/**
 	 * Returns true if the given URI matches the scope filter but
@@ -131,6 +152,21 @@ public interface ITargetScope {
 	 *              does not match the exclusion filter.
 	 */
 	boolean filter(URI uri);
+
+	
+	/**
+	 * Returns true if the given host and uriPath matches the scope filter but
+	 * does not match the exclusion filter.
+	 * 
+	 * Equivalent to (isInsideScope(host, uriPath) && !isExcluded(host, uriPath))
+	 * 
+	 * @param host The host to test
+	 * @param uriPath The path to test
+	 * @return true if the given host and uriPath pair matches the scope filter but
+	 *              does not match the exclusion filter.
+	 */
+
+	boolean filter(HttpHost host, String uriPath);
 	
 	/**
 	 * Resets the state of this scope instance by removing all scope URIs 
