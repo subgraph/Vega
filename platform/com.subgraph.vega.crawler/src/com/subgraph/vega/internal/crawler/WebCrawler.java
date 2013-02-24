@@ -82,6 +82,9 @@ public class WebCrawler implements IWebCrawler {
 	}
 	
 	public synchronized void stop() throws InterruptedException {
+		if(!crawlerRunning) {
+			return;
+		}
 		synchronized (pauseLock) {
 			if(pauseLock.isPaused()) {
 				pauseLock.unpauseCrawler();
@@ -98,8 +101,7 @@ public class WebCrawler implements IWebCrawler {
 		requestQueue.put(CrawlerTask.createExitTask());
 		responseQueue.clear();
 		responseQueue.put(CrawlerTask.createExitTask());
-		
-		latch.await();
+		crawlerRunning = false;
 	}
 	
 	@Override
