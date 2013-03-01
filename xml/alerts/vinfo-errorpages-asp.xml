@@ -4,7 +4,6 @@
 	
 	<class>Information</class>
 	<severity>Low</severity>		
-	<discussion>
 	<discussion>Vega has detected an error message associated with the Microsoft ASP/ASP.NET framework. </discussion>
   <impact>Verbose error output has been detected.</impact>
   <impact>Data in this output could reveal sensitive information about the application that could aid more complex attacks.</impact>
