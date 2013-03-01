@@ -24,8 +24,6 @@ var safeCharsets = ["utf-8",
 function run(request, response, ctx) {
 	var uri = String(request.requestLine.uri);
 	var uripart = uri.replace(/\?.*/, "");
-	var unsafeHeader = false;
-	var unsafeBody = false;
 	
 	if (response.bodyAsString.length > 0) {
 		if (response.hasHeader("Content-Type")) {
