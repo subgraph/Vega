@@ -47,6 +47,11 @@ var errorStrings = [
 		regex: "<TITLE>401 Authorization Required</TITLE>",
 		responseCode: [401]
 	},
+	{
+	  type: "http",
+	  regex: "<h1>HTTP Status 401 - </h1>",
+	  responseCode: [401]
+	},
 	{ 
 		type: "http", 
 		regex: "<TITLE>403 Forbidden</TITLE>",
