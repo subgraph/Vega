@@ -26,6 +26,11 @@ var errorStrings = [
 		regex: "<span><H1>Server Error in '/[/A-Za-z_0-9\-]*' Application.<hr width=100% size=1 color=silver></H1>"
 	},
 	{
+	  type: "asp",
+	  regex: "<title>401 - Unauthorized: Access is denied due to invalid credentials.</title>",
+	  responseCode: [401]
+	},
+	{
 		type: "django",
 		regex: "t = loader.get_template.+# You need to create a \\d{3}.html template."
 	},

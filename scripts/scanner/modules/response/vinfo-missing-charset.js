@@ -6,7 +6,7 @@ var module = {
 
 var textSubtypeRegex = /^text\/(\w+)/;
 var charsetHeaderRegex = /.+charset\s?=.+/;
-var charsetBodyRegex = /<meta.+charset\s?=.+>/gim;
+var charsetBodyRegex = /<meta.+charset\s?=[^<>]+>/im;
 
 // Do not check these text/ subtypes:
 var invalidSubtypes = ["css"];
