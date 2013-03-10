@@ -25,12 +25,9 @@ function run(request, response, ctx) {
     ctx.addRegexCaseInsensitiveHighlight("type=[\"']*file[\"']*");
 
     (found > 1) ? match = "instances" : match = "instance";
- 
-    var uri = String(request.requestLine.uri);
-    var uripart = uri.replace(/\?.*/, "");
 
     ctx.alert("vfileupload", request, response, {
-              "resource": uripart,
+              "resource": sub,
               "key": "vfileupload" + sub
     });
 
