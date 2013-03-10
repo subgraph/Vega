@@ -31,6 +31,10 @@ var errorStrings = [
 	  responseCode: [401]
 	},
 	{
+	  type: "asp",
+	  regex: "System.UnauthorizedAccessException: Access to the path",
+	},
+	{
 		type: "django",
 		regex: "t = loader.get_template.+# You need to create a \\d{3}.html template."
 	},
