@@ -102,7 +102,7 @@ import org.apache.http.protocol.HttpContext;
 	 }
 	
 	 private List<Cookie> processCookieHeader(Header header, CookieSpec spec, CookieOrigin origin) {
-		 final List<Cookie> cookies = new ArrayList<>();
+		 final List<Cookie> cookies = new ArrayList<Cookie>();
 		 for(String cookieValue: header.getValue().split(";")) {
 			 try {
 				 final Header setHeader = new BasicHeader(SM.SET_COOKIE, cookieValue);
