@@ -4,7 +4,8 @@ Bundle-Name: Http
 Bundle-SymbolicName: com.subgraph.vega.ui.http;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Import-Package: com.subgraph.vega.api.analysis,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.http.proxy,

@@ -4,7 +4,8 @@ Bundle-Name: Api
 Bundle-SymbolicName: com.subgraph.vega.api
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Import-Package: com.subgraph.vega.api.html,
  org.apache.http;version="4.0.0",
  org.apache.http.client,

@@ -4,7 +4,8 @@ Bundle-Name: Model
 Bundle-SymbolicName: com.subgraph.vega.model
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Import-Package: com.google.common.base;version="1.6.0",
  com.subgraph.vega.api.annotations,
  com.subgraph.vega.api.console,
