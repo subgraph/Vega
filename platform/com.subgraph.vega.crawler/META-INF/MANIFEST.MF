@@ -4,7 +4,8 @@ Bundle-Name: Crawler
 Bundle-SymbolicName: com.subgraph.vega.crawler
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Import-Package: com.subgraph.vega.api.crawler,
  com.subgraph.vega.api.http.requests,
  com.subgraph.vega.api.model.requests,

@@ -4,6 +4,7 @@ Bundle-Name: Hexeditor
 Bundle-SymbolicName: com.subgraph.vega.ui.hexeditor
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Require-Bundle: org.eclipse.ui;bundle-version="3.6.0"
 Export-Package: com.subgraph.vega.ui.hexeditor
