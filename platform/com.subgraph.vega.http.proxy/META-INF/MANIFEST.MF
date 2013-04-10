@@ -4,7 +4,6 @@ Bundle-Name: Proxy
 Bundle-SymbolicName: com.subgraph.vega.http.proxy
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.subgraph.vega.api.analysis,
  com.subgraph.vega.api.events,
  com.subgraph.vega.api.http.proxy,
@@ -35,3 +34,5 @@ Import-Package: com.subgraph.vega.api.analysis,
  org.apache.http.protocol;version="4.0.0",
  org.apache.http.util;version="4.0.0"
 Service-Component: OSGI-INF/proxy-service.xml
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6

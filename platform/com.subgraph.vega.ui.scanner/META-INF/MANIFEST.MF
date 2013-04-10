@@ -8,7 +8,8 @@ Bundle-Vendor: SUBGRAPH
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  com.subgraph.vega.api
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
+ JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.api.model,
