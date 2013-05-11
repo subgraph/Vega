@@ -279,7 +279,7 @@ public class ModuleContextJS {
 		return context.getIntegerProperty(name);
 	}
 
-	public Object getPropertyKeys() {
+	public Object propertyKeys() {
 				
 		List<String> keys = context.propertyKeys();
 		
