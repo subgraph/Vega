@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -250,5 +250,45 @@ public class ModuleContextJS {
 	
 	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response) {
 		context.publishAlert(type, key, message, request, response);
+	}
+
+
+	public void setProperty(String name, Object value) {
+		context.setProperty(name, value);
+	}
+
+	public void setStringProperty(String name, String value) {
+		context.setStringProperty(name, value);		
+	}
+
+	public void setIntegerProperty(String name, int value) {
+		context.setIntegerProperty(name, value);		
+	}
+
+
+	public Object getProperty(String name) {
+		return context.getProperty(name);
+	}
+
+
+	public String getStringProperty(String name) {
+		return context.getStringProperty(name);
+	}
+
+	public Integer getIntegerProperty(String name) {
+		return context.getIntegerProperty(name);
+	}
+
+	public Object getPropertyKeys() {
+				
+		List<String> keys = context.propertyKeys();
+		
+		final Context cx = Context.getCurrentContext();
+		final Scriptable array = cx.newArray(scope, keys.size());
+		for(int i = 0; i < keys.size(); i++) {
+			array.put(i, array, Context.javaToJS(keys.get(i), scope));
+		}
+		return array;
+		
 	}
 }
