@@ -4,132 +4,101 @@ var module = {
   differential: false
 };
 
+var detected = false;
+var alerted = false;
+var average = 0;
+
+var unixMetaChars = ['; ', '" ; ', "' ; ", "| ", '"| ', "'| "]; 
+var windowsMetaChars = ['&& ', '& ', '|| '];
+
+var commands = [
+  {command: "/bin/sleep 20 ;", os: "Linux/Unix"},
+  {command: "/usr/bin/sleep 20 ;", os: "Linux/Unix"},
+  {command: "/sbin/sleep 20 ;", os: "Linux/Unix"},
+  {command: "ping.exe -n 20 127.0.0.1 > nul & ::", os: "Windows"},
+  {command: "timeout 20 & ::", os: "Windows"}
+];
+
+var alteredRequests = [];
+
 function initialize(ctx) {
-  
+	for (var i = 0; i < commands.length; i++) {
+		for (var j = 0; j < unixMetaChars.length; j++) {
+			if (commands[i].os === "Linux/Unix") { 
+				alteredRequests.push({ 
+					commandString: unixMetaChars[j] + commands[i].command,
+					os: commands[i].os
+				});
+			}
+		}
+		for (var k = 0; k < windowsMetaChars.length; k++) {
+			if (commands[i].os === "Windows") { 
+				alteredRequests.push({ 
+					commandString: windowsMetaChars[k] + commands[i].command,
+					os: commands[i].os
+				});
+			}
+		}
+	}
+		
   var ps = ctx.getPathState();
-
+  
   if (ps.isParametric()) {
-	  	  
-    ctx.submitAlteredRequest(process, "; /bin/sleep 20 ; ", false, 0);
-    ctx.submitAlteredRequest(process, "; /bin/sleeep 20 ; ", false, 1);
-    
-    ctx.submitAlteredRequest(process, "\" ; /bin/sleep 20 ; ", false, 2);
-    ctx.submitAlteredRequest(process, "\" ; /bin/sleeep 20 ; ", false, 3);
-
-    ctx.submitAlteredRequest(process, "' ; /bin/sleep 20 ; ", false, 4);
-    ctx.submitAlteredRequest(process, "' ; /bin/sleeep 20 ; ", false, 5);
-    
-    ctx.submitAlteredRequest(process, "| /bin/sleep 20 ; ", false, 6);
-    ctx.submitAlteredRequest(process, "| /bin/sleeep 20 ;  ", false, 7);
-
-    ctx.submitAlteredRequest(process, "\"| /bin/sleep 20 ; ", false, 8);
-    ctx.submitAlteredRequest(process, "\"| /bin/sleeep 20 ;  ", false, 9);
-    
-    ctx.submitAlteredRequest(process, "'| /bin/sleep 20 ; ", false, 10);
-    ctx.submitAlteredRequest(process, "'| /bin/sleeep 20 ;  ", false, 11);
-    
-  }  
-
+    ctx.submitMultipleAlteredRequests(checkTiming, ["bad1", "bad2"], false);    
+  }
 }
 
-function process(req, res, ctx) {
-	
-	  if (ctx.hasModuleFailed()) return;
-	  var ps = ctx.getPathState();
-
-	  if (res.fetchFail) {
-	    ctx.error(req, res, "During command injection checks");
-	    ctx.setModuleFailed();
-	    return;
-	  }
-
-	  ctx.addRequestResponse(req, res);
-	  if (ctx.incrementResponseCount() < 12) return;
-	  
-	  if ((ctx.getSavedResponse(0).milliseconds > 20000) && (ctx.getSavedResponse(1).milliseconds < 20000))
-      {
-			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(0), ctx.getSavedResponse(0), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-	  
-	  if ((ctx.getSavedResponse(2).milliseconds > 20000) && (ctx.getSavedResponse(3).milliseconds < 20000))
-      {			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(2), ctx.getSavedResponse(2), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-
-	  if ((ctx.getSavedResponse(4).milliseconds > 20000) && (ctx.getSavedResponse(5).milliseconds < 20000))
-      {			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(4), ctx.getSavedResponse(4), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-	  
-	  if ((ctx.getSavedResponse(6).milliseconds > 20000) && (ctx.getSavedResponse(7).milliseconds < 20000))
-      {			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(6), ctx.getSavedResponse(6), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-	  
-
-	  if ((ctx.getSavedResponse(8).milliseconds > 20000) && (ctx.getSavedResponse(9).milliseconds < 20000))
-      {			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(8), ctx.getSavedResponse(8), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-
-	  if ((ctx.getSavedResponse(10).milliseconds > 20000) && (ctx.getSavedResponse(11).milliseconds < 20000))
-      {			
-		  var uri = String(req.requestLine.uri);
-		  var uripart = uri.replace(/\?.*/, "");
-
-		  ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(10), ctx.getSavedResponse(10), {
-				     output: res.bodyAsString,
-				     key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
-				     resource: uripart,
-				     detectiontype: "Blind Timing Analysis Checks",
-				     param: ps.getFuzzableParameter().name
-				  });	
-      }
-	
+function checkTiming(req, res, ctx) {
+  
+  if (res.fetchFail) {
+    ctx.error(req, res, "During command injection checks");
+    ctx.setModuleFailed();
+    return;
+  }
+  
+  ctx.addRequestResponse(req, res);
+  if (ctx.incrementResponseCount() < 2) return;
+  var first = ctx.getSavedResponse(0).milliseconds;
+  var second = ctx.getSavedResponse(1).milliseconds;
+  average = first + second / 2;
+  var firstRequest = alteredRequests.pop();
+  ctx.submitAlteredRequest(process, firstRequest.commandString, false, 0);
 }
+
+function process(req2, res2, ctx2) {
+  
+	if (res2.fetchFail) {
+    ctx2.error(req, res, "During command injection checks");
+    ctx2.setModuleFailed();
+    return;
+  }
+  
+	var ps = ctx2.getPathState();
+  var currentIndex = ctx2.getCurrentIndex();
+  ctx2.addRequestResponse(req2, res2);
+  ctx2.incrementResponseCount();
+
+  if ((average < 20000) && (ctx2.getSavedResponse(currentIndex).milliseconds > 20000)) {
+    detected = true;
+  }
+
+  if (detected && !alerted) {    
+    alerted = true;
+    var uri = String(req2.requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+    ctx2.alert("vinfo-shell-inject", ctx2.getSavedRequest(currentIndex), ctx2.getSavedResponse(currentIndex), {
+      output: res2.bodyAsString,
+      key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      resource: uripart,
+      detectiontype: alteredRequests[alteredRequests.length - 1].os + " Blind Timing Analysis Checks",
+      param: ps.getFuzzableParameter().name
+    }); 
+  } else {
+  	var nextRequest = alteredRequests.pop();
+    if (nextRequest) {
+      ctx2.submitAlteredRequest(process, nextRequest.commandString, false, currentIndex + 1);
+    }
+  }
+}
+
+
