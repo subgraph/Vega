@@ -44,7 +44,7 @@ function initialize(ctx) {
   var ps = ctx.getPathState();
   
   if (ps.isParametric()) {
-    ctx.submitMultipleAlteredRequests(checkTiming, ["bad1", "bad2"], false);    
+    ctx.submitMultipleAlteredRequests(checkTiming, ["vega1", "vega2"], false);    
   }
 }
 
