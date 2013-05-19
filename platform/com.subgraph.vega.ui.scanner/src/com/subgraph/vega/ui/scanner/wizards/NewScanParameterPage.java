@@ -140,7 +140,7 @@ public class NewScanParameterPage extends WizardPage {
 	private void handleAddParameter() {
 		final String name = parameterNameText.getText();
 		if(!parameterNames.contains(name)) {
-			parameterNames.add(name);
+			parameterNames.add(name.toLowerCase());
 			excludedParameterList.setInput(parameterNames.toArray());
 		}
 		parameterNameText.setText("");
