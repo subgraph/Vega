@@ -389,4 +389,12 @@ public class ModuleContext implements IInjectionModuleContext {
 		stringHighlights.clear();
 		regexHighlights.clear();
 	}
+	
+	@Override
+	public boolean alertExists(String key) {
+		final IScanInstance scan = scanState.getScanInstance();
+
+		return scan.hasAlertKey(key);
+	}
+	
 }

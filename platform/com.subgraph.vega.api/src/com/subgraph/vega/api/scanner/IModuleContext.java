@@ -26,4 +26,5 @@ public interface IModuleContext extends IModelProperties {
 	void reset();
 	void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response, Object ...properties);
 	void publishAlert(String type, String message, HttpRequest request, IHttpResponse response, Object ...properties);
+	boolean alertExists(String key);
 }
