@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIUtils;
@@ -33,7 +34,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class HtmlUrlExtractor {
-	
+
 	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
 		
@@ -55,6 +56,7 @@ public class HtmlUrlExtractor {
 		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "[src]", "abs:src"));
 		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
+		uris.addAll(extractURIs(document, "meta",""));
 		return uris;
 	}
 	
@@ -72,16 +74,34 @@ public class HtmlUrlExtractor {
 	private List<VegaURI> extractURIs(Document document, String query, String attribute) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		for(Element e: document.select(query)) {
-			String link = e.attr(attribute);
-			link = link.replace("\\", "%5C");
-			URI uri = createURI(link);
-			if(uri != null && hasValidHttpScheme(uri)) {
+			String link;
+			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
+				String candidateLink = extractMetaRefresh(document, e);
+				if (!candidateLink.startsWith("http")) {
+					link = absUri(document, candidateLink);
+				}
+				else {
+					link = candidateLink;
+				}
+				URI uri = createURI(link);
 				final HttpHost targetHost = URIUtils.extractHost(uri);
-				if(validateHost(targetHost)) {
-					final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
-					uris.add(vegaURI);
+				final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+				uris.add(vegaURI);
+			} else {
+				link = e.attr(attribute);
+				
+				link = link.replace("\\", "%5C");
+				URI uri = createURI(link);
+			
+				if(uri != null && hasValidHttpScheme(uri)) {
+					final HttpHost targetHost = URIUtils.extractHost(uri);
+					if(validateHost(targetHost)) {
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						uris.add(vegaURI);
+					}
 				}
 			}
+			
 		}
 		return uris;
 	}
@@ -102,6 +122,7 @@ public class HtmlUrlExtractor {
 		final String scheme = uri.getScheme();
 		return (scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
 	}
+	
 	private URI createURI(String link) {
 		try {
 			if(link.isEmpty())
@@ -111,4 +132,34 @@ public class HtmlUrlExtractor {
 			return null;
 		}
 	}
+	
+	private String extractMetaRefresh(Document document, Element e) {
+		final String content = e.attr("content");
+		String clean = content.replaceAll("\\s", "");
+		if (clean.toLowerCase().contains("url=")) {
+			return clean.split("=")[1];
+		}
+		return "";
+	}
+	
+	private String absUri(Document document, String path) {
+		final String link;
+		
+		URI u = createURI(document.baseUri());
+		
+		if (path.startsWith("/")) {
+			link = u.getScheme() + "://" + u.getHost() + path;
+		} else {
+			int i = 0;
+			int lastIndex = 0;
+			for (i = 0; i <= u.getPath().length()-1; i++) {
+			  if (u.getPath().charAt(i) == '/') {
+				  lastIndex = i;
+			  }
+			}
+			link = u.getScheme() + "://" + u.getHost() + u.getPath().substring(0,  lastIndex) + "/" + path;
+		} 
+		return link;
+	}
 }
+
