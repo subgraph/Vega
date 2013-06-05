@@ -167,24 +167,23 @@ public class HtmlUrlExtractor {
 	}
 	
 	
-	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String body) {
+	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String s) {
 		
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
-		String s = body.toLowerCase();
 		int i = 0;
 		
 		while (i < s.length()) {
 			
-			if (s.startsWith("http://", i) || s.startsWith("https://", i)) {
+			if (s.toLowerCase().startsWith("http://", i) || s.toLowerCase().startsWith("https://", i)) {
 				
 				if (i+8 >= s.length()) {
 					return uris;
 				}
 				
-				int start = s.substring(i).indexOf("http://") + i;
+				int start = s.substring(i).toLowerCase().indexOf("http://") + i;
 				
 				if (start == -1) 
-					start = s.substring(i).indexOf("https://") + i;
+					start = s.substring(i).toLowerCase().indexOf("https://") + i;
 				
 				int index = start;
 				Boolean finished = false;
