@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIUtils;
@@ -39,7 +38,7 @@ public class HtmlUrlExtractor {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
 		
 		if(htmlParseResult != null) {
-			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument());
+			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString());
 		} else {
 			return Collections.emptyList();
 		}
@@ -48,15 +47,16 @@ public class HtmlUrlExtractor {
 	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
-		return extractUrlsFromDocument(document);
+		return extractUrlsFromDocument(document, htmlString);
 	}
 	
-	private List<VegaURI> extractUrlsFromDocument(Document document) {
+	private List<VegaURI> extractUrlsFromDocument(Document document, String html) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "[src]", "abs:src"));
 		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "meta",""));
+	    uris.addAll(responseBodyUriScanFast(document, html));
 		return uris;
 	}
 	
@@ -84,9 +84,13 @@ public class HtmlUrlExtractor {
 					link = candidateLink;
 				}
 				URI uri = createURI(link);
-				final HttpHost targetHost = URIUtils.extractHost(uri);
-				final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
-				uris.add(vegaURI);
+				if(uri != null && hasValidHttpScheme(uri)) {
+					final HttpHost targetHost = URIUtils.extractHost(uri);
+					if(validateHost(targetHost)) {
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						uris.add(vegaURI);
+					}
+				}
 			} else {
 				link = e.attr(attribute);
 				
@@ -161,5 +165,56 @@ public class HtmlUrlExtractor {
 		} 
 		return link;
 	}
+	
+	
+	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String body) {
+		
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
+		String s = body.toLowerCase();
+		int i = 0;
+		
+		while (i < s.length()) {
+			
+			if (s.startsWith("http://", i) || s.startsWith("https://", i)) {
+				
+				if (i+8 >= s.length()) {
+					return uris;
+				}
+				
+				int start = s.substring(i).indexOf("http://") + i;
+				
+				if (start == -1) 
+					start = s.substring(i).indexOf("https://") + i;
+				
+				int index = start;
+				Boolean finished = false;
+				String link;
+				
+				while (index < s.length() && !finished) {
+					
+					// TODO : Some of these terminating chars are valid in URIs, e.g. ')'
+					
+					if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == ')') ) {
+						link = s.substring(start, index);
+						URI uri = createURI(link);
+						
+						if(uri != null && hasValidHttpScheme(uri)) {
+							final HttpHost targetHost = URIUtils.extractHost(uri);
+							if(validateHost(targetHost)) {
+								final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+								uris.add(vegaURI);
+							}
+						}
+						i = index;
+						finished = true;
+					}
+					index++;
+				}
+			}
+			i++;
+		}
+		return uris;
+	}
+
 }
 
