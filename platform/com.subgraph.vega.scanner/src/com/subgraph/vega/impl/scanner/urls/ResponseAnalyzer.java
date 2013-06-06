@@ -311,7 +311,7 @@ public class ResponseAnalyzer {
 				inQuote = true;
 				
 				if (matchStartsWith(text, lastWordIdx, "innerHTML", "open",
-						"url", "href", "write", "src", "location")) {
+						"url", "href", "write", "src", "location", "action")) {
 					possibleUrl = true;
 					possibleUrlIdx = idx + 1;
 				}
