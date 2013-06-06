@@ -172,18 +172,20 @@ public class HtmlUrlExtractor {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		int i = 0;
 		
+		String l = s.toLowerCase();
+		
 		while (i < s.length()) {
 			
-			if (s.toLowerCase().startsWith("http://", i) || s.toLowerCase().startsWith("https://", i)) {
+			if (l.startsWith("http://", i) || l.startsWith("https://", i)) {
 				
 				if (i+8 >= s.length()) {
 					return uris;
 				}
 				
-				int start = s.substring(i).toLowerCase().indexOf("http://") + i;
+				int start = l.substring(i).indexOf("http://") + i;
 				
 				if (start == -1) 
-					start = s.substring(i).toLowerCase().indexOf("https://") + i;
+					start = l.substring(i).indexOf("https://") + i;
 				
 				int index = start;
 				Boolean finished = false;
@@ -206,8 +208,9 @@ public class HtmlUrlExtractor {
 						}
 						i = index;
 						finished = true;
+					} else {
+						index++;
 					}
-					index++;
 				}
 			}
 			i++;
