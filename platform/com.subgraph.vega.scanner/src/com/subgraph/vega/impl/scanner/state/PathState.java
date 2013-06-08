@@ -176,10 +176,12 @@ public class PathState implements IPathState {
 	}
 
 	@Override
-	public void setDone() {
-		isDone = true;
-		response = null;
-		pathStateManager.notifyPathNodeFinish(this);
+	public synchronized void setDone() {
+		if (!isDone) {
+			isDone = true;
+			response = null;
+			pathStateManager.notifyPathNodeFinish(this);
+		}
 	}
 
 	public void requeueInitialFetch() {
