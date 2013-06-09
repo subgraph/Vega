@@ -100,6 +100,8 @@ public class PathState implements IPathState {
 	private int childCount = 0;
 	
 	private AtomicInteger outstandingRequests = new AtomicInteger();
+	private AtomicInteger fuzzCounter = new AtomicInteger(0);
+	
 	private volatile boolean finishOnNoRequests;
 	
 	private PathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path, IRequestBuilder requestBuilder) {
@@ -176,10 +178,12 @@ public class PathState implements IPathState {
 	}
 
 	@Override
-	public void setDone() {
-		isDone = true;
-		response = null;
-		pathStateManager.notifyPathNodeFinish(this);
+	public synchronized void setDone() {
+		if (!isDone) {
+			isDone = true;
+			response = null;
+			pathStateManager.notifyPathNodeFinish(this);
+		}
 	}
 
 	public void requeueInitialFetch() {
@@ -609,7 +613,19 @@ public class PathState implements IPathState {
 	}
 	
 	public void decrementOutstandingRequests() {
-		if(outstandingRequests.decrementAndGet() <= 0) {
+		if((outstandingRequests.decrementAndGet() <= 0) && (fuzzCounter.get() <= 0)) {
+			if(finishOnNoRequests) {
+				setDone();
+			}
+		}
+	}
+
+	public void incrementFuzzCounter() {
+		fuzzCounter.incrementAndGet();
+	}
+	
+	public void decrementFuzzCounter() {
+		if((fuzzCounter.decrementAndGet() <= 0) && (outstandingRequests.get() <= 0)) {
 			if(finishOnNoRequests) {
 				setDone();
 			}

@@ -257,7 +257,7 @@ public class PathStateManager {
 	}
 
 	public boolean isExcludedParameter(String name) {
-		return config.getExcludedParameterNames().contains(name);
+		return config.getExcludedParameterNames().contains(name.toLowerCase());
 	}
 	
 	public void debug(String message) {

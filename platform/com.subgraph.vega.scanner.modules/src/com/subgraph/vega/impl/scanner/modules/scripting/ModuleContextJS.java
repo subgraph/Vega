@@ -291,4 +291,9 @@ public class ModuleContextJS {
 		return array;
 		
 	}
+	
+	public boolean alertExists(String key) {
+		return context.alertExists(key);
+	}
+	
 }

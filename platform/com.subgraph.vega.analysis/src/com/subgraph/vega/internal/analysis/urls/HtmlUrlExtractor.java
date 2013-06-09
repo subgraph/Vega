@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,12 +33,12 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class HtmlUrlExtractor {
-	
+
 	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
 		
 		if(htmlParseResult != null) {
-			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument());
+			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString());
 		} else {
 			return Collections.emptyList();
 		}
@@ -47,14 +47,16 @@ public class HtmlUrlExtractor {
 	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
-		return extractUrlsFromDocument(document);
+		return extractUrlsFromDocument(document, htmlString);
 	}
 	
-	private List<VegaURI> extractUrlsFromDocument(Document document) {
+	private List<VegaURI> extractUrlsFromDocument(Document document, String html) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
 		uris.addAll(extractURIs(document, "[src]", "abs:src"));
 		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
+		uris.addAll(extractURIs(document, "meta",""));
+	    uris.addAll(responseBodyUriScanFast(document, html));
 		return uris;
 	}
 	
@@ -72,16 +74,38 @@ public class HtmlUrlExtractor {
 	private List<VegaURI> extractURIs(Document document, String query, String attribute) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		for(Element e: document.select(query)) {
-			String link = e.attr(attribute);
-			link = link.replace("\\", "%5C");
-			URI uri = createURI(link);
-			if(uri != null && hasValidHttpScheme(uri)) {
-				final HttpHost targetHost = URIUtils.extractHost(uri);
-				if(validateHost(targetHost)) {
-					final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
-					uris.add(vegaURI);
+			String link;
+			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
+				String candidateLink = extractMetaRefresh(document, e);
+				if (!candidateLink.startsWith("http")) {
+					link = absUri(document, candidateLink);
+				}
+				else {
+					link = candidateLink;
+				}
+				URI uri = createURI(link);
+				if(uri != null && hasValidHttpScheme(uri)) {
+					final HttpHost targetHost = URIUtils.extractHost(uri);
+					if(validateHost(targetHost)) {
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						uris.add(vegaURI);
+					}
+				}
+			} else {
+				link = e.attr(attribute);
+				
+				link = link.replace("\\", "%5C");
+				URI uri = createURI(link);
+			
+				if(uri != null && hasValidHttpScheme(uri)) {
+					final HttpHost targetHost = URIUtils.extractHost(uri);
+					if(validateHost(targetHost)) {
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						uris.add(vegaURI);
+					}
 				}
 			}
+			
 		}
 		return uris;
 	}
@@ -102,6 +126,7 @@ public class HtmlUrlExtractor {
 		final String scheme = uri.getScheme();
 		return (scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
 	}
+	
 	private URI createURI(String link) {
 		try {
 			if(link.isEmpty())
@@ -111,4 +136,87 @@ public class HtmlUrlExtractor {
 			return null;
 		}
 	}
+	
+	private String extractMetaRefresh(Document document, Element e) {
+		final String content = e.attr("content");
+		String clean = content.replaceAll("\\s", "");
+		if (clean.toLowerCase().contains("url=")) {
+			return clean.split("=")[1];
+		}
+		return "";
+	}
+	
+	private String absUri(Document document, String path) {
+		final String link;
+		
+		URI u = createURI(document.baseUri());
+		
+		if (path.startsWith("/")) {
+			link = u.getScheme() + "://" + u.getHost() + path;
+		} else {
+			int i = 0;
+			int lastIndex = 0;
+			for (i = 0; i <= u.getPath().length()-1; i++) {
+			  if (u.getPath().charAt(i) == '/') {
+				  lastIndex = i;
+			  }
+			}
+			link = u.getScheme() + "://" + u.getHost() + u.getPath().substring(0,  lastIndex) + "/" + path;
+		} 
+		return link;
+	}
+	
+	
+	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String s) {
+		
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
+		int i = 0;
+		
+		String l = s.toLowerCase();
+		
+		while (i < s.length()) {
+			
+			if (l.startsWith("http://", i) || l.startsWith("https://", i)) {
+				
+				if (i+8 >= s.length()) {
+					return uris;
+				}
+				
+				int start = l.substring(i).indexOf("http://") + i;
+				
+				if (start == -1) 
+					start = l.substring(i).indexOf("https://") + i;
+				
+				int index = start;
+				Boolean finished = false;
+				String link;
+				
+				while (index < s.length() && !finished) {
+					
+					// TODO : Some of these terminating chars are valid in URIs, e.g. ')'
+					
+					if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == ')') ) {
+						link = s.substring(start, index);
+						URI uri = createURI(link);
+						
+						if(uri != null && hasValidHttpScheme(uri)) {
+							final HttpHost targetHost = URIUtils.extractHost(uri);
+							if(validateHost(targetHost)) {
+								final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+								uris.add(vegaURI);
+							}
+						}
+						i = index;
+						finished = true;
+					} else {
+						index++;
+					}
+				}
+			}
+			i++;
+		}
+		return uris;
+	}
+
 }
+

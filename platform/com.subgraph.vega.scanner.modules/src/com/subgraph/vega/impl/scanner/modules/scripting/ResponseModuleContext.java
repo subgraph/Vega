@@ -195,6 +195,7 @@ public class ResponseModuleContext implements IModuleContext {
 	public List<String> propertyKeys() {
 		return scanInstance.propertyKeys();
 	}
+	
 
 	@Override
 	public void addStringHighlight(String str) {
@@ -226,5 +227,10 @@ public class ResponseModuleContext implements IModuleContext {
 	public void reset() {
 		stringHighlights.clear();
 		regexHighlights.clear();
+	}
+	
+	@Override
+	public boolean alertExists(String key) {
+		return scanInstance.hasAlertKey(key);
 	}
 }
