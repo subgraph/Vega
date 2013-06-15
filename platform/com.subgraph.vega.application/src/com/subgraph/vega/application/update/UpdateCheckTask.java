@@ -8,7 +8,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -97,7 +96,7 @@ public class UpdateCheckTask implements Runnable {
 		}
 		else {
 			
-			final MessageDialog dialog = new MessageDialog(null, "Update Available", 
+			final MessageDialog dialog = new MessageDialog(null, "Updated Vega Package Available", 
 					null,
 					DIST_UPDATE_MESSAGE,
 					MessageDialog.INFORMATION,
@@ -134,19 +133,18 @@ public class UpdateCheckTask implements Runnable {
 	
 	private void checkDebianRelease() {
 		
-		Path file = Paths.get(DEBIAN_VERSION);
-		try (InputStream in = Files.newInputStream(file);
-		    BufferedReader reader =
-		      new BufferedReader(new InputStreamReader(in))) {
-		    String line = null;
-		    while ((line = reader.readLine()) != null) {
-		    	if (line.startsWith("Kali Linux 1.0")) {
+		Path f = Paths.get(DEBIAN_VERSION);
+		try (InputStream is = Files.newInputStream(f);
+		    BufferedReader r = new BufferedReader(new InputStreamReader(is))) {
+		    String l = null;
+		    while ((l = r.readLine()) != null) {
+		    	if (l.startsWith("Kali Linux 1.0")) {
 		    		versionPrefix = "kl-1.0-";
 		    		distro = true;
 		    	}
-		    }
-		} catch (IOException x) {
+		   	}
+		} catch (IOException ex) {
+			// do nothing, it's not a distro TODO: re-implement using a build flag
 		}
-
 	}
 }
