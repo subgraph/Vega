@@ -12,11 +12,11 @@ var unixMetaChars = ['; ', '" ; ', "' ; ", "| ", '"| ', "'| "];
 var windowsMetaChars = ['&& ', '& ', '|| '];
 
 var commands = [
-  {command: "/bin/sleep 20 ;", os: "Linux/Unix"},
-  {command: "/usr/bin/sleep 20 ;", os: "Linux/Unix"},
-  {command: "/sbin/sleep 20 ;", os: "Linux/Unix"},
-  {command: "ping.exe -n 20 127.0.0.1 > nul & ::", os: "Windows"},
-  {command: "timeout 20 & ::", os: "Windows"}
+  {command: "/bin/sleep 30 ;", os: "Linux/Unix"},
+  {command: "/usr/bin/sleep 30 ;", os: "Linux/Unix"},
+  {command: "/sbin/sleep 30 ;", os: "Linux/Unix"},
+  {command: "ping.exe -n 30 127.0.0.1 > nul & ::", os: "Windows"},
+  {command: "timeout 30 & ::", os: "Windows"}
 ];
 
 var alteredRequests = [];
@@ -45,6 +45,7 @@ function initialize(ctx) {
   
   if (ps.isParametric()) {
     ctx.submitMultipleAlteredRequests(checkTiming, ["vega1", "vega2"], false);    
+    ps.incrementFuzzCounter();
   }
 }
 
@@ -78,7 +79,7 @@ function process(req2, res2, ctx2) {
   ctx2.addRequestResponse(req2, res2);
   ctx2.incrementResponseCount();
 
-  if ((average < 20000) && (ctx2.getSavedResponse(currentIndex).milliseconds > 20000)) {
+  if ((average < 30000) && (ctx2.getSavedResponse(currentIndex).milliseconds > 30000)) {
     detected = true;
   }
 
@@ -99,6 +100,11 @@ function process(req2, res2, ctx2) {
       ctx2.submitAlteredRequest(process, nextRequest.commandString, false, currentIndex + 1);
     }
   }
+
+  if (ctx2.allResponsesReceived()) {
+    ps.decrementFuzzCounter();
+  }
+
 }
 
 
