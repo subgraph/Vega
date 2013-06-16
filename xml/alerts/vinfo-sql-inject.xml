@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>Possible SQL Injection</title>
+<title>SQL Injection</title>
 	
 	<class>Input Validation Error</class>
 	<severity>High</severity>
