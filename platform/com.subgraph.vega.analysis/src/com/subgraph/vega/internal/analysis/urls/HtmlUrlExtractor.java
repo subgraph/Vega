@@ -33,15 +33,23 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class HtmlUrlExtractor {
-
+	
 	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
-		
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
+
 		if(htmlParseResult != null) {
-			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString());
-		} else {
-			return Collections.emptyList();
+			uris.addAll(extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString()));
+		} 
+		
+		if (response.getRawResponse().containsHeader("Location")) {
+			VegaURI v = locationExtractor(response, response.getRawResponse().getFirstHeader("Location").getValue());
+			if (v != null) {
+				uris.add(v);
+			}
 		}
+		
+		return uris;
 	}
 	
 	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
@@ -78,7 +86,7 @@ public class HtmlUrlExtractor {
 			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
 				String candidateLink = extractMetaRefresh(document, e);
 				if (!candidateLink.startsWith("http")) {
-					link = absUri(document, candidateLink);
+					link = absUri(document.baseUri(), candidateLink);
 				}
 				else {
 					link = candidateLink;
@@ -146,10 +154,10 @@ public class HtmlUrlExtractor {
 		return "";
 	}
 	
-	private String absUri(Document document, String path) {
+	private String absUri(String baseUri, String path) {
 		final String link;
 		
-		URI u = createURI(document.baseUri());
+		URI u = createURI(baseUri);
 		
 		if (path.startsWith("/")) {
 			link = u.getScheme() + "://" + u.getHost() + path;
@@ -220,6 +228,25 @@ public class HtmlUrlExtractor {
 			i++;
 		}
 		return uris;
+	}
+	
+	private VegaURI locationExtractor(IHttpResponse response, String v) {
+		final String link;
+		
+		if (!v.startsWith("http://") && !v.startsWith("https://")) {
+			link = absUri(response.getRequestUri().toString(), v);
+		} else
+		{
+			link = v;
+		}
+		URI uri = createURI(link);
+		if(uri != null && hasValidHttpScheme(uri)) {
+			final HttpHost targetHost = URIUtils.extractHost(uri);
+			if(validateHost(targetHost)) {
+				return new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+			}
+		}
+		return null;
 	}
 
 }
