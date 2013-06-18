@@ -310,7 +310,7 @@ public class ResponseAnalyzer {
 			if (!inQuote && (c == '\'' || c == '"')) {
 				inQuote = true;
 				
-				if (matchStartsWith(text, lastWordIdx, "innerHTML", "open",
+				if (matchStartsWith(text, lastWordIdx, "innerHTML", "open", "asyncRequest",
 						"url", "href", "write", "src", "location", "action")) {
 					possibleUrl = true;
 					possibleUrlIdx = idx + 1;
