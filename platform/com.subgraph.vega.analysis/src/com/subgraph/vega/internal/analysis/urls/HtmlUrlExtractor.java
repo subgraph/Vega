@@ -33,7 +33,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.util.VegaURI;
 
 public class HtmlUrlExtractor {
-	
+
 	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
@@ -95,7 +95,7 @@ public class HtmlUrlExtractor {
 				if(uri != null && hasValidHttpScheme(uri)) {
 					final HttpHost targetHost = URIUtils.extractHost(uri);
 					if(validateHost(targetHost)) {
-						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 						uris.add(vegaURI);
 					}
 				}
@@ -108,7 +108,7 @@ public class HtmlUrlExtractor {
 				if(uri != null && hasValidHttpScheme(uri)) {
 					final HttpHost targetHost = URIUtils.extractHost(uri);
 					if(validateHost(targetHost)) {
-						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 						uris.add(vegaURI);
 					}
 				}
@@ -214,7 +214,7 @@ public class HtmlUrlExtractor {
 						if(uri != null && hasValidHttpScheme(uri)) {
 							final HttpHost targetHost = URIUtils.extractHost(uri);
 							if(validateHost(targetHost)) {
-								final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+								final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 								uris.add(vegaURI);
 							}
 						}
@@ -223,6 +223,56 @@ public class HtmlUrlExtractor {
 					} else {
 						index++;
 					}
+				}
+			} else if (l.startsWith(".php",i) || l.startsWith(".asp",i) || l.startsWith(".jsp",i) || l.startsWith(".html",i)) {
+			
+				// found possible path
+								
+				Boolean finished = false;
+				int fileOffset = i; // point of "file" discovery
+				int index = fileOffset;
+				int startOffset = 0;    // "file" start point
+				int endOffset = s.length();      // "file" end point
+				
+				// work backwards
+				
+				while (index >= 0 && !finished) {
+				  if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '(') || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == '<') || (s.charAt(index) == ')')) {
+					  startOffset = index+1;
+					  finished = true;
+				  } else {
+					  index--;
+				  }
+				}
+				
+				index = startOffset;
+				finished = false;
+				
+				// work forwards
+								
+				while (index < s.length() && !finished) {
+				  if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == '<') || (s.charAt(index) == ')')) {
+					  endOffset = index;
+					  finished = true;
+				      String link = s.substring(startOffset, endOffset);
+
+					  if (!link.startsWith("http://") && !link.startsWith("https://")) {
+							link = absUri(document.baseUri(), link);
+					  }
+							
+				      URI uri = createURI(link);
+						
+					  if(uri != null && hasValidHttpScheme(uri)) {
+						final HttpHost targetHost = URIUtils.extractHost(uri);
+						if(validateHost(targetHost)) {
+							final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
+							uris.add(vegaURI);
+						}
+					  }
+					  i = index + 1;
+				  } else {
+					  index++;
+				  }
 				}
 			}
 			i++;
@@ -243,7 +293,7 @@ public class HtmlUrlExtractor {
 		if(uri != null && hasValidHttpScheme(uri)) {
 			final HttpHost targetHost = URIUtils.extractHost(uri);
 			if(validateHost(targetHost)) {
-				return new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+				return new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 			}
 		}
 		return null;
