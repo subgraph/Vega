@@ -39,7 +39,7 @@ public class HtmlUrlExtractor {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 
 		if(htmlParseResult != null) {
-			uris.addAll(extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString()));
+			uris.addAll(extractUrlsFromDocument(response, htmlParseResult.getJsoupDocument(), response.getBodyAsString()));
 		} 
 		
 		if (response.getRawResponse().containsHeader("Location")) {
@@ -52,19 +52,19 @@ public class HtmlUrlExtractor {
 		return uris;
 	}
 	
-	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
+	List<VegaURI> findHtmlUrls(IHttpResponse response, HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
-		return extractUrlsFromDocument(document, htmlString);
+		return extractUrlsFromDocument(response, document, htmlString);
 	}
 	
-	private List<VegaURI> extractUrlsFromDocument(Document document, String html) {
+	private List<VegaURI> extractUrlsFromDocument(IHttpResponse response, Document document, String html) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
-		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
-		uris.addAll(extractURIs(document, "[src]", "abs:src"));
-		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
-		uris.addAll(extractURIs(document, "meta",""));
-	    uris.addAll(responseBodyUriScanFast(document, html));
+		uris.addAll(extractURIs(response, document, "a[href]", "abs:href"));
+		uris.addAll(extractURIs(response, document, "[src]", "abs:src"));
+		uris.addAll(extractURIs(response, document, "link[href]", "abs:href"));
+		uris.addAll(extractURIs(response, document, "meta",""));
+	    uris.addAll(responseBodyUriScanFast(response, document, html));
 		return uris;
 	}
 	
@@ -79,14 +79,14 @@ public class HtmlUrlExtractor {
 			w.write(buffer, 0, n);
 		}
 	}
-	private List<VegaURI> extractURIs(Document document, String query, String attribute) {
+	private List<VegaURI> extractURIs(IHttpResponse response, Document document, String query, String attribute) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		for(Element e: document.select(query)) {
 			String link;
 			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
 				String candidateLink = extractMetaRefresh(document, e);
 				if (!candidateLink.startsWith("http")) {
-					link = absUri(document.baseUri(), candidateLink);
+					link = absUri(response, document.baseUri(), candidateLink);
 				}
 				else {
 					link = candidateLink;
@@ -154,28 +154,60 @@ public class HtmlUrlExtractor {
 		return "";
 	}
 	
-	private String absUri(String baseUri, String path) {
+	
+	private String absUri(IHttpResponse response, String baseUri, String path) {
 		final String link;
-		
-		URI u = createURI(baseUri);
+		String parentPath = baseUri;
+		URI u = null;
+		boolean finished = false;
+		int index = 0;
+		int lastIndex = -1;
 		
 		if (path.startsWith("/")) {
-			link = u.getScheme() + "://" + u.getHost() + path;
-		} else {
-			int i = 0;
-			int lastIndex = 0;
-			for (i = 0; i <= u.getPath().length()-1; i++) {
-			  if (u.getPath().charAt(i) == '/') {
-				  lastIndex = i;
-			  }
+			return response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + path;
+		}
+		
+		if (baseUri.startsWith("http://") || (baseUri.startsWith("https://"))) {
+			try {
+				u = new URI(baseUri);
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			link = u.getScheme() + "://" + u.getHost() + u.getPath().substring(0,  lastIndex) + "/" + path;
+			if (u != null) {
+				parentPath = u.getPath();
+			} else return "";
 		} 
+		
+
+
+		while ((index < parentPath.length()) && !finished) {
+			if (parentPath.startsWith(".php", index) ||  parentPath.startsWith(".html",index) || parentPath.startsWith(".asp", index) || parentPath.startsWith(".jsp", index)) {
+				finished = true;
+			} else if ((parentPath.charAt(index) == '/') || (parentPath.charAt(index) == '\\')) {
+				lastIndex = index;
+			}
+			index++;
+		}	
+				
+		if (finished) {
+			if (lastIndex >= 0) {
+				link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + "/" + parentPath.substring(0, lastIndex) + "/" + path;
+			} else
+			{
+				link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + "/" + parentPath + "/" + path;
+			}
+		}
+		else if (lastIndex >= 0) {
+  		  link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + parentPath.substring(0, lastIndex) + "/" + path;
+		} else
+		{
+			link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + parentPath + "/" + path;
+		}
 		return link;
 	}
 	
-	
-	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String s) {
+	private ArrayList<VegaURI> responseBodyUriScanFast(IHttpResponse response, Document document, String s) {
 		
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		int i = 0;
@@ -257,7 +289,7 @@ public class HtmlUrlExtractor {
 				      String link = s.substring(startOffset, endOffset);
 
 					  if (!link.startsWith("http://") && !link.startsWith("https://")) {
-							link = absUri(document.baseUri(), link);
+							link = absUri(response, document.baseUri(), link);
 					  }
 							
 				      URI uri = createURI(link);
@@ -284,7 +316,7 @@ public class HtmlUrlExtractor {
 		final String link;
 		
 		if (!v.startsWith("http://") && !v.startsWith("https://")) {
-			link = absUri(response.getRequestUri().toString(), v);
+			link = absUri(response, response.getRequestUri().toString(), v);
 		} else
 		{
 			link = v;
