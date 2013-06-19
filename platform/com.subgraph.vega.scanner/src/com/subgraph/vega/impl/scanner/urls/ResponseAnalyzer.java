@@ -213,7 +213,7 @@ public class ResponseAnalyzer {
 			else
 				ctx.addStringHighlight(xidstring);
 
-			String path = req.getURI().getPath();
+			String path = req.getURI().normalize().getPath();
 			String storedXSSContext;
 
 			if (offset == 0) {
@@ -361,7 +361,7 @@ public class ResponseAnalyzer {
 		if(u != null && hasValidHttpScheme(u)) {
 			final HttpHost targetHost = URIUtils.extractHost(u);
 			if(validateHost(targetHost)) {
-				final VegaURI vegaURI = new VegaURI(targetHost, u.getPath(), u.getQuery());
+				final VegaURI vegaURI = new VegaURI(targetHost, u.normalize().getPath(), u.getQuery());
 					if (uriFilter.filter(vegaURI))
 					uriParser.processUri(vegaURI);
 			}
@@ -403,12 +403,12 @@ public class ResponseAnalyzer {
 		} else {
 			int i = 0;
 			int lastIndex = 0;
-			for (i = 0; i <= u.getPath().length()-1; i++) {
-			  if (u.getPath().charAt(i) == '/') {
+			for (i = 0; i <= u.normalize().getPath().length()-1; i++) {
+			  if (u.normalize().getPath().charAt(i) == '/') {
 				  lastIndex = i;
 			  }
 			}
-			link = u.getScheme() + "://" + u.getHost() + u.getPath().substring(0,  lastIndex) + "/" + path;
+			link = u.getScheme() + "://" + u.getHost() + u.normalize().getPath().substring(0,  lastIndex) + "/" + path;
 		} 
 		return link;
 	}
@@ -460,7 +460,7 @@ public class ResponseAnalyzer {
 		if (key == null) {
 			key = createAlertKey(ctx, type, request);
 		}
-		String resource = request.getURI().getPath();
+		String resource = request.getURI().normalize().getPath();
 
 		int i = resource.indexOf('?');
 
