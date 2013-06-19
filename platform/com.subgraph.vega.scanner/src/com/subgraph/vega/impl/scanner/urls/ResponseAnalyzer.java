@@ -346,6 +346,10 @@ public class ResponseAnalyzer {
 	private void addPossibleUrl(URI uri, String candidateLink) {
 		// TODO Auto-generated method stub
 		String link;
+
+		if (isProxyScan) {
+			return;
+		}
 		
 		if (!candidateLink.startsWith("http")) {
 			link = absUri(uri, candidateLink);
@@ -358,7 +362,7 @@ public class ResponseAnalyzer {
 			final HttpHost targetHost = URIUtils.extractHost(u);
 			if(validateHost(targetHost)) {
 				final VegaURI vegaURI = new VegaURI(targetHost, u.getPath(), u.getQuery());
-				if (uriFilter.filter(vegaURI))
+					if (uriFilter.filter(vegaURI))
 					uriParser.processUri(vegaURI);
 			}
 		}		
