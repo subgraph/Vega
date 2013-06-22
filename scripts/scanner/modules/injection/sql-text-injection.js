@@ -147,7 +147,7 @@ function process(req, res, ctx) {
 
   if (ctx.isFingerprintMatch(9, fp) && !ctx.isFingerprintMatch(9, 10)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(10), ctx.getSavedResponse(10), {
-      output: ctx.getSavedResponse().bodyAsString,
+      output: ctx.getSavedResponse(10).bodyAsString,
       key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
