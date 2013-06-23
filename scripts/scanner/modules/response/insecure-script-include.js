@@ -15,21 +15,35 @@ function run(request, response, ctx) {
 
           var scripthost = parseUri(scriptsrc).host.toLowerCase();
 
-          var local = ctx.internetDomainName(response.host.hostName.toLowerCase()).topPrivateDomain().name(); 
-          var remote = ctx.internetDomainName(scripthost).topPrivateDomain().name();
+          if (ctx.isValidInternetDomainName(scripthost)) {
+
+            var local = ctx.internetDomainName(response.host.hostName.toLowerCase()).topPrivateDomain().name(); 
+            var remote = ctx.internetDomainName(scripthost).topPrivateDomain().name();
           
-            if (local != remote) {
+              if (local != remote) {
 
-              var uristr = String(request.requestLine.uri);
-              var uripart = uristr.replace(/\?.*/, "");
+                var uristr = String(request.requestLine.uri);
+                var uripart = uristr.replace(/\?.*/, "");
 
-              ctx.addStringHighlight(scriptsrc);
+                ctx.addStringHighlight(scriptsrc);
 
-              ctx.alert("xs-script-include", request, response, {
-                        "resource": uripart,
-                        "key": "xs-script-include:" + uripart + ":" + scriptsrc,
-			"output": "Local domain: "+response.host.hostName+"\n"+"Script source: "+scriptsrc
-                        });
+                ctx.alert("xs-script-include", request, response, {
+                          "resource": uripart,
+                          "key": "xs-script-include:" + uripart + ":" + scriptsrc,
+    		       	  "output": "Local domain: "+response.host.hostName+"\n"+"Script source: "+scriptsrc
+                          });
+              }
+            } else if (scripthost.toLowerCase() != response.host.hostName.toLowerCase()) {
+                var uristr = String(request.requestLine.uri);
+                var uripart = uristr.replace(/\?.*/, "");
+
+                ctx.addStringHighlight(scriptsrc);
+
+                ctx.alert("xs-script-include", request, response, {
+                          "resource": uripart,
+                          "key": "xs-script-include:" + uripart + ":" + scriptsrc,
+                          "output": "Local domain: "+response.host.hostName+"\n"+"Script source: "+scriptsrc
+                          });
             }
         }
         if ((response.host.schemeName == "https") && (scriptsrc.indexOf("http://") == 0)) {
