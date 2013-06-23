@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
+
+import com.google.common.net.InternetDomainName;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -232,5 +234,10 @@ public class ResponseModuleContext implements IModuleContext {
 	@Override
 	public boolean alertExists(String key) {
 		return scanInstance.hasAlertKey(key);
+	}
+	
+	public InternetDomainName internetDomainName(String domain) {
+		return InternetDomainName.from(domain);
+		
 	}
 }

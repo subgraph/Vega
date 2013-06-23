@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package com.subgraph.vega.api.scanner;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpUriRequest;
+
+import com.google.common.net.InternetDomainName;
 
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -50,6 +52,8 @@ public interface IInjectionModuleContext extends IModuleContext {
 	void pivotChecks(HttpUriRequest request, IHttpResponse response);
 
 	void analyzePage(HttpUriRequest request, IHttpResponse response);
+	
+	InternetDomainName internetDomainName(String domain);
 
 	List<String> getFileExtensionList();
 

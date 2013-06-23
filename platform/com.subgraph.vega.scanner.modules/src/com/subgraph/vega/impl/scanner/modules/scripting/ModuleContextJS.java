@@ -20,6 +20,8 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
 
+import com.google.common.net.InternetDomainName;
+
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
@@ -296,4 +298,7 @@ public class ModuleContextJS {
 		return context.alertExists(key);
 	}
 	
+	public InternetDomainName internetDomainName(String domain) {
+		return context.internetDomainName(domain);
+	}
 }
