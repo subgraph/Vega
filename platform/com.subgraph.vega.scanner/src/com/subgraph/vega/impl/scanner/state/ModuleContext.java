@@ -403,4 +403,8 @@ public class ModuleContext implements IInjectionModuleContext {
 		return InternetDomainName.from(domain);
 		
 	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return InternetDomainName.isValid(domain);
+	}
 }

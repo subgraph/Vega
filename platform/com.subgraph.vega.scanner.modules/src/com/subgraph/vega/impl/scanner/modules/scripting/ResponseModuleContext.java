@@ -240,4 +240,8 @@ public class ResponseModuleContext implements IModuleContext {
 		return InternetDomainName.from(domain);
 		
 	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return InternetDomainName.isValid(domain);
+	}
 }

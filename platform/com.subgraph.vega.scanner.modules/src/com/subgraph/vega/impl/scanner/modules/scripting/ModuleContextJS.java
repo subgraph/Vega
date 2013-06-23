@@ -301,4 +301,8 @@ public class ModuleContextJS {
 	public InternetDomainName internetDomainName(String domain) {
 		return context.internetDomainName(domain);
 	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return context.isValidInternetDomainName(domain);
+	}
 }

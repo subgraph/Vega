@@ -54,6 +54,7 @@ public interface IInjectionModuleContext extends IModuleContext {
 	void analyzePage(HttpUriRequest request, IHttpResponse response);
 	
 	InternetDomainName internetDomainName(String domain);
+	boolean isValidInternetDomainName(String domain);
 
 	List<String> getFileExtensionList();
 
