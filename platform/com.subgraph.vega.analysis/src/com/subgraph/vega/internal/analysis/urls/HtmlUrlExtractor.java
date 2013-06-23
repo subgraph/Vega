@@ -85,7 +85,7 @@ public class HtmlUrlExtractor {
 			String link;
 			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
 				String candidateLink = extractMetaRefresh(document, e);
-				if (!candidateLink.startsWith("http")) {
+				if (!candidateLink.startsWith("http://") && (!candidateLink.startsWith("https://"))) {
 					link = absUri(response, document.baseUri(), candidateLink);
 				}
 				else {
