@@ -120,6 +120,7 @@ function handler(req, res, ctx) {
     for (i=11; i<=15; i++) {
     	res = pwre.exec(ctx.getSavedResponse(i).bodyAsString);
     	if (res) {
+		ctx.addRegexCaseInsensitiveHighlight("root:.:0:0");
     		publishAlert(ctx, res[0], i);
     	}
     }
@@ -129,6 +130,7 @@ function handler(req, res, ctx) {
     var content = "<web-app";
     for (i = 16; i<= 19; i++) {
     	if (ctx.getSavedResponse(i).bodyAsString.indexOf(content) >= 0) {
+		ctx.addStringHighlight(content);
     		publishAlert(ctx, content, i);
     	}
     }
@@ -136,6 +138,7 @@ function handler(req, res, ctx) {
     content = "[boot loader]";
     for (i = 20; i <= 23; i++) {
     	if (ctx.getSavedResponse(i).bodyAsString.indexOf(content) >= 0) {
+                ctx.addStringHighlight(content);
     		publishAlert(ctx, content, i);
     	}
     }

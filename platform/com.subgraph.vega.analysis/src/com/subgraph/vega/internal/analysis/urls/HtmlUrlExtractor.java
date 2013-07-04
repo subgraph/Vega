@@ -178,15 +178,19 @@ public class HtmlUrlExtractor {
 			
 			if (l.startsWith("http://", i) || l.startsWith("https://", i)) {
 				
-				if (i+8 >= s.length()) {
-					return uris;
+				if (l.startsWith("http://", i))
+				{
+					if (i+7 >= s.length()) {
+						return uris;
+					}
+				}
+				else if (l.startsWith("https://", i)) {
+					if (i+8 >= s.length()) {
+						return uris;
+					}
 				}
 				
-				int start = l.substring(i).indexOf("http://") + i;
-				
-				if (start == -1) 
-					start = l.substring(i).indexOf("https://") + i;
-				
+				int start = i;
 				int index = start;
 				Boolean finished = false;
 				String link;
@@ -195,7 +199,7 @@ public class HtmlUrlExtractor {
 					
 					// TODO : Some of these terminating chars are valid in URIs, e.g. ')'
 					
-					if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == ')') ) {
+					if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == '<') || (s.charAt(index) == ')') ) {
 						link = s.substring(start, index);
 						URI uri = createURI(link);
 						
@@ -206,7 +210,7 @@ public class HtmlUrlExtractor {
 								uris.add(vegaURI);
 							}
 						}
-						i = index;
+						i = index + 1;
 						finished = true;
 					} else {
 						index++;

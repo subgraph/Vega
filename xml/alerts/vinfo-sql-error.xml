@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-<title>SQL Injection</title>
+<title>SQL Error Detected - Possible SQL Injection</title>
 	
-	<class>Input Validation Error</class>
+	<class>Error Message</class>
 	<severity>High</severity>
 
-	<impact>Vega has detected a possible SQL injection vulnerability.</impact>
-	<impact>These vulnerabilities can be exploited by remote attackers to gain unauthorized read or write access to the underlying database.</impact>
-	<impact>Exploitation of SQL injection vulnerabilities can also allow for attacks against the logic of the application.</impact>
+	<impact>Vega has detected error output from a database server.</impact>
+	<impact>This may indicate an SQL injection vulnerability, though this is not confirmed.</impact>
+	<impact>If this is due to an SQL injection condition, exploitation of SQL injection vulnerabilities can also allow for attacks against the logic of the application.</impact>
 	<impact>Attackers may be able to obtain unauthorized access to the server hosting the database.</impact>
 
 	<discussion>
-		Vega has detected a possible SQL injection vulnerability. These vulnerabilities are present when externally-supplied input is used to construct a SQL query. If precautions are not taken, the externally-supplied input (usually a GET or POST parameter) can modify the query string such that it performs unintented actions. These actions include gaining unauthorized read or write access to the data stored in the database, as well as modifying the logic of the application. 
+		Vega has detected a known SQL error string. This can indicate a possible SQL injection vulnerability. These vulnerabilities are present when externally-supplied input is used to construct a SQL query. If precautions are not taken, the externally-supplied input (usually a GET or POST parameter) can modify the query string such that it performs unintented actions. These actions include gaining unauthorized read or write access to the data stored in the database, as well as modifying the logic of the application. 
 	</discussion>
 
 
+        <remediation>
+                SQL error messages should not be output to clients, as this may be useful information in exploiting any related vulnerability.
+        </remediation>
   	<remediation>
 		The developer should review the request and response against the code to manually verify whether or not a vulnerability is present.
   	</remediation>
@@ -35,6 +38,7 @@
   	</remediation>
 
   	<references>
+		<url address="http://cwe.mitre.org/data/definitions/209.html">CWE-209: Information Exposure Through an Error Message</url>
 		<url address="http://en.wikipedia.org/wiki/SQL_injection">SQL Injection (Wikipedia)</url>
 		<url address="http://php.net/manual/en/function.mysql-real-escape-string.php"> mysql_real_escape_string() (PHP Manual)</url>
 		<url address="http://guides.rubyonrails.org/security.html#sql-injection">SQL Injection (Rails security guide)</url>

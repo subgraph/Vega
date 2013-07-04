@@ -21,7 +21,7 @@ function initialize(ctx) {
   ctx.submitRequest(createReq12(ctx, ps), process, 12);
   ctx.submitRequest(createReq13(ctx, ps), process, 13);	
   ctx.submitRequest(createReq14(ctx, ps), process, 14);
-  ctx.submitRequest(createReq14(ctx, ps), process, 15); 
+  ctx.submitRequest(createReq15(ctx, ps), process, 15); 
 
 }
 

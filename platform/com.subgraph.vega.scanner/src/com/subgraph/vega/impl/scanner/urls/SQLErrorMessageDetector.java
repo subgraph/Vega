@@ -9,7 +9,7 @@ import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 
 public class SQLErrorMessageDetector {
-	private final static String SQL_INJECTION_ALERT = "vinfo-sql-inject";
+	private final static String SQL_INJECTION_ALERT = "vinfo-sql-error";
 	private final static List<String> ERROR_STRINGS = Arrays.asList(
 			
 			"Incorrect syntax near",                             // MS-SQL Server
