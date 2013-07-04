@@ -36,27 +36,35 @@ public class HtmlUrlExtractor {
 
 	List<VegaURI> findHtmlUrls(IHttpResponse response) {
 		final IHTMLParseResult htmlParseResult = response.getParsedHTML();
-		
+		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
+
 		if(htmlParseResult != null) {
-			return extractUrlsFromDocument(htmlParseResult.getJsoupDocument(), response.getBodyAsString());
-		} else {
-			return Collections.emptyList();
+			uris.addAll(extractUrlsFromDocument(response, htmlParseResult.getJsoupDocument(), response.getBodyAsString()));
+		} 
+		
+		if (response.getRawResponse().containsHeader("Location")) {
+			VegaURI v = locationExtractor(response, response.getRawResponse().getFirstHeader("Location").getValue());
+			if (v != null) {
+				uris.add(v);
+			}
 		}
+		
+		return uris;
 	}
 	
-	List<VegaURI> findHtmlUrls(HttpEntity entity, URI basePath) throws IOException {
+	List<VegaURI> findHtmlUrls(IHttpResponse response, HttpEntity entity, URI basePath) throws IOException {
 		final String htmlString = inputStreamToString(entity.getContent());
 		final Document document = Jsoup.parse(htmlString, basePath.toString());
-		return extractUrlsFromDocument(document, htmlString);
+		return extractUrlsFromDocument(response, document, htmlString);
 	}
 	
-	private List<VegaURI> extractUrlsFromDocument(Document document, String html) {
+	private List<VegaURI> extractUrlsFromDocument(IHttpResponse response, Document document, String html) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
-		uris.addAll(extractURIs(document, "a[href]", "abs:href"));
-		uris.addAll(extractURIs(document, "[src]", "abs:src"));
-		uris.addAll(extractURIs(document, "link[href]", "abs:href"));
-		uris.addAll(extractURIs(document, "meta",""));
-	    uris.addAll(responseBodyUriScanFast(document, html));
+		uris.addAll(extractURIs(response, document, "a[href]", "abs:href"));
+		uris.addAll(extractURIs(response, document, "[src]", "abs:src"));
+		uris.addAll(extractURIs(response, document, "link[href]", "abs:href"));
+		uris.addAll(extractURIs(response, document, "meta",""));
+	    uris.addAll(responseBodyUriScanFast(response, document, html));
 		return uris;
 	}
 	
@@ -71,14 +79,14 @@ public class HtmlUrlExtractor {
 			w.write(buffer, 0, n);
 		}
 	}
-	private List<VegaURI> extractURIs(Document document, String query, String attribute) {
+	private List<VegaURI> extractURIs(IHttpResponse response, Document document, String query, String attribute) {
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		for(Element e: document.select(query)) {
 			String link;
 			if (e.tagName().equals("meta") && e.attr("http-equiv").toLowerCase().equals("refresh")) {
 				String candidateLink = extractMetaRefresh(document, e);
-				if (!candidateLink.startsWith("http")) {
-					link = absUri(document, candidateLink);
+				if (!candidateLink.startsWith("http://") && (!candidateLink.startsWith("https://"))) {
+					link = absUri(response, document.baseUri(), candidateLink);
 				}
 				else {
 					link = candidateLink;
@@ -87,7 +95,7 @@ public class HtmlUrlExtractor {
 				if(uri != null && hasValidHttpScheme(uri)) {
 					final HttpHost targetHost = URIUtils.extractHost(uri);
 					if(validateHost(targetHost)) {
-						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 						uris.add(vegaURI);
 					}
 				}
@@ -100,7 +108,7 @@ public class HtmlUrlExtractor {
 				if(uri != null && hasValidHttpScheme(uri)) {
 					final HttpHost targetHost = URIUtils.extractHost(uri);
 					if(validateHost(targetHost)) {
-						final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+						final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 						uris.add(vegaURI);
 					}
 				}
@@ -146,28 +154,60 @@ public class HtmlUrlExtractor {
 		return "";
 	}
 	
-	private String absUri(Document document, String path) {
+	
+	private String absUri(IHttpResponse response, String baseUri, String path) {
 		final String link;
-		
-		URI u = createURI(document.baseUri());
+		String parentPath = baseUri;
+		URI u = null;
+		boolean finished = false;
+		int index = 0;
+		int lastIndex = -1;
 		
 		if (path.startsWith("/")) {
-			link = u.getScheme() + "://" + u.getHost() + path;
-		} else {
-			int i = 0;
-			int lastIndex = 0;
-			for (i = 0; i <= u.getPath().length()-1; i++) {
-			  if (u.getPath().charAt(i) == '/') {
-				  lastIndex = i;
-			  }
+			return response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + path;
+		}
+		
+		if (baseUri.startsWith("http://") || (baseUri.startsWith("https://"))) {
+			try {
+				u = new URI(baseUri);
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			link = u.getScheme() + "://" + u.getHost() + u.getPath().substring(0,  lastIndex) + "/" + path;
+			if (u != null) {
+				parentPath = u.getPath();
+			} else return "";
 		} 
+		
+
+
+		while ((index < parentPath.length()) && !finished) {
+			if (parentPath.startsWith(".php", index) ||  parentPath.startsWith(".html",index) || parentPath.startsWith(".asp", index) || parentPath.startsWith(".jsp", index)) {
+				finished = true;
+			} else if ((parentPath.charAt(index) == '/') || (parentPath.charAt(index) == '\\')) {
+				lastIndex = index;
+			}
+			index++;
+		}	
+				
+		if (finished) {
+			if (lastIndex >= 0) {
+				link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + "/" + parentPath.substring(0, lastIndex) + "/" + path;
+			} else
+			{
+				link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + "/" + parentPath + "/" + path;
+			}
+		}
+		else if (lastIndex >= 0) {
+  		  link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + parentPath.substring(0, lastIndex) + "/" + path;
+		} else
+		{
+			link = response.getRequestUri().getScheme() + "://" + response.getRequestUri().getHost() + parentPath + "/" + path;
+		}
 		return link;
 	}
 	
-	
-	private ArrayList<VegaURI> responseBodyUriScanFast(Document document, String s) {
+	private ArrayList<VegaURI> responseBodyUriScanFast(IHttpResponse response, Document document, String s) {
 		
 		final ArrayList<VegaURI> uris = new ArrayList<VegaURI>();
 		int i = 0;
@@ -206,7 +246,7 @@ public class HtmlUrlExtractor {
 						if(uri != null && hasValidHttpScheme(uri)) {
 							final HttpHost targetHost = URIUtils.extractHost(uri);
 							if(validateHost(targetHost)) {
-								final VegaURI vegaURI = new VegaURI(targetHost, uri.getPath(), uri.getQuery());
+								final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
 								uris.add(vegaURI);
 							}
 						}
@@ -216,10 +256,79 @@ public class HtmlUrlExtractor {
 						index++;
 					}
 				}
+			} else if (l.startsWith(".php",i) || l.startsWith(".asp",i) || l.startsWith(".jsp",i) || l.startsWith(".html",i)) {
+			
+				// found possible path
+								
+				Boolean finished = false;
+				int fileOffset = i; // point of "file" discovery
+				int index = fileOffset;
+				int startOffset = 0;    // "file" start point
+				int endOffset = s.length();      // "file" end point
+				
+				// work backwards
+				
+				while (index >= 0 && !finished) {
+				  if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '(') || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == '<') || (s.charAt(index) == ')')) {
+					  startOffset = index+1;
+					  finished = true;
+				  } else {
+					  index--;
+				  }
+				}
+				
+				index = startOffset;
+				finished = false;
+				
+				// work forwards
+								
+				while (index < s.length() && !finished) {
+				  if (Character.isWhitespace(s.charAt(index)) || (s.charAt(index) == '"') || (s.charAt(index) == '\'') || (s.charAt(index) == '>') || (s.charAt(index) == '<') || (s.charAt(index) == ')')) {
+					  endOffset = index;
+					  finished = true;
+				      String link = s.substring(startOffset, endOffset);
+
+					  if (!link.startsWith("http://") && !link.startsWith("https://")) {
+							link = absUri(response, document.baseUri(), link);
+					  }
+							
+				      URI uri = createURI(link);
+						
+					  if(uri != null && hasValidHttpScheme(uri)) {
+						final HttpHost targetHost = URIUtils.extractHost(uri);
+						if(validateHost(targetHost)) {
+							final VegaURI vegaURI = new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
+							uris.add(vegaURI);
+						}
+					  }
+					  i = index + 1;
+				  } else {
+					  index++;
+				  }
+				}
 			}
 			i++;
 		}
 		return uris;
+	}
+	
+	private VegaURI locationExtractor(IHttpResponse response, String v) {
+		final String link;
+		
+		if (!v.startsWith("http://") && !v.startsWith("https://")) {
+			link = absUri(response, response.getRequestUri().toString(), v);
+		} else
+		{
+			link = v;
+		}
+		URI uri = createURI(link);
+		if(uri != null && hasValidHttpScheme(uri)) {
+			final HttpHost targetHost = URIUtils.extractHost(uri);
+			if(validateHost(targetHost)) {
+				return new VegaURI(targetHost, uri.normalize().getPath(), uri.getQuery());
+			}
+		}
+		return null;
 	}
 
 }

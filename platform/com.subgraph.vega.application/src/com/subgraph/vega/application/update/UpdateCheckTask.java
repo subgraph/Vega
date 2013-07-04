@@ -1,13 +1,11 @@
 package com.subgraph.vega.application.update;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -133,18 +131,19 @@ public class UpdateCheckTask implements Runnable {
 	
 	private void checkDebianRelease() {
 		
-		Path f = Paths.get(DEBIAN_VERSION);
-		try (InputStream is = Files.newInputStream(f);
-		    BufferedReader r = new BufferedReader(new InputStreamReader(is))) {
-		    String l = null;
-		    while ((l = r.readLine()) != null) {
-		    	if (l.startsWith("Kali Linux 1.0")) {
-		    		versionPrefix = "kl-1.0-";
-		    		distro = true;
-		    	}
-		   	}
-		} catch (IOException ex) {
-			// do nothing, it's not a distro TODO: re-implement using a build flag
+		
+	try {
+	    BufferedReader r = new BufferedReader ( new FileReader ( DEBIAN_VERSION ));
+	    String l = null;
+	    while ((l = r.readLine()) != null) {
+	    	if (l.startsWith("Kali Linux 1.0")) {
+	    		versionPrefix = "kl-1.0-";
+	    		distro = true;
+	    	}		
+	    }}
+		catch (FileNotFoundException e){
+		}
+		catch (IOException e){
 		}
 	}
 }

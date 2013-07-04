@@ -16,14 +16,14 @@ function initialize(ctx) {
     var pathkey;
 
     if (ps.getPath().isPostTarget() == true) {
-      pathkey = uripart + "?" + "post" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
     }
     else
     {
-      pathkey = uripart + "?" + "get" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
     }
 
-    var k= "vinfo-sql-inject:" + pathkey;
+    var k= pathkey;
 
     if (ctx.alertExists(k)) {
       return;
@@ -94,18 +94,18 @@ function process(req, res, ctx) {
   var pathkey;
 
   if (ps.getPath().isPostTarget() == true) {
-    pathkey = uripart + "?" + "post" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
   }
   else
   {
-    pathkey = uripart + "?" + "get" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
   }
 
   
   if (!ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(1, 2)) {
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(1), ctx.getSavedResponse(1), {
       output: ctx.getSavedResponse(1).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -117,7 +117,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(1, 4) && !ctx.isFingerprintMatch(3, 4)) {
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(1), ctx.getSavedResponse(1), {
       output: ctx.getSavedResponse(1).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -128,7 +128,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(5, fp) && !ctx.isFingerprintMatch(5, 6)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(6), ctx.getSavedResponse(6), {
       output: ctx.getSavedResponse(6).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -138,7 +138,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(7, fp) && !ctx.isFingerprintMatch(7, 8)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(8), ctx.getSavedResponse(8), {
       output: ctx.getSavedResponse(8).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -147,8 +147,8 @@ function process(req, res, ctx) {
 
   if (ctx.isFingerprintMatch(9, fp) && !ctx.isFingerprintMatch(9, 10)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(10), ctx.getSavedResponse(10), {
-      output: ctx.getSavedResponse().bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      output: ctx.getSavedResponse(10).bodyAsString,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -159,7 +159,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(19, fp) && !ctx.isFingerprintMatch(18, 19)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(19), ctx.getSavedResponse(19), {
       output: ctx.getSavedResponse(19).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -169,7 +169,7 @@ function process(req, res, ctx) {
   if (!ctx.isFingerprintMatch(20, 21)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(21), ctx.getSavedResponse(21), {
       output: ctx.getSavedResponse(21).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -179,7 +179,7 @@ function process(req, res, ctx) {
   if (!ctx.isFingerprintMatch(22, 23)) {
           ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(23), ctx.getSavedResponse(23), {
       output: ctx.getSavedResponse(19).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -189,7 +189,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(12, 13) && !ctx.isFingerprintMatch(11, 12)) {
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(1), ctx.getSavedResponse(1), {
       output: ctx.getSavedResponse(1).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -200,7 +200,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(14, fp) && !ctx.isFingerprintMatch(14, 15)) {
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(15), ctx.getSavedResponse(15), {
       output: ctx.getSavedResponse(1).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });
@@ -210,7 +210,7 @@ function process(req, res, ctx) {
   if (ctx.isFingerprintMatch(16, fp) && !ctx.isFingerprintMatch(17, 16)) {
 	  ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(16), ctx.getSavedResponse(16), {
       output: ctx.getSavedResponse(1).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Text Injection Differential"
     });

@@ -59,14 +59,14 @@ function initialize(ctx) {
     var pathkey;
 
     if (ps.getPath().isPostTarget() == true) {
-      pathkey = uripart + "?" + "post" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
     }
     else
     {
-      pathkey = uripart + "?" + "get" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
     }
 
-    var k= "vinfo-sql-inject:" + pathkey;
+    var k= pathkey;
 
     if (ctx.alertExists(k)) {
       return;
@@ -89,11 +89,11 @@ function checkTiming(req, res, ctx) {
   var param = ps.getFuzzableParameter().name;
 
   if (ps.getPath().isPostTarget() == true) {
-    pathkey = uripart + "?" + "post" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
   }
   else
   {
-    pathkey = uripart + "?" + "get" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
   }
 
   if (res.fetchFail) {
@@ -125,11 +125,11 @@ function process(req2, res2, ctx2) {
   var pathkey;
 
   if (ps.getPath().isPostTarget() == true) {
-    pathkey = uripart + "?" + "post" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
   }
   else
   {
-    pathkey = uripart + "?" + "get" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
   }
 
   var average = ctx2.getIntegerProperty(pathkey + "?average");
@@ -150,14 +150,14 @@ function process(req2, res2, ctx2) {
 
     ctx2.alert("vinfo-sql-inject", ctx2.getSavedRequest(currentIndex), ctx2.getSavedResponse(currentIndex), {
       output: res2.bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Timing Analysis Checks",
       param: ps.getFuzzableParameter().name
     }); 
   } else {
     if ((currentIndex + 1) < requests.length) {
-    var k= "vinfo-sql-inject:" + pathkey;
+    var k= pathkey;
 
     if (ctx2.alertExists(k)) {
       return;

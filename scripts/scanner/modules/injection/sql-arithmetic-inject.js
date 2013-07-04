@@ -17,14 +17,14 @@ function initialize(ctx) {
     var pathkey;
 
     if (ps.getPath().isPostTarget() == true) {
-      pathkey = uripart + "?" + "post" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
     }
     else
     {
-      pathkey = uripart + "?" + "get" + "?" + param;
+      pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
     }
 
-    var k= "vinfo-sql-inject:" + pathkey;
+    var k= pathkey;
 
 
     if (ctx.alertExists(k)) {
@@ -97,18 +97,18 @@ function process(req, res, ctx) {
   var pathkey;
 
   if (ps.getPath().isPostTarget() == true) {
-    pathkey = uripart + "?" + "post" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "post" + "?" + param;
   }
   else
   {
-    pathkey = uripart + "?" + "get" + "?" + param;
+    pathkey = "vinfo-sql-inject:" + uripart + "?" + "get" + "?" + param;
   }
 
   if (ctx.isFingerprintMatch(0, 1) && !ctx.isFingerprintMatch(0, 2)) {
 
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(0), ctx.getSavedResponse(0), {
       output: ctx.getSavedResponse(0).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Arithmetic Evaluation Differential"
 
@@ -122,7 +122,7 @@ function process(req, res, ctx) {
 
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(7), ctx.getSavedResponse(7), {
       output: ctx.getSavedResponse(7).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Arithmetic Evaluation Differential"
     });
@@ -134,7 +134,7 @@ function process(req, res, ctx) {
 
     ctx.alert("vinfo-sql-inject", ctx.getSavedRequest(4), ctx.getSavedResponse(4), {
       output: ctx.getSavedResponse(4).bodyAsString,
-      key: "vinfo-sql-inject:" + pathkey,
+      key: pathkey,
       resource: uripart,
       detectiontype: "Blind Arithmetic Evaluation Differential"
     });
