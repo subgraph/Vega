@@ -17,6 +17,8 @@ var requests = [["1 AND SLEEP(30) -- ", false],
                ["' UNION SELECT SLEEP(30) -- ", true],
                ["\" UNION SELECT SLEEP(30) -- ", true],
                ["(1 AND (SELECT SLEEP(30))) -- ", false],
+	       ["1' AND SLEEP(30) -- ", false],
+               ["1\" AND SLEEP(30) -- ", false],
 
                /* SQL Server */ 
 
