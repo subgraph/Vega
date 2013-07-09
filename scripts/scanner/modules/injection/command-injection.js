@@ -1,5 +1,5 @@
 var module = {
-	name: "Blind OS Command Injection (Timing)",
+	name: "Blind OS Command Injection Timing",
 	category: "Injection Modules",
 	differential: false,
         defaultDisabled: true
