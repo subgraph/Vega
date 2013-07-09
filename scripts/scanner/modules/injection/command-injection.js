@@ -1,7 +1,8 @@
 var module = {
-	name: "Blind OS Command Injection",
+	name: "Blind OS Command Injection (Timing)",
 	category: "Injection Modules",
-	differential: false
+	differential: false,
+        defaultDisabled: true
 };
 
 var unixMetaChars = ['; ', '" ; ', "' ; ", "| ", '"| ', "'| "]; 
