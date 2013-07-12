@@ -1,7 +1,8 @@
 var module = {
   name: "Blind SQL Injection Timing",
   category: "Injection Modules",
-  differential: false
+  differential: false,
+  defaultDisabled: true
 };
 
 var requests = [["1 AND SLEEP(30) -- ", false],
