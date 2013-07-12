@@ -14,7 +14,6 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xms256M -Xmx1024M -XX:PermSize=128M -XX:MaxPermSize=256M</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
