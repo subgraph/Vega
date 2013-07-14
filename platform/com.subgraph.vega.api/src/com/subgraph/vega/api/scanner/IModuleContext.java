@@ -20,6 +20,7 @@ public interface IModuleContext extends IModelProperties {
 	void reportRequestException(HttpUriRequest request, Throwable ex);
 	void error(HttpUriRequest request, IHttpResponse response, String message);
 	void debug(String msg);
+	void debug(String msg, Boolean flag);
 	void addStringHighlight(String str);
 	void addRegexHighlight(String regex);
 	void addRegexCaseInsensitiveHighlight(String regex);

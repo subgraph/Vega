@@ -244,7 +244,12 @@ public class ModuleContext implements IInjectionModuleContext {
 	public void debug(String msg) {
 		scanState.debug("[" + pathState.getPath().getUri() + "] " + msg);
 	}
-
+	
+	@Override
+	public void debug(String msg, Boolean colored) {
+		scanState.debug("[" + pathState.getPath().getUri() + "] " + msg, colored);
+	}
+	
 	@Override
 	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
 		scanState.analyzePage(this, request, response);

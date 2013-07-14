@@ -26,6 +26,18 @@ public class ConsoleService implements IConsole {
 		}
 	}
 	@Override
+	public synchronized void debug(String output) {
+		if(!output.endsWith("\n"))
+			output = output + "\n";
+		if(displays.size() == 0) {
+			bufferOutput(output);
+		} else {
+			for(IConsoleDisplay display: displays) {
+				display.printDebug(output);
+			}
+		}
+	}
+	@Override
 	public synchronized void error(String output) {
 		if(!output.endsWith("\n"))
 			output = output + "\n";

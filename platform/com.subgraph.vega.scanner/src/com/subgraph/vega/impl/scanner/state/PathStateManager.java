@@ -265,6 +265,16 @@ public class PathStateManager {
 			logger.info(message);
 	}
 	
+	public void debug(String message, Boolean colored) {
+		if(config.getDisplayDebugOutput()) {
+			if (colored) {
+				logger.finer(message);
+			} else {
+				logger.info(message);
+			}
+		}
+	}
+	
 	public void reportRequestException(HttpUriRequest request, Throwable ex) {
 		logger.warning("Exception processing request: "+ request +" : "+ ex.getMessage());
 		scanInstance.notifyScanException(request, ex);

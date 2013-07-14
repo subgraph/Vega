@@ -69,6 +69,15 @@ public class ResponseModuleContext implements IModuleContext {
 		workspace.consoleWrite(msg);
 	}
 	
+	@Override
+	public void debug(String msg, Boolean colored) {
+		if (colored) {
+			workspace.consoleDebug(msg);
+		} else {
+			workspace.consoleWrite(msg);
+		}
+	}
+	
 	public void alert(String type, HttpUriRequest request, ResponseJS response) {
 		alert(type, request, response, null);
 	}

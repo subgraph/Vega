@@ -109,6 +109,10 @@ public class ModuleContextJS {
 		context.debug(msg);
 	}
 
+	public void debug(String msg, Boolean flag) {
+		context.debug(msg, flag);
+	}
+	
 	public void analyzePage(HttpUriRequest request, ResponseJS response) {
 		context.analyzePage(request, response.getResponse());
 	}
