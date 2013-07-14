@@ -2,7 +2,7 @@ var module = {
 	name: "Blind OS Command Injection Timing",
 	category: "Injection Modules",
 	differential: false,
-        defaultDisabled: true
+	defaultDisabled: true
 };
 
 var unixMetaChars = ['; ', '" ; ', "' ; ", "| ", '"| ', "'| "]; 
@@ -53,8 +53,8 @@ function initialize(ctx) {
 function process(req, res, ctx) {
 	if (ctx.hasModuleFailed()) return;
 	if (res.fetchFail) {
-    ctx2.error(req, res, "During command injection checks");
-    ctx2.setModuleFailed();
+    ctx.error(req, res, "During command injection checks");
+    ctx.setModuleFailed();
     return;
   }
 	
