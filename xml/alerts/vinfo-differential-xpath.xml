@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Page Fingerprint Differential Detected - Possible XPath Injection</title>
+	
+	<class>Error Message</class>
+	<severity>High</severity>
+
+	<impact>Vega has detected a different response fingerprint in relation to an XPath injection attempt.</impact>
+	<impact>This may indicate an XPath injection vulnerability, though this is not confirmed.</impact>
+	<impact>If this is due to an XPath vulnerability, depending on the nature of the XPath query, exploitation could allow attackers to bypass authentication or gain unauthorized access to sensitive XML data.</impact>
+	
+	<discussion>
+	Vega has detected a different response page fingerprint in relation to an XPath injection request. This means that the response page content returned by the web application has a different signature from that returned by an ordinary request, which may indicate the existence of an XPath injection vulnerability. The differing page fingerprint may include error messages or indicate a state change in the application in response to the XPath injection attempt made by Vega. Developers should examine the response content and underlying code to verify whether or not a vulnerability is present. If the vulnerability exists and precautions are not taken, depending on the nature of the affected XPath query, such a vulnerability could allow attackers to bypass authentication or gain unauthorized access to sensitive XML data.</discussion>
+
+	<remediation>To prevent this type of vulnerability, the developer should consider adopting the use of pre-compiled XPath statements or query parameterization options.</remediation>
+	
+	<references>
+		<url address="https://www.owasp.org/index.php/XPATH_Injection">XPATH Injection (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/Blind_XPath_Injection">Blind XPath Injection (OWASP)</url>
+	</references>
+</alert>
