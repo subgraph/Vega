@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
+import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.cookie.Cookie;
 
@@ -31,6 +33,7 @@ import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 import com.subgraph.vega.impl.scanner.requests.BasicRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.GetParameterRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
@@ -607,6 +610,11 @@ public class PathState implements IPathState {
 		return pathStateManager.getCrawler().getRequestEngine();
 	}
 	
+	public HttpUriRequest createRawRequest(HttpHost httpHost, String method, String uriString) {
+		VegaHttpUriRequest request = new VegaHttpUriRequest(httpHost, method, uriString);
+		return getRequestEngine().createRawRequest(httpHost, request.getRequestLine());
+	
+	}
 	
 	void incrementOutstandingRequests() {
 		outstandingRequests.incrementAndGet();
