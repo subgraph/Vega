@@ -9,6 +9,10 @@ var errorStrings = [
 		regex: "<title>\s*Apache Tomcat.+Error Report\s*</title>",
 		responseCode: [500]
 	},
+	{
+		type: "java",
+		regex: "java.lang.Exception",
+	},
 	{ 
 		type: "cf",
 		regex: "<title>\s*Error Occurred While Processing Request\s*</title>"
