@@ -46,6 +46,6 @@ Import-Package: com.google.common.base;version="1.6.0",
  org.apache.http.util;version="4.0.0",
  org.w3c.dom.html2
 Service-Component: OSGI-INF/model.xml
-Bundle-ClassPath: lib/db4o-8.0.184.15484-all-java5.jar,
- .
+Bundle-ClassPath: .,
+ lib/db4o-8.0.249.16098-all-java5.jar
 Require-Bundle: org.apache.http.core;bundle-version="4.2.3"
