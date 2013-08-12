@@ -1,6 +1,6 @@
 ============================================================
 Notices for file(s):
-  /Vega/platform/com.subgraph.vega.model/lib/db4o-8.0.184.15484-all-java5.jar
+  /Vega/platform/com.subgraph.vega.model/lib/db4o-8.0.249.16098-all-java5.jar
 
 Vega uses db4o under the dOCL.
 http://community.versant.com/Blogs/db4o/tabid/197/entryid/1044/Default.aspx
