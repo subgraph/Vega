@@ -31,8 +31,9 @@ make_dist() {
 
 make_dmg() {
 	echo "enter make_dmg()"
-	dd if=/dev/zero of=$TARGET/vega.dmg bs=1M count=40
-	mkfs.hfsplus -v Vega $TARGET/vega.dmg
+	#dd if=/dev/zero of=$TARGET/vega.dmg bs=1M count=40
+	#mkfs.hfsplus -v Vega $TARGET/vega.dmg
+	cp /tmp/vega.dmg $TARGET/vega.dmg
 	/usr/local/bin/mount-dmg $TARGET/vega.dmg
 	mv $TARGET/vega/Vega.app /mnt/dmg
 	/usr/local/bin/mount-dmg -u
