@@ -15,7 +15,7 @@ function run(request, response, ctx) {
 
           var scripthost = parseUri(scriptsrc).host.toLowerCase();
 
-          if (ctx.isValidInternetDomainName(scripthost)) {
+          if ((ctx.isValidInternetDomainName(scripthost)) && (ctx.isValidInternetDomainName(response.host.hostName))) {
 
             var local = ctx.internetDomainName(response.host.hostName.toLowerCase()).topPrivateDomain().name(); 
             var remote = ctx.internetDomainName(scripthost).topPrivateDomain().name();
