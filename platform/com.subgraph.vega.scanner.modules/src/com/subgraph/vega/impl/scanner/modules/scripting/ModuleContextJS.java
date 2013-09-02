@@ -21,6 +21,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
 
 import com.google.common.net.InternetDomainName;
+import com.google.common.io.BaseEncoding;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -308,5 +309,15 @@ public class ModuleContextJS {
 	
 	public boolean isValidInternetDomainName(String domain) {
 		return context.isValidInternetDomainName(domain);
+	}
+	
+	public String base64decode(String encoded) {
+		byte[] decoded = BaseEncoding.base64().decode(encoded);
+		return new String(decoded);
+	}
+	
+	public String base64encode(String input) {
+		String encoded = BaseEncoding.base64().encode(input.getBytes());
+		return encoded;
 	}
 }

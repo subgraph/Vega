@@ -88,6 +88,8 @@ public class ScannerTask implements Runnable {
 
 
 		scanInstance.updateScanStatus(IScanInstance.SCAN_AUDITING);
+		scan.getRequestEngine().getCookieStore().clear();
+		
 		if (handleMacroAuthentication()) {
 			runCrawlerPhase();
 

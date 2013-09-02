@@ -27,6 +27,7 @@ import org.apache.http.client.utils.URIUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
 
 import com.subgraph.vega.api.html.IHTMLParseResult;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -139,7 +140,7 @@ public class HtmlUrlExtractor {
 		try {
 			if(link.isEmpty())
 				return null;
-			return new URI(link);
+			return new URI(Parser.unescapeEntities(link, false));
 		} catch (URISyntaxException ex) {
 			return null;
 		}

@@ -11,7 +11,17 @@ function initialize(ctx) {
 }
 
 function process(req, res, ctx) {
-  ctx.responseChecks(req, res);
+	if (ctx.hasModuleFailed()) return;
+
+  if (res.fetchFail) {
+    ctx.error(req, res, "During cross-domain policy auditor checks");
+    ctx.setModuleFailed();
+    return;
+  }
+  
+  if (ctx.allResponsesReceived()) {
+    ctx.responseChecks(req, res);
+  }
 }
 
 

@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
 
+import com.google.common.io.BaseEncoding;
 import com.google.common.net.InternetDomainName;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
@@ -252,5 +253,15 @@ public class ResponseModuleContext implements IModuleContext {
 	
 	public boolean isValidInternetDomainName(String domain) {
 		return InternetDomainName.isValid(domain);
+	}
+	
+	public String base64decode(String encoded) {
+		byte[] decoded = BaseEncoding.base64().decode(encoded);
+		return new String(decoded);
+	}
+	
+	public String base64encode(String input) {
+		String encoded = BaseEncoding.base64().encode(input.getBytes());
+		return encoded;
 	}
 }

@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7,
  JavaSE-1.6
-Import-Package: com.google.common.net;version="1.6.0",
+Import-Package: com.google.common.io,
+ com.google.common.net,
  com.subgraph.vega.api.annotations,
  com.subgraph.vega.api.console,
  com.subgraph.vega.api.crawler,
