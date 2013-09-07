@@ -1,5 +1,5 @@
 var module = {
-  name: "XSS Injection checks 2",
+  name: "XSS Injection checks",
   category: "Injection Modules"
 };
 
