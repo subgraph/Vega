@@ -264,4 +264,8 @@ public class ResponseModuleContext implements IModuleContext {
 		String encoded = BaseEncoding.base64().encode(input.getBytes());
 		return encoded;
 	}
+	
+	public long getScanId() {
+		return scanInstance.getScanId();
+	}
 }
