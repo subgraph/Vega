@@ -202,8 +202,14 @@ public class CertificateCreator {
 		final BigInteger serialNumber = getNextSerialNumber();
 		final X500Name subjectName = new X500Name(subject.getName());
 		final X509CertInfo info = new X509CertInfo();
+	    
+		// Java 8 introduces more changes to the Sun X.509 classes
+		// TODO: do this right
+		
+	    double ver = javaVersionAsFloat();
 
 		// Add all mandatory attributes
+
 		info.set(X509CertInfo.VERSION, new CertificateVersion(
 				CertificateVersion.V3));
 		info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(
@@ -211,13 +217,40 @@ public class CertificateCreator {
 		AlgorithmId algID = signer.getAlgorithmId();
 		info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(
 				algID));
-		info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(
-				subjectName));
+
+
+		if (ver >= 1.8) {
+			info.set(X509CertInfo.SUBJECT, subjectName);
+			info.set(X509CertInfo.ISSUER, signer.getSigner());
+		} else {
+			info.set(X509CertInfo.ISSUER, new CertificateIssuerName(signer.getSigner()));
+			info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(subjectName));				
+		}
+		
 		info.set(X509CertInfo.KEY, new CertificateX509Key(subjectPublic));
 		info.set(X509CertInfo.VALIDITY, validity);
-		info.set(X509CertInfo.ISSUER, new CertificateIssuerName(signer
-				.getSigner()));
+		
 		return info;
+	}
+
+	private double javaVersionAsFloat() {
+	 
+		int count = 0;
+		int position = 0;
+		double ver = 0;
+		String versionProperty = System.getProperty("java.version");
+
+	    for (; position < versionProperty.length() && count < 2; position++) {
+	        if (versionProperty.charAt(position) == '.') {
+	            count++;
+	        }
+	    }
+	    position--;
+
+	    ver = Double.parseDouble(versionProperty.substring(0, position));
+	    
+	    return ver;
+	    
 	}
 
 	private static CertificateExtensions getCACertificateExtensions() throws IOException {
