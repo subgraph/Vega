@@ -45,9 +45,9 @@ function process(req, res, ctx) {
   if (detected) {
     var uri = String(req.requestLine.uri);                                      
     var uripart = uri.replace(/\?.*/, "");                                      
-    ctx.alert("vinfo-shell-inject", ctx.getSavedRequest(currentIndex), ctx.getSavedResponse(currentIndex), {
+    ctx.alert("vinfo-bash-inject", ctx.getSavedRequest(currentIndex), ctx.getSavedResponse(currentIndex), {
       output: res.bodyAsString,                                                 
-      key: "vinfo-shell-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
+      key: "vinfo-bash-inject:" + uripart + ":" + ps.getFuzzableParameter().name,
       resource: uripart,                                                        
       detectiontype: "Bash Environment Variable OS Injection (CVE-2014-6271) Blind Timing Analysis Checks",
       param: ps.getFuzzableParameter().name                                     
