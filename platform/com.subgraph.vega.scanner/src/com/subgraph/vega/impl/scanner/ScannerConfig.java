@@ -130,7 +130,7 @@ public class ScannerConfig implements IScannerConfig {
 
 	@Override
 	public synchronized boolean getNonParameterFileInjectionChecksFlag() {
-		return false;
+		return true;
 	}
 
 	public synchronized IFormCredential createFormCredential(String username, String password) {
