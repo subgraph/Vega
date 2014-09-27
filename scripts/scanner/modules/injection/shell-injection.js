@@ -5,7 +5,10 @@ var module = {
 };
 
 function initialize(ctx) {
-  ctx.submitMultipleAlteredRequests(process, ["`true`", "`false`", "`uname`", "\"`true`\"", "\"`false`\"", "\"`uname`\"", "'true'", "'false'", "'uname'"], true);
+  var ps = ctx.getPathState();
+  if (ps.isParametric()) {
+    ctx.submitMultipleAlteredRequests(process, ["`true`", "`false`", "`uname`", "\"`true`\"", "\"`false`\"", "\"`uname`\"", "'true'", "'false'", "'uname'"], true);
+  }
 }
 
 function process(req, res, ctx) {

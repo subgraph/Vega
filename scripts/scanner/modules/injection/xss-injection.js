@@ -26,9 +26,11 @@ function createRequest(ps, index) {
 
 function initialize(ctx) {
   var ps = ctx.getPathState();
-  
-  for (var i = 0; i < payloads.length; i++) {
-    ctx.submitRequest(createRequest(ps, i), process, i);      
+
+  if (ps.isParametric()) {  
+    for (var i = 0; i < payloads.length; i++) {
+      ctx.submitRequest(createRequest(ps, i), process, i);      
+    }
   }
 };
 

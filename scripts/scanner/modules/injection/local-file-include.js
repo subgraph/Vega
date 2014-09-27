@@ -318,8 +318,10 @@ alteredRequests.push({
 
 function initialize(ctx) {
 	var ps = ctx.getPathState();
-	ctx.submitAlteredRequest(process, alteredRequests[0].payload, false, 0);
-  ps.incrementFuzzCounter();
+	if (ps.isParametric()) {
+	  ctx.submitAlteredRequest(process, alteredRequests[0].payload, false, 0);
+          ps.incrementFuzzCounter();
+        }
 	
 };
 
