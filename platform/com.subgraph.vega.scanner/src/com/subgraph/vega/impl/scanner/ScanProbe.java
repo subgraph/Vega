@@ -39,7 +39,6 @@ public class ScanProbe {
 			IHttpResponse response = requestEngine.sendRequest(currentRequest).get(true);
 			return processFirstProbeResponse(targetURI, response);
 		} catch (RequestEngineException e) {
-			e.printStackTrace();
 			return ScanProbeResult.createConnectFailedResult(e.getMessage());
 		}
 	}
