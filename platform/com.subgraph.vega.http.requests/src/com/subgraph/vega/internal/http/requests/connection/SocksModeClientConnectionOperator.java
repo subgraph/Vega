@@ -15,18 +15,14 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+
 
 import org.apache.http.HttpHost;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.OperatedClientConnection;
-import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.scheme.SchemeSocketFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.conn.DefaultClientConnectionOperator;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
@@ -47,34 +43,8 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 			return;
 		}
 		
-		final SchemeRegistry sr = new SchemeRegistry();
-		sr.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		try {
-						
-			
-			SSLSocketFactory ssf = new SSLSocketFactory(new TrustStrategy() {
-				@Override
-				public boolean isTrusted(X509Certificate[] chain, String authType)
-						throws CertificateException {
-					return true;
-				}
-			}, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-			sr.register(new Scheme("https", 443, ssf));
-			
-			
-			
-		} catch (Exception e) {
-			throw new RuntimeException("Unexpected exception creating SSLSocketFactory", e);
-		}
 		
-		
-		
-		
-		
-	//	final Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());
-	
-		final Scheme scheme = sr.getScheme(target.getSchemeName());
-		
+		final Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());		
 		final SchemeSocketFactory sf = scheme.getSchemeSocketFactory();
 		
 		final int port = scheme.resolvePort(target.getPort());
