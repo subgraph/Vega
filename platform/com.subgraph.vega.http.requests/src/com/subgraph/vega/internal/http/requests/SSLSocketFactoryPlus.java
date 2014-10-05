@@ -27,8 +27,7 @@ public class SSLSocketFactoryPlus extends SSLSocketFactory {
 
 	    if (ver < 1.8) {
 	    	
-	    	String[] suites = new String[] {"TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-	    									"TLS_RSA_WITH_AES_128_CBC_SHA", 
+	    	String[] suites = new String[] {"TLS_RSA_WITH_AES_128_CBC_SHA", 
 	    									"SSL_RSA_WITH_RC4_128_SHA", 
 	    									"TLS_EMPTY_RENEGOTIATION_INFO_SCSV"};
 	    	
