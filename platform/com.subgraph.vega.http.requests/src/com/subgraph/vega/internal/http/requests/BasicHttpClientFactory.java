@@ -85,7 +85,7 @@ public class BasicHttpClientFactory {
 		final SchemeRegistry sr = new SchemeRegistry();
 		sr.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 		try {
-			SSLSocketFactory ssf = new SSLSocketFactory(new TrustStrategy() {
+			SSLSocketFactory ssf = new SSLSocketFactoryPlus(new TrustStrategy() {
 				@Override
 				public boolean isTrusted(X509Certificate[] chain, String authType)
 						throws CertificateException {
