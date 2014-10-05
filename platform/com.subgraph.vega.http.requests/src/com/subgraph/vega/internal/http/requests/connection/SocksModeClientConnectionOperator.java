@@ -11,6 +11,7 @@
 package com.subgraph.vega.internal.http.requests.connection;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -23,6 +24,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.http.HttpHost;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.OperatedClientConnection;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -42,39 +44,6 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 
 	private final boolean isSocksMode;
 	
-	
-	static class AllowAllHostnameVerifierPlus implements X509HostnameVerifier {
-		
-	    public  void verify(
-	            final String host,
-	            final SSLSocket ssl)
-	             {
-	        // Allow everything - so never blowup.
-	             }
-
-		@Override
-		public boolean verify(String arg0, SSLSession arg1) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-
-		@Override
-		public void verify(String host, X509Certificate cert)
-				throws SSLException {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void verify(String host, String[] cns, String[] subjectAlts)
-				throws SSLException {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		
-	}
-	
 	public SocksModeClientConnectionOperator(SchemeRegistry sr) {
 		super(sr);
 		isSocksMode = System.getProperty("socksEnabled") != null;
@@ -86,40 +55,42 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 			super.openConnection(conn, target, local, context, params);
 			return;
 		}
-
-		final AllowAllHostnameVerifierPlus hostNameVerifier = new AllowAllHostnameVerifierPlus();
 		
-		final SchemeRegistry sr = new SchemeRegistry();
-		sr.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		try {
-			SSLSocketFactory ssf = new SSLSocketFactory(new TrustStrategy() {
-				@Override
-				public boolean isTrusted(X509Certificate[] chain, String authType)
-						throws CertificateException {
-					return true;
-				}
-			}, hostNameVerifier);
+		final Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());
 				
-			sr.register(new Scheme("https", 443, ssf));
-
-			} catch (Exception e) {
-				throw new RuntimeException("Unexpected exception creating SSLSocketFactory", e);	
-		}
-		// final Scheme scheme = schemeRegistry.getScheme(target.getSchemeName());
-		
-		final Scheme scheme = sr.getScheme(target.getSchemeName());		
-		
 		final SchemeSocketFactory sf = scheme.getSchemeSocketFactory();
 		
 		final int port = scheme.resolvePort(target.getPort());
+		
 		Socket sock = sf.createSocket(params);
-		
-		
+				
 		conn.opening(sock, target);
+		
 		InetSocketAddress remoteAddress = InetSocketAddress.createUnresolved(target.getHostName(), port);
 		
-		//remoteAddress = new InetSocketAddress(target.getHostName(), port);
+		/* We need to use reflection to set the private host field to the target hostname, 
+		 * otherwise SSLSocketImpl blows up due to, it seems, https://bugs.openjdk.java.net/browse/JDK-8022081.
+		 */
 		
+		Class<?> c = sock.getClass();
+		try {
+			Field f = c.getDeclaredField("host");
+			f.setAccessible(true);
+			f.set(sock, target.getHostName());
+		} catch (NoSuchFieldException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+						
 		InetSocketAddress localAddress = null;
 		if(local != null) {
 			localAddress = new InetSocketAddress(local, 0);
@@ -135,10 +106,8 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 			conn.openCompleted(sf.isSecure(sock), params);
 			return;
 		} catch (ConnectException ex) {
-			ex.printStackTrace();
-		//	throw new HttpHostConnectException(target, ex);
+			throw new HttpHostConnectException(target, ex);
 		} catch (Exception e) {
-	//		System.out.println("Host:" + conn.getRemoteAddress().getHostName() + " Port: "+conn.getRemotePort());
 			e.printStackTrace();
 		}
 	}
