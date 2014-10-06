@@ -106,7 +106,7 @@ var checkTiming = function(ctx, currentIndex) {
 
 
 var checkOutput = function(ctx, currentIndex) {
-	if (ctx.getSavedResponse(currentIndex).bodyAsString.indexOf("VEGA123 avulnerable VEGA123") > -1) {
+	if (ctx.getSavedResponse(currentIndex).bodyAsString.indexOf("VEGA123 vulnerable VEGA123") > -1) {
 		return true;
 	}
 	return false;
