@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert>
-	<title>Possible Remote File Include</title>
+	<title>Remote File Include</title>
 	
 	<class>Input Validation Error</class>
 	<severity>High</severity>
 
-	<impact>Vega has detected a possible remote file include.</impact>
+	<impact>Possibility of server-side code execution if code from remote server is run.</impact>
+        <impact>Compromise of user sessions or data.</impact>
+        <impact>Phishing, social engineering.</impact>
 
-	<remediation>The developer should investigate the page and the parameter to manually verify that a path traversal vulnerability exists.</remediation>
+	<remediation>The developer should investigate the reason why the server is fetching remote content and embedding it in the page.</remediation>
+        <remediation>In particular, the feasibility of server-side code execution should be determined.</remediation>
 
 	<discussion>
-	Remote File Include.
+	Vega has determined that content from a client-specified location is being retrieved by the server and output. In some circumstances, code included in this content will be executed by the server. If this is possible, an attacker may be able to gain unauthorized access to the server. Minimally, the inclusion of content originating on a third-party server introduces the possibility of phishing or social engineering attacks.
 	</discussion>
 
 	<references>

@@ -34,9 +34,8 @@ public class AboutDialog extends TitleAreaDialog {
 								"Version: " + IConstants.VERSION_STRING + "\n" +
 								"Build id: 0xC0FFEEEE\n" +
 								"\n" +
-								"(c) Copyright Subgraph Technologies, Inc. and others, 2013. All rights reserved.\n" +
-								"http://www.subgraph.com\n" +
-								"http://vega.subgraph.com\n" +
+								"(c) Copyright Subgraph Technologies, Inc. and others, 2014. All rights reserved.\n" +
+								"https://subgraph.com\n" +
 								"\n" +
 								"Vega would not have been possible without the generous contributions of the \nopen source and security research communities.\n\n" +
 								"With much appreciation, we acknowledge that Vega is built upon the work of many \nother individuals and projects, and includes code from the following:\n " +

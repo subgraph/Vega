@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Eval Code Injection</title>
+        
+        <class>Information</class>
+        <severity>High</severity>
+
+        <impact>Vega has detected a code injection vulnerability.</impact>
+        <impact>Attackers may be able to run arbitrary code on the server.</impact>
+        <impact>Exploitation may lead to unauthorized remote access.</impact>
+
+        <remediation>Developers should examine the code corresponding to the page in detail to determine if the vulnerability exists.</remediation>
+        <remediation>Functions that evaluate code, such as eval(), should be avoided.</remediation>
+        <remediation>If absolutely necessary, the developer should take extra care with validating the input before it is passed to the interpreter.</remediation>
+
+        <discussion>Code injection vulnerabilities often occur when inadequately sanitized externally supplied data to a function that evaluates code such as eval(). Vulnerabilities such as these can be exploited by using shell metacharacters to run arbitrary code that was not intended to be executed by the application developer. The eval() function, and derivatives, are often responsible, and should be avoided unless absolutely necessary. These vulnerabilities can grant remote access to attackers, if exploited successfully.
+        </discussion>
+
+        <references>
+                <url address="https://www.owasp.org/index.php/Direct_Dynamic_Code_Evaluation_('Eval_Injection')">Direct Dynamic Code Evaluation ('Eval Injection')</url>
+        </references>
+
+</alert>

@@ -28,7 +28,7 @@ import com.subgraph.vega.impl.scanner.forms.FormCredential;
 
 public class ScannerConfig implements IScannerConfig {
 
-	private final static String[] defaultExcludedParameters = { "XSRFToken" };
+	private final static String[] defaultExcludedParameters = { "xsrftoken", "__eventvalidation", "__eventargument", "__eventtarget", "__viewstateencrypted", "__viewstate", "anticsrf", "csrfmiddlewaretoken", "csrftoken" };
 	private ITargetScope scanTargetScope;
 	private String userAgent = IHttpRequestEngineFactory.DEFAULT_USER_AGENT;
 	private IIdentity scanIdentity;
@@ -130,7 +130,7 @@ public class ScannerConfig implements IScannerConfig {
 
 	@Override
 	public synchronized boolean getNonParameterFileInjectionChecksFlag() {
-		return false;
+		return true;
 	}
 
 	public synchronized IFormCredential createFormCredential(String username, String password) {

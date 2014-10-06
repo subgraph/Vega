@@ -19,6 +19,8 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.google.common.net.InternetDomainName;
+
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -242,7 +244,12 @@ public class ModuleContext implements IInjectionModuleContext {
 	public void debug(String msg) {
 		scanState.debug("[" + pathState.getPath().getUri() + "] " + msg);
 	}
-
+	
+	@Override
+	public void debug(String msg, Boolean colored) {
+		scanState.debug("[" + pathState.getPath().getUri() + "] " + msg, colored);
+	}
+	
 	@Override
 	public void analyzePage(HttpUriRequest request, IHttpResponse response) {
 		scanState.analyzePage(this, request, response);
@@ -388,5 +395,21 @@ public class ModuleContext implements IInjectionModuleContext {
 	public void reset() {
 		stringHighlights.clear();
 		regexHighlights.clear();
+	}
+	
+	@Override
+	public boolean alertExists(String key) {
+		final IScanInstance scan = scanState.getScanInstance();
+
+		return scan.hasAlertKey(key);
+	}
+	
+	public InternetDomainName internetDomainName(String domain) {
+		return InternetDomainName.from(domain);
+		
+	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return InternetDomainName.isValid(domain);
 	}
 }

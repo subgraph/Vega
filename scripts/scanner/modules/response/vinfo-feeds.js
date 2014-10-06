@@ -7,7 +7,7 @@ function run(request, response, ctx) {
   var output = "";
   var res = 0;
   var rss = new RegExp("<link.*rel=.*rss.*?>", "ig");
-  var atom = new RegExp("<link.*rel=.*xml.*?>", "ig");
+  var atom = new RegExp("<link.*rel=.*atom.*?>", "ig");
   var opml = new RegExp("<opml.*version.*?>", "ig");
 
   var x = rss.exec(response.bodyAsString);

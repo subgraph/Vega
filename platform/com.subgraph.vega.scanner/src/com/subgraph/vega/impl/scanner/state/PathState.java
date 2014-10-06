@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
+import org.apache.http.RequestLine;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.cookie.Cookie;
 
@@ -31,6 +33,7 @@ import com.subgraph.vega.api.model.web.IWebPath.PathType;
 import com.subgraph.vega.api.scanner.IInjectionModuleContext;
 import com.subgraph.vega.api.scanner.IPathState;
 import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
+import com.subgraph.vega.http.requests.custom.VegaHttpUriRequest;
 import com.subgraph.vega.impl.scanner.requests.BasicRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.GetParameterRequestBuilder;
 import com.subgraph.vega.impl.scanner.requests.IRequestBuilder;
@@ -100,6 +103,8 @@ public class PathState implements IPathState {
 	private int childCount = 0;
 	
 	private AtomicInteger outstandingRequests = new AtomicInteger();
+	private AtomicInteger fuzzCounter = new AtomicInteger(0);
+	
 	private volatile boolean finishOnNoRequests;
 	
 	private PathState(ICrawlerResponseProcessor fetchProcessor, PathStateManager stateManager, PathState parentState, IWebPath path, IRequestBuilder requestBuilder) {
@@ -176,10 +181,12 @@ public class PathState implements IPathState {
 	}
 
 	@Override
-	public void setDone() {
-		isDone = true;
-		response = null;
-		pathStateManager.notifyPathNodeFinish(this);
+	public synchronized void setDone() {
+		if (!isDone) {
+			isDone = true;
+			response = null;
+			pathStateManager.notifyPathNodeFinish(this);
+		}
 	}
 
 	public void requeueInitialFetch() {
@@ -603,13 +610,30 @@ public class PathState implements IPathState {
 		return pathStateManager.getCrawler().getRequestEngine();
 	}
 	
+	public HttpUriRequest createRawRequest(HttpHost httpHost, String method, String uriString) {
+		VegaHttpUriRequest request = new VegaHttpUriRequest(httpHost, method, uriString);
+		return getRequestEngine().createRawRequest(httpHost, request.getRequestLine());
+	
+	}
 	
 	void incrementOutstandingRequests() {
 		outstandingRequests.incrementAndGet();
 	}
 	
 	public void decrementOutstandingRequests() {
-		if(outstandingRequests.decrementAndGet() <= 0) {
+		if((outstandingRequests.decrementAndGet() <= 0) && (fuzzCounter.get() <= 0)) {
+			if(finishOnNoRequests) {
+				setDone();
+			}
+		}
+	}
+
+	public void incrementFuzzCounter() {
+		fuzzCounter.incrementAndGet();
+	}
+	
+	public void decrementFuzzCounter() {
+		if((fuzzCounter.decrementAndGet() <= 0) && (outstandingRequests.get() <= 0)) {
 			if(finishOnNoRequests) {
 				setDone();
 			}

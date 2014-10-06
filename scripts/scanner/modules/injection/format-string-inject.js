@@ -6,7 +6,11 @@ var module = {
 };
 
 function initialize(ctx) {
-  ctx.submitMultipleAlteredRequests(process, ["vega%dn%dn%dn%dn%dn%dn%dn%dn", "vega%nd%nd%nd%nd%nd%nd%nd%nd"]);
+  var ps = ctx.getPathState();
+
+  if (ps.isParametric()) {
+    ctx.submitMultipleAlteredRequests(process, ["vega%dn%dn%dn%dn%dn%dn%dn%dn", "vega%nd%nd%nd%nd%nd%nd%nd%nd"]);
+  }
 }
 
 function process(req, res, ctx) {

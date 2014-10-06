@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,9 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
+
+import com.google.common.net.InternetDomainName;
+import com.google.common.io.BaseEncoding;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -107,6 +110,10 @@ public class ModuleContextJS {
 		context.debug(msg);
 	}
 
+	public void debug(String msg, Boolean flag) {
+		context.debug(msg, flag);
+	}
+	
 	public void analyzePage(HttpUriRequest request, ResponseJS response) {
 		context.analyzePage(request, response.getResponse());
 	}
@@ -250,5 +257,67 @@ public class ModuleContextJS {
 	
 	public void publishAlert(String type, String key, String message, HttpRequest request, IHttpResponse response) {
 		context.publishAlert(type, key, message, request, response);
+	}
+
+
+	public void setProperty(String name, Object value) {
+		context.setProperty(name, value);
+	}
+
+	public void setStringProperty(String name, String value) {
+		context.setStringProperty(name, value);		
+	}
+
+	public void setIntegerProperty(String name, int value) {
+		context.setIntegerProperty(name, value);		
+	}
+
+
+	public Object getProperty(String name) {
+		return context.getProperty(name);
+	}
+
+
+	public String getStringProperty(String name) {
+		return context.getStringProperty(name);
+	}
+
+	public Integer getIntegerProperty(String name) {
+		return context.getIntegerProperty(name);
+	}
+
+	public Object propertyKeys() {
+				
+		List<String> keys = context.propertyKeys();
+		
+		final Context cx = Context.getCurrentContext();
+		final Scriptable array = cx.newArray(scope, keys.size());
+		for(int i = 0; i < keys.size(); i++) {
+			array.put(i, array, Context.javaToJS(keys.get(i), scope));
+		}
+		return array;
+		
+	}
+	
+	public boolean alertExists(String key) {
+		return context.alertExists(key);
+	}
+	
+	public InternetDomainName internetDomainName(String domain) {
+		return context.internetDomainName(domain);
+	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return context.isValidInternetDomainName(domain);
+	}
+	
+	public String base64decode(String encoded) {
+		byte[] decoded = BaseEncoding.base64().decode(encoded);
+		return new String(decoded);
+	}
+	
+	public String base64encode(String input) {
+		String encoded = BaseEncoding.base64().encode(input.getBytes());
+		return encoded;
 	}
 }

@@ -1,5 +1,5 @@
 var module = {
-	name: "Bash Environment Variable Blind OS Injection (CVE-2014-6271) Checks",
+	name: "Bash Environment Variable Blind OS Injection (CVE-2014-6271, CVE-2014-6278) Checks",
 	category: "Injection Modules",
 	differential: true
 };

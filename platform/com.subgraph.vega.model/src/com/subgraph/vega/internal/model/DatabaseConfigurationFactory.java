@@ -43,7 +43,7 @@ public class DatabaseConfigurationFactory {
 		configuration.common().objectClass(ScanAlert.class).objectField("requestId").indexed(true);
 		configuration.common().objectClass(Tag.class).objectField("name").indexed(true);
 
-		configuration.common().weakReferences(false);
+		configuration.common().weakReferences(true);
 		
 		if(DIAGNOSTICS_ENABLED) {
 			configuration.common().diagnostic().addListener(new DiagnosticToConsole());

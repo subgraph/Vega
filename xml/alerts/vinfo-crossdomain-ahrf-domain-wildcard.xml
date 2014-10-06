@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Flash Cross-Domain Wildcard Allow-Http-Request-Headers-From Domain </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has specified an insecure Flash cross-domain policy. The crossdomain.xml file has set the domain attribute for allow-http-request-headers-from to a wildcard value. This means that the resource does place domain-based restrictions on HTTP headers in cross-domain requests. 
+</discussion>
+        <remediation>
+          Configure the cross-domain policy file to accept HTTP headers only from specific trusted domains.
+        </remediation>
+        <references>
+                <url address="http://help.adobe.com/en_US/ActionScript/3.0_ProgrammingAS3/WS5b3ccc516d4fbf351e63e3d118a9b90204-7e08.html">Adobe Flash Player security - Website controls (policy files)</url>
+        </references>
+</alert>

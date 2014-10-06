@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Unsafe Or Unrecognized Character Set In Response Body </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has specified an unsafe or unrecognized character set in the response body. This may cause unpredictable behavior depending on how the browser interprets the character set. This may present a security concern if the affected resource contains dynamically-generated content that originates from users. In such a case, malicious users may potentially take advantage of how specific browsers interpret characters to cause malicious content to be rendered. For example, an attacker may be able to bypass a cross-site scripting filter by encoding their malicious payload in an alternate character set, which may be executed depending on how the browser interprets the encoded content.
+</discussion>
+        <remediation>
+          Specify a well-defined character set (such as UTF-8) within the response header content-type or the response body.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/OWASP_Top_Ten_Cheat_Sheet">OWASP Top Ten Cheat Sheet</url>
+        </references>
+</alert>

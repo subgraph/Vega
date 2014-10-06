@@ -18,4 +18,5 @@ public interface IConsole {
 	void registerDisplay(IConsoleDisplay display);
 	void addConsoleOutputListener(IEventHandler listener);
 	void removeConsoleOutputListener(IEventHandler listener);
+	void debug(String output); 
 }

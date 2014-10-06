@@ -27,10 +27,13 @@ public class LogHandler extends Handler {
 	@Override
 	public void publish(LogRecord record) {
 		String message = getFormatter().format(record);
-		if(record.getLevel().intValue() > Level.INFO.intValue())
+		if(record.getLevel().intValue() > Level.INFO.intValue()) {
 			console.error(message);
-		else
-			console.write(message);		
+		} else if (record.getLevel().intValue() == Level.FINER.intValue()) {
+			console.debug(message);
+		} else {
+			console.write(message);
+		}
 	}
 
 	@Override

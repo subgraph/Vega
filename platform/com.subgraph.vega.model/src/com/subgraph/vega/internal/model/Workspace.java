@@ -290,7 +290,13 @@ public class Workspace implements IWorkspace {
 	public void consoleWrite(String output) {
 		console.write(output);
 	}
-
+	
+	@Override
+	public void consoleDebug(String output) {
+		console.debug(output);
+	}
+	
+	
 	@Override
 	public void consoleError(String output) {
 		console.error(output);

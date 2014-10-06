@@ -35,6 +35,7 @@ public interface IWorkspace extends IModelProperties {
 	IHTMLParser getHTMLParser();
 	ITargetScopeManager getTargetScopeManager();
 	void consoleWrite(String output);
+	void consoleDebug(String output);
 	void consoleError(String output);
 	boolean open();
 	void close();

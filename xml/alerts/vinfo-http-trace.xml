@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP Trace Support Detected</title>
+	
+	<class>Configuration Error</class>
+	<severity>Medium</severity>
+
+	<impact>Allowing HTTP TRACE can permit cross-site tracing.</impact>
+	<impact>Attackers may be able to use cross-site tracing with cross-site scripting retrieve the value of HttpOnly cookies.</impact>
+
+	<remediation>For Apache based servers, the TraceEnable directive can be used to disable support for HTTP TRACE.</remediation>
+	<remediation>For IIS based servers, the EnableTraceMethod registry setting controls support for HTTP TRACE..</remediation>
+
+	<discussion>
+		HTTP TRACE is an HTTP method that requests that the server echo the TRACE request back to the client. This includes headers that were sent along with the request. Support for HTTP TRACE can be abused in scenarios where a cross-site scripting vulnerability has been found, but cannot be exploited to retrieve cookie values because the target cookies are set with the HttpOnly flag. The HttpOnly flag instructs browsers not to permit access to the cookie by Javascript.
+		If a cross-site scripting vulnerability is found, but the session cookie is set HttpOnly, support for HTTP TRACE will open an oppportunity for cookie theft. An attacker can use the cross-site scripting vulnerability to have the target user's browser issue a TRACE request to the server via XMLHttpRequest (or a similar function) and then retrieve the cookie from the response, which will contain the request that was sent by the browser, including cookies.
+	</discussion>
+
+	<external>
+		<url address="http://publib.boulder.ibm.com/httpserv/ihsdiag/http_trace.html">IBM HTTP Server: Disabling the HTTP TRACE method</url>
+		<url address="http://httpd.apache.org/docs/2.2/mod/core.html#traceenable">Apache 2: TraceEnable Directive</url>
+                <url address="http://technet.microsoft.com/en-us/library/cc786149%28v=WS.10%29.aspx">Windows Server 2012: WWW Service Registry Entries - EnableTraceMethod</url>
+		<url address="http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/d779ee4e-5cd1-4159-b098-66c10c5a3314.mspx?mfr=true">W2K3 Server: WWW Service Registry Entries - Enable TraceMethod</url>
+	</external>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Cross-site_tracing">Wikipedia: Cross-site Tracing</url>
+		<url address="http://www.kb.cert.org/vuls/id/867593">CERT: Web servers enable HTTP TRACE method by default</url>
+		<url address="https://www.owasp.org/index.php/Cross_Site_Tracing">OWASP: Cross Site Tracing</url>
+		<url address="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.8">W3C: RFC 2616 - HTTP 1.1 - 9.8: TRACE</url>
+	</references>
+
+</alert>
+

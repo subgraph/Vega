@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Vega"
-!define PRODUCT_VERSION "1.0 Beta"
+!define PRODUCT_VERSION "1.0"
 !define PRODUCT_PUBLISHER "Subgraph"
 !define PRODUCT_WEB_SITE "http://www.subgraph.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\Vega.exe"

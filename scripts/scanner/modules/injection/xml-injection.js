@@ -5,7 +5,11 @@ var module = {
 };
 
 function initialize(ctx) {
-  ctx.submitMultipleAlteredRequests(process, ["vega>'>\"><vega></vega>", "vega>'>\"></vega><vega>"]);
+  var ps = ctx.getPathState();
+
+  if (ps.isParametric()) {
+    ctx.submitMultipleAlteredRequests(process, ["vega>'>\"><vega></vega>", "vega>'>\"></vega><vega>"]);
+  }
 }
 
 function process(req, res, ctx) {

@@ -23,11 +23,14 @@ public class ConsoleHandler implements IConsoleDisplay {
 	
 	private final MessageConsole console;
 	private final MessageConsoleStream outputStream;
+	private final MessageConsoleStream debugStream;
 	private final MessageConsoleStream errorStream;
 	
 	public ConsoleHandler(Display display, IConsole consoleService) {
 		this.console = createMessageConsole();
 		this.outputStream = console.newMessageStream();
+		this.debugStream = console.newMessageStream();
+		this.debugStream.setColor(display.getSystemColor(SWT.COLOR_BLUE));
 		this.errorStream = console.newMessageStream();
 		this.errorStream.setColor(display.getSystemColor(SWT.COLOR_RED));
 		consoleService.registerDisplay(this);
@@ -46,7 +49,12 @@ public class ConsoleHandler implements IConsoleDisplay {
 	public void printOutput(String output) {
 		outputStream.print(output);		
 	}
-
+	
+	@Override
+	public void printDebug(String output) {
+		debugStream.print(output);		
+	}
+	
 	@Override
 	public void printError(String output) {
 		errorStream.print(output);		

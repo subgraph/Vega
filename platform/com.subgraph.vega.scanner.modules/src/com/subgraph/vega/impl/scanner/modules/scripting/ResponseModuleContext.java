@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Subgraph.
+ * Copyright (c) 2013 Subgraph.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,9 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
+
+import com.google.common.io.BaseEncoding;
+import com.google.common.net.InternetDomainName;
 
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
@@ -65,6 +68,15 @@ public class ResponseModuleContext implements IModuleContext {
 	@Override
 	public void debug(String msg) {
 		workspace.consoleWrite(msg);
+	}
+	
+	@Override
+	public void debug(String msg, Boolean colored) {
+		if (colored) {
+			workspace.consoleDebug(msg);
+		} else {
+			workspace.consoleWrite(msg);
+		}
 	}
 	
 	public void alert(String type, HttpUriRequest request, ResponseJS response) {
@@ -195,6 +207,7 @@ public class ResponseModuleContext implements IModuleContext {
 	public List<String> propertyKeys() {
 		return scanInstance.propertyKeys();
 	}
+	
 
 	@Override
 	public void addStringHighlight(String str) {
@@ -226,5 +239,33 @@ public class ResponseModuleContext implements IModuleContext {
 	public void reset() {
 		stringHighlights.clear();
 		regexHighlights.clear();
+	}
+	
+	@Override
+	public boolean alertExists(String key) {
+		return scanInstance.hasAlertKey(key);
+	}
+	
+	public InternetDomainName internetDomainName(String domain) {
+		return InternetDomainName.from(domain);
+		
+	}
+	
+	public boolean isValidInternetDomainName(String domain) {
+		return InternetDomainName.isValid(domain);
+	}
+	
+	public String base64decode(String encoded) {
+		byte[] decoded = BaseEncoding.base64().decode(encoded);
+		return new String(decoded);
+	}
+	
+	public String base64encode(String input) {
+		String encoded = BaseEncoding.base64().encode(input.getBytes());
+		return encoded;
+	}
+	
+	public long getScanId() {
+		return scanInstance.getScanId();
 	}
 }

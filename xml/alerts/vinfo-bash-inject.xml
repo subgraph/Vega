@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Bash "ShellShock" Injection</title>
+	
+	<class>Information</class>
+	<severity>High</severity>
+
+	<impact>Vega has detected a possible command injection vulnerability.</impact>
+	<impact>Attackers may be able to run commands on the server.</impact>
+	<impact>Exploitation may lead to unauthorized remote access.</impact>
+
+	<remediation>The bash shell should be upgraded on the affected host. This can often be done through the package management system, such as apt or yum.</remediation>
+	<remediation>Developers should examine the code corresponding to the page in detail to determine if the vulnerability exists.</remediation>
+	<remediation>Execution of system commands through a command interpreter, such as with system(), should be avoided.</remediation>
+	<remediation>If absolutely necessary, the developer should take extra care with validating the input before it is passed to the interpreter.</remediation>
+
+	<discussion>The issue Vega identified is due to a vulnerability in the Bash shell. This vulnerability may manifest itself remotely in web applications if user-supplied input is passed to the Bash shell environment, which can occur if header or parameter values are converted to local environment variables. If successfully exploited, this vulnerability may lead to command execution on the underlying host.</discussion>
+
+	<references>
+		<url address="https://access.redhat.com/articles/1200223">Bash Code Injection Vulnerability via Specially Crafted Environment Variables (CVE-2014-6271, CVE-2014-7169) (Red Hat)</url>
+    <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6271">CVE-2014-6271</url>
+    <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6278">CVE-2014-6278</url>
+    <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7169">CVE-2014-7169</url>
+    <url address="https://www.owasp.org/index.php/Command_Injection">Command Injection (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/Reviewing_Code_for_OS_Injection">Reviewing Code for OS Injection (OWASP)</url>
+    <url address="http://en.wikipedia.org/wiki/Code_injection#Shell_injection">Shell Injection (Wikipedia)</url>
+	</references>
+
+</alert>
+

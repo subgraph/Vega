@@ -9,7 +9,7 @@ function run(request, response, ctx) {
   if (response.document) {
 
     var form = jQuery("form", response.document);
-    form.children().each(function() {
+    form.find("input").each(function() {
       if ((this.getAttribute("type") != null) && (this.getAttribute("type") == "password")) {
         if ((this.getAttribute("autocomplete") == null) || (this.getAttribute("autocomplete").toLowerCase() != "off")) {
           ctx.addRegexCaseInsensitiveHighlight("type=[\"']*password[\"']*");
