@@ -19,6 +19,7 @@
 	<references>
 		<url address="https://access.redhat.com/articles/1200223">Bash Code Injection Vulnerability via Specially Crafted Environment Variables (CVE-2014-6271, CVE-2014-7169) (Red Hat)</url>
     <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6271">CVE-2014-6271</url>
+    <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6278">CVE-2014-6278</url>
     <url address="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7169">CVE-2014-7169</url>
     <url address="https://www.owasp.org/index.php/Command_Injection">Command Injection (OWASP)</url>
 		<url address="https://www.owasp.org/index.php/Reviewing_Code_for_OS_Injection">Reviewing Code for OS Injection (OWASP)</url>
