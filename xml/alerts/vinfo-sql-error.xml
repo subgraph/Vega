@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>SQL Error Detected - Possible SQL Injection</title>
+	
+	<class>Error Message</class>
+	<severity>High</severity>
+
+	<impact>Vega has detected error output from a database server.</impact>
+	<impact>This may indicate an SQL injection vulnerability, though this is not confirmed.</impact>
+	<impact>If this is due to an SQL injection condition, exploitation of SQL injection vulnerabilities can also allow for attacks against the logic of the application.</impact>
+	<impact>Attackers may be able to obtain unauthorized access to the server hosting the database.</impact>
+
+	<discussion>
+		Vega has detected a known SQL error string. This can indicate a possible SQL injection vulnerability. These vulnerabilities are present when externally-supplied input is used to construct a SQL query. If precautions are not taken, the externally-supplied input (usually a GET or POST parameter) can modify the query string such that it performs unintented actions. These actions include gaining unauthorized read or write access to the data stored in the database, as well as modifying the logic of the application. 
+	</discussion>
+
+
+        <remediation>
+                SQL error messages should not be output to clients, as this may be useful information in exploiting any related vulnerability.
+        </remediation>
+  	<remediation>
+		The developer should review the request and response against the code to manually verify whether or not a vulnerability is present.
+  	</remediation>
+  	<remediation>
+		The best defense against SQL injection vulnerabilities is to use parameterized statements.
+  	</remediation>
+  	<remediation>
+		Sanitizing input can prevent these vulnerabilities. Variables of string types should be filtered for escape characters, and numeric types should be checked to ensure that they are valid.
+  	</remediation>
+  	<remediation>
+		Use of stored procedures can simplify complex queries and allow for tighter access control settings.
+  	</remediation>
+  	<remediation>
+		Configuring database access controls can limit the impact of exploited vulnerabilities. This is a mitigating strategy that can be employed in environments where the code is not modifiable.
+  	</remediation>
+  	<remediation>
+		Object-relational mapping eliminates the need for SQL.
+  	</remediation>
+
+  	<references>
+		<url address="http://cwe.mitre.org/data/definitions/209.html">CWE-209: Information Exposure Through an Error Message</url>
+		<url address="http://en.wikipedia.org/wiki/SQL_injection">SQL Injection (Wikipedia)</url>
+		<url address="http://php.net/manual/en/function.mysql-real-escape-string.php"> mysql_real_escape_string() (PHP Manual)</url>
+		<url address="http://guides.rubyonrails.org/security.html#sql-injection">SQL Injection (Rails security guide)</url>
+		<url address="http://msdn.microsoft.com/en-us/library/ff648339.aspx">How To: Protect from SQL Injection in ASP.NET (MSDN)</url>
+		<url address="http://blogs.msdn.com/b/raulga/archive/2007/01/04/dynamic-sql-sql-injection.aspx">Dynamic SQL and SQL Injection (Raul Garcia's blog)</url>
+		<url address="https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet">SQL Injection Prevention Cheat Sheet (OWASP)</url>
+  	</references>
+
+</alert>

@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 public class ExcludeWidget extends RemovableItemWidget {
 
 	public ExcludeWidget(Composite parent, StructuredViewer scopeViewer) {
-		super(parent, "Exclude", scopeViewer);
+		super(parent, "Exclude (URL or pattern)", scopeViewer);
 	}
 
 	@Override

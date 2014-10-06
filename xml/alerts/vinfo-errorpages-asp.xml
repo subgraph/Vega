@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>ASP/ASPX Error Detected</title>
+	
+	<class>Information</class>
+	<severity>Low</severity>		
+	<discussion>Vega has detected an error message associated with the Microsoft ASP/ASP.NET framework. </discussion>
+  <impact>Verbose error output has been detected.</impact>
+  <impact>Data in this output could reveal sensitive information about the application that could aid more complex attacks.</impact>
+  <impact>The error itself may be indicative of a security vulnerability.</impact>
+
+  <remediation>The developer should investigate the error to determine its nature and ensure that it does not represent a vulnerability.</remediation>
+  <remediation>Disable error messages for remote users.</remediation>
+  <remediation>Configure the server and framework to display safe error messages that do not include sensitive information.</remediation>
+  <references>
+    <url address="http://msdn.microsoft.com/en-us/library/994a1482(v=vs.100).aspx">MSDN - How to: Display Safe Error Messages</url>
+  </references>
+
+</alert>

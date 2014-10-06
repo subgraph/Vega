@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Flash Cross-Domain Wildcard Allow-Http-Request-Headers-From Headers </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has specified an insecure Flash cross-domain policy. The crossdomain.xml file has set the headers attribute for allow-http-request-headers-from to a wildcard value. This means that arbitrary headers will be accepted in cross-domain requests.
+</discussion>
+        <remediation>
+          Configure the cross-domain policy file to accept a limited range of safe headers such as "SOAPAction".
+        </remediation>
+        <references>
+                <url address="http://help.adobe.com/en_US/ActionScript/3.0_ProgrammingAS3/WS5b3ccc516d4fbf351e63e3d118a9b90204-7e08.html">Adobe Flash Player security - Website controls (policy files)</url>
+                <url address="http://helpx.adobe.com/flash-player/kb/arbitrary-headers-sent-flash-player.html">Adobe Flash Player help =Arbitrary headers are not sent from Flash Player to a remote domain</url>
+        </references>
+</alert>

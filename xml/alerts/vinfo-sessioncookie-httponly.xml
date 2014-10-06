@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Session Cookie Without HttpOnly Flag </title>
+
+<class>Information</class>
+<severity>High</severity>
+<discussion>
+Vega has detected that a session cookie may have been set without the HttpOnly flag. When this flag is not present, it is possible to access the cookie via client-side script code. The HttpOnly flag is a security measure that can help mitigate the risk of cross-site scripting attacks that target session cookies of the victim. If the HttpOnly flag is set and the browser supports this feature, attacker-supplied script code will not be able to access the cookie.
+</discussion>
+        <remediation>
+          When creating the cookie in the code, set the HttpOnly flag to true.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/HttpOnly">HttpOnly OWASP Reference</url>
+        </references>
+</alert>
+
+

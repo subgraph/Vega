@@ -3,40 +3,36 @@ var module = {
   category: "Injection Modules"
 };
 
-/* 
- * Temporary. 
- * This module won't work unless the server can reach the web. 
- * A better solution would be to nominate a random page on the same server 
- * This will also prevent requests being sent to 'example.org' 
- * Also this module won't detect anything if the hostname is example.org or www.example.org.
- * I feel dirty.
- * */
-	
 function initialize(ctx) {
-  var injectables = createInjectables(ctx);
-  ctx.submitMultipleAlteredRequests(handler, injectables);
+  var ps = ctx.getPathState();
+
+  if (ps.isParametric()) {
+
+    var injectables = createInjectables(ctx);
+    ctx.submitMultipleAlteredRequests(handler, injectables);
+  }
 }
 
 function createInjectables(ctx) {
   var ps = ctx.getPathState();
-  var injectables = ["http://www.example.org", 
-                     "htTp://www.example.org", 
-                     "hthttpttp://www.example.org",
-                     "hthttp://tp://www.example.org",
-                     "www.example.org"];
+  var injectables = ["http://www.google.com/humans.txt", 
+                     "htTp://www.google.com/humans.txt", 
+                     "hthttpttp://www.google.com/humans.txt",
+                     "hthttp://tp://www.google.com/humans.txt",
+                     "www.google.com/humans.txt"];
   
   var ret = [];
- 
-  for (var i = 0; i < injectables.length; i++)
-    ret.push(injectables[i]);
-  
+
+    for (var i = 0; i < injectables.length; i++)
+      ret.push(injectables[i]);
+   
   return ret;
 }
 
 
 function handler(req, res, ctx) {
 	
-  var content = "for documentation purposes. These domains may be used as illustrative";
+  var content = "Google is built by a large team of engineers, designers, researchers, robots";
   var ps = ctx.getPathState();
   var fp = ps.getPathFingerprint();	
   
@@ -45,7 +41,8 @@ function handler(req, res, ctx) {
 	  var uri = String(req.requestLine.uri);
 	  var uripart = uri.replace(/\?.*/, "");
 	  var ps = ctx.getPathState();
-	  if (uri.host != "example.org" && uri.host != "www.example.org")
+	  if (uri.host != "www.google.com")
+		ctx.addStringHighlight(content);
 	  	ctx.alert("vinfo-rfi", req, res, {
 	  			output: res.bodyAsString,
 	  			key: "vinfo-rfi:" + uripart + ps.getFuzzableParameter().name,

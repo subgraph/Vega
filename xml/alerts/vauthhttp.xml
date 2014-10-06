@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Cleartext Password over HTTP</title>
+	
+	<class>Environment</class>
+
+	<severity>High</severity>
+
+	<impact>Vega has detected a form that can cause a password submission over an insecure channel.</impact>
+	<impact>This could result in disclosure of passwords to network eavesdroppers.</impact>
+
+	<remediation>
+		Passwords should never be sent over cleartext. The form should submit to an HTTPS target.
+	</remediation>
+
+
+	<discussion>
+    	Vega detected a form with a password input field that submits to an insecure (HTTP) target. Password values should never be sent in the clear across insecure channels. This vulnerability could result in unauthorized disclosure of passwords to passive network attackers.
+	</discussion>
+
+	<references>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

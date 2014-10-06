@@ -5,10 +5,6 @@ var module = {
 
 var headers = ["X-XSS-Protection", "Access-Control-Allow-Origin"]; // May be an issue when these headers are present
 
-
-// TODO: "X-Frame-Options" -> Burp: Frameable response (potential Clickjacking)
-// TODO: "Content-Type: text/html" missing charset -> Burp: HTML does not specify charset - this should be its own module since it also checks response body
-
 function run(request, response, ctx) {
 	var uri = String(request.requestLine.uri);
 	var uripart = uri.replace(/\?.*/, "");

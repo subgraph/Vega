@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Secure Cookie Set Over Insecure Channel </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that this cookie was sent over an insecure channel when the Secure flag was set. This may allow eavesdroppers to observe the cookie while it is initially transmitted to the browser.
+</discussion>
+        <remediation>
+          When setting cookies with the Secure flag, ensure they are sent to the browser over HTTPS.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/SecureFlag">SecureFlag OWASP Reference</url>
+        </references>
+</alert>

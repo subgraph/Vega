@@ -4,7 +4,11 @@ var module = {
 };
 
 function initialize(ctx) {
-  ctx.submitMultipleAlteredRequests(process, ["http://vega.invalid/;?", "//vega.invalid/;?", "vega://invalid/;?", " src=http://vega.invalid/;?", "\" src=http://vega.invalid/;?"]);
+
+  var ps = ctx.getPathState();
+  if (ps.isParametric()) {
+    ctx.submitMultipleAlteredRequests(process, ["http://vega.invalid/;?", "//vega.invalid/;?", "vega://invalid/;?", " src=http://vega.invalid/;?", "\" src=http://vega.invalid/;?"]);
+  }
 }
 
 function process(req, res, ctx) {

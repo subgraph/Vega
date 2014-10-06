@@ -82,7 +82,29 @@ public class ConsoleView extends ViewPart implements IConsoleDisplay {
 			}
 		});
 	}
-	
+
+	@Override
+	public void printDebug(final String message) {
+		final Display display = Display.getDefault();
+		if (display.isDisposed()) {
+			System.err.print(message);
+			return;
+		}
+		
+		display.asyncExec(new Runnable() {
+			public void run() {
+				if(output.isDisposed()) 
+					return;
+				output.append(message);
+				output.setStyleRange(new StyleRange(output.getCharCount()-message.length(), message.length(), display.getSystemColor(SWT.COLOR_BLUE), null));
+				output.setCaretOffset(output.getCharCount());
+				output.showSelection();
+				
+				showOutputIcon();
+			}
+		});
+	}
+
 	@Override
 	public void printError(final String message) {
 		final Display display = Display.getDefault();

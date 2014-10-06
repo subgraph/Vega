@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Flash Cross-Domain Permissive Site-Control Policy </title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the resource has specified an insecure Flash cross-domain site-control policy. The crossdomain.xml file has set the site-control permitted-cross-domain-policies attribute to "all". As a result, all cross-domain policy files on the domain are permitted and may override the master policy for specific resources, which can potentially lower cross-domain security settings.
+</discussion>
+        <remediation>
+          Assess the need for resource-specific cross-domain policies. If resource-specific policies are not absolutely required, configure a master policy file on the domain root path that specifies "master-only" as the value for the site-control permitted-cross-domain-policies attribute. This will enforce a single policy for the entire domain.
+        </remediation>
+        <references>
+                <url address="http://help.adobe.com/en_US/ActionScript/3.0_ProgrammingAS3/WS5b3ccc516d4fbf351e63e3d118a9b90204-7e08.html">Adobe Flash Player security - Website controls (policy files)</url>
+        </references>
+</alert>

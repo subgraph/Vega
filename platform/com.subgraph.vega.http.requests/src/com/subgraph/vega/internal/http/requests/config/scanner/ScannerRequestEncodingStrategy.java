@@ -1,5 +1,9 @@
 package com.subgraph.vega.internal.http.requests.config.scanner;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.logging.Logger;
+
 import org.apache.http.RequestLine;
 import org.apache.http.message.BasicRequestLine;
 
@@ -8,7 +12,8 @@ import com.subgraph.vega.internal.http.requests.config.IRequestEncodingStrategy;
 public class ScannerRequestEncodingStrategy implements IRequestEncodingStrategy {
 	private final String PATH_ENC_CHARS = "#&=+;,!$?%";
 	private final String QUERY_ENC_CHARS = "#+;,!$?%";
-	
+	private final static Logger logger = Logger.getLogger("scanner"); 
+
 	@Override
 	public RequestLine encodeRequestLine(RequestLine requestLine) {
 		final String path = lineToPath(requestLine.getUri());
@@ -25,6 +30,14 @@ public class ScannerRequestEncodingStrategy implements IRequestEncodingStrategy 
 	}
 	
 	private String encodeQuery(String query) {
+		// TODO: Quick fix to support URI-encoding UTF-8 characters, probably wrong level of abstraction, should maybe be re-factored as its own EncodingStrategy with a check earlier in the call chain
+		if (containsUnicode(query)){
+			try {
+				return URLEncoder.encode(query, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				logger.warning("UnsupportedEncodingException on query: " + query);
+			}
+		}
 		return encodeString(query, QUERY_ENC_CHARS);
 	}
 
@@ -75,5 +88,14 @@ public class ScannerRequestEncodingStrategy implements IRequestEncodingStrategy 
 			return null;
 		}
 		return line.substring(idx + 1);
+	}
+	
+	private static boolean containsUnicode(String line) {
+		for(int i = 0; i < line.length(); i++) {
+			if (line.charAt(i) > 255) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -257,12 +257,22 @@ public class PathStateManager {
 	}
 
 	public boolean isExcludedParameter(String name) {
-		return config.getExcludedParameterNames().contains(name);
+		return config.getExcludedParameterNames().contains(name.toLowerCase());
 	}
 	
 	public void debug(String message) {
 		if(config.getDisplayDebugOutput())
 			logger.info(message);
+	}
+	
+	public void debug(String message, Boolean colored) {
+		if(config.getDisplayDebugOutput()) {
+			if (colored) {
+				logger.finer(message);
+			} else {
+				logger.info(message);
+			}
+		}
 	}
 	
 	public void reportRequestException(HttpUriRequest request, Throwable ex) {

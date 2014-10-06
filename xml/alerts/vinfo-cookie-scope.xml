@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Permissive Cookie Domain Scope</title>
+
+<class>Information</class>
+<severity>Info</severity>
+<discussion>
+Vega has detected that the domain scope for this cookie is too permissive. The cookie domain attribute determines which domains the browser will send to the cookie to. The issue is that a sub-domain has set a cookie domain attribute that is higher in the domain hierarchy (a parent domain). As a result, the browser will submit the cookie to the parent domain and its other child domains. This presents a security risk because the browser may transmit the cookie to unintended recipients in sub-domains. If a session identifier or other sensitive information is intercepted by a malicious party, they may be able gain unauthorized access to the application.
+</discussion>
+        <remediation>
+          Restrict the cookie domain scope to ensure that cookies are not sent to unintended sub-domains.
+        </remediation>
+        <references>
+                <url address="https://www.owasp.org/index.php/Session_Management_Cheat_Sheet#Domain_and_Path_Attributes">Domain and Path attributes OWASP Reference</url>
+        </references>
+</alert>
+
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>HTTP Script Include in HTTPS Website</title>
+	
+	<class>Environment</class>
+
+	<severity>High</severity>
+
+	<impact>Vega has detected script code included in HTTPS website over insecure channels.</impact>
+	<impact>This could allow MITM attacks and compromise of the application or user data.</impact>
+
+	<remediation>
+		HTTPS websites should only include content, especially script code, over HTTPS.
+	</remediation>
+
+	<discussion>
+		Vega has detected that content served over HTTPS is including script content that will be fetched over HTTP. This is a serious vulnerability that undermines the security provided by HTTPS. Attackers observing the client interaction with the website could intercept the insecure communication and inject their own script code. If successful, this will run in the context of the DOM and have full access to resources otherwise protected by HTTPS.
+	</discussion>
+
+	<references>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

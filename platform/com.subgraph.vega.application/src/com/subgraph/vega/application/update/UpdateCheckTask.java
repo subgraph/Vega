@@ -1,5 +1,10 @@
 package com.subgraph.vega.application.update;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.http.HttpHost;
@@ -20,12 +25,17 @@ import com.subgraph.vega.application.Activator;
 public class UpdateCheckTask implements Runnable {
 
 	private final static String REPONSE_UPDATE_AVAILABLE = "UPDATE";
+	private final static String DEBIAN_VERSION = "/etc/debian_version";
 	private final static String DOWNLOAD_URL = "http://subgraph.com/vega_download.php";
 	private final static String UPDATE_MESSAGE = 
 			"A new version of Vega is available for download from the Subgraph website.\n"+ DOWNLOAD_URL;
+	private final static String DIST_UPDATE_MESSAGE = 
+			"A new version of Vega is available. Please use your distro update tools to update. For Debian-based systems such as Kali Linux, run apt-get update and then apt-get upgrade.";
 	
 	private final Shell shell;
 	private final int buildNumber;
+	private String versionPrefix = "";
+	private boolean distro = false;
 	
 	public UpdateCheckTask(Shell shell, int buildNumber) {
 		this.shell = shell;
@@ -34,7 +44,7 @@ public class UpdateCheckTask implements Runnable {
 
 	@Override
 	public void run() {
-		
+		checkDebianRelease();
 		final IHttpRequestEngine requestEngine = createRequestEngine();
 		final IHttpResponse response = sendRequest(requestEngine);
 		if(response != null && !response.getBodyAsString().isEmpty()) {
@@ -68,17 +78,32 @@ public class UpdateCheckTask implements Runnable {
 	}
 
 	private void displayUpdateDialog() {
-		System.out.println("foo");
-		final MessageDialog dialog = new MessageDialog(null, "Update Available", 
-				null,
-				UPDATE_MESSAGE,
-				MessageDialog.INFORMATION,
-				new String[] {"Ok", "Open Download Page"}, 
-				0);
-		if(dialog.open() == 1) {
-			openDownloadPage();
-		}
 
+		if (distro == false) {
+			
+		
+			final MessageDialog dialog = new MessageDialog(null, "Update Available", 
+					null,
+					UPDATE_MESSAGE,
+					MessageDialog.INFORMATION,
+					new String[] {"Ok", "Open Download Page"}, 
+					0);
+			if(dialog.open() == 1) {
+				openDownloadPage();
+			}
+		}
+		else {
+			
+			final MessageDialog dialog = new MessageDialog(null, "Updated Vega Package Available", 
+					null,
+					DIST_UPDATE_MESSAGE,
+					MessageDialog.INFORMATION,
+					new String[] {"Ok"},
+					0);
+			dialog.open();
+
+		}
+	
 	}
 	
 	private void openDownloadPage() {
@@ -101,6 +126,24 @@ public class UpdateCheckTask implements Runnable {
 	}
 	
 	private String createUriPath() {
-		return "/update-check.php?build="+buildNumber;
+		return "/update-check.php?build="+versionPrefix+buildNumber;
+	}
+	
+	private void checkDebianRelease() {
+		
+		
+	try {
+	    BufferedReader r = new BufferedReader ( new FileReader ( DEBIAN_VERSION ));
+	    String l = null;
+	    while ((l = r.readLine()) != null) {
+	    	if (l.startsWith("Kali Linux 1.0")) {
+	    		versionPrefix = "kl-1.0-";
+	    		distro = true;
+	    	}		
+	    }}
+		catch (FileNotFoundException e){
+		}
+		catch (IOException e){
+		}
 	}
 }

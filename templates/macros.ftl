@@ -64,27 +64,27 @@
   
  		 <#if defined(resource)>
   		<tr>
-  			<td><div class="tablefield">Resource</div></td><td><a class="resourcelink" href="#">${resource}</a></td>
+  			<td><div class="tablefield">Resource</div></td><td><b>${resource}</b></td>
   		</tr>
   		</#if>
 
 	        <#if defined(param)>
                 <tr>
-                        <td><div class="tablefield">Parameter</div></td><td><a class="resourcelink" href="#">${param}</a></td>
+                        <td><div class="tablefield">Parameter</div></td><td><b>${param}</b></td>
                 </tr>
                 </#if>
 
  
                  <#if defined(methods)>
                 <tr>
-                        <td><div class="tablefield">Method</div></td><td><a class="resourcelink" href="#">${methods}</a></td>
+                        <td><div class="tablefield">Method</div></td><td><b>${methods}</b></td>
                 </tr>
                 </#if>
 
 
 		<#if defined(detectiontype)>
 		<tr>
-			<td><div class="tablefield">Detection Type</div></td><td><a class="resourcelink" href="#">${detectiontype}</a></td>
+			<td><div class="tablefield">Detection Type</div></td><td><b>${detectiontype}</b></td>
 		</tr>
 		</#if>
 

@@ -99,7 +99,7 @@ public class UriParser {
 		final IWebPath rootPath = webHost.getRootPath();
 		synchronized(pathStateManager) {
 			if(!pathStateManager.hasSeenPath(rootPath)) {
-				pathStateManager.createStateForPath(rootPath, directoryProcessor);
+				pathStateManager.createStateForPath(rootPath, unknownProcessor);
 			}
 		}
 	}

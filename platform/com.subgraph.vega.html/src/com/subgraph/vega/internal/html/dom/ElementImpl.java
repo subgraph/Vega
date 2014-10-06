@@ -156,8 +156,8 @@ public class ElementImpl extends NodeImpl implements Element {
 		// see:             	return new NodeListImpl(elements);
 
 		if(getTagName().equals("FORM") && "*".equals(name)) {
-            ArrayList<org.jsoup.nodes.Element>fe = new ArrayList<org.jsoup.nodes.Element>();
-            fe = ((FormElement) this.jsoupElement).getElements();
+            Elements fe;
+            fe = ((FormElement) this.jsoupElement).elements();
             for (org.jsoup.nodes.Element f : fe)
             {
             	elements.add(HTMLElementImpl.create(f, getOwnerDocument()));

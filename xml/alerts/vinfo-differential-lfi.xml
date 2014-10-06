@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Page Fingerprint Differential Detected - Possible Local File Include</title>
+	
+	<class>Error Message</class>
+	<severity>High</severity>
+
+	<impact>Vega has detected a different response fingerprint in relation to a local file include injection attempt.</impact>
+	<impact>This may indicate a local file include vulnerability, though this is not confirmed.</impact>
+	<impact>If this is due to a local file include vulnerability, exploitation of local file include vulnerabilities can allow attackers to gain unauthorized access to files, which may also aid in other attacks.</impact>
+	<impact>Differing responses may also indicate the presence of a file enumeration vulnerability, which instead of allowing the attacker to gain access to file contents, may allow them to determine if files exist on the system.</impact>
+	
+	<discussion>
+	Vega has detected a different response page fingerprint in relation to a local file include injection request. This means that the response page content returned by the web application has a different signature from that returned by an ordinary request, which may indicate the existence of a local file include vulnerability. Local file include vulnerabilities are present when externally-supplied input is used to specify the location of a local filesystem resource that is requested by the web application. The differing page fingerprint may include error messages or indicate a state change in the application in response to the local file include injection attempt made by Vega. Differing responses may also be indicative of a file enumeration vulnerability, which would allow an attacker to determine if specific files exist on the system. Developers should examine the response content and underlying code to verify whether or not a vulnerability is present. If the vulnerability exists and precautions are not taken, such a vulnerability could allow attackers to gain unauthorized access to sensitive information contained in local files, which may also be leveraged in further attacks on the web application.
+	</discussion>
+
+	<remediation>To prevent this type of vulnerability, the developer should canonicalize the path of any filesystem resource that has a path composed of externally-supplied input and then perform an authorization check prior to access.</remediation>
+	<remediation>The realpath() library call will return the canonical path of the resource. It is implemented in PHP, Perl, and Python.</remediation>
+	<remediation>For Ruby frameworks, File.expand_path can be used.</remediation>
+	<remediation>GetFullPath() can be used on ASP.NET applications.</remediation>
+	<remediation>getCanonicalPath() can be used in Java code.</remediation>
+	<remediation>Additional protection against unauthorized access to filesystem resources can be obtained by using chroot() or similar mechanisms to limit filesystem access to the web application and http server process, although this can be difficult to manage.</remediation>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/Directory_traversal">Directory Traversal (Wikipedia)</url>
+		<url address="https://www.owasp.org/index.php/Path_Traversal">Path Traversal (OWASP)</url>
+		<url address="https://www.owasp.org/index.php/File_System#Path_traversal">Avoiding Path Traversal (OWASP)</url>
+	</references>
+</alert>

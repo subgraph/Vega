@@ -245,19 +245,19 @@ public class ScanInstance implements IScanInstance, Activatable {
 
 	@Override
 	public void setProperty(String name, Object value) {
-		activate(ActivationPurpose.READ);
+		activate(ActivationPurpose.WRITE);
 		properties.setProperty(name, value);
 	}
 
 	@Override
 	public void setStringProperty(String name, String value) {
-		activate(ActivationPurpose.READ);
+		activate(ActivationPurpose.WRITE);
 		properties.setStringProperty(name, value);
 	}
 
 	@Override
 	public void setIntegerProperty(String name, int value) {
-		activate(ActivationPurpose.READ);
+		activate(ActivationPurpose.WRITE);
 		properties.setIntegerProperty(name, value);
 	}
 

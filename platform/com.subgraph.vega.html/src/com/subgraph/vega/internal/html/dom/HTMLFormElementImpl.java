@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.FormElement;
+import org.jsoup.select.Elements;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.html2.HTMLCollection;
@@ -36,8 +37,8 @@ public class HTMLFormElementImpl extends HTMLElementImpl implements HTMLFormElem
 		
 		final List<HTMLElementImpl> elementList = new ArrayList<HTMLElementImpl>();
 		
-		ArrayList<Element>fe = new ArrayList<Element>();
-		fe = ((FormElement) jsoupElement).getElements();
+		Elements fe;
+		fe = ((FormElement) jsoupElement).elements();
 		
 		for(Element e: fe) {
 			addFormElementsToList(e, elementList);

@@ -4,9 +4,12 @@ var module = {
 };
 
 
-var textSubtypeRegex = /^text\/\w+/;
+var textSubtypeRegex = /^text\/(\w+)/;
 var charsetHeaderRegex = /.+charset\s?=.+/;
-var charsetBodyRegex = /<meta.+charset\s?=.+>/gim;
+var charsetBodyRegex = /<meta.+charset\s?=[^<>]+>/im;
+
+// Do not check these text/ subtypes:
+var invalidSubtypes = ["css"];
 
 function run(request, response, ctx) {
 	var uri = String(request.requestLine.uri);
@@ -17,7 +20,8 @@ function run(request, response, ctx) {
 	// Only check responses with "Content-Type: text/*"
 	if (response.hasHeader("Content-Type")) {
 		var hdr = response.getFirstHeader("Content-Type");
-		if (textSubtypeRegex.test(hdr.value)) {
+		var textSubtype = textSubtypeRegex.exec(hdr.value);
+		if (textSubtype && invalidSubtypes.indexOf(textSubtype[1].toLowerCase()) === -1) {
 			if (response.bodyAsString.length > 0) {
 				// Alert if charset not specified in header and body.
 				if (!charsetHeaderRegex.test(hdr.value) && !charsetBodyRegex.test(response.bodyAsString)) {

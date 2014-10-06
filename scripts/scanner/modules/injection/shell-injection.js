@@ -5,7 +5,10 @@ var module = {
 };
 
 function initialize(ctx) {
-  ctx.submitMultipleAlteredRequests(process, ["`true`", "`false`", "`uname`", "\"`true`\"", "\"`false`\"", "\"`uname`\"", "'true'", "'false'", "'uname'"], true);
+  var ps = ctx.getPathState();
+  if (ps.isParametric()) {
+    ctx.submitMultipleAlteredRequests(process, ["`true`", "`false`", "`uname`", "\"`true`\"", "\"`false`\"", "\"`uname`\"", "'true'", "'false'", "'uname'"], true);
+  }
 }
 
 function process(req, res, ctx) {
@@ -26,9 +29,13 @@ function process(req, res, ctx) {
 
 function checkMatch(ctx, idx) {
   if (ctx.isFingerprintMatch(idx, idx + 1) && !ctx.isFingerprintMatch(idx, idx + 2)) {
+    
+    var uri = String(ctx.getSavedRequest(idx).requestLine.uri);
+    var uripart = uri.replace(/\?.*/, "");
+
     ctx.alert("vinfo-shell-inject",  ctx.getSavedRequest(idx), ctx.getSavedResponse(idx), {
       message: "responses to `true` and `false` are different than `uname`",
-      resource: ctx.getSavedRequest(idx)
+      resource: uripart
     });
     ctx.responseChecks(idx + 2);
   }

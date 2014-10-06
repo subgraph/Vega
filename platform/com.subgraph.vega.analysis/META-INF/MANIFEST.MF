@@ -20,5 +20,6 @@ Import-Package: com.subgraph.vega.api.analysis,
  org.apache.http.client.utils;version="4.2.2",
  org.jsoup,
  org.jsoup.nodes,
+ org.jsoup.parser,
  org.jsoup.select
 Service-Component: OSGI-INF/analysis.xml
