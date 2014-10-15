@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>SSLv2 Support</title>
+	
+	<class>Configuration</class>
+
+	<severity>High</severity>
+
+	<impact>SSLv2 is vulnerable to many known attacks that can affect user security.</impact>
+
+	<remediation>
+		Support for SSLv2 should be disabled as it is obsolete.
+	</remediation>
+	<remediation>
+                The Mozilla Server Side TLS configuration guide includes instructions for disabling SSLv2 in server configuration (see link below).
+        </remediation>
+	<remediation>
+		It is likely that the HTTPS server must be restarted for configuration changes to take effect.
+	</remediation>
+
+	<discussion>
+		Vega discovered support for SSLv2. SSLv2 is known to have many serious vulnerabilities and should not be supported or used.
+	</discussion>
+
+	<references>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

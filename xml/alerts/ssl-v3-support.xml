@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>SSLv3 Supported (POODLE attack, others)</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>Data security is at risk due to multiple known weaknesses in SSL 3.0.</impact>
+	<impact>This includes the POODLE attack.</impact>
+
+	<remediation>
+		Remove support for SSLv3. 
+	</remediation>
+	<remediation>
+		Mozilla has recommended settings for Apache, Nginx, Haproxy and others. These settings include explicitly supporting
+		TLS (while excluding SSLv2, SSLv3). See guide below.
+	</remediation>
+	<remediation>
+		It is likely that the HTTPS server must be restarted for any configuration change to take effect.
+	</remediation>
+
+	<discussion>
+		Vega detected server support for SSL 3.0. This version of the protocol has numerous known weaknesses 
+		and is considered deprecated in favor of newer versions of TLS.
+	</discussion>
+
+	<references>
+		<url address="https://www.imperialviolet.org/2014/10/14/poodle.html">POODLE Attacks on SSLv3 (ImperialViolet)</url>
+		<url address="https://wiki.mozilla.org/Security/Server_Side_TLS">Sever Side TLS (Mozilla)</url>
+		<url address="http://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_3.0">Transport Layer Security - SSL 3.0</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

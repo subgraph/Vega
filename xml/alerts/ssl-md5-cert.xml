@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Certificate signed using MD5</title>
+	
+	<class>Configuration</class>
+
+	<severity>High</severity>
+
+	<impact>Certificates may be forged.</impact>
+	<impact>Forged certificatescan be used in MITM attacks against users.</impact>
+
+	<remediation>
+		Obtain a new certificate signed with SHA-256.
+	</remediation>
+
+
+	<discussion>
+		Vega detected a certificate signed using MD5. MD5 is known to be insecure, and this has been demonstrated with known certificate forgery.
+	</discussion>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/MD5#Collision_vulnerabilities">MD5 Collision Vulnerabilities (Wikipedia)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>RC4 Preferred Cipher</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>RC4 has known weaknesses and may be found to be broken in the future.</impact>
+	<impact>Data confidentiality may be at risk.</impact>
+
+	<remediation>
+		RC4 should not be prioritized as the most preferred cipher by the server.
+	</remediation>
+	<remediation>
+		This can be changed in the server configuration settings. Mozilla has guidelines on server-side TLS configuration for a number of implementations. See link below.
+	</remediation>
+	<remediation>
+		The HTTPS server would likely need to be restarted for configuration changes to take effect.
+	</remediation>
+
+	<discussion>
+		Vega detected RC4 as a cipher prioritized by the vendor. RC4 has known issues and it is suspected that even more severe vulnerabilities may be unknown publicly. It is recommended that more secure ciphers be prioritized by the server. Consult the guidance provided by Mozilla in their Server Side TLS configuration guide.
+	</discussion>
+
+	<references>
+                <url address="https://wiki.mozilla.org/Security/Server_Side_TLS"> Server Side TLS (Mozilla)</url>
+		<url address="http://en.wikipedia.org/wiki/RC4#Biased_outputs_of_the_RC4">Biased outputs of the RC4 (Wikipedia)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

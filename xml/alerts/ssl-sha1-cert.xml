@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Certificate signed using SHA-1</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>Certificates can be forged by capable adversaries.</impact>
+	<impact>Forged certificates can be used in MITM attacks against connecting clients.</impact>
+
+	<remediation>
+		Renew certificates with SHA-256 signatures.
+	</remediation>
+	<remediation>
+		This should be done before 2016.
+	</remediation>
+
+	<discussion>
+		Vega detected a certificate signed using SHA-1. SHA-1 is a hash algorithm used in digital signatures. It is currently considered deprecated due to the increasing feasibility in breaking it. 
+	</discussion>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/SHA-1">SHA-1 (Wikipedia)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

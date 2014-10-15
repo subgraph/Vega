@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Anonymous Diffie-Hellman Supported</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>Clients connecting with anonymous Diffie-Hellman are susceptible to MITM attacks.</impact>
+
+	<remediation>
+		For deployments using OpenSSL, Anonymous Diffie-Hellman can be disabled by adding "!ADH" to the supported cipher list string.
+	</remediation>
+	<remediation>
+		The HTTPS server should be restarted after such a change.
+	</remediation>
+
+	<discussion>
+		Diffie-Hellman is a key-agreement protocol that is used by clients and servers to mutually derive a session key for the HTTPS session. Anonymous Diffie-Hellman is a version without authentication. Vega detected support for anonymous Diffie-Hellman offered by the server.
+	</discussion>
+
+	<references>
+		<url address="http://wiki.openssl.org/index.php/Diffie_Hellman">Diffie-Hellman (OpenSSL)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

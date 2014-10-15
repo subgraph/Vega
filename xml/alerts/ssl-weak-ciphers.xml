@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Weak Ciphers Supported</title>
+	
+	<class>Configuration</class>
+
+	<severity>Low</severity>
+
+	<impact>Data security may be at risk.</impact>
+
+	<remediation>
+		Disable support for weak ciphers.
+	</remediation>
+	<remediation>
+		The Mozilla Server Side TLS guide (link below) includes guidelines for disabling support for weak ciphers in many implementations.
+	</remediation>
+	<remediation>
+		The HTTPS server may need to be restarted following any configuration changes.
+	</remediation>
+
+	<discussion>
+		Vega discovered that the server supports weak ciphers. If used by a client these may put data security at risk.
+	</discussion>
+
+	<references>
+                <url address="https://wiki.mozilla.org/Security/Server_Side_TLS"> Server Side TLS (Mozilla)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

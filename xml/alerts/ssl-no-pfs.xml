@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Forward Secrecy Not Supported</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+        <impact>If a forward secret cipher is not used, the security of the session data is as secure as the server's long-term private key.</impact>
+
+        <remediation>
+                Server administrators should configure the server to prioritize forward secret cipher suites such as those using ECDHE (elliptic-curve DH ephemeral) and DHE (DH ephemeral).
+        </remediation>
+        <remediation>
+                Mozilla has made guielines available for securely configuring TLS servers. See the references section for a link.
+        </remediation>
+        <remediation>
+                The HTTPS server must likely be restarted for any configuration changes to take effect.
+        </remediation>
+
+        <discussion>
+                Vega detected that the server does not support or prioritize forward secret ciphers in the list of supported cipher suites.
+                Forward secret ciphers use algorithms such as Diffie-Hellman ephemeral to generate a single-use session key. This key
+                is not derived from the long-term private key, therefore the security of the data is not subject to decryption if that key
+                is compromised in the future.
+        </discussion>
+
+        <references>
+                <url address="https://wiki.mozilla.org/Security/Server_Side_TLS">Security/Server Side TLS (Mozilla)</url>
+                <url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+        </references>
+
+
+</alert>
+

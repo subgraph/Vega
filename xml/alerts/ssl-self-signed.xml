@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Self-Signed Certificate</title>
+	
+	<class>Configuration</class>
+
+	<severity>Info</severity>
+
+	<impact>This is an informational finding.</impact>
+
+	<remediation>
+		N/A.
+	</remediation>
+
+
+	<discussion>
+		Vega detected a self-signed certificate.
+	</discussion>
+
+	<references>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

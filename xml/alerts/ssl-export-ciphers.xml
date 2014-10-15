@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Export Grade Ciphers Supported</title>
+	
+	<class>Configuration</class>
+
+	<severity>Low</severity>
+
+	<impact>Export grade ciphers do not offer a strong level of security.</impact>
+
+	<remediation>
+		For implemented using OpenSSL, "!EXPORT" can be added to the supported ciphersuites string to disable support for export grade ciphers.
+	</remediation>
+        <remediation>
+                The Mozilla Server Side TLS configuration guide includes instructions for disabling spport for export grade ciphers in server configuration (see link below).
+        </remediation>
+	<remediation>
+		The HTTPS server should be restarted after such a change is made.
+	</remediation>
+
+
+	<discussion>
+		Vega detected server support for weak ("export grade") cipher suites.
+	</discussion>
+
+	<references>
+                <url address="https://wiki.mozilla.org/Security/Server_Side_TLS"> Server Side TLS (Mozilla)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

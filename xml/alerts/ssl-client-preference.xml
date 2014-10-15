@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Client Ciphersuite Preference</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>User browsers may select less secure cipher suites creating opportunities for attack.</impact>
+
+	<remediation>
+		HTTPS server should be configured to enforce server ciphersuite preferences. How this is configured will vary by server.
+	</remediation>
+	<remediation>
+		Mozilla has included guidelines for configuring server ciphersuite preference for various implementations. See link below.
+	<discussion>
+		The server can override client ciphersuite prioritization during the TLS handshake. This is useful for enforcing better, more
+		secure ciphersuites for all visiting clients. Vega has detected that this is not configured in the server, potentially leaving
+		older clients at risk.
+	</discussion>
+
+	<references>
+		<url address="https://wiki.mozilla.org/Security/Server_Side_TLS"> Server Side TLS (Mozilla)</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

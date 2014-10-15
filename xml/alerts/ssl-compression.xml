@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>TLS Compression Support (CRIME attack)</title>
+	
+	<class>Configuration</class>
+
+	<severity>Medium</severity>
+
+	<impact>Attackers may be able to exploit the CRIME attack to obtain session cookies or other sensitive data.</impact>
+
+	<remediation>
+		TLS Compression can be disabled in the server configuration. Consult documentation for the precise steps.
+	</remediation>
+	<remediation>
+		The Mozilla Server Side TLS configuration guide includes instructions for disabling TLS/SSL compression in server configuration (see link below).
+	</remediation>
+	<remediation> 
+		The HTTPS server must likely be restarted for configuration changes to take effect.
+	</remediation>
+
+	<discussion>
+		Vega detected that TLS compression is enabled by the server. This can be leveraged to carry out a chosen-plaintext attack through observing the compression ratio of data sent back from the server. If the attacker can induce a target user into making specific requests, it may be possible for them to obtain their session cookie.
+	</discussion>
+
+	<references>
+                <url address="https://wiki.mozilla.org/Security/Server_Side_TLS"> Server Side TLS (Mozilla)</url>
+		<url address="http://en.wikipedia.org/wiki/CRIME">CRIME attack against TLS</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+

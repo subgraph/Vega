@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alert>
+<title>Small RSA Modulus</title>
+	
+	<class>Configuration</class>
+
+	<severity>High</severity>
+
+	<impact>Data security may be at risk.</impact>
+	<impact>Users may be vulnerable to data decryption or MITM attacks.</impact>
+
+	<remediation>
+		Deploy with an RSA key with a larger modulus (2048 recommended).
+	</remediation>
+
+	<discussion>
+		Vega detected a 1024 bit or smaller RSA public key. This is unacceptably small today and may be vulnerable to factorization.
+	</discussion>
+
+	<references>
+		<url address="http://en.wikipedia.org/wiki/RSA_%28cryptosystem%29">RSA Cryptosystem</url>
+        	<url address="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS (Wikipedia)</url>
+	</references>
+
+</alert>
+
