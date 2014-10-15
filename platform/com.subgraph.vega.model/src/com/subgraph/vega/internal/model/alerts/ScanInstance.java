@@ -158,6 +158,7 @@ public class ScanInstance implements IScanInstance, Activatable {
 	public boolean isActive() {
 		int scanStatus = getScanStatus();
 		return (scanStatus == SCAN_PROBING || scanStatus == SCAN_STARTING || scanStatus == SCAN_AUDITING);
+
 	}
 	
 	@Override

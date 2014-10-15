@@ -15,7 +15,8 @@ import java.util.Collection;
 import com.subgraph.vega.api.model.IModelProperties;
 
 public interface IScanAlert extends IModelProperties {
-	enum Severity { HIGH, MEDIUM, LOW, INFO, UNKNOWN };
+	enum Severity { HIGH, MEDIUM, LOW, INFO, UNKNOWN }
+	String getDiscretionaryHostname();
 	String getName();
 	Severity getSeverity();
 	String getTitle();
@@ -31,4 +32,6 @@ public interface IScanAlert extends IModelProperties {
 	void addRegexHighlight(String regex);
 	void addRegexCaseInsensitiveHighlight(String regex);
 	Collection<IScanAlertHighlight> getHighlights();
+	void setDiscretionaryHostname(String hostname);
+	void setResource(String resourceString);
 }

@@ -72,23 +72,25 @@ public class SocksModeClientConnectionOperator extends DefaultClientConnectionOp
 		 * otherwise SSLSocketImpl blows up due to, it seems, https://bugs.openjdk.java.net/browse/JDK-8022081.
 		 */
 		
-		Class<?> c = sock.getClass();
-		try {
-			Field f = c.getDeclaredField("host");
-			f.setAccessible(true);
-			f.set(sock, target.getHostName());
-		} catch (NoSuchFieldException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (SecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (sf.isSecure(sock) == true) {
+			Class<?> c = sock.getClass();
+			try {
+				Field f = c.getDeclaredField("host");
+				f.setAccessible(true);
+				f.set(sock, target.getHostName());
+			} catch (NoSuchFieldException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (SecurityException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 						
 		InetSocketAddress localAddress = null;

@@ -36,6 +36,7 @@ import com.subgraph.vega.api.scanner.modules.IBasicModuleScript;
 import com.subgraph.vega.api.scanner.modules.IResponseProcessingModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 import com.subgraph.vega.api.scanner.modules.IScannerModuleRegistry;
+import com.subgraph.vega.sslprobe.SSLProbe;
 
 public class Scan implements IScan {
 	private final Scanner scanner;
@@ -44,6 +45,7 @@ public class Scan implements IScan {
 	private IScanInstance scanInstance; // guarded by this
 	private IWorkspace workspace; // guarded by this
 	private ScanProbe scanProbe; // guarded by this
+	private SSLProbe sslProbe; 
 	private IHttpRequestEngine requestEngine; // guarded by this
 	private ScannerTask scannerTask; // guarded by this
 	private Thread scannerThread; // guarded by this
@@ -140,6 +142,23 @@ public class Scan implements IScan {
 			}
 			
 			scanProbe = new ScanProbe(uri, requestEngine);
+			
+			if (uri.getScheme().contains("https")) {
+				int sslPort;
+				String httpHostString;
+				
+				if (uri.getPort() == -1) {
+					sslPort = 443;
+					httpHostString = "https://" + uri.getHost();
+				} else
+				{
+					sslPort = uri.getPort();
+					httpHostString = "https://" + uri.getHost() + ":" + sslPort;
+				}
+				sslProbe = new SSLProbe(scanInstance, uri.getHost(), sslPort, httpHostString);
+				sslProbe.run();
+			}
+			
 		}
 		final IScanProbeResult probeResult = scanProbe.runProbe();
 		synchronized(this) {
@@ -148,7 +167,7 @@ public class Scan implements IScan {
 		redirectURI = probeResult.getRedirectTarget();
 		return probeResult;
 	}
-
+	
 	@Override
 	public void startScan() {
 		synchronized(this) {

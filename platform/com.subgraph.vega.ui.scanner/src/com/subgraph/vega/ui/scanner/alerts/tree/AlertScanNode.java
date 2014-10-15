@@ -67,8 +67,9 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 
 		sb.append(" [");
 		switch(scanInstance.getScanStatus()) {
+		
 		case IScanInstance.SCAN_PROBING:
-			sb.append("Probing");
+			sb.append("Probing Server");
 			break;
 		case IScanInstance.SCAN_STARTING:
 			sb.append("Starting");
@@ -104,6 +105,9 @@ public class AlertScanNode extends AbstractAlertTreeNode {
 	@Override
 	protected String createKeyForAlert(IScanAlert alert) {
 		if(!alert.hasAssociatedRequest()) {
+			if (alert.getDiscretionaryHostname() != null) {
+				return alert.getDiscretionaryHostname();
+			}
 			return NO_HOSTNAME;
 		}
 		final IRequestLogRecord record = workspace.getRequestLog().lookupRecord(alert.getRequestId());

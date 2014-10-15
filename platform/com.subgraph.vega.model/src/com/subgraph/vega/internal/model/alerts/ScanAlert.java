@@ -38,6 +38,7 @@ public class ScanAlert implements IScanAlert, Activatable {
 	private final ModelProperties properties;
 	
 	private transient Activator activator;
+	private String discretionaryHostname;
 	
 	ScanAlert(String key, String name, String title, Severity severity, IScanInstance scanInstance, long requestId) {
 		this.key = key;
@@ -66,6 +67,26 @@ public class ScanAlert implements IScanAlert, Activatable {
 	public String getTitle() {
 		activate(ActivationPurpose.READ);
 		return title;
+	}
+	
+	@Override
+	public String getDiscretionaryHostname() {
+		activate(ActivationPurpose.READ);
+		return this.discretionaryHostname;
+	}
+
+	@Override
+	public void setDiscretionaryHostname(String hostname) {
+		activate(ActivationPurpose.READ);
+		discretionaryHostname = hostname;
+		activate(ActivationPurpose.WRITE);
+	}
+	
+	@Override
+	public void setResource(String resourceString) {
+		activate(ActivationPurpose.READ);
+		this.resource = resourceString;
+		activate(ActivationPurpose.WRITE);
 	}
 
 	@Override
@@ -260,6 +281,9 @@ public class ScanAlert implements IScanAlert, Activatable {
 		
 		this.activator = activator;			
 	}
+
+
+
 
 
 }

@@ -98,6 +98,7 @@ public class CrawlerPane extends Composite {
 		switch(scannerStatus) {
 		case IScanInstance.SCAN_CONFIG:
 		case IScanInstance.SCAN_PROBING:
+			progressPane.setLabelText("Probing server..");
 		case IScanInstance.SCAN_STARTING:
 		case IScanInstance.SCAN_AUDITING:
 			progressPane.setProgressBarValue((int) crawlerPercent);
