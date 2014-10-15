@@ -1,6 +1,5 @@
 package com.subgraph.vega.internal.sslprobe;
 
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
