@@ -13,6 +13,8 @@
 	</remediation>
 	<remediation>
 		Mozilla has included guidelines for configuring server ciphersuite preference for various implementations. See link below.
+	</remediation>
+
 	<discussion>
 		The server can override client ciphersuite prioritization during the TLS handshake. This is useful for enforcing better, more
 		secure ciphersuites for all visiting clients. Vega has detected that this is not configured in the server, potentially leaving
