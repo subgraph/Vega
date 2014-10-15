@@ -4,10 +4,11 @@
 	
 	<class>Configuration</class>
 
-	<severity>Medium</severity>
+	<severity>High</severity>
 
 	<impact>Data security is at risk due to multiple known weaknesses in SSL 3.0.</impact>
-	<impact>This includes the POODLE attack.</impact>
+	<impact>This includes the POODLE attack, which could allow decryption of sensitive data, such as session cookies.</impact>
+	<impact>It should be noted that an attacker with MITM capabilities may be able to force clients to use SSL 3.0.</impact>
 
 	<remediation>
 		Remove support for SSLv3. 
@@ -22,7 +23,8 @@
 
 	<discussion>
 		Vega detected server support for SSL 3.0. This version of the protocol has numerous known weaknesses 
-		and is considered deprecated in favor of newer versions of TLS.
+		and is considered deprecated in favor of newer versions of TLS. Some of the known weaknesses can result in a 
+		compromise of sensitive data such as user session tokens.
 	</discussion>
 
 	<references>
