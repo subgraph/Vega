@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sslprobe
+Bundle-SymbolicName: com.subgraph.vega.sslprobe
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.subgraph.vega.sslprobe.Activator
+Bundle-Vendor: SUBGRAPH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8,
+ JavaSE-1.7
+Import-Package: com.google.common.collect,
+ com.subgraph.vega.api.model.alerts,
+ org.apache.http;version="4.2.3",
+ org.osgi.framework;version="1.3.0"
+Export-Package: com.subgraph.vega.sslprobe
