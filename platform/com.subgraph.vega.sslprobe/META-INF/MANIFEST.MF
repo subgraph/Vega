@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.subgraph.vega.sslprobe.Activator
 Bundle-Vendor: SUBGRAPH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8,
- JavaSE-1.7
+ JavaSE-1.7,
+ JavaSE-1.6
 Import-Package: com.google.common.collect,
  com.subgraph.vega.api.model.alerts,
  org.apache.http;version="4.2.3",
