@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
@@ -89,6 +88,7 @@ abstract public class ProbeBase<T> implements Callable<T>, Runnable {
 
 	protected void closeConnection() {
 		if(socket != null) {
+			
 			closeQuietly(socket);
 			socket = null;
 			input = null;
@@ -142,9 +142,10 @@ abstract public class ProbeBase<T> implements Callable<T>, Runnable {
 		return true;
 	}
 
-	private void closeQuietly(Closeable closeable){
+	private void closeQuietly(Socket socket) {
 		try {
-			closeable.close();
+			socket.close();
 		} catch (IOException e) {}
 	}
+	
 }
