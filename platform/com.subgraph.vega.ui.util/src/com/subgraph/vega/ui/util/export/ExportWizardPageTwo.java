@@ -188,7 +188,6 @@ public class ExportWizardPageTwo extends WizardPage {
 		if (scanInstanceItem != null) {
 			for (TreeItem sItem : alertsTree.getItems()) {
 				if (sItem == scanInstanceItem) {
-					System.out.println("Found it");
 					Rectangle itemRectangle = sItem.getBounds();
 					Rectangle clientArea = treeContainer.getClientArea();
 					Point origin = treeContainer.getOrigin();
@@ -196,9 +195,7 @@ public class ExportWizardPageTwo extends WizardPage {
 							|| itemRectangle.x + itemRectangle.width > origin.x + clientArea.width
 							|| itemRectangle.y + itemRectangle.height > origin.y + clientArea.height) {
 						treeContainer.setOrigin(0, itemRectangle.y);
-						System.out.println(origin.x + " " + origin.y + " " + itemRectangle.x + " "+ itemRectangle.y);
 						origin = treeContainer.getOrigin();
-						System.out.println(origin.x + " " + origin.y + " " + itemRectangle.x + " "+ itemRectangle.y);
 						treeContainer.setOrigin(new Point(sItem.getBounds().x, sItem.getBounds().y));
 					} 
 					else {
@@ -219,7 +216,6 @@ public class ExportWizardPageTwo extends WizardPage {
 				
 		for (TreeItem t : alertsTree.getItems()) {
 			if (t.getChecked() == true) {
-				System.out.println(t.getData());
 		//		IScanInstance s = (IScanInstance)(t.getData());
 				List<IScanAlert> scanInstanceAlerts = (List<IScanAlert>) t.getData();
 				//s.getAllAlerts();

@@ -38,9 +38,7 @@ public class AlertExportWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		// TODO Auto-generated method stub
-		
-		
+				
 		List<IScanAlert> alerts;
 		alerts = two.allAlertsFromTree();
 		System.out.println(alerts.size());

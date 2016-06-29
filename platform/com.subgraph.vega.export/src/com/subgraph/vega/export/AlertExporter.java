@@ -40,7 +40,6 @@ public class AlertExporter {
 	}
 	
 	public void exportAlertsbyList(List<IScanAlert> alerts) {
-		System.out.println("Size:"+alerts.size());
 		writeFile("/tmp/test2.html", renderer.renderList(alerts));
 	}
 	
@@ -49,7 +48,6 @@ public class AlertExporter {
 		List <IScanInstance> scanInstances = alertRepository.getAllScanInstances();
 		
 		for (IScanInstance s : scanInstances) {
-			System.out.println("Scan instance:" + s.getScanId());
 			List<IScanAlert> scanInstanceAlerts = s.getAllAlerts();
 			writeFile("/tmp/test.html",renderer.renderList(scanInstanceAlerts));
 		}
