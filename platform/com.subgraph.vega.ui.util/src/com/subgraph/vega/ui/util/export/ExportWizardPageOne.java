@@ -47,27 +47,28 @@ public class ExportWizardPageOne extends WizardPage {
 		
 		
 		radioGroup = new Group(container, SWT.SHADOW_IN);
-		radioGroup.setText("Select XML or HTML output.");
+		//radioGroup.setText("Select XML or HTML output.");
 		gd.grabExcessHorizontalSpace = true;
 		radioGroup.setLayoutData(gd);
 		
 		radioGroup.setLayout(new RowLayout(SWT.VERTICAL));
 		Button htmlButton = new Button(radioGroup, SWT.RADIO);
-		Button xmlButton = new Button(radioGroup, SWT.RADIO);
-		xmlButton.setText("XML");
+		//Button xmlButton = new Button(radioGroup, SWT.RADIO | SWT.);
+	//	xmlButton.setText("XML");
 		htmlButton.setText("HTML");
 		htmlButton.setSelection(true);
-		xmlButton.addSelectionListener(new SelectionAdapter() {
+		/*xmlButton.addSelectionListener(new SelectionAdapter() {
 			
 			public void widgetSelected(SelectionEvent e) {
 				choice = xmlButton.getText();
 			}
 		});
+		*/
 		
 		htmlButton.addSelectionListener(new SelectionAdapter() {
 			
 			public void widgetSelected(SelectionEvent e) {
-				choice = xmlButton.getText();
+				choice = htmlButton.getText();
 			}
 		});
 		
