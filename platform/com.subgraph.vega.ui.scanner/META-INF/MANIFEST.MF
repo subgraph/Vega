@@ -21,8 +21,10 @@ Import-Package: com.subgraph.vega.api.events,
  com.subgraph.vega.api.scanner,
  com.subgraph.vega.api.scanner.modules,
  com.subgraph.vega.api.xml,
+ com.subgraph.vega.export,
  com.subgraph.vega.ui.http.request.view,
  com.subgraph.vega.ui.util.dialogs,
+ com.subgraph.vega.ui.util.export,
  com.subgraph.vega.ui.util.images,
  com.subgraph.vega.ui.util.modules,
  org.apache.http;version="4.0.0",
@@ -34,4 +36,5 @@ Import-Package: com.subgraph.vega.api.events,
  org.eclipse.ui.forms.widgets
 Bundle-ClassPath: .,
  lib/freemarker-gae-2.3.20.jar
-Export-Package: com.subgraph.vega.ui.scanner
+Export-Package: com.subgraph.vega.ui.scanner,
+ com.subgraph.vega.ui.scanner.info
