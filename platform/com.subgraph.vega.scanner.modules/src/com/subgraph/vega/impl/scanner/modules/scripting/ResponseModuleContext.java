@@ -23,7 +23,6 @@ import org.mozilla.javascript.Wrapper;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.net.InternetDomainName;
-
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.model.IWorkspace;
 import com.subgraph.vega.api.model.alerts.IScanAlert;
@@ -141,13 +140,15 @@ public class ResponseModuleContext implements IModuleContext {
 			Object... properties) {
 		debug("Publishing Alert: ("+ type +") ["+ request.getRequestLine().getUri() +"] ");
 		final IRequestLog requestLog = workspace.getRequestLog();
-		
+	
 		synchronized(scanInstance) {
 			if(key != null && scanInstance.hasAlertKey(key)) {
 				return;
 			}
 			final long requestId = requestLog.addRequestResponse(response);
 			final IScanAlert alert = scanInstance.createAlert(type, key, requestId);
+			final String hostname = response.getHost().getHostName();
+			alert.setDiscretionaryHostname(hostname);
 			
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {

@@ -20,7 +20,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.google.common.net.InternetDomainName;
-
 import com.subgraph.vega.api.crawler.ICrawlerResponseProcessor;
 import com.subgraph.vega.api.http.requests.IHttpResponse;
 import com.subgraph.vega.api.http.requests.IPageFingerprint;
@@ -295,6 +294,10 @@ public class ModuleContext implements IInjectionModuleContext {
 				return;
 			final long requestId = requestLog.addRequestResponse(response);
 			final IScanAlert alert = scan.createAlert(type, key, requestId);
+			final String hostname = response.getHost().getHostName();
+			
+			alert.setDiscretionaryHostname(hostname);
+
 			for(int i = 0; (i + 1) < properties.length; i += 2) {
 				if(properties[i] instanceof String) {
 					alert.setProperty((String) properties[i], properties[i + 1]);
