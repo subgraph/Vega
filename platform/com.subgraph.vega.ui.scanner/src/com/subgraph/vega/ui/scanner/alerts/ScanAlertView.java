@@ -24,6 +24,8 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -31,6 +33,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.dialogs.ExportWizard;
 import org.eclipse.ui.part.ViewPart;
 
 import com.subgraph.vega.api.events.IEvent;
@@ -42,11 +46,13 @@ import com.subgraph.vega.api.model.alerts.IScanAlertRepository;
 import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.model.alerts.NewScanAlertEvent;
 import com.subgraph.vega.api.scanner.IScan;
+import com.subgraph.vega.export.AlertExporter;
 import com.subgraph.vega.ui.scanner.Activator;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertHostNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertScanNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertSeverityNode;
 import com.subgraph.vega.ui.scanner.alerts.tree.AlertTitleNode;
+import com.subgraph.vega.ui.util.export.AlertExportWizard;
 import com.subgraph.vega.ui.util.images.ImageCache;
 
 public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEventHandler {
@@ -306,6 +312,23 @@ public class ScanAlertView extends ViewPart implements IDoubleClickListener, IEv
 		};
 		action.setText("Remove Scan");
 		manager.add(action);
+		
+		final Action exportAction = new Action() {
+			@Override
+			public void run() {
+			//	AlertExporter exporter = new AlertExporter(currentWorkspace);
+				//exporter.exportbyScanInstance(node.getScanInstance());			
+				WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+				      new AlertExportWizard(node.getScanInstance()));				
+				wizardDialog.open();
+				
+			  }
+				
+				  
+			
+		};
+		exportAction.setText("Export Scan Results");
+		manager.add(exportAction);
 	}
 	
 	private void createContextMenuForAlertTreeNode(IMenuManager manager, final IAlertTreeNode node) {

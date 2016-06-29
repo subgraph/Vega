@@ -64,7 +64,7 @@ public class AlertRenderer {
 	private final Map<String, Document> alertDocumentCache = new HashMap<String, Document>();
 	private IRequestLog requestLog;
 	
-	AlertRenderer(TemplateLoader templateLoader) {
+	public AlertRenderer(TemplateLoader templateLoader) {
 		imageURL = findImage("icons/vega_logo.png");
 		bulletPointURL = findImage("icons/doubleArrow.png");
 		bannerPatternURL = findImage("icons/bannerPattern.png");
@@ -174,6 +174,85 @@ public class AlertRenderer {
 		} catch (TemplateException e) {
 			return "Error processing alert template file alerts/"+ alert.getName() +".xml :<br><br>"+ e.getMessage();
 		}
+	}
+	
+	public String renderList(List<IScanAlert> alerts) {
+		final int maxAlertString = Activator.getDefault().getPreferenceStore().getInt(IPreferenceConstants.P_MAX_ALERT_STRING);
+
+		Map<String, Object> root = new HashMap<String, Object>();
+		String output = "<html><head><title>Report</title></head><body>";
+
+		for (IScanAlert alert : alerts) {
+			try {
+				Template t = configuration.getTemplate("report-alert.ftl");
+				Document xmlRoot = getAlertDocument(alert.getName());
+				if(xmlRoot == null)
+					return "";
+				NodeModel nodeModel = NodeModel.wrap(xmlRoot);
+				root.put("doc", nodeModel);
+				Map<String,Object> vars = new HashMap<String,Object>();
+				for(String k: alert.propertyKeys()) {
+					Object value = alert.getProperty(k);
+					if(value instanceof String) {
+						String s = (String) value;
+						if(s.length() > maxAlertString) {
+							s = s.substring(0, maxAlertString) + "...";
+						} 
+						vars.put(k, s);
+					} else {
+						vars.put(k, alert.getProperty(k));
+					}
+				}
+				String severityVar = severityToString(alert.getSeverity());
+				if(severityVar != null) {
+					vars.put("severity", severityVar);
+				}
+				String severityCSSVar = severityToSeverityCSSClass(alert.getSeverity());
+				if(severityCSSVar != null) {
+					vars.put("severityCSS", severityCSSVar);
+				}
+				if(imageURL != null)
+					vars.put("imageURL", imageURL);
+				if(bulletPointURL != null)
+					vars.put("bulletPointURL", bulletPointURL);
+				if(bannerPatternURL != null)
+					vars.put("bannerPatternURL", bannerPatternURL);
+				if(bannerLogoURL != null)
+					vars.put("bannerLogoURL", bannerLogoURL);
+				if(titlePatternURL != null)
+					vars.put("titlePatternURL", titlePatternURL);
+				if(redArrowURL != null)
+					vars.put("redArrowURL", redArrowURL);
+				if(redArrowURL != null)
+					vars.put("sectionGradientURL", sectionGradientURL);
+				if(linkArrowURL != null)
+					vars.put("linkArrowURL", linkArrowURL);
+				
+				if(alert.getRequestId() >= 0 && requestLog != null) {
+					final IRequestLogRecord record = requestLog.lookupRecord(alert.getRequestId());
+					if(record != null) {
+						if(record.getRequest() instanceof HttpEntityEnclosingRequest) {
+							vars.put("requestText", renderEntityEnclosingRequest((HttpEntityEnclosingRequest) record.getRequest()));
+						} else {
+							vars.put("requestText", renderBasicRequest(record.getRequest()));
+						}
+						vars.put("requestId", Long.toString(alert.getRequestId()));
+					}
+				}
+				root.put("vars", vars);
+				
+				StringWriter out = new StringWriter();
+				t.process(root, out);
+				out.flush();
+				output += out.toString();
+			} catch (IOException e) {
+				return "I/O error reading alert template file alerts/"+ alert.getName() + ".xml :<br><br>"+ e.getMessage();
+			} catch (TemplateException e) {
+				return "Error processing alert template file alerts/"+ alert.getName() +".xml :<br><br>"+ e.getMessage();
+			}
+		}
+		output += "</body></html>";
+		return output;
 	}
 	
 	private String renderEntityEnclosingRequest(HttpEntityEnclosingRequest request) {
