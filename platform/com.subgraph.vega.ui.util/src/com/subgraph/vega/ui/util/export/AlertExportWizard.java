@@ -41,7 +41,6 @@ public class AlertExportWizard extends Wizard {
 				
 		List<IScanAlert> alerts;
 		alerts = two.allAlertsFromTree();
-		System.out.println(alerts.size());
 		
 		AlertExporter exporter = new AlertExporter();
 		exporter.exportAlertsbyList(alerts);

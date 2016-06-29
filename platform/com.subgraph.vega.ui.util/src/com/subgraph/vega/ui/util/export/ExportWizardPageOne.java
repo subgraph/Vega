@@ -53,8 +53,8 @@ public class ExportWizardPageOne extends WizardPage {
 		
 		radioGroup.setLayout(new RowLayout(SWT.VERTICAL));
 		Button htmlButton = new Button(radioGroup, SWT.RADIO);
-		//Button xmlButton = new Button(radioGroup, SWT.RADIO | SWT.);
-	//	xmlButton.setText("XML");
+		/*Button xmlButton = new Button(radioGroup, SWT.RADIO | SWT.);
+	    xmlButton.setText("XML");*/
 		htmlButton.setText("HTML");
 		htmlButton.setSelection(true);
 		/*xmlButton.addSelectionListener(new SelectionAdapter() {
