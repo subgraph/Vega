@@ -13,6 +13,7 @@ package com.subgraph.vega.api.scanner;
 import java.net.URI;
 import java.util.List;
 
+import com.subgraph.vega.api.model.alerts.IScanInstance;
 import com.subgraph.vega.api.scanner.modules.IScannerModule;
 
 public interface IScan {
@@ -48,4 +49,8 @@ public interface IScan {
 	void pauseScan();
 	void unpauseScan();
 	boolean isPausedScan();
+	
+	IScanInstance getScanInstance();
+	
+	void useAllModules();
 }

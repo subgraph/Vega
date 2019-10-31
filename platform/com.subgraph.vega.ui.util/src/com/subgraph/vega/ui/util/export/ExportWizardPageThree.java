@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.subgraph.vega.export.AlertExporter;
+
 public class ExportWizardPageThree extends WizardPage {
 
 	protected FileDialog dialog;
@@ -52,6 +54,8 @@ public class ExportWizardPageThree extends WizardPage {
 		textField.setSize(VISIBLE_PATH_LENGTH, textField.getSize().y);
 		Button button = new Button(container, SWT.NONE);
 		button.setText("Open");
+
+		final Composite parent1 = parent;
 		
 		GridData buttonGridData = new GridData();
 		buttonGridData.horizontalSpan = 2;
@@ -66,7 +70,7 @@ public class ExportWizardPageThree extends WizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				doFileDialog(parent.getShell());
+				doFileDialog(parent1.getShell());
 			}
 
 			@Override
@@ -89,6 +93,11 @@ public class ExportWizardPageThree extends WizardPage {
 		
 		setPageComplete(false);
 		setControl(container);
+		/*System.out.println("Started myexporter.");
+		AlertExporter myexporter = new AlertExporter();
+		myexporter.exportAllAlerts();
+		System.out.println("Finished myexporter.");*/
+		
 	}
 
 	private void doFileDialog(Shell shell) {

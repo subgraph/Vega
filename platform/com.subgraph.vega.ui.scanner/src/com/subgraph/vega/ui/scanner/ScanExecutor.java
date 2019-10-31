@@ -34,6 +34,12 @@ import com.subgraph.vega.ui.scanner.preferences.IPreferenceConstants;
 import com.subgraph.vega.ui.scanner.wizards.NewScanWizard;
 import com.subgraph.vega.ui.scanner.wizards.NewWizardDialog;
 
+/*---new imports---*/
+import com.subgraph.vega.api.util.UriTools;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+
 public class ScanExecutor {
 	
 	public String runScan(Shell shell, String target) {
@@ -53,7 +59,7 @@ public class ScanExecutor {
 	}
 	
 	private String maybeLaunchScanFromWizard(Shell shell, NewScanWizard wizard, IScanner scanner, IScan scan) {
-
+					
 		final ITargetScope scanTargetScope = wizard.getScanTargetScope();
 		if(scanTargetScope == null) {
 			return null;
@@ -62,9 +68,16 @@ public class ScanExecutor {
 		final IScannerConfig config = scan.getConfig();
 		config.setScanTargetScope(scanTargetScope);
 		config.setUserAgent(IPreferenceConstants.P_USER_AGENT);
+
+
 		config.setCookieList(getCookieListForScope(wizard.getCookieStringList(), scanTargetScope));
+
+
 		config.setScanIdentity(wizard.getScanIdentity());
-		config.setExcludedParameterNames(wizard.getExcludedParameterNames());
+
+
+		config.setExcludedParameterNames(wizard.getExcludedParameterNames());	
+
 		final IPreferenceStore preferences = Activator.getDefault().getPreferenceStore();
 		config.setLogAllRequests(preferences.getBoolean(IPreferenceConstants.P_LOG_ALL_REQUESTS));
 		config.setDisplayDebugOutput(preferences.getBoolean(IPreferenceConstants.P_DISPLAY_DEBUG_OUTPUT));

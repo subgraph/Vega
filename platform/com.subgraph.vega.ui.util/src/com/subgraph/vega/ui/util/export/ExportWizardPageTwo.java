@@ -82,12 +82,12 @@ public class ExportWizardPageTwo extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				if (selectAllButton.getSelection() == true) {
+				//if (selectAllButton.getSelection() == true) {
 					for (TreeItem t: alertsTree.getItems()) {
 						t.setChecked(true);
 						setPageComplete(true);
 					}
-				}
+				//}
 			
 	  			treeContainer.setOrigin (0, 10);
 
@@ -165,9 +165,9 @@ public class ExportWizardPageTwo extends WizardPage {
 		      public void widgetSelected(SelectionEvent e) {
 		          TreeItem ti = (TreeItem) e.item;
 		          if (ti.getChecked() == false) {
-		        	  if (selectAllButton.getSelection() == true) {
+		        	  /*if (selectAllButton.getSelection() == true) {
 		        		  selectAllButton.setSelection(false);
-		        	  }
+		        	  }*/
 		        	
 		          }
 		          

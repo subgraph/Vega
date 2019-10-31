@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.subgraph.vega.application" default="build.jars" basedir=".">
+
+	<property name="p2.build.repo" value="file:${buildDirectory}/buildRepo"/>
+	<property name="basews" value="${ws}"/>
+	<property name="baseos" value="${os}"/>
+	<property name="basearch" value="${arch}"/>
+	<property name="basenl" value="${nl}"/>
+	<property name="bundleId" value="com.subgraph.vega.application"/>
+	<property name="bundleVersion" value="1.0.0.201802091157"/>
+	<property name="p2.publishonerror" value="false"/>
+
+	<!-- Compiler settings. -->
+	<property name="javacFailOnError" value="false"/>
+	<property name="javacDebugInfo" value="on"/>
+	<property name="javacVerbose" value="false"/>
+	<property name="logExtension" value=".log"/>
+	<property name="compilerArg" value=""/>
+	<property name="compilation.prereq.log" value="${buildDirectory}/prereqErrors.log"/>
+	<property name="javacSource" value="1.3"/>
+	<property name="javacTarget" value="1.2"/>
+	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
+		<and>
+			<os family="mac"/>
+			<available file="${java.home}/../Classes" type="dir"/>
+		</and>
+	</condition>
+	<property name="dir_bootclasspath" value="${java.home}/lib"/>
+	<path id="path_bootclasspath">
+		<fileset dir="${dir_bootclasspath}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	<property name="bootclasspath" refid="path_bootclasspath"/>
+	<condition property="bundleBootClasspath" value="${JavaSE-1.7}"	>
+		<isset property="JavaSE-1.7"/>
+	</condition>
+	<condition property="bundleJavacSource" value="1.7"	>
+		<isset property="JavaSE-1.7"/>
+	</condition>
+	<condition property="bundleJavacTarget" value="1.7"	>
+		<isset property="JavaSE-1.7"/>
+	</condition>
+	<condition property="bundleBootClasspath" value="${JavaSE-1.6}"	>
+		<isset property="JavaSE-1.6"/>
+	</condition>
+	<condition property="bundleJavacSource" value="1.6"	>
+		<isset property="JavaSE-1.6"/>
+	</condition>
+	<condition property="bundleJavacTarget" value="1.6"	>
+		<isset property="JavaSE-1.6"/>
+	</condition>
+	<property name="bundleJavacSource" value="${javacSource}"/>
+	<property name="bundleJavacTarget" value="${javacTarget}"/>
+	<property name="bundleBootClasspath" value="${bootclasspath}"/>
+
+	<target name="init" depends="properties">
+		<condition property="pluginTemp" value="${buildTempFolder}/plugins"		>
+			<isset property="buildTempFolder"/>
+		</condition>
+		<property name="pluginTemp" value="${basedir}"/>
+		<condition property="build.result.folder" value="${pluginTemp}/com.subgraph.vega.application_1.0.0.201802091157"		>
+			<isset property="buildTempFolder"/>
+		</condition>
+		<property name="build.result.folder" value="${basedir}"/>
+		<property name="temp.folder" value="${basedir}/temp.folder"/>
+		<property name="plugin.destination" value="${basedir}"/>
+		<condition property="p2.publish.parts" value="true"		>
+			<istrue value="${p2.gathering}"/>
+		</condition>
+		<property name="compilation.problem.marker" value="${build.result.folder}/compilation.problem"/>
+		<condition property="compilation.problem.marker.exists" value="true"		>
+			<and>
+			<available file="${compilation.problem.marker}"/>
+			<isfalse value="${p2.publishonerror}"/>
+			</and>
+		</condition>
+	</target>
+
+	<target name="properties" if="eclipse.running">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+
+	</target>
+
+	<target name="build.update.jar" depends="init" description="Build the plug-in: com.subgraph.vega.application for an update site.">
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.jars"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<jar destfile="${plugin.destination}/com.subgraph.vega.application_1.0.0.201802091157.jar" basedir="${temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" filesetmanifest="merge"/>
+		<delete dir="${temp.folder}"/>
+	</target>
+
+	<target name="@dot.nestedJars">
+		<mkdir dir="${buildDirectory}/nestedJars/com.ibm.icu_58.2.0.v20170418-1837"/>
+		<unzip src="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/com.ibm.icu_58.2.0.v20170418-1837.jar" dest="${buildDirectory}/nestedJars/com.ibm.icu_58.2.0.v20170418-1837" overwrite="false">
+			<patternset includes="icu-data.jar"/>
+		</unzip>
+	</target>
+	<target name="@dot" depends="init,@dot.nestedJars" unless="@dot" description="Create jar: com.subgraph.vega.application @dot.">
+		<delete dir="${build.result.folder}/@dot"/>
+		<mkdir dir="${build.result.folder}/@dot"/>
+		<path id="@dot.classpath">
+			<pathelement path="../com.subgraph.vega.api/bin/"/>
+			<pathelement path="../com.subgraph.vega.api/@dot"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/com.google.guava_21.0.0.v20170206-1425.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/javax.annotation_1.2.0.v201602091430.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.osgi_3.12.50.v20170928-1321.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.osgi.compatibility.state_1.1.0.v20170516-1513.jar"/>
+			<pathelement path="../com.subgraph.vega.html/bin/"/>
+			<pathelement path="../com.subgraph.vega.html/@dot"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.jsoup_1.7.2.v201411291515.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.httpcomponents.httpcore_4.4.6.v20170210-0925.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.httpcomponents.httpclient_4.5.2.v20170210-0925.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.commons.codec_1.9.0.v20170208-1614.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.commons.logging_1.1.1.v201101211721.jar"/>
+			<pathelement path="../com.subgraph.vega.ui.http/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.http/@dot"/>
+			<pathelement path="../com.subgraph.vega.ui.httpeditor/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.httpeditor/@dot"/>
+			<pathelement path="../com.subgraph.vega.ui.hexeditor/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.hexeditor/@dot"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ui_3.109.0.v20170411-1742.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.runtime_3.13.0.v20170207-1030.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/javax.inject_1.0.0.v20091030.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.equinox.common_3.9.0.v20170207-1454.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.felix.gogo.command_0.10.0.v201209301215.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.felix.gogo.runtime_0.10.0.v201209301036.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.osgi.services_3.6.0.v20170228-1906.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.osgi.util_3.4.0.v20170111-1608.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/javax.xml_1.3.4.v201005080400.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/javax.servlet_3.1.0.v201410161800.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.jobs_3.9.2.v20171030-1027.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.equinox.registry_3.7.0.v20170222-1344.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.equinox.preferences_3.7.0.v20170126-2132.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.contenttype_3.6.0.v20170207-1037.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.equinox.app_1.3.400.v20150715-1528.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.swt_3.106.2.v20171129-0543.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_64_3.106.2.v20171129-0543.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.jface_3.13.2.v20171022-1656.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.commands_3.9.0.v20170530-1048.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.equinox.bidi_1.1.0.v20160728-1031.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ui.workbench_3.110.1.v20170704-1208.jar"/>
+			<pathelement path="${buildDirectory}/nestedJars/com.ibm.icu_58.2.0.v20170418-1837/icu-data.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/com.ibm.icu_58.2.0.v20170418-1837.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.commands_0.12.100.v20170513-0428.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.expressions_3.6.0.v20170207-1037.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.contexts_1.6.0.v20170322-1144.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.di_1.6.100.v20170421-1418.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.di.annotations_1.6.0.v20170119-2002.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.services_2.1.0.v20170407-0928.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.workbench_1.5.1.v20170815-1446.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.model.workbench_2.0.1.v20170713-1800.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.emf.ecore_2.13.0.v20170609-0707.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.emf.common_2.13.0.v20170609-0707.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.resources_3.12.0.v20170417-1558.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ant.core_3.5.0.v20170509-2149.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.variables_3.4.0.v20170113-2056.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.filesystem_1.7.0.v20170406-1337.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.200.v20140124-1940.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.emf.xpath_0.2.0.v20160630-0728.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.commons.jxpath_1.3.0.v200911051830.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.services_1.3.0.v20170307-2032.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.di_1.2.100.v20170414-1137.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.di.extensions.supplier_0.15.0.v20170407-0928.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.core.di.extensions_0.15.0.v20170228-1728.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.emf.ecore.change_2.11.0.v20170609-0707.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.emf.ecore.xmi_2.13.0.v20170609-0707.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.workbench.renderers.swt_0.14.101.v20170713-1343.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.workbench.swt_0.14.101.v20170710-1119.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.databinding_1.6.100.v20170515-1119.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.databinding.observable_1.6.100.v20170515-1119.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.core.databinding.property_1.6.100.v20170515-1119.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.jface.databinding_1.8.100.v20170503-1507.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.css.core_0.12.101.v20170712-1547.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.w3c.css.sac_1.3.1.v200903091627.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.batik.css_1.8.0.v20170214-1941.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.apache.batik.util_1.8.0.v20170214-1941.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.w3c.dom.svg_1.1.0.v201011041433.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.w3c.dom.smil_1.0.1.v200903091627.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.w3c.dom.events_3.0.0.draft20060413_v201105210656.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.css.swt_0.13.1.v20170808-1940.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.bindings_0.12.1.v20170823-1632.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.workbench3_0.14.0.v20160630-0740.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.css.swt.theme_0.11.0.v20170312-2302.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.swt.gtk_1.0.200.v20170513-0428.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.widgets_1.2.0.v20160630-0736.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.help_3.8.1.v20170815-1448.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.e4.ui.workbench.addons.swt_1.3.1.v20170319-1442.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.jface.text_3.12.1.v20171114-1359.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.text_3.6.100.v20170203-0814.jar"/>
+			<pathelement path="../com.subgraph.vega.ui.tags/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.tags/@dot"/>
+			<pathelement path="../com.subgraph.vega.ui.util/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.util/@dot"/>
+			<pathelement path="../com.subgraph.vega.export/bin/"/>
+			<pathelement path="../com.subgraph.vega.export/@dot"/>
+			<pathelement path="../com.subgraph.vega.export/bin"/>
+			<pathelement path="../com.subgraph.vega.export/lib/freemarker.jar"/>
+			<pathelement path="../com.subgraph.vega.ui.scanner/bin/"/>
+			<pathelement path="../com.subgraph.vega.ui.scanner/@dot"/>
+			<pathelement path="../com.subgraph.vega.ui.scanner/bin"/>
+			<pathelement path="../com.subgraph.vega.ui.scanner/lib/freemarker-gae-2.3.20.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ui.forms_3.7.101.v20170815-1446.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ui.console_3.7.1.v20170728-0806.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.ui.workbench.texteditor_3.10.100.v20170426-2021.jar"/>
+			<pathelement path="../../../../Downloads/eclipse-rcp-oxygen-2-linux-gtk-x86_64/eclipse/plugins/org.eclipse.compare.core_3.6.100.v20170516-0820.jar"/>
+			<pathelement path="extra-bundles/py4j0.10.6.jar"/>
+			<pathelement path="${build.result.folder}/../com.subgraph.vega.application_1.0.0.201802091157/extra-bundles/py4j0.10.6.jar"/>
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${build.result.folder}/@dot" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
+			<classpath refid="@dot.classpath" />
+			<src path="src/"			/>
+			<compilerarg value="@${basedir}/javaCompiler...args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+			<compilerarg line="-log &apos;${build.result.folder}/@dot${logExtension}&apos;" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+		</javac>
+		<antcall target="checkCompilationResults"/>
+		<!-- Copy necessary resources -->
+		<copy todir="${build.result.folder}/@dot" failonerror="true" overwrite="false">
+			<fileset dir="src/">
+				<exclude name="**/*.java"/>
+				<exclude name="**/package.htm*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="src.zip" depends="init" unless="src.zip">
+		<mkdir dir="${build.result.folder}"/>
+		<antcall target="zip.src.zip"/>
+	</target>
+	<target name="zip.src.zip">
+		<zip destfile="${build.result.folder}/src.zip" filesonly="false" whenempty="skip" update="false">
+			<fileset dir="src/">
+				<include name="**/*.java"/>
+			</fileset>
+		</zip>
+	</target>
+	<target name="copy.src.zip">
+		<copy todir="${source.destination.folder}/" failonerror="true" overwrite="true">
+			<fileset dir="src/">
+				<include name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.jars" depends="init" description="Compile classes and build nested jars for the plug-in: com.subgraph.vega.application.">
+		<delete file="${compilation.problem.marker}" quiet="true"/>
+		<available property="@dot" file="${build.result.folder}/@dot"/>
+		<antcall target="@dot"/>
+	</target>
+
+	<target name="checkCompilationResults" if="compilation.error.occured">
+		<echo file="${compilation.problem.marker}" message="com.subgraph.vega.application_1.0.0.201802091157${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError log="${compilation.prereq.log}" bundle="com.subgraph.vega.application_1.0.0.201802091157">
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.http/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.http_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.util/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.util_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.tags/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.tags_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.hexeditor/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.hexeditor_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.html/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.html_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.httpeditor/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.httpeditor_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.export/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.export_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.api/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.api_1.0.0.201802091157/compilation.problem"/>
+			<include name="/root/Schreibtisch/Vega/platform/com.subgraph.vega.ui.scanner/compilation.problem"/>
+			<include name="${pluginTemp}/com.subgraph.vega.ui.scanner_1.0.0.201802091157/compilation.problem"/>
+		</eclipse.logCompileError>
+	</target>
+
+	<target name="build.sources" depends="init">
+		<available property="src.zip" file="${build.result.folder}/src.zip"/>
+		<antcall target="src.zip"/>
+	</target>
+
+	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
+		<mkdir dir="${build.result.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}">
+				<include name="META-INF/MANIFEST.MF"/>
+				<include name="plugin.xml"/>
+				<include name="fragment.xml"/>
+			</fileset>
+		</copy>
+		<eclipse.versionReplacer path="${build.result.folder}" version="1.0.0.201802091157"/>
+		<antcall target="apitools.generation">
+			<param name="projectLocation" value="${basedir}"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot:/root/Schreibtisch/Vega/platform/com.subgraph.vega.application/extra-bundles/py4j0.10.6.jar"/>
+			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
+			<param name="target.folder" value="${build.result.folder}"/>
+		</antcall>
+		<eclipse.gatherBundle 
+		   metadataRepository="${p2.build.repo}"
+		   artifactRepository="${p2.build.repo}"
+		   buildResultFolder="${build.result.folder}"
+		   baseDirectory="${basedir}"
+		/>
+	</target>
+
+	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		<copy todir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" failonerror="true" overwrite="false">
+			<fileset dir="${build.result.folder}/@dot">
+				<include name="**"/>
+			</fileset>
+		</copy>
+		<copy todir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}">
+				<include name="plugin.xml"/>
+				<include name="META-INF/"/>
+				<include name="icons/"/>
+				<include name="splash.bmp"/>
+				<include name="plugin_customization.ini"/>
+				<include name="OSGI-INF/"/>
+				<include name="extra-bundles/py4j0.10.6.jar"/>
+			</fileset>
+		</copy>
+		<eclipse.versionReplacer path="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" version="1.0.0.201802091157"/>
+		<antcall target="apitools.generation">
+			<param name="projectLocation" value="${basedir}"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot:/root/Schreibtisch/Vega/platform/com.subgraph.vega.application/extra-bundles/py4j0.10.6.jar"/>
+			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		</antcall>
+	</target>
+
+	<target name="build.zips" depends="init">
+	</target>
+
+	<target name="gather.sources" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" failonerror="false" overwrite="false"/>
+		<antcall target="copy.src.includes">
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		</antcall>
+	</target>
+
+	<target name="gather.individual.sources" depends="init">
+		<antcall target="copy.src.zip">
+			<param name="source.destination.folder" value="${destination.temp.folder}"/>
+		</antcall>
+		<antcall target="copy.src.includes">
+			<param name="source.destination.folder" value="${destination.temp.folder}"/>
+		</antcall>
+	</target>
+
+	<target name="copy.src.includes" depends="init">
+	</target>
+
+	<target name="gather.logs" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157"/>
+		<copy todir="${destination.temp.folder}/com.subgraph.vega.application_1.0.0.201802091157" failonerror="false" overwrite="false">
+			<fileset dir="${build.result.folder}">
+				<include name="@dot${logExtension}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean" depends="init" description="Clean the plug-in: com.subgraph.vega.application of all the zips, jars and logs created.">
+		<delete dir="${build.result.folder}/@dot"/>
+		<delete file="${build.result.folder}/src.zip"/>
+		<delete file="${plugin.destination}/com.subgraph.vega.application_1.0.0.201802091157.jar"/>
+		<delete file="${plugin.destination}/com.subgraph.vega.application_1.0.0.201802091157.zip"/>
+		<delete dir="${temp.folder}"/>
+		<delete file="${compilation.problem.marker}" quiet="true"/>
+	</target>
+
+	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
+		<eclipse.convertPath fileSystemPath="/root/Schreibtisch/Vega/platform/com.subgraph.vega.application" property="resourcePath"/>
+		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
+	</target>
+
+	<target name="zip.plugin" depends="init" description="Create a zip containing all the elements for the plug-in: com.subgraph.vega.application.">
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.jars"/>
+		<antcall target="build.sources"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<antcall target="gather.sources">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<delete>
+			<fileset dir="${temp.folder}">
+				<include name="**/*.bin${logExtension}"/>
+			</fileset>
+		</delete>
+		<zip destfile="${plugin.destination}/com.subgraph.vega.application_1.0.0.201802091157.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<delete dir="${temp.folder}"/>
+	</target>
+
+	<target name="apitools.generation" if="generateAPIDescription">
+		<apitooling.apigeneration  projectName="${projectName}" project="${projectLocation}" binary="${binary.folders}" target="${target.folder}" extramanifests="${extraManifests}" allownonapiproject="${allowNonApiProject}"		/>
+	</target>
+
+</project>

@@ -16,9 +16,11 @@ public interface IScannerModuleRegistry {
 	final static int PROXY_SCAN_ID = -1;
 	void runDomTests();
 	List<IResponseProcessingModule> getResponseProcessingModules();
+	List<IResponseProcessingModule> getAllResponseProcessingModules();
 	List<IResponseProcessingModule> updateResponseProcessingModules(List<IResponseProcessingModule> currentModules);
 	
 	List<IBasicModuleScript> getBasicModules();
+	List<IBasicModuleScript> getAllBasicModules();
 	List<IBasicModuleScript> updateBasicModules(List<IBasicModuleScript> currentModules);
 	
 }

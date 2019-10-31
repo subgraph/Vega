@@ -101,9 +101,25 @@ public class ScriptLoader {
 		}
 		return result;
 	}
+	
+	public List<ScriptedModule> getReallyAllModulesByType(ModuleScriptType type) {
+		final List<ScriptedModule> result = new ArrayList<ScriptedModule>();
+		synchronized(modulePathMap) {
+			for(ScriptedModule m: modulePathMap.values()) {
+				if((type == null || type == m.getModuleType())) {
+					result.add(m);
+				}
+			}
+		}
+		return result;
+	}
 
 	public List<ScriptedModule> getAllModules() {
 		return getAllModulesByType(null);
+	}
+	
+	public List<ScriptedModule> getReallyAllModules(){
+		return getReallyAllModulesByType(null);
 	}
 	
 	public Scriptable getPreludeScope() {
