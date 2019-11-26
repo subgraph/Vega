@@ -1,6 +1,6 @@
 # Python Interface for Vega
 
-This code adds a rudimentary Python interface to Vega. With this, it is possible to automatically configure and run scans as well as getting the results of Vega. Please follow the installation instructions of Vega given [here](https://github.com/subgraph/Vega/wiki/Installing-Vega).
+This code adds a rudimentary Python interface to Vega. With this, it is possible to automatically configure and run scans as well as getting the results of Vega. Please follow the installation instructions of Vega given [here](https://github.com/subgraph/Vega/wiki/Building-Vega).
 
 An example of how to use the Python interface is presented in the following:
 
