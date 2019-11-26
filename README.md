@@ -21,7 +21,7 @@ from py4j.java_collections import ListConverter
 target = "192.168.0.2"
 result_path = "./results"
 authentication = "admin:admin"
-vega_path = "/path/to/vega"
+vega_path = "/path/to/vega/Vega"
 #seconds to wait for Vega to start
 wait_time = 10
 
@@ -35,6 +35,7 @@ cmd = "xvfb-run -a " + vega_path
 #process gets a new group ID so it can be stopped (including all additional created processes) later
 vega_process = sp.Popen(shlex.split(cmd), preexec_fn=os.setsid)
 print("Started Vega from %s" % str(vega_path))
+time.sleep(wait_time)
 
 # init vega classes
 gateway = JavaGateway()
