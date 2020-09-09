@@ -1,7 +1,7 @@
 # Python Interface for Vega
 
 This code adds a rudimentary Python interface to Vega using [py4j](https://github.com/bartdag/py4j). With this, it is possible to automatically configure and run scans as well as getting the results of Vega.
-An installation guidline for Ubuntu 16.04 is given [here](installation.md). You may also have a look at the installation instructions for Vega given [here](https://github.com/subgraph/Vega/wiki/Building-Vega).
+An installation guidline for Ubuntu 16.04 is given [here](Installation.md). You may also have a look at the installation instructions for Vega given [here](https://github.com/subgraph/Vega/wiki/Building-Vega).
 
 An example of how to use the Python interface is presented in the following (and can also be found in [example.py](example.py)).
 Values that can be set for Vega can be found in [MyScanExecutor](platform/com.subgraph.vega.ui.scanner/src/com/subgraph/vega/ui/scanner/MyScanExecutor.java) and [AlertExporter](platform/com.subgraph.vega.export/src/com/subgraph/vega/export/AlertExporter.java).
