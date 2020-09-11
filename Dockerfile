@@ -18,8 +18,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip3 install py4j
 
-# RUN git clone https://github.com/anneborcherding/Vega.git
-
 RUN ant
 
 # second stage, extract Vega
