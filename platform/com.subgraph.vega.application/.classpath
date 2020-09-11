@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="extra-bundles/py4j0.10.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.subgraph.vega.ui.scanner"/>
+	<classpathentry kind="lib" path="/root/Schreibtisch/Vega/dependencies/lib/py4j0.10.6.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.subgraph.vega.export"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.subgraph.vega.api"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

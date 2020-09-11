@@ -123,11 +123,31 @@ public class ScannerModuleRepository implements IScannerModuleRegistry {
 		}
 		return modules;
 	}
+	
+	@Override
+	public List<IResponseProcessingModule> getAllResponseProcessingModules() {
+		final List<IResponseProcessingModule> modules = new ArrayList<IResponseProcessingModule>();
+		for(ScriptedModule m: scriptLoader.getReallyAllModules()) {
+			if(m.getModuleType() == ModuleScriptType.RESPONSE_PROCESSOR)
+				modules.add(new ResponseProcessorScript(m));
+		}
+		return modules;
+	}
 
 	@Override
 	public List<IBasicModuleScript> getBasicModules() {
 		final List<IBasicModuleScript> modules = new ArrayList<IBasicModuleScript>();
 		for(ScriptedModule m: scriptLoader.getAllModules()) {
+			if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
+				modules.add(new BasicModuleScript(m));
+		}
+		return modules;
+	}
+	
+	@Override
+	public List<IBasicModuleScript> getAllBasicModules() {
+		final List<IBasicModuleScript> modules = new ArrayList<IBasicModuleScript>();
+		for(ScriptedModule m: scriptLoader.getReallyAllModules()) {
 			if(m.getModuleType() == ModuleScriptType.BASIC_MODULE)
 				modules.add(new BasicModuleScript(m));
 		}

@@ -8,6 +8,13 @@
 	<import file="build/ant/pde-build-targets.xml" />
 	<import file="build/ant/unpack-targets.xml" />
 
+	<path id="classpath">
+  		<fileset dir="dependencies" includes="**/*.jar" />
+ 	</path>
+	<echo>lib.dir: dependencies</echo>
+	<pathconvert property="classpathProp" refid="classpath"/>
+	<echo>Classpath: ${classpathProp}</echo>
+
 	<target name="one">
     <property name="build.one" value="true" />
     <antcall target="dobuild" />

@@ -31,6 +31,11 @@ public class ScanProbeTask implements Runnable {
 		this.shell = shell;
 		this.scan = scan;
 	}
+	
+	ScanProbeTask(IScan scan) {
+		this.shell = null;
+		this.scan = scan;
+	}
 
 	@Override
 	public void run() {
@@ -51,26 +56,33 @@ public class ScanProbeTask implements Runnable {
 
 	private void processTargetURI(final URI uri) {
 		final IScanProbeResult probeResult = scan.probeTargetUri(uri);
-		shell.getDisplay().syncExec(new Runnable() {
+		if(!processProbeResult(uri, probeResult)) {
+			cancelScan = true;
+		}
+		/*shell.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				if(!processProbeResult(uri, probeResult)) {
 					cancelScan = true;
 				}
 			}
-		});
+		});*/
 	}
 
 	private boolean processProbeResult(URI uri, IScanProbeResult probeResult) {
 		if(probeResult.getProbeResultType() == ProbeResultType.PROBE_CONNECT_FAILED) {
-			MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
+			//MessageDialog.openError(shell, "Failed to connect to target", probeResult.getFailureMessage());
+			System.out.println("Failed to connect to target. " + probeResult.getFailureMessage());
 			return false;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT) {
 			final URI redirectURI = probeResult.getRedirectTarget();
 			if(!isTrivialRedirect(uri, redirectURI)) {
-				String message = "Target address "+ uri + " redirects to address "+ redirectURI + "\n\n"+
-						"Would you like to add "+ redirectURI +" to the scope?";
-				boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
+				//String message = "Target address "+ uri + " redirects to address "+ redirectURI + "\n\n"+
+				//		"Would you like to add "+ redirectURI +" to the scope?";
+				System.out.println("Target address "+ uri + " redirects to address "+ redirectURI + "\n\n"+
+						"I added "+ redirectURI +" to the scope.");
+				//boolean doit = MessageDialog.openQuestion(shell, "Follow Redirect?", message);
+				boolean doit = true;
 				if(!doit) {
 					return false;
 				}
@@ -80,7 +92,8 @@ public class ScanProbeTask implements Runnable {
 			
 			return true;
 		} else if(probeResult.getProbeResultType() == ProbeResultType.PROBE_REDIRECT_FAILED) {
-			MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
+			//MessageDialog.openError(shell, "Redirect failure", probeResult.getFailureMessage());
+			System.out.println("Redirect Failure. " + probeResult.getFailureMessage());
 			return false;
 		}
 		return true;

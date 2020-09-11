@@ -34,6 +34,8 @@ import com.subgraph.vega.application.console.ConsoleHandler;
 import com.subgraph.vega.application.logging.LogFormatter;
 import com.subgraph.vega.application.logging.LogHandler;
 
+//new imports
+import py4j.GatewayServer;
 /**
  * This class controls all aspects of the application's execution
  */
@@ -44,6 +46,14 @@ public class Application implements IApplication {
 	 */
 	
 	public Object start(IApplicationContext context) throws Exception {
+
+		//new code
+		
+		GatewayServer gatewayserver = new GatewayServer(new EntryPoint(this));
+		gatewayserver.start();
+		System.out.println("Gateway server started!!");
+		
+		//end of new code
 		Display display = PlatformUI.createDisplay();
 		setupLogging();
 		
@@ -113,7 +123,7 @@ public class Application implements IApplication {
 			rootLogger.addHandler(handler);
 		}
 		
-		rootLogger.setLevel(Level.WARNING);
+		rootLogger.setLevel(Level.FINEST);
 	}
 
 	private boolean setupWorkspace() {

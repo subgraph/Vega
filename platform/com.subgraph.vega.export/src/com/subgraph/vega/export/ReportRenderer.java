@@ -146,7 +146,7 @@ public class ReportRenderer {
 			output += "<span class=table-title>Summary</span>\n";
 			output += "<table>\n";
 			output += "<col style=\"width: 95%;\">\n<col style=\"width: 5%;\">\n";
-			output += "<thead><th style=\"text-align: left;\">FINDINGS</th><th>TOTAL</th></thead>\n<tbody>\n";
+			output += "<thead><tr><th style=\"text-align: left;\">FINDINGS</th><th>TOTAL</th></tr></thead>\n<tbody>\n";
 			
 			HashMap<Severity, Integer> severityTotals = new HashMap<Severity, Integer>();
 			
@@ -161,7 +161,7 @@ public class ReportRenderer {
 			
 			for (Severity s : Severity.values()) {
 				if ((reportSummary.get(s) != null) && (reportSummary.get(s).isEmpty() == false)) {
-					output += "<tr class=severity-row><td class=severity-name><a href=\"#section-" + s.name() +"\">"+ this.severityToString(s) + "</td><td class=severity-"+s.name() +">"+severityTotals.get(s)+"</td></tr>\n";
+					output += "<tr class=severity-row><td class=severity-name><a href=\"#section-" + s.name() +"\">"+ this.severityToString(s) + "</a></td><td class=severity-"+s.name() +">"+severityTotals.get(s)+"</td></tr>\n";
 					for (String alertTitle : reportSummary.get(s).keySet()) {
 						output += "<tr class=alert-row><td>" + alertTitle + "</td><td class=alert-count>" + reportSummary.get(s).get(alertTitle) + "</td></tr>\n";
 					}	

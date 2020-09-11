@@ -267,6 +267,15 @@ public class Scan implements IScan {
 			basicModules = moduleRegistry.updateBasicModules(basicModules);
 		}
 	}
+	
+	public void useAllModules()
+	{
+		IScannerModuleRegistry moduleRegistry = scanner.getScannerModuleRegistry();
+		responseProcessingModules = moduleRegistry.getAllResponseProcessingModules();
+		basicModules = moduleRegistry.getAllBasicModules();
+		responseProcessingModules = moduleRegistry.updateResponseProcessingModules(responseProcessingModules);
+		basicModules = moduleRegistry.updateBasicModules(basicModules);
+	}
 
 	public Scanner getScanner() {
 		return scanner;

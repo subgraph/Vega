@@ -9,6 +9,9 @@ import java.io.Writer;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.lang.Thread;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,6 +31,12 @@ public class AlertExporter {
 	IScanAlertRepository alertRepository;
 	ReportRenderer renderer;	
 	private final Logger logger = Logger.getLogger("alert-exporter");
+	private String path = "";
+	
+	public void setPath(String path)
+	{
+		this.path = path;
+	}
 
 
 	public AlertExporter(IWorkspace workspace) {
@@ -37,20 +46,78 @@ public class AlertExporter {
 	
 	public AlertExporter() {
 		renderer = new ReportRenderer(createTemplateLoader());
+		//alertRepository = Activator.getDefault().getModel().getCurrentWorkspace().getScanAlertRepository();
 	}
 	
 	public void exportAlertsbyList(List<IScanAlert> alerts) {
 		writeFile("/tmp/test2.html", renderer.renderList(alerts));
 	}
 	
-	public void exportAllAlerts() {
-		
-		List <IScanInstance> scanInstances = alertRepository.getAllScanInstances();
-		
-		for (IScanInstance s : scanInstances) {
-			List<IScanAlert> scanInstanceAlerts = s.getAllAlerts();
-			writeFile("/tmp/test.html",renderer.renderList(scanInstanceAlerts));
+	public void exportAlertsOfLastScan(){
+		System.out.println("started exporting...");
+		if(alertRepository == null)
+		{
+			alertRepository = Activator.getDefault().getModel().getCurrentWorkspace().getScanAlertRepository();
 		}
+		if(path.length() == 0)
+		{
+			path = "/tmp/test.html";
+		}
+		List <IScanInstance> scanInstances = alertRepository.getAllScanInstances();
+
+		IScanInstance newestInstance = null; //scanInstances.get(0);
+		Date newestInstanceStartTime = null; //newestInstance.getStartTime();
+
+		int i = 0;
+		for (IScanInstance s : scanInstances) {
+			i++;
+			if(s == null || s.getStartTime() == null)
+			{
+				continue;
+			}
+			
+			if(newestInstance == null || 
+					(s.getStartTime().after(newestInstanceStartTime) &
+					((s.getScanStatus() == IScanInstance.SCAN_CANCELLED) || (s.getScanStatus() == IScanInstance.SCAN_COMPLETED))))
+			{
+				newestInstance = s;
+				newestInstanceStartTime = s.getStartTime();
+			}
+		}
+		
+		writeFile(path,renderer.renderList(newestInstance.getAllAlerts()));
+		
+		
+	}
+	
+	public void exportAllAlerts() {
+		System.out.println("started exporting...");
+		if(alertRepository == null)
+		{
+			alertRepository = Activator.getDefault().getModel().getCurrentWorkspace().getScanAlertRepository();
+		}
+		if(path.length() == 0)
+		{
+			path = "/tmp/test.html";
+		}
+		List <IScanInstance> scanInstances = alertRepository.getAllScanInstances();
+		System.out.println("finished finding all instances.");
+		int i = 0;
+		List<IScanAlert> scanInstanceAlerts = new ArrayList<IScanAlert>();
+		scanInstanceAlerts.addAll(scanInstances.get(0).getAllAlerts());
+		for (IScanInstance s : scanInstances) {
+			i++;
+			if(s.getStartTime() == null || !((s.getScanStatus() == IScanInstance.SCAN_CANCELLED) || (s.getScanStatus() == IScanInstance.SCAN_COMPLETED)))
+			{
+				continue;
+			}
+			System.out.println("save instance nr. " + i);
+			System.out.println("alerts: " + s.getAllAlerts().size());
+			System.out.println("starttime: " + s.getStartTime());
+			scanInstanceAlerts.addAll(s.getAllAlerts());
+			
+		}
+		writeFile(path,renderer.renderList(scanInstanceAlerts));
 	}
 	
 	public void exportbyScanInstance(IScanInstance scanInstance) {

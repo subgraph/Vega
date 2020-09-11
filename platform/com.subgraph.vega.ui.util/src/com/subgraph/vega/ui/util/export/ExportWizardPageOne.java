@@ -68,7 +68,8 @@ public class ExportWizardPageOne extends WizardPage {
 		htmlButton.addSelectionListener(new SelectionAdapter() {
 			
 			public void widgetSelected(SelectionEvent e) {
-				choice = htmlButton.getText();
+				//choice = htmlButton.getText();
+				choice = "HTML";
 			}
 		});
 		
