@@ -10,7 +10,7 @@ sourceInput="deb http://deb.debian.org/debian oldstable main contrib non-free"
 sourceCheck="http://deb.debian.org/debian"
 
 clear
-echo -e "${yellowText}Vega for Kali Linux (2020) (64-bit) Installer by Indica"
+echo -e "${yellowText}Vega for Kali Linux (2021) (64-bit) Installer by Indica"
 
 # Download Vega
 echo -e "${blueText}Downloading Vega . . .${defaultText}"
